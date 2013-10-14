@@ -153,26 +153,21 @@ class RabbitConsumer extends DefaultConsumer {
         )
 
         // Process and hand off the message to the consumer service
-        Object response
         try {
-            response = processMessage(context)
+            // Process the message
+            Object response = processMessage(context)
 
-            // If a response was given and a reply-to is set, send the message back
+            // If a response was given and a replyTo is set, send the message back
             if (context.properties.replyTo && response) {
-                log.debug("replying to ${context.properties.replyTo} with message ${response}")
                 new RabbitMessageBuilder(context.channel).send {
                     routingKey = context.properties.replyTo
-                    message = response
+                    correlationId = context.properties.correlationId
+                    delegate.body = response
                 }
             }
         } catch (Exception e) {
             log.error("unexpected exception ${e.getClass()} encountered in the rabbit consumer associated with service ${service.clazz.simpleName}", e)
-            e.stackTrace.each {
-                log.debug(it)
-            }
-            return
         }
-
     }
 
     /**

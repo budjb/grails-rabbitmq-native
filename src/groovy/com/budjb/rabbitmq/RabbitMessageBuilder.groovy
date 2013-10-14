@@ -41,12 +41,12 @@ class RabbitMessageBuilder {
     /**
      * Routing key to send the message to.
      */
-    String routingKey = null
+    String routingKey = ''
 
     /**
      * Exchange to send the message to.
      */
-    String exchange = null
+    String exchange = ''
 
     /**
      * RPC timeout, in milliseconds.
@@ -56,7 +56,7 @@ class RabbitMessageBuilder {
     /**
      * Message body.
      */
-    Object message
+    Object body
 
     /**
      * Message headers.
@@ -64,14 +64,64 @@ class RabbitMessageBuilder {
     Map headers = [:]
 
     /**
-     * Correlation id.
+     * Content type.
      */
-    String correlationId
+    String contentType
+
+    /**
+     * Content encoding.
+     */
+    String contentEncoding
+
+    /**
+     * Delivery mode (1 == non-persistent, 2 == persistent)
+     */
+    int deliveryMode
 
     /**
      * Priority.
      */
     int priority
+
+    /**
+     * Correlation id.
+     */
+    String correlationId
+
+    /**
+     * Queue to reply to.
+     */
+    String replyTo
+
+    /**
+     * Message expiration.
+     */
+    String expiration
+
+    /**
+     * Message ID.
+     */
+    String messageId
+
+    /**
+     * Message timestamp.
+     */
+    Calendar timestamp
+
+    /**
+     * Message type name.
+     */
+    String type
+
+    /**
+     * User ID.
+     */
+    String userId
+
+    /**
+     * Application ID.
+     */
+    String appId
 
     /**
      * Whether to auto-convert the reply payload.
@@ -99,21 +149,21 @@ class RabbitMessageBuilder {
         }
 
         // Make sure a message was provided
-        if (!message) {
-            throw new IllegalArgumentException("message required")
+        if (!this.body) {
+            throw new IllegalArgumentException("body required")
         }
 
         // Build properties
         AMQP.BasicProperties properties = buildProperties()
 
         // Convert the object and create the message
-        byte[] body = convertMessage(message)
+        byte[] body = convertMessage(this.body)
 
         // Create a channel
         channel = RabbitLoader.instance.connection.createChannel()
 
         // Send the message
-        channel.basicPublish(exchange ?: '', routingKey ?: '', properties, body)
+        channel.basicPublish(exchange, routingKey, properties, body)
 
         // Close the channel
         channel.close()
@@ -146,13 +196,13 @@ class RabbitMessageBuilder {
      * Sends a message to the rabbit service.
      *
      * @param routingKey Routing key to send the message to.
-     * @param message Message payload.
+     * @param body Message payload.
      * @throws IllegalArgumentException
      */
-    public void send(String routingKey, Object message) throws IllegalArgumentException {
+    public void send(String routingKey, Object body) throws IllegalArgumentException {
         // Set the params
         this.routingKey = routingKey
-        this.message = message
+        this.body = body
 
         // Send the message
         doSend()
@@ -163,14 +213,14 @@ class RabbitMessageBuilder {
      *
      * @param exchange Exchange to send the message to.
      * @param routingKey Routing key to send the message to.
-     * @param message Message payload.
+     * @param body Message payload.
      * @throws IllegalArgumentException
      */
-    public void send(String exchange, String routingKey, Object message) throws IllegalArgumentException {
+    public void send(String exchange, String routingKey, Object body) throws IllegalArgumentException {
         // Set the params
         this.exchange = exchange
         this.routingKey = routingKey
-        this.message = message
+        this.body = body
 
         // Send the message
         doSend()
@@ -197,15 +247,15 @@ class RabbitMessageBuilder {
         }
 
         // Make sure a message was provided
-        if (!message) {
-            throw new IllegalArgumentException("message required")
+        if (!this.body) {
+            throw new IllegalArgumentException("body required")
         }
 
         // Build properties
         AMQP.BasicProperties properties = buildProperties()
 
         // Convert the object and create the message
-        byte[] input = convertMessage(this.message)
+        byte[] body = convertMessage(this.body)
 
         // Create a channel for the message
         channel = RabbitLoader.instance.connection.createChannel()
@@ -243,18 +293,24 @@ class RabbitMessageBuilder {
         channel.basicConsume(properties.replyTo, false, consumerTag, true, true, null, consumer)
 
         // Send the message
-        channel.basicPublish(exchange, routingKey, properties, input)
+        channel.basicPublish(exchange, routingKey, properties, body)
 
         // Wait for the reply
         MessageContext reply = (timeout < 0) ? replyHandoff.take() : replyHandoff.poll(timeout, TimeUnit.MILLISECONDS)
 
-        // Cancel the consumer
-        channel.basicCancel(consumerTag)
-
         // Close the channel
         channel.close()
 
-        // TODO: we may want to give the option of returning the context...
+        // If the reply is null, assume the timeout was reached
+        if (reply == null) {
+            throw new TimeoutException("timeout of ${timeout} milliseconds reached while waiting for a response in an RPC message to exchange '${exchange}' and routingKey '${routingKey}'")
+        }
+
+        // If auto convert is disabled, return the MessageContext
+        if (!autoConvert) {
+            return reply
+        }
+
         return convertReply(reply.body)
     }
 
@@ -299,17 +355,17 @@ class RabbitMessageBuilder {
      * other object type (string, list, map) if autoConvert is true.
      *
      * @param routingKey Routing key to send the message to.
-     * @param message Message payload.
+     * @param body Message payload.
      * @return
      * @throws TimeoutException
      * @throws ShutdownSignalException
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public Object rpc(String routingKey, Object message) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+    public Object rpc(String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         // Set the params
         this.routingKey = routingKey
-        this.message = message
+        this.body = body
 
         // Send the message
         return doRpc()
@@ -323,18 +379,18 @@ class RabbitMessageBuilder {
      *
      * @param exchange Exchange to send the message to.
      * @param routingKey Routing key to send the message to.
-     * @param message Message payload.
+     * @param body Message payload.
      * @return
      * @throws TimeoutException
      * @throws ShutdownSignalException
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public Object rpc(String exchange, String routingKey, Object message) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+    public Object rpc(String exchange, String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         // Set the params
         this.exchange = exchange
         this.routingKey = routingKey
-        this.message = message
+        this.body = body
 
         // Send the message
         doRpc()
@@ -351,9 +407,19 @@ class RabbitMessageBuilder {
         // Set any headers
         builder.headers(headers)
 
-        // Set correlation id
-        if (correlationId) {
-            builder.correlationId(correlationId)
+        // Content type
+        if (contentType) {
+            builder.contentType(contentType)
+        }
+
+        // Content encoding
+        if (contentEncoding) {
+            builder.contentEncoding(contentEncoding)
+        }
+
+        // Delivery mode
+        if (deliveryMode in [1, 2]) {
+            builder.deliveryMode(deliveryMode)
         }
 
         // Set priority
@@ -361,7 +427,45 @@ class RabbitMessageBuilder {
             builder.priority(priority)
         }
 
-        // TODO: add more message properties
+        // Set correlation id
+        if (correlationId) {
+            builder.correlationId(correlationId)
+        }
+
+        // Reply-to
+        if (replyTo) {
+            builder.replyTo(replyTo)
+        }
+
+        // Expiration
+        if (expiration) {
+            builder.expiration(expiration)
+        }
+
+        // Message ID
+        if (messageId) {
+            builder.messageId(messageId)
+        }
+
+        // Timestamp
+        if (timestamp) {
+            builder.timestamp(timestamp.getTime())
+        }
+
+        // Type
+        if (type) {
+            builder.type(type)
+        }
+
+        // User ID
+        if (userId) {
+            builder.userId(userId)
+        }
+
+        // Application ID
+        if (appId) {
+            builder.appId(appId)
+        }
 
         return builder.build()
     }
