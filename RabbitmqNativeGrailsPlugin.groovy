@@ -1,5 +1,6 @@
 import org.apache.log4j.Logger
 import com.budjb.rabbitmq.RabbitDriver
+import com.budjb.rabbitmq.RabbitConsumer
 
 class RabbitmqNativeGrailsPlugin {
     /**
@@ -66,7 +67,7 @@ class RabbitmqNativeGrailsPlugin {
      * Handle Grails service reloads.
      */
     def onChange = { event ->
-        if (application.serviceClasses.any { it.clazz == event.source }) {
+        if (application.serviceClasses.any { it.clazz == event.source && RabbitConsumer.isConsumer(it) }) {
             RabbitDriver.instance.restartConsumers()
         }
     }

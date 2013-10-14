@@ -6,6 +6,11 @@ import com.rabbitmq.client.Envelope
 
 class MessageContext {
     /**
+     * Channel
+     */
+    Channel channel
+
+    /**
      * Consumer tag.
      */
     String consumerTag

@@ -138,42 +138,7 @@ class RabbitDriver {
      */
     public void startConsumers() {
         grailsApplication.serviceClasses?.each { GrailsClass service ->
-            // Check if the service wants to be a listener
-            if (!GrailsRabbitConsumer.isConsumer(service)) {
-                return
-            }
-
-            // Load the rabbit config properties into a configuration holder
-            ConsumerConfiguration config = new ConsumerConfiguration(service.getPropertyValue('rabbitConfig'))
-
-            // Make sure a queue or an exchange was specified
-            if (!config.queue && !config.exchange) {
-                log.error("RabbitMQ configuration for service ${service.name} is missing a queue or an exchange.")
-                return
-            }
-
-            // Make sure that only a queue or an exchange was specified
-            if (config.queue && config.exchange) {
-                log.error("RabbitMQ configuration for service ${service.name} can not have both a queue and an exchange.")
-                return
-            }
-
-            // Start the consumers
-            log.info("Registering service ${service.name} as a Rabbit consumer with ${config.listeners} listeners.")
-            config.listeners.times {
-                // Create the channel
-                Channel channel = connection.createChannel()
-
-                // Set up the consumer
-                channel.basicConsume(
-                    config.queue ? config.queue : channel.queueDeclare().queue,
-                    config.autoAck,
-                    new GrailsRabbitConsumer(channel, config, service)
-                )
-
-                // Store the channel
-                channels << channel
-            }
+            channels += RabbitConsumer.startConsumer(connection, service)
         }
     }
 
@@ -194,7 +159,9 @@ class RabbitDriver {
     public void stopConsumers() {
         log.info("Closing RabbitMQ channels")
         channels.each { channel ->
-            channel.close()
+            if (channel.isOpen()) {
+                channel.close()
+            }
         }
         channels = []
     }

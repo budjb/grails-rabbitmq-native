@@ -16,7 +16,7 @@ class ConsumerConfiguration {
      *
      * This should only be used in conjunction with topic exchange subscriptions.
      */
-    public String routingKey = null
+    public String routingKey = ''
 
     /**
      * Number of concurrent listeners.
@@ -31,19 +31,18 @@ class ConsumerConfiguration {
     /**
      * Whether the listener should auto acknowledge.
      */
-    public boolean autoAck = true
-
-    /**
-     * Whether to attempt to convert the message to JSON even if the
-     * header type does not indicate it.
-     */
-    public boolean alwaysConvertJson = false
+    public AutoAck autoAck = AutoAck.POST
 
     /**
      * Whether to attempt conversion of incoming messages.
      * This also depends on the appropriate handler signature being present.
      */
-    public boolean convert = true
+    public MessageConvertMethod convert = MessageConvertMethod.ALWAYS
+
+    /**
+     * Whether to retry the message on failure.
+     */
+    boolean retry = false
 
     /**
      * Constructor that parses the options defined in the service listener.
@@ -51,13 +50,34 @@ class ConsumerConfiguration {
      * @param options
      */
     public ConsumerConfiguration(Map options) {
-        queue = options['queue'] ?: queue
-        exchange = options['exchange'] ?: exchange
-        routingKey = options['routingKey'] ?: routingKey
-        listeners = options['listeners']?.toInteger() ?: listeners
-        transacted = options['transacted'] ?: transacted
-        autoAck = options['autoAck'] ?: autoAck
-        alwaysConvertJson = options['alwaysConvertJson'] ?: alwaysConvertJson
-        convert = options['convert'] ?: convert
+        queue =         parseConfigOption(String, queue, options['queue'])
+        exchange =      parseConfigOption(String, exchange, options['exchange'])
+        routingKey =    parseConfigOption(String, routingKey, options['routingKey'])
+        listeners =     parseConfigOption(Integer, listeners, options['listeners'])
+        transacted =    parseConfigOption(Boolean, transacted, options['transacted'])
+        autoAck =       parseConfigOption(AutoAck, autoAck, options['autoAck'])
+        convert =       parseConfigOption(MessageConvertMethod, convert, options['convert'])
+        retry =         parseConfigOption(Boolean, retry, options['retry'])
+    }
+
+    /**
+     * Assigns the option provided by the listener's config, or returns the default
+     * value if the option was not provided or it was unable to be converted to
+     * the correct data type.
+     *
+     * @param var
+     * @param value
+     * @return
+     */
+    private Object parseConfigOption(Class clazz, Object defaultValue, Object value) {
+        if (value == null) {
+            return defaultValue
+        }
+        try {
+            return value.asType(clazz)
+        }
+        catch (Exception e) {
+            return defaultValue
+        }
     }
 }
