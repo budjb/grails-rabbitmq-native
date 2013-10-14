@@ -7,7 +7,7 @@ import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
 
-class RabbitDriver {
+class RabbitLoader {
     private class ConnectionConfiguration {
         /**
          * RabbitMQ host
@@ -98,7 +98,7 @@ class RabbitDriver {
     /**
      * Singleton instance of the driver.
      */
-    private static RabbitDriver _instance
+    private static RabbitLoader _instance
 
     /**
      * Connection to the RabbitMQ server
@@ -115,9 +115,9 @@ class RabbitDriver {
      *
      * @return
      */
-    public static RabbitDriver getInstance() {
+    public static RabbitLoader getInstance() {
         if (!_instance) {
-            _instance = new RabbitDriver()
+            _instance = new RabbitLoader()
         }
         return _instance
     }
@@ -179,11 +179,15 @@ class RabbitDriver {
         connection = null
     }
 
+    /**
+     * Disconnects and completely restarts the connection to the RabbitMQ server.
+     */
     public void restart() {
         stop()
         start()
         startConsumers()
     }
+
     /**
      * Creates the connection to the RabbitMQ server.
      */

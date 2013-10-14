@@ -10,7 +10,7 @@ grails.project.dependency.resolution = {
         mavenCentral()
     }
     dependencies {
-        compile 'com.rabbitmq:amqp-client:3.1.4'
+        compile 'com.rabbitmq:amqp-client:3.1.3'
     }
     plugins {
         build(":tomcat:$grailsVersion",

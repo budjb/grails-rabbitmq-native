@@ -153,15 +153,35 @@ class RabbitConsumer extends DefaultConsumer {
         )
 
         // Process and hand off the message to the consumer service
+        Object response
         try {
-            processMessage(context)
+            response = processMessage(context)
+
+            // If a response was given and a reply-to is set, send the message back
+            if (context.properties.replyTo && response) {
+                log.debug("replying to ${context.properties.replyTo} with message ${response}")
+                new RabbitMessageBuilder(context.channel).send {
+                    routingKey = context.properties.replyTo
+                    message = response
+                }
+            }
         } catch (Exception e) {
             log.error("unexpected exception ${e.getClass()} encountered in the rabbit consumer associated with service ${service.clazz.simpleName}", e)
+            e.stackTrace.each {
+                log.debug(it)
+            }
             return
         }
+
     }
 
-    private void processMessage(MessageContext context) {
+    /**
+     * Processes the message and hands it off to the service handler.
+     *
+     * @param context
+     * @return Any returned value from the service handler.
+     */
+    private Object processMessage(MessageContext context) {
         // Convert the message body
         Object converted = convertMessage(context)
 
@@ -181,12 +201,14 @@ class RabbitConsumer extends DefaultConsumer {
         // Pass off the message
         try {
             // Invoke the handler
-            serviceInstance."${RABBIT_HANDLER_NAME}"(converted, context)
+            Object response = serviceInstance."${RABBIT_HANDLER_NAME}"(converted, context)
 
             // Ack the message
             if (configuration.autoAck == AutoAck.POST) {
                 channel.basicAck(context.envelope.deliveryTag, false)
             }
+
+            return response
         }
         catch (Exception e) {
             // Reject the message, optionally submitting for requeue
@@ -196,6 +218,7 @@ class RabbitConsumer extends DefaultConsumer {
 
             // Log the error
             log.error("unhandled exception ${e.getClass().name} caught from RabbitMQ message handler for service ${service.clazz.simpleName}", e)
+            return null
         }
     }
 

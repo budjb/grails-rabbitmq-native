@@ -1,5 +1,5 @@
 import org.apache.log4j.Logger
-import com.budjb.rabbitmq.RabbitDriver
+import com.budjb.rabbitmq.RabbitLoader
 import com.budjb.rabbitmq.RabbitConsumer
 
 class RabbitmqNativeGrailsPlugin {
@@ -68,7 +68,7 @@ class RabbitmqNativeGrailsPlugin {
      */
     def onChange = { event ->
         if (application.serviceClasses.any { it.clazz == event.source && RabbitConsumer.isConsumer(it) }) {
-            RabbitDriver.instance.restartConsumers()
+            RabbitLoader.instance.restartConsumers()
         }
     }
 
@@ -76,13 +76,13 @@ class RabbitmqNativeGrailsPlugin {
      * Handle configuration changes.
      */
     def onConfigChange = { event ->
-        RabbitDriver.instance.restart()
+        RabbitLoader.instance.restart()
     }
 
     /**
      * Shutdown event.
      */
     def onShutdown = { event ->
-        RabbitDriver.instance.stop()
+        RabbitLoader.instance.stop()
     }
 }
