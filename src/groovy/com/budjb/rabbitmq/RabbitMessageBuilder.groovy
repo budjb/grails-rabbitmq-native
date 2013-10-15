@@ -160,7 +160,7 @@ class RabbitMessageBuilder {
         byte[] body = convertMessage(this.body)
 
         // Create a channel
-        channel = RabbitLoader.instance.connection.createChannel()
+        channel = RabbitContext.instance.connection.createChannel()
 
         // Send the message
         channel.basicPublish(exchange, routingKey, properties, body)
@@ -258,7 +258,7 @@ class RabbitMessageBuilder {
         byte[] body = convertMessage(this.body)
 
         // Create a channel for the message
-        channel = RabbitLoader.instance.connection.createChannel()
+        channel = RabbitContext.instance.connection.createChannel()
 
         // Set the reply queue
         properties.replyTo = channel.queueDeclare().queue

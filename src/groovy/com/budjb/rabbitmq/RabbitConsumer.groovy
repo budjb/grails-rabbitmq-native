@@ -74,13 +74,13 @@ class RabbitConsumer extends DefaultConsumer {
 
         // Make sure a queue or an exchange was specified
         if (!config.queue && !config.exchange) {
-            log.error("RabbitMQ configuration for service ${service.clazz.simpleName} is missing a queue or an exchange.")
+            log.error("RabbitMQ configuration for service ${service.clazz.simpleName} is missing a queue or an exchange")
             return []
         }
 
         // Make sure that only a queue or an exchange was specified
         if (config.queue && config.exchange) {
-            log.error("RabbitMQ configuration for service ${service.clazz.simpleName} can not have both a queue and an exchange.")
+            log.error("RabbitMQ configuration for service ${service.clazz.simpleName} can not have both a queue and an exchange")
             return []
         }
 
@@ -88,7 +88,7 @@ class RabbitConsumer extends DefaultConsumer {
         List<Channel> channels = []
 
         // Start the consumers
-        log.info("Registering service ${service.clazz.simpleName} as a RabbitMQ consumer with ${config.listeners} listener(s).")
+        log.info("registering service ${service.clazz.simpleName} as a RabbitMQ consumer with ${config.listeners} listener(s)")
         config.listeners.times {
             // Create the channel
             Channel channel = connection.createChannel()
@@ -165,7 +165,8 @@ class RabbitConsumer extends DefaultConsumer {
                     delegate.body = response
                 }
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.error("unexpected exception ${e.getClass()} encountered in the rabbit consumer associated with service ${service.clazz.simpleName}", e)
         }
     }
