@@ -142,7 +142,7 @@ class RabbitMessageBuilder {
      *
      * @throws IllegalArgumentException
      */
-    protected void doSend() throws IllegalArgumentException{
+    protected void doSend() throws IllegalArgumentException {
         // Make sure an exchange or a routing key were provided
         if (!exchange && !routingKey) {
             throw new IllegalArgumentException("exchange and/or routing key required")

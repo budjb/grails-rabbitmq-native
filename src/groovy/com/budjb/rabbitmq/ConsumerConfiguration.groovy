@@ -19,9 +19,9 @@ class ConsumerConfiguration {
     public String routingKey = ''
 
     /**
-     * Number of concurrent listeners.
+     * Number of concurrent consumers.
      */
-    public int listeners = 1
+    public int consumers = 1
 
     /**
      * Whether to mark the consumer as transacted.
@@ -29,7 +29,7 @@ class ConsumerConfiguration {
     public boolean transacted = false
 
     /**
-     * Whether the listener should auto acknowledge.
+     * Whether the consumer should auto acknowledge.
      */
     public AutoAck autoAck = AutoAck.POST
 
@@ -45,7 +45,7 @@ class ConsumerConfiguration {
     boolean retry = false
 
     /**
-     * Constructor that parses the options defined in the service listener.
+     * Constructor that parses the options defined in the service consumer.
      *
      * @param options
      */
@@ -53,7 +53,7 @@ class ConsumerConfiguration {
         queue =         parseConfigOption(String, queue, options['queue'])
         exchange =      parseConfigOption(String, exchange, options['exchange'])
         routingKey =    parseConfigOption(String, routingKey, options['routingKey'])
-        listeners =     parseConfigOption(Integer, listeners, options['listeners'])
+        consumers =     parseConfigOption(Integer, consumers, options['consumers'])
         transacted =    parseConfigOption(Boolean, transacted, options['transacted'])
         autoAck =       parseConfigOption(AutoAck, autoAck, options['autoAck'])
         convert =       parseConfigOption(MessageConvertMethod, convert, options['convert'])
@@ -61,7 +61,7 @@ class ConsumerConfiguration {
     }
 
     /**
-     * Assigns the option provided by the listener's config, or returns the default
+     * Assigns the option provided by the consumer's config, or returns the default
      * value if the option was not provided or it was unable to be converted to
      * the correct data type.
      *

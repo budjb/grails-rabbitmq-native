@@ -17,34 +17,34 @@ class RabbitConsumer extends DefaultConsumer {
     private static Logger log = Logger.getLogger(RabbitConsumer)
 
     /**
-     * Name of the handler method a listener is expected to define.
+     * Name of the handler method a consumer is expected to define.
      */
     static final String RABBIT_HANDLER_NAME = 'handleMessage'
 
     /**
-     * Name of the configuration variable a listener is expected to define.
+     * Name of the configuration variable a consumer is expected to define.
      */
     static final String RABBIT_CONFIG_NAME = 'rabbitConfig'
 
     /**
-     * Instance of the service's GrailsClass associated with this listener.
+     * Handler object.
      */
-    private GrailsClass service
+    private Object handler
 
     /**
-     * Configuration provided by the service for this listener.
+     * Configuration provided by the handler for this consumer.
      */
     private ConsumerConfiguration configuration
 
     /**
-     * Determines if a service is a RabbitMQ listener.
+     * Determines if a handler is a RabbitMQ consumer.
      *
      * @param grailsClass
      * @return
      */
-    public static boolean isConsumer(GrailsClass clazz) {
+    public static boolean isConsumer(Object clazz) {
         // Check for the existence and type of the rabbit config static variable
-        if (!clazz.hasProperty(RABBIT_CONFIG_NAME) || !(clazz.getPropertyValue(RABBIT_CONFIG_NAME) instanceof Map)) {
+        if (!clazz.metaClass.properties.any { it.name == RABBIT_CONFIG_NAME && it.type.isAssignableFrom(Map) }) {
             return false
         }
 
@@ -57,30 +57,30 @@ class RabbitConsumer extends DefaultConsumer {
     }
 
     /**
-     * Starts a consumer against a Grails service class.
+     * Starts a consumer against a handler.
      *
      * @param connection Connection to the RabbitMQ server.
-     * @param service Grails service to wrap a RabbitMQ consumer around.
+     * @param handler Handler object to wrap a RabbitMQ consumer around.
      * @return A list of channels that were created for the consumer.
      */
-    public static List<Channel> startConsumer(Connection connection, GrailsClass service) {
-        // Check if the service wants to be a listener
-        if (!RabbitConsumer.isConsumer(service)) {
+    public static List<Channel> startConsumer(Connection connection, Object handler) {
+        // Check if the object wants to be a consumer
+        if (!RabbitConsumer.isConsumer(handler)) {
             return []
         }
 
         // Load the rabbit config properties into a configuration holder
-        ConsumerConfiguration config = new ConsumerConfiguration(service.getPropertyValue(RABBIT_CONFIG_NAME))
+        ConsumerConfiguration config = new ConsumerConfiguration(handler."${RABBIT_CONFIG_NAME}")
 
         // Make sure a queue or an exchange was specified
         if (!config.queue && !config.exchange) {
-            log.error("RabbitMQ configuration for service ${service.clazz.simpleName} is missing a queue or an exchange")
+            log.error("RabbitMQ configuration for consumer ${handler.class.simpleName} is missing a queue or an exchange")
             return []
         }
 
         // Make sure that only a queue or an exchange was specified
         if (config.queue && config.exchange) {
-            log.error("RabbitMQ configuration for service ${service.clazz.simpleName} can not have both a queue and an exchange")
+            log.error("RabbitMQ configuration for consumer ${handler.class.simpleName} can not have both a queue and an exchange")
             return []
         }
 
@@ -88,8 +88,8 @@ class RabbitConsumer extends DefaultConsumer {
         List<Channel> channels = []
 
         // Start the consumers
-        log.info("registering service ${service.clazz.simpleName} as a RabbitMQ consumer with ${config.listeners} listener(s)")
-        config.listeners.times {
+        log.info("registering consumer ${handler.getClass().simpleName} as a RabbitMQ consumer with ${config.consumers} consumer(s)")
+        config.consumers.times {
             // Create the channel
             Channel channel = connection.createChannel()
 
@@ -107,7 +107,7 @@ class RabbitConsumer extends DefaultConsumer {
             channel.basicConsume(
                 queue,
                 config.autoAck == AutoAck.ALWAYS,
-                new RabbitConsumer(channel, config, service)
+                new RabbitConsumer(channel, config, handler)
             )
 
             // Store the channel
@@ -123,19 +123,19 @@ class RabbitConsumer extends DefaultConsumer {
      * @param channel
      * @param grailsClass
      */
-    public RabbitConsumer(Channel channel, ConsumerConfiguration configuration, GrailsClass service) {
+    public RabbitConsumer(Channel channel, ConsumerConfiguration configuration, Object handler) {
         // Run the parent
         super(channel)
 
-        // Store the service this consumer is acting on behalf of
-        this.service = service
+        // Store the handler this consumer is acting on behalf of
+        this.handler = handler
 
         // Store the configuration
         this.configuration = configuration
     }
 
     /**
-     * Passes delivery of a message to the service registered with this consumer instance.
+     * Passes delivery of a message to the handler registered with this consumer instance.
      *
      * @param consumerTag
      * @param envelope
@@ -152,7 +152,7 @@ class RabbitConsumer extends DefaultConsumer {
             body: body
         )
 
-        // Process and hand off the message to the consumer service
+        // Process and hand off the message to the consumer
         try {
             // Process the message
             Object response = processMessage(context)
@@ -167,15 +167,15 @@ class RabbitConsumer extends DefaultConsumer {
             }
         }
         catch (Exception e) {
-            log.error("unexpected exception ${e.getClass()} encountered in the rabbit consumer associated with service ${service.clazz.simpleName}", e)
+            log.error("unexpected exception ${e.getClass()} encountered in the rabbit consumer associated with handler ${handler.class.simpleName}", e)
         }
     }
 
     /**
-     * Processes the message and hands it off to the service handler.
+     * Processes the message and hands it off to the handler.
      *
      * @param context
-     * @return Any returned value from the service handler.
+     * @return Any returned value from the handler.
      */
     private Object processMessage(MessageContext context) {
         // Convert the message body
@@ -187,17 +187,14 @@ class RabbitConsumer extends DefaultConsumer {
             if (configuration.autoAck == AutoAck.POST) {
                 context.channel.basicReject(context.envelope.deliveryTag, configuration.retry)
             }
-            log.error("${service.clazz.simpleName} does not have a message handler defined to handle class type ${converted.getClass()}")
+            log.error("${handler.class.simpleName} does not have a message handler defined to handle class type ${converted.getClass()}")
             return
         }
-
-        // Get the instance of the service
-        Object serviceInstance = service.referenceInstance
 
         // Pass off the message
         try {
             // Invoke the handler
-            Object response = serviceInstance."${RABBIT_HANDLER_NAME}"(converted, context)
+            Object response = handler."${RABBIT_HANDLER_NAME}"(converted, context)
 
             // Ack the message
             if (configuration.autoAck == AutoAck.POST) {
@@ -213,14 +210,14 @@ class RabbitConsumer extends DefaultConsumer {
             }
 
             // Log the error
-            log.error("unhandled exception ${e.getClass().name} caught from RabbitMQ message handler for service ${service.clazz.simpleName}", e)
+            log.error("unhandled exception ${e.getClass().name} caught from RabbitMQ message handler for consumer ${handler.class.simpleName}", e)
             return null
         }
     }
 
     /**
      * Attempts to convert the body of the incoming message from a byte array.
-     * The output of this method is dependent on the listener's configuration,
+     * The output of this method is dependent on the consumer's configuration,
      * the content-type of the message, and the existence of an appropriately
      * defined handler for the converted type.
      *
@@ -228,7 +225,7 @@ class RabbitConsumer extends DefaultConsumer {
      * @return
      */
     private Object convertMessage(MessageContext context) {
-        // Check if the listeners wants us to not convert
+        // Check if the consumers wants us to not convert
         if (configuration.convert == MessageConvertMethod.DISABLED) {
             return context.body
         }
@@ -368,7 +365,7 @@ class RabbitConsumer extends DefaultConsumer {
      */
     private boolean isHandlerTypeDefined(Class requested) {
         // Get a list of methods that match the handler name
-        List<Method> methods = service.referenceInstance.getClass().getDeclaredMethods().findAll { it.name == RABBIT_HANDLER_NAME }
+        List<Method> methods = handler.class.getDeclaredMethods().findAll { it.name == RABBIT_HANDLER_NAME }
 
         // Get a list of method parameter lists
         List<Class[]> signatures = methods*.parameterTypes

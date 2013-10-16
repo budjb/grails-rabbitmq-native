@@ -2,7 +2,6 @@ package com.budjb.rabbitmq
 
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.commons.GrailsClass
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
@@ -39,6 +38,11 @@ class RabbitContext {
     Map<Class, MessageConverter> messageConverters = [:]
 
     /**
+     * A list of services that are set up as consumers
+     */
+    List<Object> consumers = []
+
+    /**
      * Initializes the rabbit driver.
      */
     public void start() {
@@ -50,16 +54,16 @@ class RabbitContext {
     }
 
     /**
-     * Starts the individual listeners.
+     * Starts the individual consumers.
      */
     public void startConsumers() {
-        grailsApplication.serviceClasses?.each { GrailsClass service ->
-            channels += RabbitConsumer.startConsumer(connection, service)
+        consumers.each {
+            channels += RabbitConsumer.startConsumer(connection, it)
         }
     }
 
     /**
-     * Reloads the RabbitMQ connection and listeners.
+     * Reloads the RabbitMQ connection and consumers.
      */
     public void restartConsumers() {
         // Close the existing channels and connection
@@ -82,6 +86,7 @@ class RabbitContext {
             }
             channels = []
         }
+        consumers = []
     }
 
     /**
@@ -142,5 +147,19 @@ class RabbitContext {
     public void registerMessageConverter(MessageConverter converter) {
         log.debug("registering message converter '${converter.class.simpleName}' for type '${converter.type}'")
         messageConverters[converter.type] = converter
+    }
+
+    /**
+     * Attempts to register a grails class as a consumer.
+     *
+     * @param candidate
+     * @return
+     */
+    public boolean registerConsumer(Object candidate) {
+        if (!RabbitConsumer.isConsumer(candidate)) {
+            return false
+        }
+        consumers << candidate
+        return true
     }
 }

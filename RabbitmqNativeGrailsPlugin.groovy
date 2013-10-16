@@ -5,6 +5,8 @@ import com.budjb.rabbitmq.MessageConverterArtefactHandler
 import com.budjb.rabbitmq.converter.StringMessageConverter
 import com.budjb.rabbitmq.GrailsMessageConverterClass
 import org.codehaus.groovy.grails.commons.AbstractInjectableGrailsClass
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.codehaus.groovy.grails.commons.GrailsClass
 
 class RabbitmqNativeGrailsPlugin {
     /**
@@ -102,7 +104,7 @@ class RabbitmqNativeGrailsPlugin {
 
         // Configure application-provided converters
         application.messageConverterClasses.each { GrailsMessageConverterClass grailsClass ->
-            "${grailsClass.propertyName}"(grailsClass.clazz) { bean ->
+            "${grailsClass.fullName}"(grailsClass.clazz) { bean ->
                 bean.scope = 'singleton'
                 bean.autowire = true
             }
@@ -113,21 +115,7 @@ class RabbitmqNativeGrailsPlugin {
      * Application context actions.
      */
     def doWithApplicationContext = { applicationContext ->
-        // Get the rabbit context instance
-        RabbitContext context = applicationContext.getBean('rabbitContext')
-
-        // Register built-in message converters to the rabbit context
-        context.registerMessageConverter(applicationContext.getBean("${StringMessageConverter.name}"))
-
-        // Register application-provided message converters to the rabbit context
-        application.getArtefacts('MessageConverter').each { clazz ->
-            context.registerMessageConverter(clazz.referenceInstance)
-        }
-
-        // TODO: register listeners
-
-        // Completely restart rabbit context
-        context.restart()
+        restartRabbitContext(application, applicationContext.getBean('rabbitContext'))
     }
 
     /**
@@ -150,14 +138,14 @@ class RabbitmqNativeGrailsPlugin {
                 }
             }.registerBeans(event.ctx)
 
-            // Reapply application context actions
-            doWithApplicationContext(event.ctx)
+            // Restart the rabbit context
+            restartRabbitContext(application, event.ctx.getBean('rabbitContext'))
             return
         }
 
-        // Check for reloaded service listeners
+        // Check for reloaded service consumers
         if (application.serviceClasses.any { it.clazz == event.source && RabbitConsumer.isConsumer(it) }) {
-            event.ctx.getBean('rabbitContext').restartConsumers()
+            restartConsumers(application, event.ctx.getBean('rabbitContext'))
             return
         }
     }
@@ -166,6 +154,70 @@ class RabbitmqNativeGrailsPlugin {
      * Handle configuration changes.
      */
     def onConfigChange = { event ->
-        event.ctx.getBean('rabbitContext').restart()
+        restartRabbitContext(application, event.ctx.getBean('rabbitContext'))
+    }
+
+    /**
+     * Restarts the rabbit context.
+     *
+     * @param context
+     */
+    void restartRabbitContext(GrailsApplication application, RabbitContext context) {
+        // Stop the rabbit context
+        context.stop()
+
+        // Register message converters
+        registerConverters(application, context)
+
+        // Register consumers
+        registerConsumers(application, context)
+
+        // Start the rabbit context
+        context.start()
+
+        // Start the consumers
+        context.startConsumers()
+    }
+
+    /**
+     * Restarts the rabbit consumers.
+     *
+     * @param context
+     */
+    void restartConsumers(GrailsApplication application, RabbitContext context) {
+        // Stop the consumers
+        context.stopConsumers()
+
+        // Register consumers again
+        registerConsumers(application, context)
+
+        // Start the consumers
+        context.startConsumers()
+    }
+
+    /**
+     * Registers consumers against the rabbit context.
+     *
+     * @param context
+     */
+    void registerConsumers(GrailsApplication application, RabbitContext context) {
+        application.serviceClasses.each { GrailsClass clazz ->
+            context.registerConsumer(application.mainContext.getBean(clazz.propertyName))
+        }
+    }
+
+    /**
+     * Registers message converters against the rabbit context.
+     *
+     * @param context
+     */
+    void registerConverters(GrailsApplication application, RabbitContext context) {
+        // Register built-in message converters
+        context.registerMessageConverter(application.mainContext.getBean("${StringMessageConverter.name}"))
+
+        // Register application-provided converters
+        application.messageConverterClasses.each { GrailsClass clazz ->
+            context.registerMessageConverter(application.mainContext.getBean(clazz.fullName))
+        }
     }
 }
