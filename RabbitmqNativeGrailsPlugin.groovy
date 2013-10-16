@@ -1,4 +1,4 @@
-import grails.util.Holders;
+import grails.util.Holders
 
 import org.apache.log4j.Logger
 
@@ -8,6 +8,7 @@ import com.budjb.rabbitmq.MessageConverterArtefactHandler
 import com.budjb.rabbitmq.MessageConsumerArtefactHandler
 import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.GrailsMessageConverterClass
+import com.budjb.rabbitmq.RabbitQueueBuilder
 
 import org.codehaus.groovy.grails.commons.AbstractInjectableGrailsClass
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -203,8 +204,35 @@ class RabbitmqNativeGrailsPlugin {
         // Start the rabbit context
         context.start()
 
+        // Configure up exchanges and queues
+        configureQueues(application, context)
+
         // Start the consumers
         context.startConsumers()
+    }
+
+    /**
+     * Configure queues based on the application's configuration.
+     *
+     * @param application
+     */
+    void configureQueues(GrailsApplication application, RabbitContext context) {
+        // Skip if the config isn't defined
+        if (!(application.config.rabbitmq?.queues instanceof Closure)) {
+            return
+        }
+
+        // Grab the config closure
+        Closure config = application.config.rabbitmq.queues
+
+        // Create the queue builder
+        RabbitQueueBuilder queueBuilder = new RabbitQueueBuilder(context)
+
+        // Run the config
+        config = config.clone()
+        config.delegate = queueBuilder
+        config.resolveStrategy = Closure.DELEGATE_FIRST
+        config()
     }
 
     /**
