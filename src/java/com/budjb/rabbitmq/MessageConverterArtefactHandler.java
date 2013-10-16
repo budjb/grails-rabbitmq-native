@@ -10,14 +10,28 @@ class MessageConverterArtefactHandler extends ArtefactHandlerAdapter {
     public static final String TYPE = "MessageConverter";
 
     /**
+     * Class suffix.
+     */
+    public static final String SUFFIX = "Converter";
+
+    /**
      * Logger.
      */
     private static final Logger log = Logger.getLogger(MessageConverterArtefactHandler.class);
 
+    /**
+     * Constructor.
+     */
     public MessageConverterArtefactHandler() {
-        super(TYPE, GrailsMessageConverterClass.class, DefaultGrailsMessageConverterClass.class, null);
+        super(TYPE, GrailsMessageConverterClass.class, DefaultGrailsMessageConverterClass.class, SUFFIX);
     }
 
+    /**
+     * Determines if a class is an artefact of the type that this handler owns.
+     *
+     * @param clazz
+     * @return
+     */
     public boolean isArtefactClass(Class clazz) {
         if (clazz == null) {
             return false;
@@ -26,10 +40,13 @@ class MessageConverterArtefactHandler extends ArtefactHandlerAdapter {
         return isMessageConverter(clazz);
     }
 
+    /**
+     * Determines if a class is a message converter.
+     *
+     * @param clazz
+     * @return
+     */
     public static boolean isMessageConverter(Class clazz) {
-        if (MessageConverter.class.isAssignableFrom(clazz)) {
-            return true;
-        }
-        return false;
+        return clazz.getName().endsWith(SUFFIX) && MessageConverter.class.isAssignableFrom(clazz);
     }
 }

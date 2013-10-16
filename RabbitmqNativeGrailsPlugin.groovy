@@ -1,9 +1,14 @@
+import grails.util.Holders;
+
 import org.apache.log4j.Logger
+
 import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitConsumer
 import com.budjb.rabbitmq.MessageConverterArtefactHandler
+import com.budjb.rabbitmq.MessageConsumerArtefactHandler
 import com.budjb.rabbitmq.converter.StringMessageConverter
 import com.budjb.rabbitmq.GrailsMessageConverterClass
+
 import org.codehaus.groovy.grails.commons.AbstractInjectableGrailsClass
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsClass
@@ -68,16 +73,18 @@ class RabbitmqNativeGrailsPlugin {
      * Resources this plugin should monitor changes for.
      */
     def watchedResources = [
-        'file:./grails-app/services/**/*Service.groovy',
-        'file:./grails-app/rabbit/**/*Converter.groovy',
-        'file:./plugins/*/grails-app/rabbit/**/*Converter.groovy'
+        'file:./grails-app/rabbit-converters/**Converter.groovy',
+        'file:./grails-app/rabbit-consumers/**Consumer.groovy',
+        'file:./plugins/*/grails-app/rabbit-converters/**Converter.groovy',
+        'file:./plugins/*/grails-app/rabbit-consumers/**Consumer.groovy'
     ]
 
     /**
      * Custom artefacts
      */
     def artefacts = [
-        new MessageConverterArtefactHandler()
+        new MessageConverterArtefactHandler(),
+        new MessageConsumerArtefactHandler()
     ]
 
     /**
@@ -103,8 +110,16 @@ class RabbitmqNativeGrailsPlugin {
         "${StringMessageConverter.name}"(StringMessageConverter)
 
         // Configure application-provided converters
-        application.messageConverterClasses.each { GrailsMessageConverterClass grailsClass ->
-            "${grailsClass.fullName}"(grailsClass.clazz) { bean ->
+        application.messageConverterClasses.each { GrailsClass clazz ->
+            "${clazz.fullName}"(clazz.clazz) { bean ->
+                bean.scope = 'singleton'
+                bean.autowire = true
+            }
+        }
+
+        // Configure consumers
+        application.messageConsumerClasses.each { GrailsClass clazz ->
+            "${clazz.fullName}"(clazz.clazz) { bean ->
                 bean.scope = 'singleton'
                 bean.autowire = true
             }
@@ -143,8 +158,18 @@ class RabbitmqNativeGrailsPlugin {
             return
         }
 
-        // Check for reloaded service consumers
-        if (application.serviceClasses.any { it.clazz == event.source && RabbitConsumer.isConsumer(it) }) {
+        // Check for reloaded message consumers
+        if (application.isArtefactOfType(MessageConsumerArtefactHandler.TYPE, event.source)) {
+            // Re-register the bean
+            GrailsMessageConverterClass consumerClass = application.addArtefact(MessageConsumerArtefactHandler.TYPE, event.source)
+            beans {
+                "${consumerClass.propertyName}"(consumerClass.clazz) { bean ->
+                    bean.scope = 'singleton'
+                    bean.autowire = true
+                }
+            }.registerBeans(event.ctx)
+
+            // Restart the rabbit context
             restartConsumers(application, event.ctx.getBean('rabbitContext'))
             return
         }
@@ -201,7 +226,7 @@ class RabbitmqNativeGrailsPlugin {
      * @param context
      */
     void registerConsumers(GrailsApplication application, RabbitContext context) {
-        application.serviceClasses.each { GrailsClass clazz ->
+        application.messageConsumerClasses.each { GrailsClass clazz ->
             context.registerConsumer(clazz)
         }
     }

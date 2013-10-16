@@ -40,10 +40,20 @@ class RabbitConsumer extends DefaultConsumer {
     /**
      * Determines if a handler is a RabbitMQ consumer.
      *
-     * @param grailsClass
+     * @param clazz
      * @return
      */
     public static boolean isConsumer(GrailsClass clazz) {
+        return isConsumer(clazz.clazz)
+    }
+
+    /**
+     * Determines if a handler is a RabbitMQ consumer.
+     *
+     * @param clazz
+     * @return
+     */
+    public static boolean isConsumer(Class clazz) {
         // Check for the existence and type of the rabbit config static variable
         if (!clazz.metaClass.properties.any { it.name == RABBIT_CONFIG_NAME && it.type.isAssignableFrom(Map) }) {
             return false
