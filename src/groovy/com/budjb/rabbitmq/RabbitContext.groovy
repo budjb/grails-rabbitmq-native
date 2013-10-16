@@ -2,6 +2,7 @@ package com.budjb.rabbitmq
 
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.codehaus.groovy.grails.commons.GrailsClass
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
@@ -155,11 +156,22 @@ class RabbitContext {
      * @param candidate
      * @return
      */
-    public boolean registerConsumer(Object candidate) {
+    public boolean registerConsumer(GrailsClass candidate) {
         if (!RabbitConsumer.isConsumer(candidate)) {
             return false
         }
         consumers << candidate
         return true
+    }
+
+    /**
+     * Creates a new untracked channel.
+     *
+     * The caller must make sure to clean this up (channel.close()).
+     *
+     * @return
+     */
+    public Channel createChannel() {
+        return connection.createChannel()
     }
 }

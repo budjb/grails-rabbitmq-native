@@ -5,7 +5,5 @@ class RabbitmqNativeBootStrap {
     def grailsApplication
 
     def init = { servletContext ->
-        // Inject the grailsApplication
-        RabbitMessageBuilder.grailsApplication = grailsApplication
     }
 }

@@ -9,6 +9,7 @@ import groovy.json.JsonSlurper
 import java.lang.reflect.Method
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsClass
+import grails.util.Holders
 
 class RabbitConsumer extends DefaultConsumer {
     /**
@@ -27,9 +28,9 @@ class RabbitConsumer extends DefaultConsumer {
     static final String RABBIT_CONFIG_NAME = 'rabbitConfig'
 
     /**
-     * Handler object.
+     * Handler GrailsClass.
      */
-    private Object handler
+    private GrailsClass handler
 
     /**
      * Configuration provided by the handler for this consumer.
@@ -42,7 +43,7 @@ class RabbitConsumer extends DefaultConsumer {
      * @param grailsClass
      * @return
      */
-    public static boolean isConsumer(Object clazz) {
+    public static boolean isConsumer(GrailsClass clazz) {
         // Check for the existence and type of the rabbit config static variable
         if (!clazz.metaClass.properties.any { it.name == RABBIT_CONFIG_NAME && it.type.isAssignableFrom(Map) }) {
             return false
@@ -63,24 +64,24 @@ class RabbitConsumer extends DefaultConsumer {
      * @param handler Handler object to wrap a RabbitMQ consumer around.
      * @return A list of channels that were created for the consumer.
      */
-    public static List<Channel> startConsumer(Connection connection, Object handler) {
+    public static List<Channel> startConsumer(Connection connection, GrailsClass handler) {
         // Check if the object wants to be a consumer
         if (!RabbitConsumer.isConsumer(handler)) {
             return []
         }
 
         // Load the rabbit config properties into a configuration holder
-        ConsumerConfiguration config = new ConsumerConfiguration(handler."${RABBIT_CONFIG_NAME}")
+        ConsumerConfiguration config = new ConsumerConfiguration(handler.getPropertyValue(RABBIT_CONFIG_NAME))
 
         // Make sure a queue or an exchange was specified
         if (!config.queue && !config.exchange) {
-            log.error("RabbitMQ configuration for consumer ${handler.class.simpleName} is missing a queue or an exchange")
+            log.error("RabbitMQ configuration for consumer ${handler.shortName} is missing a queue or an exchange")
             return []
         }
 
         // Make sure that only a queue or an exchange was specified
         if (config.queue && config.exchange) {
-            log.error("RabbitMQ configuration for consumer ${handler.class.simpleName} can not have both a queue and an exchange")
+            log.error("RabbitMQ configuration for consumer ${handler.shortName} can not have both a queue and an exchange")
             return []
         }
 
@@ -88,7 +89,7 @@ class RabbitConsumer extends DefaultConsumer {
         List<Channel> channels = []
 
         // Start the consumers
-        log.info("registering consumer ${handler.getClass().simpleName} as a RabbitMQ consumer with ${config.consumers} consumer(s)")
+        log.info("registering consumer ${handler.shortName} as a RabbitMQ consumer with ${config.consumers} consumer(s)")
         config.consumers.times {
             // Create the channel
             Channel channel = connection.createChannel()
@@ -123,7 +124,7 @@ class RabbitConsumer extends DefaultConsumer {
      * @param channel
      * @param grailsClass
      */
-    public RabbitConsumer(Channel channel, ConsumerConfiguration configuration, Object handler) {
+    public RabbitConsumer(Channel channel, ConsumerConfiguration configuration, GrailsClass handler) {
         // Run the parent
         super(channel)
 
@@ -167,7 +168,7 @@ class RabbitConsumer extends DefaultConsumer {
             }
         }
         catch (Exception e) {
-            log.error("unexpected exception ${e.getClass()} encountered in the rabbit consumer associated with handler ${handler.class.simpleName}", e)
+            log.error("unexpected exception ${e.getClass()} encountered in the rabbit consumer associated with handler ${handler.shortName}", e)
         }
     }
 
@@ -187,14 +188,17 @@ class RabbitConsumer extends DefaultConsumer {
             if (configuration.autoAck == AutoAck.POST) {
                 context.channel.basicReject(context.envelope.deliveryTag, configuration.retry)
             }
-            log.error("${handler.class.simpleName} does not have a message handler defined to handle class type ${converted.getClass()}")
+            log.error("${handler.shortName} does not have a message handler defined to handle class type ${converted.getClass()}")
             return
         }
 
         // Pass off the message
         try {
+            // Get the handler bean
+            Object handlerBean = getHandlerBean()
+
             // Invoke the handler
-            Object response = handler."${RABBIT_HANDLER_NAME}"(converted, context)
+            Object response = handlerBean."${RABBIT_HANDLER_NAME}"(converted, context)
 
             // Ack the message
             if (configuration.autoAck == AutoAck.POST) {
@@ -210,7 +214,7 @@ class RabbitConsumer extends DefaultConsumer {
             }
 
             // Log the error
-            log.error("unhandled exception ${e.getClass().name} caught from RabbitMQ message handler for consumer ${handler.class.simpleName}", e)
+            log.error("unhandled exception ${e.getClass().name} caught from RabbitMQ message handler for consumer ${handler.shortName}", e)
             return null
         }
     }
@@ -365,7 +369,7 @@ class RabbitConsumer extends DefaultConsumer {
      */
     private boolean isHandlerTypeDefined(Class requested) {
         // Get a list of methods that match the handler name
-        List<Method> methods = handler.class.getDeclaredMethods().findAll { it.name == RABBIT_HANDLER_NAME }
+        List<Method> methods = handler.clazz.getDeclaredMethods().findAll { it.name == RABBIT_HANDLER_NAME }
 
         // Get a list of method parameter lists
         List<Class[]> signatures = methods*.parameterTypes
@@ -386,5 +390,14 @@ class RabbitConsumer extends DefaultConsumer {
             // Finally, determine if the first parameter will handle our requested type
             return signature[0].isAssignableFrom(requested)
         }
+    }
+
+    /**
+     * Returns the bean for the handler grails class.
+     *
+     * @return
+     */
+    protected Object getHandlerBean() {
+        return Holders.applicationContext.getBean(handler.propertyName)
     }
 }

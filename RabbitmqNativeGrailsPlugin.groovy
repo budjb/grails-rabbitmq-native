@@ -202,7 +202,7 @@ class RabbitmqNativeGrailsPlugin {
      */
     void registerConsumers(GrailsApplication application, RabbitContext context) {
         application.serviceClasses.each { GrailsClass clazz ->
-            context.registerConsumer(application.mainContext.getBean(clazz.propertyName))
+            context.registerConsumer(clazz)
         }
     }
 

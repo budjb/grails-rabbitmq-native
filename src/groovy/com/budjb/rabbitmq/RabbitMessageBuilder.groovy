@@ -8,21 +8,16 @@ import com.rabbitmq.client.MessageProperties
 import com.rabbitmq.client.RpcClient
 import com.rabbitmq.client.ShutdownSignalException
 import grails.converters.JSON
+import grails.util.Holders
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.commons.GrailsApplication
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import com.budjb.rabbitmq.exception.MessageConvertException
 
 class RabbitMessageBuilder {
-    /**
-     * Grails application.
-     */
-    public static GrailsApplication grailsApplication
-
     /**
      * Default timeout for RPC calls (5 seconds).
      */
@@ -32,6 +27,11 @@ class RabbitMessageBuilder {
      * Logger
      */
     protected static Logger log = Logger.getLogger(RabbitMessageBuilder)
+
+    /**
+     * Rabbit context.
+     */
+    RabbitContext rabbitContext
 
     /**
      * Channel to publish messages through.
@@ -134,6 +134,10 @@ class RabbitMessageBuilder {
      * Loads the rabbit template bean registered from the grails plugin.
      */
     public RabbitMessageBuilder(Channel channel = null) {
+        // Load the rabbit context bean
+        rabbitContext = Holders.applicationContext.getBean('rabbitContext')
+
+        // Store the channel
         this.channel = channel
     }
 
@@ -159,14 +163,23 @@ class RabbitMessageBuilder {
         // Convert the object and create the message
         byte[] body = convertMessage(this.body)
 
-        // Create a channel
-        channel = RabbitContext.instance.connection.createChannel()
+        // Whether the channel is a temporary channel
+        boolean tempChannel = false
+
+        // If we weren't passed a channel, create a temporary one
+        if (!channel) {
+            channel = rabbitContext.createChannel()
+            tempChannel = true
+        }
 
         // Send the message
         channel.basicPublish(exchange, routingKey, properties, body)
 
         // Close the channel
-        channel.close()
+        if (tempChannel) {
+            channel.close()
+            channel = null
+        }
     }
 
     /**
@@ -257,8 +270,14 @@ class RabbitMessageBuilder {
         // Convert the object and create the message
         byte[] body = convertMessage(this.body)
 
-        // Create a channel for the message
-        channel = RabbitContext.instance.connection.createChannel()
+        // Whether this is a temporary channel
+        boolean tempChannel = false
+
+        // If a channel wasn't given, create one
+        if (!channel) {
+            channel = rabbitContext.connection.createChannel()
+            tempChannel = true
+        }
 
         // Set the reply queue
         properties.replyTo = channel.queueDeclare().queue
@@ -299,7 +318,10 @@ class RabbitMessageBuilder {
         MessageContext reply = (timeout < 0) ? replyHandoff.take() : replyHandoff.poll(timeout, TimeUnit.MILLISECONDS)
 
         // Close the channel
-        channel.close()
+        if (tempChannel) {
+            channel.close()
+            channel = null
+        }
 
         // If the reply is null, assume the timeout was reached
         if (reply == null) {
@@ -473,6 +495,8 @@ class RabbitMessageBuilder {
     /**
      * Converts the payload object and creates the message object.
      *
+     * TODO: refactor this to use the converter beans
+     *
      * @param source Object to convert.
      * @return Source object converted to a byte array.
      */
@@ -488,7 +512,7 @@ class RabbitMessageBuilder {
         }
 
         // Check for domains (use the Grails JSON converter on purpose)
-        if (grailsApplication.isDomainClass(source.getClass())) {
+        if (Holders.grailsApplication.isDomainClass(source.getClass())) {
             return new JSON(source).toString().getBytes()
         }
 
