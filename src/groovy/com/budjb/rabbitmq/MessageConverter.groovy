@@ -1,5 +1,7 @@
 package com.budjb.rabbitmq
 
+import java.lang.reflect.ParameterizedType
+
 abstract class MessageConverter<T> {
     /**
      * Returns the class type this converter is responsible for converting.
@@ -7,7 +9,7 @@ abstract class MessageConverter<T> {
      * @return
      */
     public Class getType() {
-        return T
+        return ((ParameterizedType)getClass().getGenericSuperclass()).actualTypeArguments[0]
     }
 
     /**

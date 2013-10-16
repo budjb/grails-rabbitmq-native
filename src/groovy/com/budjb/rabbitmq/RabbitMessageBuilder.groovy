@@ -161,7 +161,7 @@ class RabbitMessageBuilder {
         AMQP.BasicProperties properties = buildProperties()
 
         // Convert the object and create the message
-        byte[] body = convertMessage(this.body)
+        byte[] body = convertMessageToBytes(this.body)
 
         // Whether the channel is a temporary channel
         boolean tempChannel = false
@@ -268,7 +268,7 @@ class RabbitMessageBuilder {
         AMQP.BasicProperties properties = buildProperties()
 
         // Convert the object and create the message
-        byte[] body = convertMessage(this.body)
+        byte[] body = convertMessageToBytes(this.body)
 
         // Whether this is a temporary channel
         boolean tempChannel = false
@@ -333,7 +333,7 @@ class RabbitMessageBuilder {
             return reply
         }
 
-        return convertReply(reply.body)
+        return convertMessageFromBytes(reply.body)
     }
 
     /**
@@ -493,73 +493,59 @@ class RabbitMessageBuilder {
     }
 
     /**
-     * Converts the payload object and creates the message object.
+     * Attempts to convert an object to a byte array.
      *
-     * TODO: refactor this to use the converter beans
-     *
-     * @param source Object to convert.
-     * @return Source object converted to a byte array.
+     * @param Source object that needs conversion.
+     * @return
      */
-    protected byte[] convertMessage(Object source) {
-        // If we were given a byte array, there's nothing to do
+    protected byte[] convertMessageToBytes(Object source) {
         if (source instanceof byte[]) {
-            return source
+            return null
+        }
+        for (MessageConverter converter in rabbitContext.messageConverters) {
+            if (!converter.type.isAssignableFrom(source.getClass()) || !converter.canConvertFrom()) {
+                continue
+            }
+
+            try {
+                byte[] converted = converter.convertFrom(source)
+                if (converted != null) {
+                    return converted
+                }
+            }
+            catch (Exception e) {
+                log.error("unhandled exception caught from message converter ${converter.class.simpleName}", e)
+            }
         }
 
-        // Check for lists or maps
-        if (source instanceof List || source instanceof Map) {
-            return new JsonBuilder(source).toString().getBytes()
-        }
-
-        // Check for domains (use the Grails JSON converter on purpose)
-        if (Holders.grailsApplication.isDomainClass(source.getClass())) {
-            return new JSON(source).toString().getBytes()
-        }
-
-        // Attempt automatic conversion (this won't always work)
-        try {
-            return source.toString().getBytes()
-        }
-        catch (Exception e) {
-            throw new MessageConvertException(source.getClass())
-        }
+        // TODO: make a custom exception
+        throw new Exception("unable to find a converter for type ${source.getClass().name}")
     }
 
     /**
-     * Attempts to convert the message reply to an appropriate data type.
+     * Attempts to convert the given byte array to another type via the message converters.
      *
-     * @param body
-     * @return
+     * @param input Byte array to convert.
+     * @return An object converted from a byte array, or the byte array if no conversion could be done.
      */
-    protected Object convertReply(byte[] body) {
-        // Skip if auto convert is disabled
-        if (!autoConvert) {
-            return body
+    protected Object convertMessageFromBytes(byte[] input) {
+        for (MessageConverter converter in rabbitContext.messageConverters) {
+            if (!converter.canConvertTo()) {
+                return null
+            }
+
+            try {
+                Object converted = converter.convertTo(input)
+                if (converted != null) {
+                    return converted
+                }
+            }
+            catch (Exception e) {
+                log.error("unhandled exception caught from message converter ${converter.class.simpleName}", e)
+            }
         }
 
-        // Convert to a string
-        String string
-        try {
-            string = new String(body)
-        }
-        catch (Exception e) {
-            return body
-        }
-
-        // Attempt JSON conversion
-        try {
-            return new JsonSlurper().parseText(string)
-        }
-        catch (Exception e) {
-            // continue
-        }
-
-        // Attempt integer
-        if (string.isInteger()) {
-            return string.toInteger()
-        }
-
-        return string
+        return input
     }
 
     /**

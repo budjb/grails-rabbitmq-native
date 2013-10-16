@@ -47,8 +47,14 @@ class RabbitContext {
      * Initializes the rabbit driver.
      */
     public void start() {
+        // Check for the configuration
+        if (!grailsApplication.config.rabbitmq?.connection) {
+            log.warn("not starting RabbitMQ because there is no configuration defined")
+            return
+        }
+
         // Load the configuration
-        connectionConfiguration = new ConnectionConfiguration(grailsApplication.config.rabbitmq?.connection)
+        connectionConfiguration = new ConnectionConfiguration(grailsApplication.config.rabbitmq.connection)
 
         // Connect to the server
         connect()
@@ -79,7 +85,7 @@ class RabbitContext {
      */
     public void stopConsumers() {
         if (channels) {
-            log.info("closing RabbitMQ channels")
+            log.debug("closing RabbitMQ channels")
             channels.each { channel ->
                 if (channel.isOpen()) {
                     channel.close()
@@ -96,7 +102,7 @@ class RabbitContext {
     public void stop() {
         stopConsumers()
         if (connection?.isOpen()) {
-            log.info("closing connection to the RabbitMQ server")
+            log.debug("closing connection to the RabbitMQ server")
             connection.close()
             connection = null
         }
@@ -156,8 +162,9 @@ class RabbitContext {
      * @param candidate
      * @return
      */
-    public boolean registerConsumer(GrailsClass candidate) {
+    public boolean registerConsumer(DefaultGrailsMessageConsumerClass candidate) {
         if (!RabbitConsumer.isConsumer(candidate)) {
+            log.warn("not starting '${candidate.shortName}' as a RabbitMQ message consumer because it is not properly configured")
             return false
         }
         consumers << candidate

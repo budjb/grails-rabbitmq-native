@@ -90,13 +90,13 @@ class RabbitConsumer extends DefaultConsumer {
 
         // Make sure a queue or an exchange was specified
         if (!config.queue && !config.exchange) {
-            log.error("RabbitMQ configuration for consumer ${handler.shortName} is missing a queue or an exchange")
+            log.warn("RabbitMQ configuration for consumer ${handler.shortName} is missing a queue or an exchange")
             return []
         }
 
         // Make sure that only a queue or an exchange was specified
         if (config.queue && config.exchange) {
-            log.error("RabbitMQ configuration for consumer ${handler.shortName} can not have both a queue and an exchange")
+            log.warn("RabbitMQ configuration for consumer ${handler.shortName} can not have both a queue and an exchange")
             return []
         }
 
@@ -104,7 +104,7 @@ class RabbitConsumer extends DefaultConsumer {
         List<Channel> channels = []
 
         // Start the consumers
-        log.info("registering consumer ${handler.shortName} as a RabbitMQ consumer with ${config.consumers} consumer(s)")
+        log.debug("registering consumer ${handler.shortName} as a RabbitMQ consumer with ${config.consumers} consumer(s)")
         config.consumers.times {
             // Create the channel
             Channel channel = connection.createChannel()
@@ -255,10 +255,10 @@ class RabbitConsumer extends DefaultConsumer {
         // If a content-type this converter is aware of is given, respect it.
         if (context.properties.contentType) {
             // Find a converter
-            MessageConverter converter = rabbitContext.messageConverters.find { it.contentType == context.properties.contentType }
+            List<MessageConverter> converters = rabbitContext.messageConverters.findAll { it.contentType == context.properties.contentType }
 
-            // If a converter is found and it can convert to its type, allow it to do so
-            if (converter) {
+            // If converters are found and it can convert to its type, allow it to do so
+            for (MessageConverter converter in converters) {
                 Object converted = attemptConversion(converter, context)
                 if (converted != null) {
                     return converted

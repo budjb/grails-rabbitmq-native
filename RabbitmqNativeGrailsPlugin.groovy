@@ -109,6 +109,8 @@ class RabbitmqNativeGrailsPlugin {
         // Configure built-in converters
         "${StringMessageConverter.name}"(StringMessageConverter)
         "${IntegerMessageConverter.name}"(IntegerMessageConverter)
+        "${MapMessageConverter.name}"(MapMessageConverter)
+        "${ListMessageConverter.name}"(ListMessageConverter)
 
         // Configure application-provided converters
         application.messageConverterClasses.each { GrailsClass clazz ->
@@ -246,6 +248,8 @@ class RabbitmqNativeGrailsPlugin {
         // Register built-in message converters
         // Note: the order matters, we want string to be the last one
         context.registerMessageConverter(application.mainContext.getBean("${IntegerMessageConverter.name}"))
+        context.registerMessageConverter(application.mainContext.getBean("${MapMessageConverter.name}"))
+        context.registerMessageConverter(application.mainContext.getBean("${ListMessageConverter.name}"))
         context.registerMessageConverter(application.mainContext.getBean("${StringMessageConverter.name}"))
     }
 }
