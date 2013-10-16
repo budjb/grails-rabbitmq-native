@@ -33,6 +33,11 @@ class RabbitConsumer extends DefaultConsumer {
     private GrailsClass handler
 
     /**
+     * Rabbit context.
+     */
+    RabbitContext rabbitContext
+
+    /**
      * Configuration provided by the handler for this consumer.
      */
     private ConsumerConfiguration configuration
@@ -137,6 +142,9 @@ class RabbitConsumer extends DefaultConsumer {
     public RabbitConsumer(Channel channel, ConsumerConfiguration configuration, GrailsClass handler) {
         // Run the parent
         super(channel)
+
+        // Grab the rabbit context object
+        this.rabbitContext = Holders.grailsApplication.mainContext.getBean('rabbitContext')
 
         // Store the handler this consumer is acting on behalf of
         this.handler = handler
@@ -245,16 +253,17 @@ class RabbitConsumer extends DefaultConsumer {
         }
 
         // If a content-type this converter is aware of is given, respect it.
-        switch (context.properties.contentType) {
-            // Handle strings
-            case 'text/plain':
-                return convertString(context)
-                break
+        if (context.properties.contentType) {
+            // Find a converter
+            MessageConverter converter = rabbitContext.messageConverters.find { it.contentType == context.properties.contentType }
 
-            // Handle JSON
-            case 'application/json':
-                return convertJson(context)
-                break
+            // If a converter is found and it can convert to its type, allow it to do so
+            if (converter) {
+                Object converted = attemptConversion(converter, context)
+                if (converted != null) {
+                    return converted
+                }
+            }
         }
 
         // If no content-type was handled, the config may specify to stop
@@ -262,112 +271,45 @@ class RabbitConsumer extends DefaultConsumer {
             return context.body
         }
 
-        // Try integer conversion
-        Object data = convertInteger(context)
-        if (!(data instanceof byte[])) {
-            return data
+        // Iterate through converters until we have success
+        for (MessageConverter converter in rabbitContext.messageConverters) {
+            Object converted = attemptConversion(converter, context)
+            if (converted != null) {
+                return converted
+            }
         }
 
-        // Try JSON (and implicitly String) conversion
-        data = convertJson(context)
-        if (!(data instanceof byte[])) {
-            return data
-        }
-
+        // No converters worked, so fall back to the byte array
         return context.body
     }
 
     /**
-     * Attempts to locate a handler for Integer types and converts the message
-     * to an Integer.  The converter will fall back to the byte array on failure.
+     * Attempts to convert a message with the given converter.
      *
+     * @param converter
      * @param context
      * @return
      */
-    private Object convertInteger(MessageContext context) {
-        // First check if the handler is defined
-        if (!isHandlerTypeDefined(Integer)) {
-            return context.body
+    public Object attemptConversion(MessageConverter converter, MessageContext context) {
+        // Skip if the converter can't convert the message from a byte array
+        if (!converter.canConvertTo()) {
+            return null
         }
 
-        // Convert the message to a string
-        String raw
         try {
-            raw = new String(context.body)
+            // Convert the message
+            Object converted = converter.convertTo(context.body)
+
+            // If conversion worked and a handler is defined for the type, we're done
+            if (converted != null && isHandlerTypeDefined(converted.getClass())) {
+                return converted
+            }
         }
         catch (Exception e) {
-            return context.body
+            log.error("unhandled exception caught from message converter ${converter.class.simpleName}", e)
         }
 
-        // See if the raw string is an integer
-        if (!raw.isInteger()) {
-            return context.body
-        }
-
-        return raw.toInteger()
-    }
-
-    /**
-     * Attempts to locate a handler for JSON types, and converts the
-     * message body to JSON.  This converter will attempt to convert
-     * to a string on failure to convert to JSON.
-     *
-     * @param context
-     * @return
-     */
-    private Object convertJson(MessageContext context) {
-        // First check whether Map or List type handlers are defined
-        if (!isHandlerTypeDefined(Map) && !isHandlerTypeDefined(List)) {
-            return convertString(context)
-        }
-
-        // Convert the body to a string.
-        // If it fails, just return the byte array since convertString won't work.
-        String raw
-        try {
-            raw = new String(context.body)
-        }
-        catch (Exception e) {
-            return context.body
-        }
-
-        // Convert the raw string to JSON.
-        Object json
-        try {
-            json = new JsonSlurper().parseText(raw)
-        }
-        catch (Exception e) {
-            return convertString(context)
-        }
-
-        // Finally, determine if we really have the correct handler defined.
-        if (!isHandlerTypeDefined(json.getClass())) {
-            return convertString(context.body)
-        }
-
-        return json
-    }
-
-    /**
-     * Attempts to locate a handler for String types and converts the message
-     * to a String.  The converter will fall back to the byte array on failure.
-     *
-     * @param context
-     * @return
-     */
-    private Object convertString(MessageContext context) {
-        // Fall back to the byte array if a String handler is not defined.
-        if (!isHandlerTypeDefined(String)) {
-            return context.body
-        }
-
-        // Attempt to return the string
-        try {
-            return new String(context.body)
-        }
-        catch (Exception e) {
-            return context.body
-        }
+        return null
     }
 
     /**
@@ -408,6 +350,6 @@ class RabbitConsumer extends DefaultConsumer {
      * @return
      */
     protected Object getHandlerBean() {
-        return Holders.applicationContext.getBean(handler.propertyName)
+        return Holders.applicationContext.getBean(handler.fullName)
     }
 }

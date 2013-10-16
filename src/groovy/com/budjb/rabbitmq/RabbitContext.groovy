@@ -36,12 +36,12 @@ class RabbitContext {
     /**
      * A list of registered message converters
      */
-    Map<Class, MessageConverter> messageConverters = [:]
+    public List<MessageConverter> messageConverters = []
 
     /**
      * A list of services that are set up as consumers
      */
-    List<Object> consumers = []
+    protected List<Object> consumers = []
 
     /**
      * Initializes the rabbit driver.
@@ -100,7 +100,7 @@ class RabbitContext {
             connection.close()
             connection = null
         }
-        messageConverters = [:]
+        messageConverters = []
     }
 
     /**
@@ -147,7 +147,7 @@ class RabbitContext {
      */
     public void registerMessageConverter(MessageConverter converter) {
         log.debug("registering message converter '${converter.class.simpleName}' for type '${converter.type}'")
-        messageConverters[converter.type] = converter
+        messageConverters << converter
     }
 
     /**

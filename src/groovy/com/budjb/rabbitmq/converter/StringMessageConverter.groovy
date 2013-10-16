@@ -2,12 +2,7 @@ package com.budjb.rabbitmq.converter
 
 import com.budjb.rabbitmq.MessageConverter
 
-class StringMessageConverter implements MessageConverter<String> {
-    @Override
-    public Class getType() {
-        return String
-    }
-
+class StringMessageConverter extends MessageConverter<String> {
     @Override
     public boolean canConvertFrom() {
         return true
@@ -26,6 +21,11 @@ class StringMessageConverter implements MessageConverter<String> {
     @Override
     public byte[] convertFrom(String input) {
         return input.getBytes()
+    }
+
+    @Override
+    public String getContentType() {
+        return 'text/plain'
     }
 
 }

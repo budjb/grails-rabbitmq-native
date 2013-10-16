@@ -6,7 +6,7 @@ import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitConsumer
 import com.budjb.rabbitmq.MessageConverterArtefactHandler
 import com.budjb.rabbitmq.MessageConsumerArtefactHandler
-import com.budjb.rabbitmq.converter.StringMessageConverter
+import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.GrailsMessageConverterClass
 
 import org.codehaus.groovy.grails.commons.AbstractInjectableGrailsClass
@@ -108,6 +108,7 @@ class RabbitmqNativeGrailsPlugin {
 
         // Configure built-in converters
         "${StringMessageConverter.name}"(StringMessageConverter)
+        "${IntegerMessageConverter.name}"(IntegerMessageConverter)
 
         // Configure application-provided converters
         application.messageConverterClasses.each { GrailsClass clazz ->
@@ -237,12 +238,14 @@ class RabbitmqNativeGrailsPlugin {
      * @param context
      */
     void registerConverters(GrailsApplication application, RabbitContext context) {
-        // Register built-in message converters
-        context.registerMessageConverter(application.mainContext.getBean("${StringMessageConverter.name}"))
-
         // Register application-provided converters
         application.messageConverterClasses.each { GrailsClass clazz ->
             context.registerMessageConverter(application.mainContext.getBean(clazz.fullName))
         }
+
+        // Register built-in message converters
+        // Note: the order matters, we want string to be the last one
+        context.registerMessageConverter(application.mainContext.getBean("${IntegerMessageConverter.name}"))
+        context.registerMessageConverter(application.mainContext.getBean("${StringMessageConverter.name}"))
     }
 }
