@@ -1,1 +1,8 @@
-introduction: Introduction
+introduction:
+    title: Introduction
+    migrating: Migrating From The Official RabbitMQ Plugin
+    changelog: Changelog
+configuration: Configuration
+consuming:
+    title: Consuming Messages
+    handlers: Message Handlers

@@ -1,5 +1,7 @@
 // configuration for plugin testing - will not be included in the plugin zip
 
+grails.doc.images = new File('src/docs/images')
+
 log4j = {
     // Example of changing the log pattern for the default console
     // appender:

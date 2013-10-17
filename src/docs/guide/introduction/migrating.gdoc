@@ -1,0 +1,5 @@
+This plugin was created to provide closer integration with the native RabbitMQ Java library, and remove the Spring Framework
+RabbitMQ layer utilized by the official Grails RabbitMQ plugin. This plugin follows many of its conventions, but it also
+does some things very differently. If you are migrating from the official plugin to this one, please keep in mind that while
+many things may work similarly, there are small changes that need to be accounted for. Also note that not all features of
+the official plugin are present in this one, and visa versa.
