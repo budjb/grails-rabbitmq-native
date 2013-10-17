@@ -50,14 +50,18 @@ class ConsumerConfiguration {
      * @param options
      */
     public ConsumerConfiguration(Map options) {
-        queue =         parseConfigOption(String, queue, options['queue'])
-        exchange =      parseConfigOption(String, exchange, options['exchange'])
-        routingKey =    parseConfigOption(String, routingKey, options['routingKey'])
-        consumers =     parseConfigOption(Integer, consumers, options['consumers'])
-        transacted =    parseConfigOption(Boolean, transacted, options['transacted'])
-        autoAck =       parseConfigOption(AutoAck, autoAck, options['autoAck'])
-        convert =       parseConfigOption(MessageConvertMethod, convert, options['convert'])
-        retry =         parseConfigOption(Boolean, retry, options['retry'])
+        queue      = parseConfigOption(String, queue, options['queue'])
+        exchange   = parseConfigOption(String, exchange, options['exchange'])
+        routingKey = parseConfigOption(String, routingKey, options['routingKey'])
+        consumers  = parseConfigOption(Integer, consumers, options['consumers'])
+        transacted = parseConfigOption(Boolean, transacted, options['transacted'])
+        autoAck    = parseConfigOption(AutoAck, autoAck, options['autoAck'])
+        convert    = parseConfigOption(MessageConvertMethod, convert, options['convert'])
+        retry      = parseConfigOption(Boolean, retry, options['retry'])
+
+        if (transacted) {
+            autoAck = AutoAck.POST
+        }
     }
 
     /**

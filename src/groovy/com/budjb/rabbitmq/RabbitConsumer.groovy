@@ -215,6 +215,11 @@ class RabbitConsumer extends DefaultConsumer {
             // Get the handler bean
             Object handlerBean = getHandlerBean()
 
+            // Start the transaction if requested
+            if (configuration.transacted) {
+                context.channel.txSelect()
+            }
+
             // Invoke the handler
             Object response = handlerBean."${RABBIT_HANDLER_NAME}"(converted, context)
 
@@ -223,16 +228,31 @@ class RabbitConsumer extends DefaultConsumer {
                 channel.basicAck(context.envelope.deliveryTag, false)
             }
 
+            // Commit the transaction if requested
+            if (configuration.transacted) {
+                context.channel.txCommit()
+            }
+
             return response
         }
         catch (Exception e) {
+            // Rollback the transaction
+            if (configuration.transacted) {
+                context.channel.txRollback()
+            }
+
             // Reject the message, optionally submitting for requeue
             if (configuration.autoAck == AutoAck.POST) {
                 channel.basicReject(context.envelope.deliveryTag, configuration.retry)
             }
 
             // Log the error
-            log.error("unhandled exception ${e.getClass().name} caught from RabbitMQ message handler for consumer ${handler.shortName}", e)
+            if (configuration.transacted) {
+                log.error("transaction rolled back due to unhandled exception ${e.getClass().name} caught in RabbitMQ message handler for consumer ${handler.shortName}", e)
+            }
+            else {
+                log.error("unhandled exception ${e.getClass().name} caught in RabbitMQ message handler for consumer ${handler.shortName}", e)
+            }
             return null
         }
     }
