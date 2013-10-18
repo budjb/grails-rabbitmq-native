@@ -2,15 +2,20 @@ One of the requirements for a consumer to be registered to the RabbitMQ server i
 in the consumer class. The message handler is the mechanism by which messages are consumed.
 
 h3. Basic Usage
-### TODO: link to MessageContext###
 In its most basic form, a message handler method takes in the body of the received message, and a @MessageContext@
 object that contains the message parameters received from the RabbitMQ server, along with the consumer's channel
 that the handler should send messages through.
 
 This is the most generic form of a message handler:
 {code}
-def handleMessage(def body, MessageContext context) {
-    // Do work
+package com.example
+
+class ExampleConsumer {
+    // ...
+
+    def handleMessage(def body, MessageContext context) {
+        // Do work
+    }
 }
 {code}
 
@@ -31,12 +36,18 @@ so that the handler does not need to handle the conversion.
 
 The following handlers would accept the converted Map:
 {code}
-def handleMessage(Map body, MessageContext context) {
-    // Do work
-}
+package com.example
 
-def handleMessage(def body, MessageContext context) {
-    // Since def is a generic type (Object)
+class ExampleConsumer {
+    // ...
+
+    def handleMessage(Map body, MessageContext context) {
+        // Do work
+    }
+
+    def handleMessage(def body, MessageContext context) {
+        // Since def is a generic type (Object)
+    }
 }
 {code}
 
@@ -58,3 +69,14 @@ TODO: link to converters
 The plugin has built-in converters for @Integer@, @Map@, @List@, and @String@ types. The plugin allows users
 to define their own converters to convert other object types, which will be discussed later in this guide.
 
+h3. MessageContext Object
+The message context is just an object that encapsulates the data relevant to the received message.  Below
+is a list of properties of the class.
+{table}
+*Property* | *Description*
+@body@ | Incoming message in its raw @byte[]@ format.
+@channel@ | The RabbitMQ channel the message handler should use to send messages. This is especially important when using transactions.
+@consumerTag@ | Consumer tag
+@envelope@ | Properties of the message's delivery (see RabbitMQ's [documentation | http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.1.5/rabbitmq-java-client-javadoc-3.1.5/com/rabbitmq/client/Envelope.html])
+@properties@ | Properties of the message (see RabbitMQ's [documentation | http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.1.5/rabbitmq-java-client-javadoc-3.1.5/com/rabbitmq/client/BasicProperties.html])
+{table}

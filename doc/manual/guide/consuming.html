@@ -98,15 +98,13 @@ an error stating so and not register the consumer to any queues.
 <h2 id="handlers">3.1 Message Handlers</h2>
 One of the requirements for a consumer to be registered to the RabbitMQ server is that a message handler be declared
 in the consumer class. The message handler is the mechanism by which messages are consumed.<p class="paragraph"/><h3>Basic Usage</h3>
-<ol>
-<ol>
-<ol>
-<li>TODO: link to MessageContext###</li>
-</ol></ol></ol><p class="paragraph"/>In its most basic form, a message handler method takes in the body of the received message, and a <code>MessageContext</code>
+In its most basic form, a message handler method takes in the body of the received message, and a <code>MessageContext</code>
 object that contains the message parameters received from the RabbitMQ server, along with the consumer's channel
 that the handler should send messages through.<p class="paragraph"/>This is the most generic form of a message handler:
-<div class="code"><pre>def handleMessage(def body, MessageContext context) &#123;
-    // Do work
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    // ...<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // Do work
+    &#125;
 &#125;</pre></div><p class="paragraph"/><h3>Typed Message Handlers</h3>
 The logic surrounding the message consumer classes will by default attempt to intelligently convert the body of
 the received message from a byte array to a converted type, such as a String. Before routing the message to the
@@ -115,10 +113,12 @@ and if the conversion was successful, determine if an appropriate handler has be
 <div class="code"><pre>&#123;<span class="java&#45;quote">"foo"</span>:<span class="java&#45;quote">"bar"</span>,<span class="java&#45;quote">"hi"</span>:<span class="java&#45;quote">"there"</span>&#125;</pre></div><p class="paragraph"/>If the above message is received, the converter for the Map class type will convert the byte array to a Map
 of the JSON data. If a valid handler for the Map type is defined, the handler will receive the converted JSON
 so that the handler does not need to handle the conversion.<p class="paragraph"/>The following handlers would accept the converted Map:
-<div class="code"><pre>def handleMessage(Map body, MessageContext context) &#123;
-    // Do work
-&#125;<p class="paragraph"/>def handleMessage(def body, MessageContext context) &#123;
-    // Since def is a <span class="java&#45;keyword">generic</span> type (<span class="java&#45;object">Object</span>)
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    // ...<p class="paragraph"/>    def handleMessage(Map body, MessageContext context) &#123;
+        // Do work
+    &#125;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // Since def is a <span class="java&#45;keyword">generic</span> type (<span class="java&#45;object">Object</span>)
+    &#125;
 &#125;</pre></div><p class="paragraph"/><blockquote class="note">
 If a converter was successfully able to convert the message body, but no handler was defined to handle the
 class type, other converters will get a chance to convert the message body. In the above example, if only
@@ -129,7 +129,11 @@ byte array received from the RabbitMQ server.
 If no handler is defined that can handle the received message (including the raw byte array), an error will
 be logged and the message will be rejected.
 </blockquote><p class="paragraph"/>TODO: link to converters<p class="paragraph"/>The plugin has built-in converters for <code>Integer</code>, <code>Map</code>, <code>List</code>, and <code>String</code> types. The plugin allows users
-to define their own converters to convert other object types, which will be discussed later in this guide.<p class="paragraph"/>
+to define their own converters to convert other object types, which will be discussed later in this guide.<p class="paragraph"/><h3>MessageContext Object</h3>
+The message context is just an object that encapsulates the data relevant to the received message.  Below
+is a list of properties of the class.
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Description</strong></th></tr><tr class="table-odd"><td><code>body</code></td><td>Incoming message in its raw <code>byte</code> format.</td></tr><tr class="table-even"><td><code>channel</code></td><td>The RabbitMQ channel the message handler should use to send messages. This is especially important when using transactions.</td></tr><tr class="table-odd"><td><code>consumerTag</code></td><td>Consumer tag</td></tr><tr class="table-even"><td><code>envelope</code></td><td>Properties of the message's delivery (see RabbitMQ's <a href=" http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.1.5/rabbitmq-java-client-javadoc-3.1.5/com/rabbitmq/client/Envelope.html" target="blank">documentation </a>)</td></tr><tr class="table-odd"><td><code>properties</code></td><td>Properties of the message (see RabbitMQ's <a href=" http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.1.5/rabbitmq-java-client-javadoc-3.1.5/com/rabbitmq/client/BasicProperties.html" target="blank">documentation </a>)</td></tr></table>
+
 
 
                 <div style="clear:both;margin-top:15px;"></div>
