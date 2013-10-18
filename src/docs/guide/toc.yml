@@ -6,3 +6,5 @@ configuration: Configuration
 consuming:
     title: Consuming Messages
     handlers: Message Handlers
+    queues: Subscribing To Queues
+    exchanges: Subscribing To Exchanges

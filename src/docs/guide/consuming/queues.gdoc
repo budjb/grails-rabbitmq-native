@@ -1,0 +1,22 @@
+Message consumers can subscribe to either queues or exchanges. When a consumer is registered to a queue, the consumer will receive messages from the queue as
+the RabbitMQ server determines that it's the consumer's turn to receive a message, since there may be multiple listeners on the same queue.
+
+Each message consumer class must have a configuration defined.  The configuration should be a Map, assigned to a static variable named @rabbitConfig@. To
+subscribe to queues, the only required configuration option is the @queue@ variable, which is the name of the queue to subscribe to.
+
+Here is a simple example of a consumer subscribing to a queue.
+{code}
+package com.example
+
+class ExampleConsumer {
+    static rabbitConfig = [
+        'queue': 'test.queue'
+    ]
+
+    def handleMessage(def body, MessageContext context) {
+        // Process message
+    }
+}
+{code}
+
+There are many options available to influence how the consumer works, which can be found in the reference.
