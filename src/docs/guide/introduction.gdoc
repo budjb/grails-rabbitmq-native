@@ -10,3 +10,4 @@ custom data types.
 This guide details the configuration of the plugin, and may not fully explain the use and conventions of the RabbitMQ services
 or its Java library.  More information can be found in their [Java API guide|http://www.rabbitmq.com/api-guide.html] and
 [JavaDoc|http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.1.5/rabbitmq-java-client-javadoc-3.1.5].
+
