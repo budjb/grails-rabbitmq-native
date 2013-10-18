@@ -68,7 +68,7 @@ class RabbitmqNativeGrailsPlugin {
     /**
      * Online location of the plugin's browseable source code.
      */
-    def scm = [url: 'https://github.com/budjb/grails-jersey-request-builder']
+    def scm = [url: 'https://github.com/budjb/grails-rabbitmq-native']
 
     /**
      * Load order.
