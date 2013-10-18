@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>3.1.3 MessageContext Object 0.1</title>
+    <title>4.1.3 MessageContext Object 0.1</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -27,10 +27,19 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0"><a href="../../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../../guide/configuration.html"><strong>2</strong><span>Configuration</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/migrating.html"><strong>2</strong><span>Migrating From The Official RabbitMQ Plugin</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../../guide/consuming.html"><strong>3</strong><span>Consuming Messages</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/configuration.html"><strong>3</strong><span>Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/changelog.html"><strong>6</strong><span>Changelog</span></a>
                     </div>
                     
                 </div>
@@ -56,16 +65,18 @@ function addJsClass() {
             <div id="main" class="corner-all">
 
                 
-                    <div class="toc-item prev-left"><a href="../../guide/configuration.html">&lt;&lt; <strong>2</strong><span>Configuration</span></a></div>
+                    <div class="toc-item prev-left"><a href="../../guide/configuration.html">&lt;&lt; <strong>3</strong><span>Configuration</span></a></div>
                 
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
                 
+                    <div class="toc-item next-right"><a href="../../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span> >></a></div>
+                
 
 
                 <div class="project">
-                    <h1>3.1.3 MessageContext Object - Reference Documentation</h1>
+                    <h1>4.1.3 MessageContext Object - Reference Documentation</h1>
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
@@ -78,7 +89,7 @@ function addJsClass() {
 
                 
 
-<h2 id="messagecontext">3.1.3 MessageContext Object</h2>
+<h2 id="messagecontext">4.1.3 MessageContext Object</h2>
 The message context is just an object that encapsulates the data relevant to the received message.  Below
 is a list of properties of the class.
 <table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Description</strong></th></tr><tr class="table-odd"><td><code>body</code></td><td>Incoming message in its raw <code>byte</code> format.</td></tr><tr class="table-even"><td><code>channel</code></td><td>The RabbitMQ channel the message handler should use to publish messages. This is especially important when using transactions.</td></tr><tr class="table-odd"><td><code>consumerTag</code></td><td>Consumer tag</td></tr><tr class="table-even"><td><code>envelope</code></td><td>Properties of the message's delivery (see RabbitMQ's <a href="http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.1.5/rabbitmq-java-client-javadoc-3.1.5/com/rabbitmq/client/Envelope.html" target="blank">documentation</a>)</td></tr><tr class="table-odd"><td><code>properties</code></td><td>Properties of the message (see RabbitMQ's <a href="http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.1.5/rabbitmq-java-client-javadoc-3.1.5/com/rabbitmq/client/BasicProperties.html" target="blank">documentation</a>)</td></tr></table>
@@ -87,7 +98,9 @@ is a list of properties of the class.
 
                 <div style="clear:both;margin-top:15px;"></div>
                 
-                    <div class="toc-item prev-left"><a href="../../guide/configuration.html">&lt;&lt; <strong>2</strong><span>Configuration</span></a></div>
+                    <div class="toc-item prev-left"><a href="../../guide/configuration.html">&lt;&lt; <strong>3</strong><span>Configuration</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span> >></a></div>
                 
                 <div style="clear:both"></div>
             </div>

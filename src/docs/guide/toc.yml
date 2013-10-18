@@ -1,7 +1,5 @@
-introduction:
-    title: Introduction
-    migrating: Migrating From The Official RabbitMQ Plugin
-    changelog: Changelog
+introduction: Introduction
+migrating: Migrating From The Official RabbitMQ Plugin
 configuration: Configuration
 consuming:
     title: Consuming Messages
@@ -16,3 +14,5 @@ consuming:
         title: Subscribing To Exchanges
         fanout: Fanout Exchanges
         topic: Topic Exchanges
+publishing: Publishing Messages
+changelog: Changelog

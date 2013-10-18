@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>1 Introduction 0.1</title>
+    <title>5 Publishing Messages 0.1</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -65,16 +65,18 @@ function addJsClass() {
             <div id="main" class="corner-all">
 
                 
+                    <div class="toc-item prev-left"><a href="../guide/consuming.html">&lt;&lt; <strong>4</strong><span>Consuming Messages</span></a></div>
+                
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
                 
-                    <div class="toc-item next-right"><a href="../guide/migrating.html"><strong>2</strong><span>Migrating From The Official RabbitMQ Plugin</span> >></a></div>
+                    <div class="toc-item next-right"><a href="../guide/changelog.html"><strong>6</strong><span>Changelog</span> >></a></div>
                 
 
 
                 <div class="project">
-                    <h1>1 Introduction - Reference Documentation</h1>
+                    <h1>5 Publishing Messages - Reference Documentation</h1>
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
@@ -87,20 +89,35 @@ function addJsClass() {
 
                 
 
-<h1 id="introduction">1 Introduction</h1>
-The RabbitMQ Native plugin for Grails provides RabbitMQ integration using the Java libraries provided by the RabbitMQ project.
-It provides easy configuration of exchanges and queues via a project's configuration, simple configuration of consumers, and
-a convenience class to easily publish messages.<p class="paragraph"/>This plugin strives to provide an easy convention to follow to quickly begin consuming messages, but still provide easy
-access to the underlying layer to allow users of this plugin to do whatever they need to do outside of those conventions.
-It also provides a powerful message body converter system that allows the user to quickly write and plug in converters for
-custom data types.<p class="paragraph"/>This guide details the configuration of the plugin, and may not fully explain the use and conventions of the RabbitMQ services
-or its Java library.  More information can be found in their <a href="http://www.rabbitmq.com/api-guide.html" target="blank">Java API guide</a> and
-<a href="http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.1.5/rabbitmq-java-client-javadoc-3.1.5" target="blank">JavaDoc</a>.<p class="paragraph"/>
+<h1 id="publishing">5 Publishing Messages</h1>
+Publishing messages through the plugin is achieved by using the <code>RabbitMessageBuilder</code> class. This class utilizes a closure-based configuration method to both send messages
+without waiting for a response, and sending rpc-style messages. There are many options available to the <code>RabbitMessageBuilder</code> which are documented in the reference, but
+this guide will only demonstrate basic usage.`<p class="paragraph"/><h3>Sending Messages</h3>
+Sending a message means publishing a message to an exchange or queue and not waiting for a response (fire and forget). The only required parameters to the builder
+are a queue or exchange to publish the message to, and the body of the message.<p class="paragraph"/>Send Example
+<div class="code"><pre>// Send a message
+<span class="java&#45;keyword">new</span> RabbitMessageBuilder().send &#123;
+    queue = 'some.queue'
+    body = 'hi!'
+&#125;</pre></div><p class="paragraph"/>RabbitMQ expects the body of a message to be a byte array. The message converters will also work when publishing messages, so if an object type other than <code>byte</code> is
+encountered, a suitable message converter will be found and run against the message body, if one exists.<p class="paragraph"/><h3>RPC Messages</h3>
+Publishing an RPC message is as easy as sending messages, except the returned message is returned from the function.<p class="paragraph"/>RPC Example
+<div class="code"><pre>// Send a message
+def result = <span class="java&#45;keyword">new</span> RabbitMessageBuilder().rpc &#123;
+    queue = 'some.queue'
+    body = 'hi!'
+    timeout = RabbitMessageBuilder.DEFAULT_TIMEOUT
+&#125;</pre></div><p class="paragraph"/>While this documentation will not deep-dive into the configuration options for the builder, the timeout option is especially important for RPC-style messages. The
+timeout property is the amount of time (in milliseconds) the client will wait for the server to respond. If the timeout is reached, a <code>TimeoutException</code> will be
+thrown. If the timeout is set to 0, the client will wait indefinitely for a response. The default value of the timeout, if not passed, is 5 seconds.
+
 
 
                 <div style="clear:both;margin-top:15px;"></div>
                 
-                    <div class="toc-item next-right"><a href="../guide/migrating.html"><strong>2</strong><span>Migrating From The Official RabbitMQ Plugin</span> >></a></div>
+                    <div class="toc-item prev-left"><a href="../guide/consuming.html">&lt;&lt; <strong>4</strong><span>Consuming Messages</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/changelog.html"><strong>6</strong><span>Changelog</span> >></a></div>
                 
                 <div style="clear:both"></div>
             </div>
