@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>3.3 Subscribing To Exchanges 0.1</title>
+    <title>3.1.1 Basic Usage 0.1</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -65,7 +65,7 @@ function addJsClass() {
 
 
                 <div class="project">
-                    <h1>3.3 Subscribing To Exchanges - Reference Documentation</h1>
+                    <h1>3.1.1 Basic Usage - Reference Documentation</h1>
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
@@ -75,54 +75,16 @@ function addJsClass() {
                 </div>
 
                 
-                <div id="table-of-content">
-                    <h2>Table of Contents</h2>
-                    
-                    <div class="toc-item" style="margin-left:0px"><a href="#fanout"><strong>3.1</strong><span>Fanout Exchanges</span></a>
-                    </div>
-                    
-                    <div class="toc-item" style="margin-left:0px"><a href="#topic"><strong>3.2</strong><span>Topic Exchanges</span></a>
-                    </div>
-                    
-                </div>
-                
 
                 
 
-<h2 id="exchanges">3.3 Subscribing To Exchanges</h2>
-Subscribing to a exchanges is different from subscribing to queues, as there are different types of exchanges with different behavior.
-RabbitMQ's libraries do not provide a direct way to subscribe to an exchange, but rather the method to use this functionality is to create
-a queue that is bound to an exchange. This plugin provides a convenience configuration method that handles the queue creation and binding for you.
-The binding requirements differ between the different types of exchanges.<p class="paragraph"/>There are 2 types of exchanges that consumers can subscribe to via this plugin:
-<ul class="star">
-<li>Fanout</li>
-<li>Topic</li>
-</ul><p class="paragraph"/>
-
-
-<h2 id="fanout">3.3.1 Fanout Exchanges</h2>
-A fanout exchange will forward a received message to every queue bound to it. There is no binding criteria for this kind of exchange.
-This is the simplest type of exchange, and is also the easiest to configure.<p class="paragraph"/>Fanout Example:
+<h2 id="basic">3.1.1 Basic Usage</h2>
+In its most basic form, a message handler method takes in the body of the received message, and a <code>MessageContext</code>
+object that contains the message parameters received from the RabbitMQ server, along with the consumer's channel
+that the handler should publish messages through.<p class="paragraph"/>This is the most generic form of a message handler:
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
-    <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
-        'exchange': 'fanout.exchange'
-    &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
-        // <span class="java&#45;object">Process</span> message
-    &#125;
-&#125;</pre></div>
-
-
-
-<h2 id="topic">3.3.2 Topic Exchanges</h2>
-A topic exchange will forward messages to queues based on the binding criteria the queue used to register to the exchange. In RabbitMQ terms,
-this is called a routing key. If a routing key is omitted, the queue will receive all messages submitted to the topic exchange. The routing
-key can be either a direct match, or utilize wildcards to do a partial topic match. More information can be found in the RabbitMQ documentation.<p class="paragraph"/>Topic Example:
-<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
-    <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
-        'exchange': 'topic.exchange',
-        'routingKey': 'foo.bar'
-    &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
-        // <span class="java&#45;object">Process</span> message
+    // ...<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // Do work
     &#125;
 &#125;</pre></div>
 

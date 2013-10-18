@@ -1,6 +1,6 @@
 The RabbitMQ Native plugin for Grails provides RabbitMQ integration using the Java libraries provided by the RabbitMQ project.
 It provides easy configuration of exchanges and queues via a project's configuration, simple configuration of consumers, and
-a convenience class to easily send messages.
+a convenience class to easily publish messages.
 
 This plugin strives to provide an easy convention to follow to quickly begin consuming messages, but still provide easy
 access to the underlying layer to allow users of this plugin to do whatever they need to do outside of those conventions.

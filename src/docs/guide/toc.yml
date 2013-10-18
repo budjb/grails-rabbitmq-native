@@ -5,6 +5,14 @@ introduction:
 configuration: Configuration
 consuming:
     title: Consuming Messages
-    handlers: Message Handlers
+    handlers:
+        title: Message Handlers
+        basic: Basic Usage
+        typed: Typed Message Handlers
+        messagecontext: MessageContext Object
+        rpc: RPC-Style Messages
     queues: Subscribing To Queues
-    exchanges: Subscribing To Exchanges
+    exchanges:
+        title: Subscribing To Exchanges
+        fanout: Fanout Exchanges
+        topic: Topic Exchanges

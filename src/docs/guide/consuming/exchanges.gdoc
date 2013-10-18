@@ -3,48 +3,7 @@ RabbitMQ's libraries do not provide a direct way to subscribe to an exchange, bu
 a queue that is bound to an exchange. This plugin provides a convenience configuration method that handles the queue creation and binding for you.
 The binding requirements differ between the different types of exchanges.
 
-There are 2 types of exchanges that consumers can subscribe to:
+There are 2 types of exchanges that consumers can subscribe to via this plugin:
 
 * Fanout
 * Topic
-
-h3. Fanout Exchanges
-A fanout exchange will forward a received message to every queue bound to it. There is no binding criteria for this kind of exchange.
-This is the simplest type of exchange, and is also the easiest to configure.
-
-Fanout Example:
-{code}
-package com.example
-
-class ExampleConsumer {
-    static rabbitConfig = [
-        'exchange': 'fanout.exchange'
-    ]
-
-    def handleMessage(def body, MessageContext context) {
-        // Process message
-    }
-}
-{code}
-
-h3. Topic Exchanges
-A topic exchange will forward messages to queues based on the binding criteria the queue used to register to the exchange. In RabbitMQ terms,
-this is called a routing key. If a routing key is omitted, the queue will receive all messages submitted to the topic exchange. The routing
-key can be either a direct match, or utilize wildcards to do a partial topic match. More information can be found in the RabbitMQ documentation.
-
-Topic Example:
-{code}
-package com.example
-
-class ExampleConsumer {
-    static rabbitConfig = [
-        'exchange': 'topic.exchange',
-        'routingKey': 'foo.bar'
-    ]
-
-    def handleMessage(def body, MessageContext context) {
-        // Process message
-    }
-}
-{code}
-
