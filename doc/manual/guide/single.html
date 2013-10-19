@@ -98,6 +98,10 @@ function addJsClass(el) {
                             
                             <div class="toc-item" style="margin-left:0px"><a href="#publishing"><strong>5</strong><span>Publishing Messages</span></a></div>
                             
+                            <div class="toc-item" style="margin-left:10px"><a href="#send"><strong>5.1</strong><span>Sending Messages</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#rpcsend"><strong>5.2</strong><span>RPC Messages</span></a></div>
+                            
                             <div class="toc-item" style="margin-left:0px"><a href="#changelog"><strong>6</strong><span>Changelog</span></a></div>
                             
                             <div style="clear:both" ></div>
@@ -265,7 +269,11 @@ key can be either a direct match, or utilize wildcards to do a partial topic mat
 <h1 id="publishing">5 Publishing Messages</h1>
 Publishing messages through the plugin is achieved by using the <code>RabbitMessageBuilder</code> class. This class utilizes a closure-based configuration method to both send messages
 without waiting for a response, and sending rpc-style messages. There are many options available to the <code>RabbitMessageBuilder</code> which are documented in the reference, but
-this guide will only demonstrate basic usage.`<p class="paragraph"/><h3>Sending Messages</h3>
+this guide will only demonstrate basic usage.`
+
+
+
+<h2 id="send">5.1 Sending Messages</h2>
 Sending a message means publishing a message to an exchange or queue and not waiting for a response (fire and forget). The only required parameters to the builder
 are a queue or exchange to publish the message to, and the body of the message.<p class="paragraph"/>Send Example
 <div class="code"><pre>// Send a message
@@ -273,7 +281,11 @@ are a queue or exchange to publish the message to, and the body of the message.<
     queue = 'some.queue'
     body = 'hi!'
 &#125;</pre></div><p class="paragraph"/>RabbitMQ expects the body of a message to be a byte array. The message converters will also work when publishing messages, so if an object type other than <code>byte</code> is
-encountered, a suitable message converter will be found and run against the message body, if one exists.<p class="paragraph"/><h3>RPC Messages</h3>
+encountered, a suitable message converter will be found and run against the message body, if one exists.
+
+
+
+<h2 id="rpcsend">5.2 RPC Messages</h2>
 Publishing an RPC message is as easy as sending messages, except the returned message is returned from the function.<p class="paragraph"/>RPC Example
 <div class="code"><pre>// Send a message
 def result = <span class="java&#45;keyword">new</span> RabbitMessageBuilder().rpc &#123;

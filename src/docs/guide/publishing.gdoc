@@ -1,36 +1,3 @@
 Publishing messages through the plugin is achieved by using the @RabbitMessageBuilder@ class. This class utilizes a closure-based configuration method to both send messages
 without waiting for a response, and sending rpc-style messages. There are many options available to the @RabbitMessageBuilder@ which are documented in the reference, but
 this guide will only demonstrate basic usage.`
-
-h3. Sending Messages
-Sending a message means publishing a message to an exchange or queue and not waiting for a response (fire and forget). The only required parameters to the builder
-are a queue or exchange to publish the message to, and the body of the message.
-
-Send Example
-{code}
-// Send a message
-new RabbitMessageBuilder().send {
-    queue = 'some.queue'
-    body = 'hi!'
-}
-{code}
-
-RabbitMQ expects the body of a message to be a byte array. The message converters will also work when publishing messages, so if an object type other than @byte[]@ is
-encountered, a suitable message converter will be found and run against the message body, if one exists.
-
-h3. RPC Messages
-Publishing an RPC message is as easy as sending messages, except the returned message is returned from the function.
-
-RPC Example
-{code}
-// Send a message
-def result = new RabbitMessageBuilder().rpc {
-    queue = 'some.queue'
-    body = 'hi!'
-    timeout = RabbitMessageBuilder.DEFAULT_TIMEOUT
-}
-{code}
-
-While this documentation will not deep-dive into the configuration options for the builder, the timeout option is especially important for RPC-style messages. The
-timeout property is the amount of time (in milliseconds) the client will wait for the server to respond. If the timeout is reached, a @TimeoutException@ will be
-thrown. If the timeout is set to 0, the client will wait indefinitely for a response. The default value of the timeout, if not passed, is 5 seconds.

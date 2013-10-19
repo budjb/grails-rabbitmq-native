@@ -14,5 +14,8 @@ consuming:
         title: Subscribing To Exchanges
         fanout: Fanout Exchanges
         topic: Topic Exchanges
-publishing: Publishing Messages
+publishing:
+    title: Publishing Messages
+    send: Sending Messages
+    rpcsend: RPC Messages
 changelog: Changelog

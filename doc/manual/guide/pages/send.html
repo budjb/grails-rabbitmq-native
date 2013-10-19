@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>5 Publishing Messages 0.1</title>
+    <title>5.1 Sending Messages 0.1</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -20,26 +20,26 @@ function addJsClass() {
     <ul>
         <li>
             <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
-                <a href="../guide/index.html" class="button">Table of contents</a>
+                <a href="../../guide/index.html" class="button">Table of contents</a>
 
                 <div id="nav-summary-childs" style="display:none;">
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/migrating.html"><strong>2</strong><span>Migrating From The Official RabbitMQ Plugin</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/migrating.html"><strong>2</strong><span>Migrating From The Official RabbitMQ Plugin</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/configuration.html"><strong>3</strong><span>Configuration</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/configuration.html"><strong>3</strong><span>Configuration</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/changelog.html"><strong>6</strong><span>Changelog</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/changelog.html"><strong>6</strong><span>Changelog</span></a>
                     </div>
                     
                 </div>
@@ -65,18 +65,18 @@ function addJsClass() {
             <div id="main" class="corner-all">
 
                 
-                    <div class="toc-item prev-left"><a href="../guide/consuming.html">&lt;&lt; <strong>4</strong><span>Consuming Messages</span></a></div>
+                    <div class="toc-item prev-left"><a href="../../guide/consuming.html">&lt;&lt; <strong>4</strong><span>Consuming Messages</span></a></div>
                 
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
                 
-                    <div class="toc-item next-right"><a href="../guide/changelog.html"><strong>6</strong><span>Changelog</span> >></a></div>
+                    <div class="toc-item next-right"><a href="../../guide/changelog.html"><strong>6</strong><span>Changelog</span> >></a></div>
                 
 
 
                 <div class="project">
-                    <h1>5 Publishing Messages - Reference Documentation</h1>
+                    <h1>5.1 Sending Messages - Reference Documentation</h1>
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
@@ -86,26 +86,8 @@ function addJsClass() {
                 </div>
 
                 
-                <div id="table-of-content">
-                    <h2>Table of Contents</h2>
-                    
-                    <div class="toc-item" style="margin-left:0px"><a href="#send"><strong>5.1</strong><span>Sending Messages</span></a>
-                    </div>
-                    
-                    <div class="toc-item" style="margin-left:0px"><a href="#rpcsend"><strong>5.2</strong><span>RPC Messages</span></a>
-                    </div>
-                    
-                </div>
-                
 
                 
-
-<h1 id="publishing">5 Publishing Messages</h1>
-Publishing messages through the plugin is achieved by using the <code>RabbitMessageBuilder</code> class. This class utilizes a closure-based configuration method to both send messages
-without waiting for a response, and sending rpc-style messages. There are many options available to the <code>RabbitMessageBuilder</code> which are documented in the reference, but
-this guide will only demonstrate basic usage.`
-
-
 
 <h2 id="send">5.1 Sending Messages</h2>
 Sending a message means publishing a message to an exchange or queue and not waiting for a response (fire and forget). The only required parameters to the builder
@@ -119,24 +101,11 @@ encountered, a suitable message converter will be found and run against the mess
 
 
 
-<h2 id="rpcsend">5.2 RPC Messages</h2>
-Publishing an RPC message is as easy as sending messages, except the returned message is returned from the function.<p class="paragraph"/>RPC Example
-<div class="code"><pre>// Send a message
-def result = <span class="java&#45;keyword">new</span> RabbitMessageBuilder().rpc &#123;
-    queue = 'some.queue'
-    body = 'hi!'
-    timeout = RabbitMessageBuilder.DEFAULT_TIMEOUT
-&#125;</pre></div><p class="paragraph"/>While this documentation will not deep-dive into the configuration options for the builder, the timeout option is especially important for RPC-style messages. The
-timeout property is the amount of time (in milliseconds) the client will wait for the server to respond. If the timeout is reached, a <code>TimeoutException</code> will be
-thrown. If the timeout is set to 0, the client will wait indefinitely for a response. The default value of the timeout, if not passed, is 5 seconds.
-
-
-
                 <div style="clear:both;margin-top:15px;"></div>
                 
-                    <div class="toc-item prev-left"><a href="../guide/consuming.html">&lt;&lt; <strong>4</strong><span>Consuming Messages</span></a></div>
+                    <div class="toc-item prev-left"><a href="../../guide/consuming.html">&lt;&lt; <strong>4</strong><span>Consuming Messages</span></a></div>
                 
-                    <div class="toc-item next-right"><a href="../guide/changelog.html"><strong>6</strong><span>Changelog</span> >></a></div>
+                    <div class="toc-item next-right"><a href="../../guide/changelog.html"><strong>6</strong><span>Changelog</span> >></a></div>
                 
                 <div style="clear:both"></div>
             </div>
@@ -144,7 +113,7 @@ thrown. If the timeout is set to 0, the client will wait indefinitely for a resp
         <td id="col2">
             <div class="local clearfix">
                 <div class="local-title">
-                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
                     <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
                 </div>
                 <div class="menu">
@@ -152,7 +121,7 @@ thrown. If the timeout is set to 0, the client will wait indefinitely for a resp
                     <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Items</h1><div class="menu-sub">
                         
                             
-                            <div class="menu-item"><a href="../ref/Items/reference.html">reference</a>
+                            <div class="menu-item"><a href="../../ref/Items/reference.html">reference</a>
                             </div>
                             
                             </div>
