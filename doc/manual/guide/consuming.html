@@ -39,7 +39,10 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0"><a href="../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/changelog.html"><strong>6</strong><span>Changelog</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/converters.html"><strong>6</strong><span>Message Converters</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/changelog.html"><strong>7</strong><span>Changelog</span></a>
                     </div>
                     
                 </div>
@@ -219,7 +222,7 @@ The binding requirements differ between the different types of exchanges.<p clas
 
 <h2 id="fanout">4.3.1 Fanout Exchanges</h2>
 A fanout exchange will forward a received message to every queue bound to it. There is no binding criteria for this kind of exchange.
-This is the simplest type of exchange, and is also the easiest to configure.<p class="paragraph"/>Fanout Example:
+This is the simplest type of exchange, and is also the easiest to configure.<p class="paragraph"/><h4>Fanout Example</h4>
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
     <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
         'exchange': 'fanout.exchange'
@@ -233,7 +236,7 @@ This is the simplest type of exchange, and is also the easiest to configure.<p c
 <h2 id="topic">4.3.2 Topic Exchanges</h2>
 A topic exchange will forward messages to queues based on the binding criteria the queue used to register to the exchange. In RabbitMQ terms,
 this is called a routing key. If a routing key is omitted, the queue will receive all messages submitted to the topic exchange. The routing
-key can be either a direct match, or utilize wildcards to do a partial topic match. More information can be found in the RabbitMQ documentation.<p class="paragraph"/>Topic Example:
+key can be either a direct match, or utilize wildcards to do a partial topic match. More information can be found in the RabbitMQ documentation.<p class="paragraph"/><h4>Topic Example</h4>
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
     <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
         'exchange': 'topic.exchange',

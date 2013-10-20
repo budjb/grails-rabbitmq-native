@@ -18,4 +18,7 @@ publishing:
     title: Publishing Messages
     send: Sending Messages
     rpcsend: RPC Messages
+converters:
+    title: Message Converters
+    custom: Custom Message Converters
 changelog: Changelog

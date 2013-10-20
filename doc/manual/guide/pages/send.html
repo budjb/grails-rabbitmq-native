@@ -39,7 +39,10 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0"><a href="../../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../../guide/changelog.html"><strong>6</strong><span>Changelog</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/converters.html"><strong>6</strong><span>Message Converters</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/changelog.html"><strong>7</strong><span>Changelog</span></a>
                     </div>
                     
                 </div>
@@ -71,7 +74,7 @@ function addJsClass() {
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
                 
-                    <div class="toc-item next-right"><a href="../../guide/changelog.html"><strong>6</strong><span>Changelog</span> >></a></div>
+                    <div class="toc-item next-right"><a href="../../guide/converters.html"><strong>6</strong><span>Message Converters</span> >></a></div>
                 
 
 
@@ -91,7 +94,7 @@ function addJsClass() {
 
 <h2 id="send">5.1 Sending Messages</h2>
 Sending a message means publishing a message to an exchange or queue and not waiting for a response (fire and forget). The only required parameters to the builder
-are a queue or exchange to publish the message to, and the body of the message.<p class="paragraph"/>Send Example
+are a queue or exchange to publish the message to, and the body of the message.<p class="paragraph"/><h4>Send Example</h4>
 <div class="code"><pre>// Send a message
 <span class="java&#45;keyword">new</span> RabbitMessageBuilder().send &#123;
     queue = 'some.queue'
@@ -105,7 +108,7 @@ encountered, a suitable message converter will be found and run against the mess
                 
                     <div class="toc-item prev-left"><a href="../../guide/consuming.html">&lt;&lt; <strong>4</strong><span>Consuming Messages</span></a></div>
                 
-                    <div class="toc-item next-right"><a href="../../guide/changelog.html"><strong>6</strong><span>Changelog</span> >></a></div>
+                    <div class="toc-item next-right"><a href="../../guide/converters.html"><strong>6</strong><span>Message Converters</span> >></a></div>
                 
                 <div style="clear:both"></div>
             </div>
