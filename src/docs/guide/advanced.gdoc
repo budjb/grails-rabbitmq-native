@@ -1,0 +1,1 @@
+While the plugin effectively wraps the functionality of the RabbitMQ library, the end user has direct access to all of the underlying library objects and connection instances.

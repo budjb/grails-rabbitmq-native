@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>3 Configuration 0.1</title>
+    <title>2 Configuration 0.1</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -27,19 +27,19 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/migrating.html"><strong>2</strong><span>Migrating From The Official RabbitMQ Plugin</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/configuration.html"><strong>2</strong><span>Configuration</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/configuration.html"><strong>3</strong><span>Configuration</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/consuming.html"><strong>3</strong><span>Consuming Messages</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/publishing.html"><strong>4</strong><span>Publishing Messages</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/converters.html"><strong>5</strong><span>Message Converters</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/converters.html"><strong>6</strong><span>Message Converters</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/advanced.html"><strong>6</strong><span>Advanced Usage</span></a>
                     </div>
                     
                     <div class="toc-item" style="margin-left:0"><a href="../guide/changelog.html"><strong>7</strong><span>Changelog</span></a>
@@ -68,18 +68,18 @@ function addJsClass() {
             <div id="main" class="corner-all">
 
                 
-                    <div class="toc-item prev-left"><a href="../guide/migrating.html">&lt;&lt; <strong>2</strong><span>Migrating From The Official RabbitMQ Plugin</span></a></div>
+                    <div class="toc-item prev-left"><a href="../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
                 
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
                 
-                    <div class="toc-item next-right"><a href="../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span> >></a></div>
+                    <div class="toc-item next-right"><a href="../guide/consuming.html"><strong>3</strong><span>Consuming Messages</span> >></a></div>
                 
 
 
                 <div class="project">
-                    <h1>3 Configuration - Reference Documentation</h1>
+                    <h1>2 Configuration - Reference Documentation</h1>
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
@@ -89,12 +89,30 @@ function addJsClass() {
                 </div>
 
                 
+                <div id="table-of-content">
+                    <h2>Table of Contents</h2>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#connection"><strong>2.1</strong><span>Server Connection</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#queuesconf"><strong>2.2</strong><span>Defining Queues</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#exchangesconf"><strong>2.3</strong><span>Defining Exchanges</span></a>
+                    </div>
+                    
+                </div>
+                
 
                 
 
-<h1 id="configuration">3 Configuration</h1>
-Configuration of the connection to the RabbitMQ server is done in your project's <code>grails-app/conf/Config.groovy</code> file.<p class="paragraph"/>Currently this plugin has only a few configuration parameters, all of which are used in the connection to the RabbitMQ server.
-A bare minimum configuration example looks like:<p class="paragraph"/><div class="code"><pre>rabbitmq &#123;
+<h1 id="configuration">2 Configuration</h1>
+Configuration of the connection to the RabbitMQ server is done in your project's <code>grails-app/conf/Config.groovy</code> file.
+
+
+
+<h2 id="connection">2.1 Server Connection</h2>
+The plugin expects the connection configuration to the RabbitMQ server to be defined. A bare minimum configuration example looks like:<p class="paragraph"/><div class="code"><pre>rabbitmq &#123;
     connection &#123;
         host = 'example.com'
         username = 'foo'
@@ -105,11 +123,81 @@ A bare minimum configuration example looks like:<p class="paragraph"/><div class
 
 
 
+<h2 id="queuesconf">2.2 Defining Queues</h2>
+The plugin allows authors to define the exchanges and queues programatically inside the configuration. This allows the application to configure its own queues without someone
+having to manually create the exchanges and queues prior to running the application.<p class="paragraph"/>Queue configuration is also done in the <code>Config.groovy</code> file under the rabbitmq block, much as the server connection is configured. Usage is best illustrated with an example:
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        queue name: 'example.queue', durable: <span class="java&#45;keyword">true</span>
+    &#125;
+&#125;</pre></div><p class="paragraph"/>The above code will define a queue named <strong class="bold">example.queue</strong>, and its durable flag will be set.<p class="paragraph"/><blockquote class="warning">
+Be sure to note that the queues property is a closure. You must ensure that the <strong class="bold"><code>=</code></strong> is present for this feature to function properly.
+</blockquote><p class="paragraph"/>Below is a table of all of the options available when defining queues:
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>arguments</code></td><td>&#160;</td><td>Extra arguments used to create the queue. See the RabbitMQ documentation for more information.</td><td><code>Map</code></td><td>&#160;</td></tr><tr class="table-even"><td><code>autoDelete</code></td><td>&#160;</td><td>Whether to automatically delete the queue once there are no more consumers listening to it.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>binding</code></td><td>&#160;</td><td>Used in conjunction with exchanges. See the exchanges section for more information.</td><td> <em class="italic">Mixed</em> </td><td>&#160;</td></tr><tr class="table-even"><td><code>durable</code></td><td>&#160;</td><td>Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>match</code></td><td>&#160;</td><td>Used in conjunction when the headers exchange type. Either "any" or "all".</td><td><code>String</td><td>&#160;</td></tr><tr class="table-even"><td></code>name<code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Name of the queue.</td><td></code>String@</td><td>&#160;</td></tr></table>
+
+
+
+<h2 id="exchangesconf">2.3 Defining Exchanges</h2>
+Defining exchanges is very similar to defining queues. The following code illustrates how to define an exchange:
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: 'example.exchange', type: 'topic'
+    &#125;
+&#125;</pre></div><p class="paragraph"/>The above example will create an exchange with the name <strong class="bold">example.exchange</strong> and of the type <strong class="bold">topic</strong>. Below is a list of all the options availble when creating exchanges:
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>arguments</code></td><td>&#160;</td><td>Extra arguments used to create the exchange. See the RabbitMQ documentation for more information.</td><td><code>Map</code></td><td>&#160;</td></tr><tr class="table-even"><td><code>autoDelete</code></td><td>&#160;</td><td>Whether to automatically delete the exchange once there are no longer any queues bound to it.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>durable</code></td><td>&#160;</td><td>Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-even"><td><code>name</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Name of the exchange.</td><td><code>String</code></td><td>&#160;</td></tr><tr class="table-odd"><td><code>type</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>One of "fanout", "topic", "direct", or "headers".</td><td><code>String</code></td><td>&#160;</td></tr></table><p class="paragraph"/>Queues can also be automatically bound to exchanges. The last parameter of the exchange function takes a closure to define queues inside the exchange. See the following example:
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: 'example.exchange', type: 'topic', &#123;
+            queue name: 'example.queue', binding: 'sample.binding.&#35;'
+        &#125;
+    &#125;
+&#125;</pre></div>
+This example will create a <strong class="bold">topic</strong> exchange named <strong class="bold">example.exchange</strong>, as well as create a queue named <strong class="bold">example.queue</strong>. The queue will be bound to the exchange with the topic or
+routing key of "sample.binding.#".<p class="paragraph"/>Queues need to have their binding defined specifically for the type of exchange they are bound to.<p class="paragraph"/><h3>Fanout Exchanges</h3>
+Fanout exchanges are the easiest to configure bindings for, since they require none. Fanout exchanges simply send every message it received to every queue bound to it.
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: 'example.exchange', type: 'fanout', &#123;
+            queue name: 'example.queue'
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/><h3>Topic Exchanges</h3>
+Topic exchanges require queues to define a topic. Topics can be an exact match, but their strength is in their partial matching ability. See the RabbitMQ documentation for details about this kind of exchange.
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: 'example.exchange', type: 'topic', &#123;
+            queue name: 'example.queue', binding: 'exmaple.binding.&#35;'
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/><h3>Direct Exchanges</h3>
+Direct exchanges are similar to topic exchanges, except that their "topics" only function with direct name matching. The appropriate name for the binding in this case is "routing key". Queues must define a
+routing key when binding to this type of exchange.
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: 'example.exchange', type: 'direct', &#123;
+            queue name: 'example.queue', binding: 'exmapleRoutingKey'
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/><h3>Header Exchanges</h3>
+Header exchanges are like topic exchanges, but with the ability to define multiple match keywords. The binding for queues allows the queue to match on all or one of multiple header values. The queue must also
+set the <code>match</code> property for this exchange type, and the value must be one of "any" or "all".
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: 'example.exchange', type: 'headers', &#123;
+            queue name: 'example.queue', match: 'any', binding: &#91;
+                'header1': 'header&#45;value&#45;1',
+                'header2': 'header&#45;value&#45;2'
+            &#93;
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/>
+
+
                 <div style="clear:both;margin-top:15px;"></div>
                 
-                    <div class="toc-item prev-left"><a href="../guide/migrating.html">&lt;&lt; <strong>2</strong><span>Migrating From The Official RabbitMQ Plugin</span></a></div>
+                    <div class="toc-item prev-left"><a href="../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
                 
-                    <div class="toc-item next-right"><a href="../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span> >></a></div>
+                    <div class="toc-item next-right"><a href="../guide/consuming.html"><strong>3</strong><span>Consuming Messages</span> >></a></div>
                 
                 <div style="clear:both"></div>
             </div>

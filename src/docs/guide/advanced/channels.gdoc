@@ -1,0 +1,14 @@
+@RabbitContext@ contains a method @createChannel@, which simply calls the same function within the @Connection@ instance. This method returns a new @Channel@ that can be used
+to publish messages or even consume messages, if you prefer to set up your own consumers.
+
+{warning}
+If the @createChannel@ method is used, the author *must* ensure that the channel is closed when it is no longer needed. The @RabbitContext@ does not track these @Channel@ instances
+as it does with those channels it automatically creates for consumers, and it can be easy to create channel "leaks". Simply call @Channel.close()@ to terminate a channel when it
+is no longer needed.
+{warning}
+
+h4. Channel Efficiency
+Creating channels takes time. If a @RabbitMessageBuilder@ instance is not passed a @Channel@ instance when it is constructed, the builder will create a temporary channel to publish
+the message. While this is convenient, it also slows down publishing messages considerably (for example, 65ms per message published). When a bulk publish job is required, the job
+can be sped up by creating a channel before building the @RabbitMessageBuilder@ and passing that channel into its constructor. In tests, this has brought down the publish time
+per message from 65ms to 1ms or less per message. Be sure to close the channel when the bulk publish job is completed.

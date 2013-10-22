@@ -1,7 +1,6 @@
 Subscribing to a exchanges is different from subscribing to queues, as there are different types of exchanges with different behavior.
-RabbitMQ's libraries do not provide a direct way to subscribe to an exchange, but rather the method to use this functionality is to create
-a queue that is bound to an exchange. This plugin provides a convenience configuration method that handles the queue creation and binding for you.
-The binding requirements differ between the different types of exchanges.
+RabbitMQ's libraries do not provide a direct way to subscribe to an exchange, however the plugin provides a way to subscribe to exchanges directly by creating
+a temporary queue that is bound to an exchange. The binding requirements differ between the different types of exchanges.
 
 There are 2 types of exchanges that consumers can subscribe to via this plugin:
 

@@ -1,0 +1,21 @@
+The plugin expects the connection configuration to the RabbitMQ server to be defined. A bare minimum configuration example looks like:
+
+{code}
+rabbitmq {
+    connection {
+        host = 'example.com'
+        username = 'foo'
+        password = 'bar'
+    }
+}
+{code}
+
+The following table enumerates all the configuration options available to the connection configuration:
+{table}
+*Configuration Property* | *Required* | *Description* | *Type* | *Default*
+@host@ | !/bullet_red.png! | Hostname or IP address of the RabbitMQ server to connect to. | String | _none_
+@username@ | !/bullet_red.png! | Username to log into the RabbitMQ server with. | String | _none_
+@password@ | !/bullet_red.png! | Password to log into the RabbitMQ server with. | String | _none_
+@port@ | | Port to connect to the RabbitMQ server with. | Integer | 5672
+@virtualHost@ | | Name of the virtual host to connect to the RabbitMQ server with. | String | _none_
+{table}

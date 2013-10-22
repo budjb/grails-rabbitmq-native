@@ -1,6 +1,9 @@
 introduction: Introduction
-migrating: Migrating From The Official RabbitMQ Plugin
-configuration: Configuration
+configuration:
+    title: Configuration
+    connection: Server Connection
+    queuesconf: Defining Queues
+    exchangesconf: Defining Exchanges
 consuming:
     title: Consuming Messages
     handlers:
@@ -21,4 +24,9 @@ publishing:
 converters:
     title: Message Converters
     custom: Custom Message Converters
+advanced:
+    title: Advanced Usage
+    rabbitcontext: The Rabbit Context
+    channels: Channels
+    transactions: Transactions
 changelog: Changelog

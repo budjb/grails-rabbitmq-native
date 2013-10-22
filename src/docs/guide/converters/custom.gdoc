@@ -44,7 +44,7 @@ class StringMessageConverter extends MessageConverter<String> {
      * Converts a value from a byte array to a String.
      *
      * @param input Value to convert.
-     * @return Value converted to a String.
+     * @return Value converted to a String, or null if the conversion failed.
      */
     @Override
     public String convertTo(byte[] input) {
@@ -55,7 +55,7 @@ class StringMessageConverter extends MessageConverter<String> {
      * Converts a value from a String to a byte array.
      *
      * @param input Value to convert.
-     * @return Value converted to a byte array.
+     * @return Value converted to a byte array, or null if the conversion failed..
      */
     @Override
     public byte[] convertFrom(String input) {
