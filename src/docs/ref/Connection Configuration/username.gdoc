@@ -1,0 +1,21 @@
+h1. username
+
+h2. Purpose
+
+Sets the username to use when connecting to the RabbitMQ server.
+
+h2. Examples
+
+{code}
+rabbitmq {
+    connection {
+        host = "rabbit.example.com"
+        username = "foo"
+        password = "bar"
+    }
+}
+{code}
+
+h2. Description
+
+The username is required to connect to the RabbitMQ server.

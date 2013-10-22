@@ -1,0 +1,20 @@
+h1. contentType
+
+h2. Purpose
+
+Sets the content-type property of the message.
+
+h2. Examples
+
+{code}
+new RabbitMessageBuilder().send {
+    queue = "example.queue"
+    contentType = "text/plain"
+    body = "test message"
+}
+{code}
+
+h2. Description
+
+The content type is not required for the plugin to operate, but it may be useful for other libraries that consume messages, or required for the application logic of some consumers.
+There are no constraints around the value for this field; use it as you see necessary.

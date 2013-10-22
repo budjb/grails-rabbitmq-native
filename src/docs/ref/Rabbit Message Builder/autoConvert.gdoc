@@ -1,0 +1,20 @@
+h1. autoConvert
+
+h2. Purpose
+
+Toggles whether the message will be converted via the message converters when a response is received from an RPC message.
+
+h2. Examples
+
+{code}
+new RabbitMessageBuilder().send {
+    queue = "example.queue"
+    body = "test message"
+    autoConvert = true
+}
+{code}
+
+h2. Description
+
+If this value is true, the same logic to convert messages in the message consumers is used to convert the received message from a byte array to a converted object type, if one exists.
+If this is false, the raw byte array is returned from the RPC response.

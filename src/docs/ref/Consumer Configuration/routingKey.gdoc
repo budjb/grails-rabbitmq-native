@@ -1,0 +1,18 @@
+h1. routingKey
+
+h2. Purpose
+
+Set the routingKey to use when subscribing to an exchange.
+
+h2. Examples
+
+{code}
+def rabbitConfig = [
+    exchange: "example.exchange",
+    routingKey: "example.routing.key"
+]
+{code}
+
+h2. Description
+
+The routing key may be necessary depending on the type of exchange is being subscribed to. This property is ignored when consuming from a queue.

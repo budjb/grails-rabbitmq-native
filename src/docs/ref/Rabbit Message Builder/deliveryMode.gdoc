@@ -1,0 +1,19 @@
+h1. deliveryMode
+
+h2. Purpose
+
+Sets the delivery mode of the message.
+
+h2. Examples
+
+{code}
+new RabbitMessageBuilder().send {
+    queue = "example.queue"
+    deliveryMode = 1
+    body = "test message"
+}
+{code}
+
+h2. Description
+
+1 = non-persistent, and 2 = persistent. See the RabbitMQ documentation for what this means.

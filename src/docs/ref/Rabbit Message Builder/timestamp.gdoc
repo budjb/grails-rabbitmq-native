@@ -1,0 +1,19 @@
+h1. timestamp
+
+h2. Purpose
+
+Sets the timestamp property of the message.
+
+h2. Examples
+
+{code}
+new RabbitMessageBuilder().send {
+    queue = "example.queue"
+    messageId = "1234"
+    body = "test message"
+}
+{code}
+
+h2. Description
+
+Message timestamp. This property is not automatically set.

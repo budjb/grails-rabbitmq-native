@@ -1,0 +1,19 @@
+h1. expiration
+
+h2. Purpose
+
+Sets the expiration property of the message.
+
+h2. Examples
+
+{code}
+new RabbitMessageBuilder().send {
+    queue = "example.queue"
+    expiration = "Tuesday, October 22nd 2013"
+    body = "test message"
+}
+{code}
+
+h2. Description
+
+The expiration field is a free-form field that is not respected by the RabbitMQ server. It is up to the message consumer to interpret the value of this field.

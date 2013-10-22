@@ -1,0 +1,22 @@
+h1. retry
+
+h2. Purpose
+
+Sets whether a rejected message should be redelivered.
+
+h2. Examples
+
+{code}
+def rabbitConfig = [
+    queue: "example.queue",
+    retry: false
+]
+{code}
+
+h2. Description
+
+If a message is rejected, this property is used to determine whether the message should be marked for redelivery.
+
+{warning}
+If a message is rejected because of an unhandled exception, for example, that will repeat every time the message is consumed, the message will be retried indefinitely if enabled. Be careful when using this feature.
+{warning}

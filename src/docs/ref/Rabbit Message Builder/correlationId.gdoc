@@ -1,0 +1,20 @@
+h1. correlationId
+
+h2. Purpose
+
+Sets the correlation ID of the message.
+
+h2. Examples
+
+{code}
+new RabbitMessageBuilder().send {
+    queue = "example.queue"
+    correlationId = "1234"
+    body = "test message"
+}
+{code}
+
+h2. Description
+
+The correlation ID is useful for correlating relationships between different messages. The use of this property is useful when implementing RPC calls on a single queue. As with most properties,
+this can be used at the author's discretion.
