@@ -177,7 +177,7 @@ byte array received from the RabbitMQ server.
 <blockquote class="warning">
 If no handler is defined that can handle the received message (including the raw byte array), an error will
 be logged and the message will be rejected.
-</blockquote><p class="paragraph"/>TODO: link to converters<p class="paragraph"/>The plugin has built-in converters for <code>Integer</code>, <code>Map</code>, <code>List</code>, and <code>String</code> types. The plugin allows users
+</blockquote><p class="paragraph"/>The plugin has built-in <a href="../guide/single.html#converters" class="guide">converters</a> for <code>Integer</code>, <code>Map</code>, <code>List</code>, and <code>String</code> types. The plugin allows users
 to define their own converters to convert other object types, which will be discussed later in this guide.
 
 
@@ -204,7 +204,7 @@ the RabbitMQ server determines that it's the consumer's turn to receive a messag
 subscribe to queues, the only required configuration option is the <code>queue</code> variable, which is the name of the queue to subscribe to.<p class="paragraph"/>Here is a simple example of a consumer subscribing to a queue.
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
     <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
-        'queue': 'test.queue'
+        <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"test.queue"</span>
     &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
         // <span class="java&#45;object">Process</span> message
     &#125;
@@ -227,7 +227,7 @@ A fanout exchange will forward a received message to every queue bound to it. Th
 This is the simplest type of exchange, and is also the easiest to configure.<p class="paragraph"/><h4>Fanout Example</h4>
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
     <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
-        'exchange': 'fanout.exchange'
+        <span class="java&#45;quote">"exchange"</span>: <span class="java&#45;quote">"fanout.exchange"</span>
     &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
         // <span class="java&#45;object">Process</span> message
     &#125;
@@ -241,8 +241,8 @@ this is called a routing key. If a routing key is omitted, the queue will receiv
 key can be either a direct match, or utilize wildcards to do a partial topic match. More information can be found in the RabbitMQ documentation.<p class="paragraph"/><h4>Topic Example</h4>
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
     <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
-        'exchange': 'topic.exchange',
-        'routingKey': 'foo.bar'
+        <span class="java&#45;quote">"exchange"</span>: <span class="java&#45;quote">"topic.exchange"</span>,
+        <span class="java&#45;quote">"routingKey"</span>: <span class="java&#45;quote">"foo.bar"</span>
     &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
         // <span class="java&#45;object">Process</span> message
     &#125;

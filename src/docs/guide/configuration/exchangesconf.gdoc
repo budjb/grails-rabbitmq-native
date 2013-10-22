@@ -2,7 +2,7 @@ Defining exchanges is very similar to defining queues. The following code illust
 {code}
 rabbitmq {
     queues = {
-        exchange name: 'example.exchange', type: 'topic'
+        exchange name: "example.exchange", type: "topic"
     }
 }
 {code}
@@ -10,19 +10,19 @@ rabbitmq {
 The above example will create an exchange with the name *example.exchange* and of the type *topic*. Below is a list of all the options availble when creating exchanges:
 {table}
 *Property* | *Required* | *Description* | *Type* | *Default*
-@arguments@ | | Extra arguments used to create the exchange. See the RabbitMQ documentation for more information. | @Map@ |
+@arguments@ | | Extra arguments used to create the exchange. See the RabbitMQ documentation for more information. | @Map@ | _none_
 @autoDelete@ | | Whether to automatically delete the exchange once there are no longer any queues bound to it. | @boolean@ | @false@
 @durable@ | | Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts. | @boolean@ | @false@
-@name@ | !/bullet_red.png! | Name of the exchange. | @String@ |
-@type@ | !/bullet_red.png! | One of "fanout", "topic", "direct", or "headers". | @String@|
+@name@ | !/bullet_red.png! | Name of the exchange. | @String@ | _none_
+@type@ | !/bullet_red.png! | One of "fanout", "topic", "direct", or "headers". | @String@| _none_
 {table}
 
 Queues can also be automatically bound to exchanges. The last parameter of the exchange function takes a closure to define queues inside the exchange. See the following example:
 {code}
 rabbitmq {
     queues = {
-        exchange name: 'example.exchange', type: 'topic', {
-            queue name: 'example.queue', binding: 'sample.binding.#'
+        exchange name: "example.exchange", type: "topic", {
+            queue name: "example.queue", binding: "sample.binding.#"
         }
     }
 }
@@ -37,8 +37,8 @@ Fanout exchanges are the easiest to configure bindings for, since they require n
 {code}
 rabbitmq {
     queues = {
-        exchange name: 'example.exchange', type: 'fanout', {
-            queue name: 'example.queue'
+        exchange name: "example.exchange", type: "fanout", {
+            queue name: "example.queue"
         }
     }
 }
@@ -49,8 +49,8 @@ Topic exchanges require queues to define a topic. Topics can be an exact match, 
 {code}
 rabbitmq {
     queues = {
-        exchange name: 'example.exchange', type: 'topic', {
-            queue name: 'example.queue', binding: 'exmaple.binding.#'
+        exchange name: "example.exchange", type: "topic", {
+            queue name: "example.queue", binding: "exmaple.binding.#"
         }
     }
 }
@@ -62,8 +62,8 @@ routing key when binding to this type of exchange.
 {code}
 rabbitmq {
     queues = {
-        exchange name: 'example.exchange', type: 'direct', {
-            queue name: 'example.queue', binding: 'exmapleRoutingKey'
+        exchange name: "example.exchange", type: "direct", {
+            queue name: "example.queue", binding: "exmapleRoutingKey"
         }
     }
 }
@@ -75,10 +75,10 @@ set the @match@ property for this exchange type, and the value must be one of "a
 {code}
 rabbitmq {
     queues = {
-        exchange name: 'example.exchange', type: 'headers', {
-            queue name: 'example.queue', match: 'any', binding: [
-                'header1': 'header-value-1',
-                'header2': 'header-value-2'
+        exchange name: "example.exchange", type: "headers", {
+            queue name: "example.queue", match: "any", binding: [
+                "header1": "header-value-1",
+                "header2": "header-value-2"
             ]
         }
     }

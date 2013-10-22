@@ -8,8 +8,8 @@ package com.example
 
 class ExampleConsumer {
     static rabbitConfig = [
-        'exchange': 'topic.exchange',
-        'routingKey': 'foo.bar'
+        "exchange": "topic.exchange",
+        "routingKey": "foo.bar"
     ]
 
     def handleMessage(def body, MessageContext context) {

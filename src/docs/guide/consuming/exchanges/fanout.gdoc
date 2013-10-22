@@ -7,7 +7,7 @@ package com.example
 
 class ExampleConsumer {
     static rabbitConfig = [
-        'exchange': 'fanout.exchange'
+        "exchange": "fanout.exchange"
     ]
 
     def handleMessage(def body, MessageContext context) {

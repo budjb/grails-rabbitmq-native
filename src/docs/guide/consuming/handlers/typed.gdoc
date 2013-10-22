@@ -42,7 +42,5 @@ If no handler is defined that can handle the received message (including the raw
 be logged and the message will be rejected.
 {warning}
 
-TODO: link to converters
-
-The plugin has built-in converters for @Integer@, @Map@, @List@, and @String@ types. The plugin allows users
+The plugin has built-in [converters|guide:converters] for @Integer@, @Map@, @List@, and @String@ types. The plugin allows users
 to define their own converters to convert other object types, which will be discussed later in this guide.

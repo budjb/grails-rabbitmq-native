@@ -102,17 +102,17 @@ Create a project named <strong class="bold">RabbitExample</strong>. You can do t
 In <code>grails-app/conf/Config.groovy</code>, add:
 <div class="code"><pre>rabbitmq &#123;
     connection &#123;
-        host = 'changeme'
-        username = 'changeme'
-        password = 'changeme'
+        host = <span class="java&#45;quote">"changeme"</span>
+        username = <span class="java&#45;quote">"changeme"</span>
+        password = <span class="java&#45;quote">"changeme"</span>
     &#125;
     queues = &#123;
-        queue name: 'testqueue'
+        queue name: <span class="java&#45;quote">"testqueue"</span>
     &#125;
 &#125;</pre></div><p class="paragraph"/><h3>Consumer</h3>
-Create the following path: <code>grails-app/rabbit-consumers/com/example</code>. In this path, create the following a file named <code>TestConsumer.groovy</code>:
+Create the following path: <code>grails-app/rabbit-consumers/com/example/</code>. In this path, create the following a file named <code>TestConsumer.groovy</code>:
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.MessageContext<p class="paragraph"/>class TestConsumer &#123;<p class="paragraph"/>    def rabbitConfig = &#91;
-        queue: 'testqueue'
+        queue: <span class="java&#45;quote">"testqueue"</span>
     &#93;<p class="paragraph"/>    def handleMessage(<span class="java&#45;object">String</span> body, MessageContext context) &#123;
         println body
         <span class="java&#45;keyword">return</span> <span class="java&#45;quote">"Hello to you, too!"</span>

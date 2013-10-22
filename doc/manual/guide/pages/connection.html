@@ -98,9 +98,9 @@ function addJsClass() {
 <h2 id="connection">3.1 Server Connection</h2>
 The plugin expects the connection configuration to the RabbitMQ server to be defined. A bare minimum configuration example looks like:<p class="paragraph"/><div class="code"><pre>rabbitmq &#123;
     connection &#123;
-        host = 'example.com'
-        username = 'foo'
-        password = 'bar'
+        host = <span class="java&#45;quote">"example.com"</span>
+        username = <span class="java&#45;quote">"foo"</span>
+        password = <span class="java&#45;quote">"bar"</span>
     &#125;
 &#125;</pre></div><p class="paragraph"/>The following table enumerates all the configuration options available to the connection configuration:
 <table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Configuration Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>host</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Hostname or IP address of the RabbitMQ server to connect to.</td><td>String</td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>username</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Username to log into the RabbitMQ server with.</td><td>String</td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>password</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Password to log into the RabbitMQ server with.</td><td>String</td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>port</code></td><td>&#160;</td><td>Port to connect to the RabbitMQ server with.</td><td>Integer</td><td>5672</td></tr><tr class="table-odd"><td><code>virtualHost</code></td><td>&#160;</td><td>Name of the virtual host to connect to the RabbitMQ server with.</td><td>String</td><td> <em class="italic">none</em> </td></tr></table>

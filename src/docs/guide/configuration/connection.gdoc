@@ -3,9 +3,9 @@ The plugin expects the connection configuration to the RabbitMQ server to be def
 {code}
 rabbitmq {
     connection {
-        host = 'example.com'
-        username = 'foo'
-        password = 'bar'
+        host = "example.com"
+        username = "foo"
+        password = "bar"
     }
 }
 {code}

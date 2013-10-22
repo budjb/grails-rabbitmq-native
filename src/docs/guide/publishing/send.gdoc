@@ -5,8 +5,8 @@ h4. Send Example
 {code}
 // Send a message
 new RabbitMessageBuilder().send {
-    queue = 'some.queue'
-    body = 'hi!'
+    queue = "some.queue"
+    body = "hi!"
 }
 {code}
 

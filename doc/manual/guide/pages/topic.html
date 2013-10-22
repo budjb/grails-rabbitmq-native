@@ -101,8 +101,8 @@ this is called a routing key. If a routing key is omitted, the queue will receiv
 key can be either a direct match, or utilize wildcards to do a partial topic match. More information can be found in the RabbitMQ documentation.<p class="paragraph"/><h4>Topic Example</h4>
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
     <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
-        'exchange': 'topic.exchange',
-        'routingKey': 'foo.bar'
+        <span class="java&#45;quote">"exchange"</span>: <span class="java&#45;quote">"topic.exchange"</span>,
+        <span class="java&#45;quote">"routingKey"</span>: <span class="java&#45;quote">"foo.bar"</span>
     &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
         // <span class="java&#45;object">Process</span> message
     &#125;

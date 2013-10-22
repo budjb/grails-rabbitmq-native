@@ -101,7 +101,7 @@ the RabbitMQ server determines that it's the consumer's turn to receive a messag
 subscribe to queues, the only required configuration option is the <code>queue</code> variable, which is the name of the queue to subscribe to.<p class="paragraph"/>Here is a simple example of a consumer subscribing to a queue.
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
     <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
-        'queue': 'test.queue'
+        <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"test.queue"</span>
     &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
         // <span class="java&#45;object">Process</span> message
     &#125;

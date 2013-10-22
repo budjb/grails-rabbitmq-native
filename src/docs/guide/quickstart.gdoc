@@ -11,18 +11,18 @@ In @grails-app/conf/Config.groovy@, add:
 {code}
 rabbitmq {
     connection {
-        host = 'changeme'
-        username = 'changeme'
-        password = 'changeme'
+        host = "changeme"
+        username = "changeme"
+        password = "changeme"
     }
     queues = {
-        queue name: 'testqueue'
+        queue name: "testqueue"
     }
 }
 {code}
 
 h3. Consumer
-Create the following path: @grails-app/rabbit-consumers/com/example@. In this path, create the following a file named @TestConsumer.groovy@:
+Create the following path: @grails-app/rabbit-consumers/com/example/@. In this path, create the following a file named @TestConsumer.groovy@:
 {code}
 package com.example
 
@@ -31,7 +31,7 @@ import com.budjb.rabbitmq.MessageContext
 class TestConsumer {
 
     def rabbitConfig = [
-        queue: 'testqueue'
+        queue: "testqueue"
     ]
 
     def handleMessage(String body, MessageContext context) {

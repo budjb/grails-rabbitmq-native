@@ -100,7 +100,7 @@ A fanout exchange will forward a received message to every queue bound to it. Th
 This is the simplest type of exchange, and is also the easiest to configure.<p class="paragraph"/><h4>Fanout Example</h4>
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
     <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
-        'exchange': 'fanout.exchange'
+        <span class="java&#45;quote">"exchange"</span>: <span class="java&#45;quote">"fanout.exchange"</span>
     &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
         // <span class="java&#45;object">Process</span> message
     &#125;

@@ -10,7 +10,7 @@ package com.example
 
 class ExampleConsumer {
     static rabbitConfig = [
-        'queue': 'test.queue'
+        "queue": "test.queue"
     ]
 
     def handleMessage(def body, MessageContext context) {
