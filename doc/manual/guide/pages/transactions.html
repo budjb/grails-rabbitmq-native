@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>6.3 Transactions 0.1</title>
+    <title>7.3 Transactions 0.1</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -27,22 +27,25 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0"><a href="../../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../../guide/configuration.html"><strong>2</strong><span>Configuration</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/quickstart.html"><strong>2</strong><span>Quick Start</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../../guide/consuming.html"><strong>3</strong><span>Consuming Messages</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/configuration.html"><strong>3</strong><span>Configuration</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../../guide/publishing.html"><strong>4</strong><span>Publishing Messages</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../../guide/converters.html"><strong>5</strong><span>Message Converters</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../../guide/advanced.html"><strong>6</strong><span>Advanced Usage</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/converters.html"><strong>6</strong><span>Message Converters</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../../guide/changelog.html"><strong>7</strong><span>Changelog</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/advanced.html"><strong>7</strong><span>Advanced Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/changelog.html"><strong>8</strong><span>Changelog</span></a>
                     </div>
                     
                 </div>
@@ -68,18 +71,18 @@ function addJsClass() {
             <div id="main" class="corner-all">
 
                 
-                    <div class="toc-item prev-left"><a href="../../guide/converters.html">&lt;&lt; <strong>5</strong><span>Message Converters</span></a></div>
+                    <div class="toc-item prev-left"><a href="../../guide/converters.html">&lt;&lt; <strong>6</strong><span>Message Converters</span></a></div>
                 
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
                 
-                    <div class="toc-item next-right"><a href="../../guide/changelog.html"><strong>7</strong><span>Changelog</span> >></a></div>
+                    <div class="toc-item next-right"><a href="../../guide/changelog.html"><strong>8</strong><span>Changelog</span> >></a></div>
                 
 
 
                 <div class="project">
-                    <h1>6.3 Transactions - Reference Documentation</h1>
+                    <h1>7.3 Transactions - Reference Documentation</h1>
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
@@ -92,7 +95,7 @@ function addJsClass() {
 
                 
 
-<h2 id="transactions">6.3 Transactions</h2>
+<h2 id="transactions">7.3 Transactions</h2>
 The plugin provides a bit of automation around channel transactions. When a consumer is defined with the <code>transacted</code> property set to <code>true</code>, a transaction is automatically started on
 the channel passed to the message handler. When the message handler completes successfully, the transaction is automatically committed. If an unhandled exception is thrown from the message
 handler, the transaction is automatically rolled back.<p class="paragraph"/>It is <strong class="bold">especially important</strong> that any messages published from a message handler use the <code>Channel</code> instance passed in the <code>MessageContext</code> for this functionality to work.<p class="paragraph"/>Since the <code>Channel</code> is passed in the <code>MessageContext</code>, the author has full control over committing and rolling back transactions.
@@ -101,9 +104,9 @@ handler, the transaction is automatically rolled back.<p class="paragraph"/>It i
 
                 <div style="clear:both;margin-top:15px;"></div>
                 
-                    <div class="toc-item prev-left"><a href="../../guide/converters.html">&lt;&lt; <strong>5</strong><span>Message Converters</span></a></div>
+                    <div class="toc-item prev-left"><a href="../../guide/converters.html">&lt;&lt; <strong>6</strong><span>Message Converters</span></a></div>
                 
-                    <div class="toc-item next-right"><a href="../../guide/changelog.html"><strong>7</strong><span>Changelog</span> >></a></div>
+                    <div class="toc-item next-right"><a href="../../guide/changelog.html"><strong>8</strong><span>Changelog</span> >></a></div>
                 
                 <div style="clear:both"></div>
             </div>
