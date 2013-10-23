@@ -1,6 +1,5 @@
 package com.budjb.rabbitmq
 
-import com.budjb.rabbitmq.exception.MissingConfigurationException
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsClass
@@ -51,11 +50,7 @@ class RabbitContext {
         // Check for the configuration
         if (!grailsApplication.config.rabbitmq?.connection) {
             log.warn("not starting RabbitMQ because there is no configuration defined")
-            if(grailsApplication.config.rabbitmq?.connectionFactory) {
-                log.warn("An unsupported legacy config was found.")
-                log.warn("Please check the docs: http://budjb.github.io/grails-rabbitmq-native/doc/manual/guide/configuration.html")
-            }
-            throw new MissingConfigurationException("Unable to start application. rabbitmq-native configuration not found.")
+            return
         }
 
         // Load the configuration
