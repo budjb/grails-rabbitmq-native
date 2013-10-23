@@ -50,12 +50,10 @@ class RabbitContext {
     public void start() {
         // Check for the configuration
         if (!grailsApplication.config.rabbitmq?.connection) {
-            log.warn("not starting RabbitMQ because there is no configuration defined")
-            if(grailsApplication.config.rabbitmq?.connectionFactory) {
-                log.warn("An unsupported legacy config was found.")
-                log.warn("Please check the docs: http://budjb.github.io/grails-rabbitmq-native/doc/manual/guide/configuration.html")
+            if (grailsApplication.config.rabbitmq?.connectionFactory) {
+                log.warn("An unsupported legacy config was found. Please refer to the documentation for proper configuration (http://budjb.github.io/grails-rabbitmq-native/doc/manual/)")
             }
-            throw new MissingConfigurationException("Unable to start application. rabbitmq-native configuration not found.")
+            throw new MissingConfigurationException("unable to start application because the RabbitMQ connection configuration was not found")
         }
 
         // Load the configuration

@@ -1,17 +1,20 @@
 @artifact.package@
-class @artifact.name@ {
 
+import com.budjb.rabbitmq.MessageContext
+
+class @artifact.name@ {
+    /**
+     * Consumer configuration.
+     */
     static rabbitConfig = [
         // TODO: Setup config.
     ]
 
     /**
-     * Handle the incoming Rabbit message.
+     * Handle an incoming RabbitMQ message.
      *
-     * @param body      The body as a Byte-array.
-     *
-     * @param context   Additional information available from the message.
-     *
+     * @param body    The converted body of the incoming message.
+     * @param context Properties of the incoming message.
      * @return
      */
     def handleMessage(def body, MessageContext context) {
