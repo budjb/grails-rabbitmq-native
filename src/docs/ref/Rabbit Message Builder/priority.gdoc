@@ -1,0 +1,19 @@
+h1. priority
+
+h2. Purpose
+
+Sets the priority of the message.
+
+h2. Examples
+
+{code}
+new RabbitMessageBuilder().send {
+    queue = "example.queue"
+    priority = 5
+    body = "test message"
+}
+{code}
+
+h2. Description
+
+The priority of the message is defined as an integer, with 0 being the lowest priority, and the highest being 9 (according the AMQP spec).

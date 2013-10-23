@@ -1,0 +1,68 @@
+This is a quick and dirty how-to detailing how to quickly begin using the plugin. While there is a lot of configurability offered by this plugin, this is a very basic demonstration of its usage.
+
+h3. Create The Application
+Create a project named *RabbitExample*. You can do this by entering:
+{code}
+grails create-app RabbitExample
+{code}
+
+h3. Configuring
+In @grails-app/conf/Config.groovy@, add:
+{code}
+rabbitmq {
+    connection {
+        host = "changeme"
+        username = "changeme"
+        password = "changeme"
+    }
+    queues = {
+        queue name: "testqueue"
+    }
+}
+{code}
+
+h3. Consumer
+Create the following path: @grails-app/rabbit-consumers/com/example/@. In this path, create the following a file named @TestConsumer.groovy@:
+{code}
+package com.example
+
+import com.budjb.rabbitmq.MessageContext
+
+class TestConsumer {
+
+    def rabbitConfig = [
+        queue: "testqueue"
+    ]
+
+    def handleMessage(String body, MessageContext context) {
+        println body
+        return "Hello to you, too!"
+    }
+}
+{code}
+
+h3. Controller
+Create a controller with the following path: @grails-app/controllers/com/example/TestController.groovy@. Populate that file with:
+{code}
+package com.example
+
+import com.budjb.rabbitmq.RabbitMessageBuilder
+
+class TestController {
+    def index = {
+        render new RabbitMessageBuilder().rpc {
+            queue = "testqueue"
+            body = "Hello!"
+        }
+    }
+}
+{code}
+
+h4. Run it!
+Run the grails application.
+{code}
+grails run-app
+{code}
+
+You can see the application in action by hitting the test controller. If you're running this on your localhost, your URL may be similar to @http://localhost:8080/RabbitExample/test/index@.
+You should see the message "Hello!" printed the application's output console, and your web browser should dispay the message "Hello to you, too!"

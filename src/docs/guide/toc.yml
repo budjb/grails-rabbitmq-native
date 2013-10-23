@@ -1,0 +1,33 @@
+introduction: Introduction
+quickstart: Quick Start
+configuration:
+    title: Configuration
+    connection: Server Connection
+    queuesconf: Defining Queues
+    exchangesconf: Defining Exchanges
+consuming:
+    title: Consuming Messages
+    handlers:
+        title: Message Handlers
+        basic: Basic Usage
+        typed: Typed Message Handlers
+        messagecontext: MessageContext Object
+        rpc: RPC-Style Messages
+    queues: Subscribing To Queues
+    exchanges:
+        title: Subscribing To Exchanges
+        fanout: Fanout Exchanges
+        topic: Topic Exchanges
+publishing:
+    title: Publishing Messages
+    send: Sending Messages
+    rpcsend: RPC Messages
+converters:
+    title: Message Converters
+    custom: Custom Message Converters
+advanced:
+    title: Advanced Usage
+    rabbitcontext: The Rabbit Context
+    channels: Channels
+    transactions: Transactions
+changelog: Changelog

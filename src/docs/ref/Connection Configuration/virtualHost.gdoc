@@ -1,0 +1,22 @@
+h1. virtualHost
+
+h2. Purpose
+
+Sets the virtual host to use on the connection.
+
+h2. Examples
+
+{code}
+rabbitmq {
+    connection {
+        host = "rabbit.example.com"
+        username = "foo"
+        password = "bar"
+        virtualHost = "vhost1"
+    }
+}
+{code}
+
+h2. Description
+
+The virtual host is useful to segregate exchanges and queues when multiple applications are using the same physical RabbitMQ server. If this is omitted, the default virtual host is used.

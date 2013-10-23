@@ -1,0 +1,18 @@
+h1. exchange
+
+h2. Purpose
+
+Set the exchange to subscribe to.
+
+h2. Examples
+
+{code}
+def rabbitConfig = [
+    exchange: "example.exchange"
+]
+{code}
+
+h2. Description
+
+Tells the plugin that the consumer should subscribe to an exchange. The exchange must already exist for the consumer to beging listening to it. Exchanges can be created externally from the application, or via the
+application's RabbitMQ configuration. Note that a routing key might be necessary depending on the type of exchange is specified.

@@ -1,0 +1,15 @@
+Publishing an RPC message is as easy as sending messages, except the returned message is returned from the function.
+
+h4. RPC Example
+{code}
+// Send a message
+def result = new RabbitMessageBuilder().rpc {
+    queue = "some.queue"
+    body = "hi!"
+    timeout = RabbitMessageBuilder.DEFAULT_TIMEOUT
+}
+{code}
+
+While this documentation will not deep-dive into the configuration options for the builder, the timeout option is especially important for RPC-style messages. The
+timeout property is the amount of time (in milliseconds) the client will wait for the server to respond. If the timeout is reached, a @TimeoutException@ will be
+thrown. If the timeout is set to 0, the client will wait indefinitely for a response. The default value of the timeout, if not passed, is 5 seconds.

@@ -1,0 +1,19 @@
+A topic exchange will forward messages to queues based on the binding criteria the queue used to register to the exchange. In RabbitMQ terms,
+this is called a routing key. If a routing key is omitted, the queue will receive all messages submitted to the topic exchange. The routing
+key can be either a direct match, or utilize wildcards to do a partial topic match. More information can be found in the RabbitMQ documentation.
+
+h4. Topic Example
+{code}
+package com.example
+
+class ExampleConsumer {
+    static rabbitConfig = [
+        "exchange": "topic.exchange",
+        "routingKey": "foo.bar"
+    ]
+
+    def handleMessage(def body, MessageContext context) {
+        // Process message
+    }
+}
+{code}

@@ -1,0 +1,21 @@
+h1. host
+
+h2. Purpose
+
+Sets the host name of IP address of the RabbitMQ server.
+
+h2. Examples
+
+{code}
+rabbitmq {
+    connection {
+        host = "rabbit.example.com"
+        username = "foo"
+        password = "bar"
+    }
+}
+{code}
+
+h2. Description
+
+The host is required to connect to the RabbitMQ server.

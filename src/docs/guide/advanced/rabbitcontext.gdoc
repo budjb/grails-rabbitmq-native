@@ -1,0 +1,21 @@
+The bean responsible for connecting to the RabbitMQ server and keeping track of the connection and channel objects is the @RabbitContext@. While you may never need to use this bean, it can be useful.
+
+The @RabbitContext@ bean can be injected as follows:
+{code}
+class TestService {
+    def rabbitContext
+}
+{code}
+
+The bean can also be retrieved from the @ApplicationContext@, as follows:
+{code}
+import grails.util.Holders
+
+class TestObject {
+    def testMethod() {
+        RabbitContext context = Holders.applicationContext.getBean('rabbitContext')
+    }
+}
+{code}
+
+Of particular importance is the @connection@ property of the @RabbitContext@ bean, which is an instance of RabbitMQ's @Connection@ object.

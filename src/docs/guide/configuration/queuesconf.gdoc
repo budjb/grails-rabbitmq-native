@@ -1,0 +1,28 @@
+The plugin allows authors to define the exchanges and queues programatically inside the configuration. This allows the application to configure its own queues without someone
+having to manually create the exchanges and queues prior to running the application.
+
+Queue configuration is also done in the @Config.groovy@ file under the rabbitmq block, much as the server connection is configured. Usage is best illustrated with an example:
+{code}
+rabbitmq {
+    queues = {
+        queue name: "example.queue", durable: true
+    }
+}
+{code}
+
+The above code will define a queue named *example.queue*, and its durable flag will be set.
+
+{warning}
+Be sure to note that the queues property is a closure. You must ensure that the *@=@* is present for this feature to function properly.
+{warning}
+
+Below is a table of all of the options available when defining queues:
+{table}
+*Property* | *Required* | *Description* | *Type* | *Default*
+@arguments@ | | Extra arguments used to create the queue. See the RabbitMQ documentation for more information. | @Map@ | _none_
+@autoDelete@ | | Whether to automatically delete the queue once there are no more consumers listening to it. | @boolean@ | @false@
+@binding@ | | Used in conjunction with exchanges. See the exchanges section for more information. | _Mixed_ | _none_
+@durable@ | | Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts. | @boolean@ | @false@
+@match@ | | Used in conjunction when the headers exchange type. Either "any" or "all". | @String@ | _none_
+@name@ | !/bullet_red.png! | Name of the queue. | @String@ | _none_
+{table}

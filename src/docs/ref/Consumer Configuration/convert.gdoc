@@ -1,0 +1,24 @@
+h1. convert
+
+h2. Purpose
+
+Sets the automatic message body conversion mode.
+
+h2. Examples
+
+{code}
+def rabbitConfig = [
+    queue: "example.queue",
+    convert: MessageConvertMethod.ALWAYS
+]
+{code}
+
+h2. Description
+
+There are 3 convert modes:
+{table}
+*Enum Value* | *Effect*
+@MessageConvertMethod.DISABLED@ | The message is never automatically converted. The message handler always receives a byte array.
+@MessageConvertMethod.HEADER@ | The message will only be automatically converted if the incoming message has the content-type property set and a matching converter is found based on that content-type.
+@MessageConvertMethod.ALWAYS@ | The message will be automatically converted as long as a suitable message converter and message handler are found. This is the default mode.
+{table}

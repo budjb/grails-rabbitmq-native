@@ -1,0 +1,18 @@
+h1. transacted
+
+h2. Purpose
+
+Sets whether automatic transactions should be enabled on the consumer.
+
+h2. Examples
+
+{code}
+def rabbitConfig = [
+    queue: "example.queue",
+    transacted: true
+]
+{code}
+
+h2. Description
+
+See the [transactions|guide:advanced/transactions] documentation for more information.

@@ -1,0 +1,14 @@
+Sending a message means publishing a message to an exchange or queue and not waiting for a response (fire and forget). The only required parameters to the builder
+are a queue or exchange to publish the message to, and the body of the message.
+
+h4. Send Example
+{code}
+// Send a message
+new RabbitMessageBuilder().send {
+    queue = "some.queue"
+    body = "hi!"
+}
+{code}
+
+RabbitMQ expects the body of a message to be a byte array. Message converters will also work when publishing messages, so if an object type other than @byte[]@ is
+encountered, a suitable message converter will be found and run against the message body, if one exists.

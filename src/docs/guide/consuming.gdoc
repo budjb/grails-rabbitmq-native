@@ -1,0 +1,5 @@
+Consuming messages is accomplished by creating a message consumer class. Consumer classes are placed into the
+@grails-app/rabbit-consumers@, and must end with @Consumer.groovy@. These classes are Spring beans, meaning
+that they can inject other Spring beans such as services, the @grailsApplication@ instance, etc. Each consumer
+class must be configured in a certain way. If there is a misconfiguration in a consumer, the plugin will log
+an error stating so and not register the consumer to any queues.
