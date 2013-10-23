@@ -27,8 +27,10 @@ target(createConsumer: "Creates a new Rabbit-native Consumer class.") {
     def type = "Consumer"
     promptForName(type: type)
 
-    def name = argsMap["params"][0]
-    createArtifact(name: name, suffix: type, type: type, path: "grails-app/rabbit-consumers")
+    for (name in argsMap["params"]) {
+        name = purgeRedundantArtifactSuffix(name, type)
+        createArtifact(name: name, suffix: type, type: type, path: "grails-app/rabbit-consumers")
+    }
 }
 
 setDefaultTarget createConsumer
