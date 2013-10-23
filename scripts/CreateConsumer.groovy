@@ -30,6 +30,7 @@ target(createConsumer: "Creates a new Rabbit-native Consumer class.") {
     for (name in argsMap["params"]) {
         name = purgeRedundantArtifactSuffix(name, type)
         createArtifact(name: name, suffix: type, type: type, path: "grails-app/rabbit-consumers")
+        createUnitTest(name: name, suffix: type)
     }
 }
 
