@@ -1,5 +1,4 @@
 @artifact.package@
-
 import com.budjb.rabbitmq.MessageContext
 
 class @artifact.name@ {
