@@ -18,6 +18,4 @@ h2. Description
 
 Setting the replyTo property of the message lets the consumer know that the publisher expects a response to the message. The value of this property should be an existent queue the client is consuming on.
 
-{info}
 This property is automatically set when the @RabbitMessageBuilder.rpc()@ method is used, and the consumer has access to this property to reply to the message.
-{info}

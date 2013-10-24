@@ -16,4 +16,4 @@ new RabbitMessageBuilder().send {
 
 h2. Description
 
-Creating user ID.
+Creating user id.

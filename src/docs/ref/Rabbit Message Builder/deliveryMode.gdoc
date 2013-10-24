@@ -16,4 +16,4 @@ new RabbitMessageBuilder().send {
 
 h2. Description
 
-1 = non-persistent, and 2 = persistent. See the RabbitMQ documentation for what this means.
+Non-persistent (1) or persistent (2).

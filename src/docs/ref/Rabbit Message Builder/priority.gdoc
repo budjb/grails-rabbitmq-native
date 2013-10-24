@@ -16,4 +16,4 @@ new RabbitMessageBuilder().send {
 
 h2. Description
 
-The priority of the message is defined as an integer, with 0 being the lowest priority, and the highest being 9 (according the AMQP spec).
+Message priority, 0 to 9.

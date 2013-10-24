@@ -16,4 +16,4 @@ new RabbitMessageBuilder().send {
 
 h2. Description
 
-The content encoding field is a freeform field with no constraints. This field is typically used to pass information on how the message body was encoding, such as gzip, base64, etc.
+MIME content encoding.

@@ -16,4 +16,4 @@ new RabbitMessageBuilder().send {
 
 h2. Description
 
-The expiration field is a free-form field that is not respected by the RabbitMQ server. It is up to the message consumer to interpret the value of this field.
+Message expiration specification.
