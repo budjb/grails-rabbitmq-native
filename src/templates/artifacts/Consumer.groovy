@@ -6,7 +6,7 @@ class @artifact.name@ {
      * Consumer configuration.
      */
     static rabbitConfig = [
-        // TODO: Setup config.
+        : // TODO: Setup config.
     ]
 
     /**
