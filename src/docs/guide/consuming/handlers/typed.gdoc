@@ -1,6 +1,6 @@
 The logic surrounding the message consumer classes will by default attempt to intelligently convert the body of
 the received message from a byte array to a converted type, such as a String. Before routing the message to the
-consumer and handler, the plugin will run through a list of converters that will attempt to convert the message,
+consumer and handler, the plugin will run through a list of [converters|guide:converters] that will attempt to convert the message,
 and if the conversion was successful, determine if an appropriate handler has been defined.
 
 For example, consider this JSON blob:

@@ -18,7 +18,7 @@ class RabbitmqNativeGrailsPlugin {
     /**
      * Version of the plugin.
      */
-    def version = "0.1.2"
+    def version = "0.1.3"
 
     /**
      * Maven group.
@@ -48,12 +48,12 @@ class RabbitmqNativeGrailsPlugin {
     /**
      * Description of the plugin.
      */
-    def description = 'The native RabbitMQ Grails plugin wraps RabbitMQ consumer funcionality around Grails services.'
+    def description = 'The native RabbitMQ Grails plugin provides easily consumable messaging functionality.'
 
     /**
      * URL to the plugin's documentation.
      */
-    def documentation = "http://grails.org/plugin/rabbitmq-native"
+    def documentation = "http://budjb.github.io/grails-rabbitmq-native/doc/manual/guide/index.html"
 
     /**
      * Project license.

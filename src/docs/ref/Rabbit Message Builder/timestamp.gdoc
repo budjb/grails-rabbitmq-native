@@ -16,4 +16,4 @@ new RabbitMessageBuilder().send {
 
 h2. Description
 
-Message timestamp. This property is not automatically set.
+Message timestamp.

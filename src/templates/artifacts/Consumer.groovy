@@ -1,12 +1,11 @@
-@artifact.package@
-import com.budjb.rabbitmq.MessageContext
+@artifact.package@import com.budjb.rabbitmq.MessageContext
 
 class @artifact.name@ {
     /**
      * Consumer configuration.
      */
     static rabbitConfig = [
-        // TODO: Setup config.
+        : // TODO: Setup config.
     ]
 
     /**

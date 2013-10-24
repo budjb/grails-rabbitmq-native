@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
     <head>
-        <title>Rabbitmq Native Plugin 0.1.2</title>
+        <title>Rabbitmq Native Plugin 0.1.3</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8" />
         <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8" />
@@ -52,7 +52,7 @@ function addJsClass(el) {
                 
                 
             </div>
-            <p>The native RabbitMQ Grails plugin wraps RabbitMQ consumer funcionality around Grails services.</p>
+            <p>The native RabbitMQ Grails plugin provides easily consumable messaging functionality.</p>
         </div>
 
 
@@ -66,7 +66,7 @@ function addJsClass(el) {
                         <div class="project">
                             <h1>Rabbitmq Native Plugin - Reference Documentation</h1>
                             <p><strong>Authors:</strong> Bud Byrd</p>
-                            <p><strong>Version:</strong> 0.1.2</p>
+                            <p><strong>Version:</strong> 0.1.3</p>
                             
                         </div>
 
@@ -157,15 +157,28 @@ In <code>grails-app/conf/Config.groovy</code>, add:
         queue name: <span class="java&#45;quote">"testqueue"</span>
     &#125;
 &#125;</pre></div><p class="paragraph"/><h3>Consumer</h3>
-Create the following path: <code>grails-app/rabbit-consumers/com/example/</code>. In this path, create the following a file named <code>TestConsumer.groovy</code>:
-<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.MessageContext<p class="paragraph"/>class TestConsumer &#123;<p class="paragraph"/>    def rabbitConfig = &#91;
+Create the a consumer by using the following command:
+<div class="code"><pre>grails create&#45;consumer com.example.Test</pre></div><p class="paragraph"/>Update the consumer to reflect the following:
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.MessageContext<p class="paragraph"/>class TestConsumer &#123;
+    /&#42;&#42;
+     &#42; Consumer configuration.
+     &#42;/
+    <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
         queue: <span class="java&#45;quote">"testqueue"</span>
-    &#93;<p class="paragraph"/>    def handleMessage(<span class="java&#45;object">String</span> body, MessageContext context) &#123;
+    &#93;<p class="paragraph"/>    /&#42;&#42;
+     &#42; Handle an incoming RabbitMQ message.
+     &#42;
+     &#42; @param body    The converted body of the incoming message.
+     &#42; @param context Properties of the incoming message.
+     &#42; @<span class="java&#45;keyword">return</span>
+     &#42;/
+    def handleMessage(def body, MessageContext context) &#123;
         println body
         <span class="java&#45;keyword">return</span> <span class="java&#45;quote">"Hello to you, too!"</span>
     &#125;
 &#125;</pre></div><p class="paragraph"/><h3>Controller</h3>
-Create a controller with the following path: <code>grails-app/controllers/com/example/TestController.groovy</code>. Populate that file with:
+Create a controller by using the following command:
+<div class="code"><pre>grails create&#45;controller com.example.Test</pre></div><p class="paragraph"/>Update the controller to reflect the following:
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.RabbitMessageBuilder<p class="paragraph"/>class TestController &#123;
     def index = &#123;
         render <span class="java&#45;keyword">new</span> RabbitMessageBuilder().rpc &#123;
@@ -207,7 +220,7 @@ having to manually create the exchanges and queues prior to running the applicat
 &#125;</pre></div><p class="paragraph"/>The above code will define a queue named <strong class="bold">example.queue</strong>, and its durable flag will be set.<p class="paragraph"/><blockquote class="warning">
 Be sure to note that the queues property is a closure. You must ensure that the <strong class="bold"><code>=</code></strong> is present for this feature to function properly.
 </blockquote><p class="paragraph"/>Below is a table of all of the options available when defining queues:
-<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>arguments</code></td><td>&#160;</td><td>Extra arguments used to create the queue. See the RabbitMQ documentation for more information.</td><td><code>Map</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>autoDelete</code></td><td>&#160;</td><td>Whether to automatically delete the queue once there are no more consumers listening to it.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>binding</code></td><td>&#160;</td><td>Used in conjunction with exchanges. See the exchanges section for more information.</td><td> <em class="italic">Mixed</em> </td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>durable</code></td><td>&#160;</td><td>Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>match</code></td><td>&#160;</td><td>Used in conjunction when the headers exchange type. Either "any" or "all".</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>name</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Name of the queue.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr></table>
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>arguments</code></td><td>&#160;</td><td>Extra arguments used to create the queue. See the <a href="http://www.rabbitmq.com/documentation.html" target="blank">RabbitMQ documentation</a> for more information.</td><td><code>Map</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>autoDelete</code></td><td>&#160;</td><td>Whether to automatically delete the queue once there are no more consumers listening to it.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>binding</code></td><td>&#160;</td><td>Used in conjunction with exchanges. See the exchanges section for more information.</td><td> <em class="italic">Mixed</em> </td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>durable</code></td><td>&#160;</td><td>Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>match</code></td><td>&#160;</td><td>Used in conjunction when the headers exchange type. Either "any" or "all".</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>name</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Name of the queue.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr></table>
 
 
 
@@ -218,7 +231,7 @@ Defining exchanges is very similar to defining queues. The following code illust
         exchange name: <span class="java&#45;quote">"example.exchange"</span>, type: <span class="java&#45;quote">"topic"</span>
     &#125;
 &#125;</pre></div><p class="paragraph"/>The above example will create an exchange with the name <strong class="bold">example.exchange</strong> and of the type <strong class="bold">topic</strong>. Below is a list of all the options availble when creating exchanges:
-<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>arguments</code></td><td>&#160;</td><td>Extra arguments used to create the exchange. See the RabbitMQ documentation for more information.</td><td><code>Map</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>autoDelete</code></td><td>&#160;</td><td>Whether to automatically delete the exchange once there are no longer any queues bound to it.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>durable</code></td><td>&#160;</td><td>Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-even"><td><code>name</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Name of the exchange.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>type</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>One of "fanout", "topic", "direct", or "headers".</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr></table><p class="paragraph"/>Queues can also be automatically bound to exchanges. The last parameter of the exchange function takes a closure to define queues inside the exchange. See the following example:
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>arguments</code></td><td>&#160;</td><td>Extra arguments used to create the exchange. See the <a href="http://www.rabbitmq.com/documentation.html" target="blank">RabbitMQ documentation</a> for more information.</td><td><code>Map</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>autoDelete</code></td><td>&#160;</td><td>Whether to automatically delete the exchange once there are no longer any queues bound to it.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>durable</code></td><td>&#160;</td><td>Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-even"><td><code>name</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Name of the exchange.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>type</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>One of "fanout", "topic", "direct", or "headers".</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr></table><p class="paragraph"/>Queues can also be automatically bound to exchanges. The last parameter of the exchange function takes a closure to define queues inside the exchange. See the following example:
 <div class="code"><pre>rabbitmq &#123;
     queues = &#123;
         exchange name: <span class="java&#45;quote">"example.exchange"</span>, type: <span class="java&#45;quote">"topic"</span>, &#123;
@@ -236,7 +249,8 @@ Fanout exchanges are the easiest to configure bindings for, since they require n
         &#125;
     &#125;
 &#125;</pre></div><p class="paragraph"/><h3>Topic Exchanges</h3>
-Topic exchanges require queues to define a topic. Topics can be an exact match, but their strength is in their partial matching ability. See the RabbitMQ documentation for details about this kind of exchange.
+Topic exchanges require queues to define a topic. Topics can be an exact match, but their strength is in their partial matching ability. See the <a href="http://www.rabbitmq.com/documentation.html" target="blank">RabbitMQ documentation</a>
+for details about this kind of exchange.
 <div class="code"><pre>rabbitmq &#123;
     queues = &#123;
         exchange name: <span class="java&#45;quote">"example.exchange"</span>, type: <span class="java&#45;quote">"topic"</span>, &#123;
@@ -297,7 +311,7 @@ that the handler should publish messages through.<p class="paragraph"/>This is t
 <h2 id="typed">4.1.2 Typed Message Handlers</h2>
 The logic surrounding the message consumer classes will by default attempt to intelligently convert the body of
 the received message from a byte array to a converted type, such as a String. Before routing the message to the
-consumer and handler, the plugin will run through a list of converters that will attempt to convert the message,
+consumer and handler, the plugin will run through a list of <a href="../guide/single.html#converters" class="guide">converters</a> that will attempt to convert the message,
 and if the conversion was successful, determine if an appropriate handler has been defined.<p class="paragraph"/>For example, consider this JSON blob:
 <div class="code"><pre>&#123;<span class="java&#45;quote">"foo"</span>:<span class="java&#45;quote">"bar"</span>,<span class="java&#45;quote">"hi"</span>:<span class="java&#45;quote">"there"</span>&#125;</pre></div><p class="paragraph"/>If the above message is received, the converter for the Map class type will convert the byte array to a Map
 of the JSON data. If a valid handler for the Map type is defined, the handler will receive the converted JSON
@@ -416,9 +430,9 @@ def result = <span class="java&#45;keyword">new</span> RabbitMessageBuilder().rp
     queue = <span class="java&#45;quote">"some.queue"</span>
     body = <span class="java&#45;quote">"hi!"</span>
     timeout = RabbitMessageBuilder.DEFAULT_TIMEOUT
-&#125;</pre></div><p class="paragraph"/>While this documentation will not deep-dive into the configuration options for the builder, the timeout option is especially important for RPC-style messages. The
-timeout property is the amount of time (in milliseconds) the client will wait for the server to respond. If the timeout is reached, a <code>TimeoutException</code> will be
-thrown. If the timeout is set to 0, the client will wait indefinitely for a response. The default value of the timeout, if not passed, is 5 seconds.
+&#125;</pre></div><p class="paragraph"/>While this documentation will not deep-dive into the configuration options for the builder, the <a href="../ref/Rabbit Message Builder/timeout.html" class="Rabbit Message Builder">timeout</a> option is especially important for RPC-style messages. The
+timeout property is the amount of time (in milliseconds) the client will wait for the server to respond. If the timeout is reached, a <code>TimeoutException</code>
+will be thrown. If the timeout is set to 0, the client will wait indefinitely for a response. The default value of the timeout, if not passed, is 5 seconds.
 
 
 
@@ -528,7 +542,18 @@ handler, the transaction is automatically rolled back.<p class="paragraph"/>It i
 
 
 <h1 id="changelog">8 Changelog</h1>
-<h3>Version 0.1 - 10/17/2013</h3>
+<h3>Version 0.1.3 - 10/23/2013</h3>
+<ul class="star">
+<li>Touch up the consumer template.</li>
+</ul><p class="paragraph"/><h3>Version 0.1.2 - 10/22/2013</h3>
+<ul class="star">
+<li>Add the ability to create multiple consumers at the same time with the <code>create-consumer</code> script (thanks Aaron Brown!).</li>
+<li>Also create a unit test when creating consumers (thanks Michael Rice!).</li>
+</ul><p class="paragraph"/><h3>Version 0.1.1 - 10/22/2013</h3>
+<ul class="star">
+<li>Throw an exception if the connection configuration is missing on application start (thanks Michael Rice!).</li>
+<li>Add the <code>create-consumer</code> script (thanks Aaron Brown!).</li>
+</ul><p class="paragraph"/><h3>Version 0.1 - 10/17/2013</h3>
 <ul class="star">
 <li>Code complete/experimental release.</li>
 </ul><p class="paragraph"/>
@@ -542,6 +567,15 @@ handler, the transaction is automatically rolled back.<p class="paragraph"/>It i
                     <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
                 </div>
                 <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Command Line</h1><div class="menu-sub">
+                        
+                        
+                        <div class="menu-item"><a href="../ref/Command%20Line/create-consumer.html">create-consumer</a>
+                        </div>
+                        
+                        </div>
+                    </div>
                     
                     <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Connection Configuration</h1><div class="menu-sub">
                         

@@ -16,5 +16,4 @@ new RabbitMessageBuilder().send {
 
 h2. Description
 
-The content type is not required for the plugin to operate, but it may be useful for other libraries that consume messages, or required for the application logic of some consumers.
-There are no constraints around the value for this field; use it as you see necessary.
+MIME content type.

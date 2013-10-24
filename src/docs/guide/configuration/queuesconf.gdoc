@@ -19,7 +19,7 @@ Be sure to note that the queues property is a closure. You must ensure that the 
 Below is a table of all of the options available when defining queues:
 {table}
 *Property* | *Required* | *Description* | *Type* | *Default*
-@arguments@ | | Extra arguments used to create the queue. See the RabbitMQ documentation for more information. | @Map@ | _none_
+@arguments@ | | Extra arguments used to create the queue. See the [RabbitMQ documentation|http://www.rabbitmq.com/documentation.html] for more information. | @Map@ | _none_
 @autoDelete@ | | Whether to automatically delete the queue once there are no more consumers listening to it. | @boolean@ | @false@
 @binding@ | | Used in conjunction with exchanges. See the exchanges section for more information. | _Mixed_ | _none_
 @durable@ | | Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts. | @boolean@ | @false@

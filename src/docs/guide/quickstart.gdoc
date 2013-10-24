@@ -22,19 +22,33 @@ rabbitmq {
 {code}
 
 h3. Consumer
-Create the following path: @grails-app/rabbit-consumers/com/example/@. In this path, create the following a file named @TestConsumer.groovy@:
+Create the a consumer by using the following command:
+{code}
+grails create-consumer com.example.Test
+{code}
+
+Update the consumer to reflect the following:
 {code}
 package com.example
 
 import com.budjb.rabbitmq.MessageContext
 
 class TestConsumer {
-
-    def rabbitConfig = [
+    /**
+     * Consumer configuration.
+     */
+    static rabbitConfig = [
         queue: "testqueue"
     ]
 
-    def handleMessage(String body, MessageContext context) {
+    /**
+     * Handle an incoming RabbitMQ message.
+     *
+     * @param body    The converted body of the incoming message.
+     * @param context Properties of the incoming message.
+     * @return
+     */
+    def handleMessage(def body, MessageContext context) {
         println body
         return "Hello to you, too!"
     }
@@ -42,7 +56,12 @@ class TestConsumer {
 {code}
 
 h3. Controller
-Create a controller with the following path: @grails-app/controllers/com/example/TestController.groovy@. Populate that file with:
+Create a controller by using the following command:
+{code}
+grails create-controller com.example.Test
+{code}
+
+Update the controller to reflect the following:
 {code}
 package com.example
 

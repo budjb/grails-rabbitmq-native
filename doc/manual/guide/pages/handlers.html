@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>4.1 Message Handlers 0.1.2</title>
+    <title>4.1 Message Handlers 0.1.3</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -61,7 +61,7 @@ function addJsClass() {
         
         
     </div>
-    <p>The native RabbitMQ Grails plugin wraps RabbitMQ consumer funcionality around Grails services.</p>
+    <p>The native RabbitMQ Grails plugin provides easily consumable messaging functionality.</p>
 </div>
 
 
@@ -86,7 +86,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 0.1.2</p>
+                    <p><strong>Version:</strong> 0.1.3</p>
 
                     
                 </div>
@@ -133,7 +133,7 @@ that the handler should publish messages through.<p class="paragraph"/>This is t
 <h2 id="typed">4.1.2 Typed Message Handlers</h2>
 The logic surrounding the message consumer classes will by default attempt to intelligently convert the body of
 the received message from a byte array to a converted type, such as a String. Before routing the message to the
-consumer and handler, the plugin will run through a list of converters that will attempt to convert the message,
+consumer and handler, the plugin will run through a list of <a href="../guide/single.html#converters" class="guide">converters</a> that will attempt to convert the message,
 and if the conversion was successful, determine if an appropriate handler has been defined.<p class="paragraph"/>For example, consider this JSON blob:
 <div class="code"><pre>&#123;<span class="java&#45;quote">"foo"</span>:<span class="java&#45;quote">"bar"</span>,<span class="java&#45;quote">"hi"</span>:<span class="java&#45;quote">"there"</span>&#125;</pre></div><p class="paragraph"/>If the above message is received, the converter for the Map class type will convert the byte array to a Map
 of the JSON data. If a valid handler for the Map type is defined, the handler will receive the converted JSON
@@ -190,6 +190,15 @@ like headers, content-types, etc, you must manually build the response message, 
                     <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
                 </div>
                 <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Command Line</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../../ref/Command%20Line/create-consumer.html">create-consumer</a>
+                            </div>
+                            
+                            </div>
+                    </div>
                     
                     <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Connection Configuration</h1><div class="menu-sub">
                         
