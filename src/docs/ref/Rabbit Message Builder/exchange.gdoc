@@ -18,6 +18,6 @@ h2. Description
 Setting this property lets the @RabbitMessageBuilder@ know to publish the message to an exchange. Depending on the type of exchange, the use of the [routingKey|RabbitMessageBuilder]
 property may be necessary. See the RabbitMQ documentation for more information on exchanges.
 
-{info}
+{note}
 A publish operation with the @RabbitMessageBuilder@ may only be done with either an exchange or a queue, but not both.  Attemping to use both will result in an error.
-{info}
+{note}
