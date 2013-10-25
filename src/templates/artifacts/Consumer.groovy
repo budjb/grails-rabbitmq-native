@@ -4,9 +4,8 @@ class @artifact.name@ {
     /**
      * Consumer configuration.
      */
-    static rabbitConfig = [
-        : // TODO: Setup config.
-    ]
+    // TODO: Setup config.
+    static rabbitConfig = [:]
 
     /**
      * Handle an incoming RabbitMQ message.
