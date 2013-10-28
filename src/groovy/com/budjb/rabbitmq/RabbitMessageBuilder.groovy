@@ -152,10 +152,8 @@ class RabbitMessageBuilder {
             throw new IllegalArgumentException("exchange and/or routing key required")
         }
 
-        // Make sure a message was provided
-        if (!this.body) {
-            throw new IllegalArgumentException("body required")
-        }
+        // Default body to a byte array
+        this.body = (this.body == null) ? new byte[0] : this.body
 
         // Build properties
         AMQP.BasicProperties properties = buildProperties()
@@ -259,10 +257,8 @@ class RabbitMessageBuilder {
             throw new IllegalArgumentException("exchange and/or routing key required")
         }
 
-        // Make sure a message was provided
-        if (!this.body) {
-            throw new IllegalArgumentException("body required")
-        }
+        // Default body to a byte array
+        this.body = (this.body == null) ? new byte[0] : this.body
 
         // Build properties
         AMQP.BasicProperties properties = buildProperties()
