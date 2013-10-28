@@ -2,7 +2,7 @@ package com.budjb.rabbitmq;
 
 import org.codehaus.groovy.grails.commons.AbstractInjectableGrailsClass;
 
-class DefaultGrailsMessageConverterClass extends AbstractInjectableGrailsClass implements GrailsMessageConverterClass {
+public class DefaultGrailsMessageConverterClass extends AbstractInjectableGrailsClass implements GrailsMessageConverterClass {
     public static final String MESSAGECONVERTER = "MessageConverter";
 
     public DefaultGrailsMessageConverterClass(Class clazz) {
