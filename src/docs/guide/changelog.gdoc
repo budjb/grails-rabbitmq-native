@@ -1,3 +1,6 @@
+h3. Version 0.1.5 - 10/28/2013
+* @body@ parameter to the @RabbitMessageBuilder@ is no longer required. It now defaults to an empty byte array.
+
 h3. Version 0.1.4 - 10/28/2013
 * Fix a class visibility issue in the artefact handlers for this plugin.
 
