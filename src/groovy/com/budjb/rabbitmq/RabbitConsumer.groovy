@@ -6,7 +6,9 @@ import com.rabbitmq.client.Connection
 import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
 import groovy.json.JsonSlurper
+import java.lang.reflect.Field
 import java.lang.reflect.Method
+import java.lang.reflect.Modifier
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsClass
 import grails.util.Holders
@@ -59,17 +61,28 @@ class RabbitConsumer extends DefaultConsumer {
      * @return
      */
     public static boolean isConsumer(Class clazz) {
-        // Check for the existence and type of the rabbit config static variable
-        if (!clazz.metaClass.properties.any { it.name == RABBIT_CONFIG_NAME && it.type.isAssignableFrom(Map) }) {
+        // Ensure the config field is set
+        try {
+            Field field = clazz.getDeclaredField(RABBIT_CONFIG_NAME)
+            if (!Modifier.isStatic(field.modifiers)) {
+                return false
+            }
+        }
+        catch (NoSuchFieldException e) {
             return false
         }
 
-        // Check for the existence of the handleMessage method
-        if (!clazz.metaClass.methods.any { it.name == RABBIT_HANDLER_NAME }) {
+        // Ensure the config field is a map
+        if (!Map.class.isAssignableFrom(clazz."${RABBIT_CONFIG_NAME}".getClass())) {
             return false
         }
 
-        return true
+        // Check if we find any handler defined
+        if (clazz.getDeclaredMethods().any { it.name == RABBIT_HANDLER_NAME }) {
+            return true
+        }
+
+        return false
     }
 
     /**
@@ -200,8 +213,16 @@ class RabbitConsumer extends DefaultConsumer {
         // Convert the message body
         Object converted = convertMessage(context)
 
+        // Find a valid handler
+        Method method = getHandlerMethodForType(converted.getClass())
+
+        // If no method is found, attempt to find the MessageContext handler
+        if (!method) {
+            method = getHandlerWithSignature([MessageContext])
+        }
+
         // Confirm that there is a handler defined to handle our message.
-        if (!isHandlerTypeDefined(converted.getClass())) {
+        if (!method) {
             // Reject the message
             if (configuration.autoAck == AutoAck.POST) {
                 context.channel.basicReject(context.envelope.deliveryTag, configuration.retry)
@@ -221,7 +242,16 @@ class RabbitConsumer extends DefaultConsumer {
             }
 
             // Invoke the handler
-            Object response = handlerBean."${RABBIT_HANDLER_NAME}"(converted, context)
+            Object response
+            if (method.parameterTypes[0].isAssignableFrom(MessageContext)) {
+                response = handlerBean."${RABBIT_HANDLER_NAME}"(context)
+            }
+            else if (method.parameterTypes.size() == 2) {
+                response = handlerBean."${RABBIT_HANDLER_NAME}"(converted, context)
+            }
+            else {
+                response = handlerBean."${RABBIT_HANDLER_NAME}"(converted)
+            }
 
             // Ack the message
             if (configuration.autoAck == AutoAck.POST) {
@@ -321,7 +351,7 @@ class RabbitConsumer extends DefaultConsumer {
             Object converted = converter.convertTo(context.body)
 
             // If conversion worked and a handler is defined for the type, we're done
-            if (converted != null && isHandlerTypeDefined(converted.getClass())) {
+            if (converted != null && getHandlerMethodForType(converted.getClass())) {
                 return converted
             }
         }
@@ -339,28 +369,44 @@ class RabbitConsumer extends DefaultConsumer {
      * @param requested
      * @return
      */
-    private boolean isHandlerTypeDefined(Class requested) {
+    private Method getHandlerMethodForType(Class requested) {
+        // Check for long parameter list
+        Method method = getHandlerWithSignature([requested, MessageContext])
+        if (method) {
+            return method
+        }
+
+        // Check for short parameter list
+        method = getHandlerWithSignature([requested])
+        if (method) {
+            return method
+        }
+
+        return null
+}
+
+    private Method getHandlerWithSignature(List<Class> requested) {
         // Get a list of methods that match the handler name
         List<Method> methods = handler.clazz.getDeclaredMethods().findAll { it.name == RABBIT_HANDLER_NAME }
 
-        // Get a list of method parameter lists
-        List<Class[]> signatures = methods*.parameterTypes
+        // Find a matching method
+        return methods.find { method ->
+            // Get the method signature
+            List<Class> signature = method.parameterTypes
 
-        // Determine if there are any method signatures that will
-        // take our requested data type.
-        return signatures.any { Class[] signature ->
-            // The method should take 2 parameters.
-            if (signature.size()  != 2) {
+            // Ensure we get the right number of parameters
+            if (signature.size() != requested.size()) {
                 return false
             }
 
-            // Ensure that the second parameter takes a MessageContext.
-            if (!signature[1].isAssignableFrom(MessageContext)) {
-                return false
+            // Ensure each parameter is assignable
+            for (int i = 0; i < signature.size(); i++) {
+                if (!signature[i].isAssignableFrom(requested[i])) {
+                    return false
+                }
             }
 
-            // Finally, determine if the first parameter will handle our requested type
-            return signature[0].isAssignableFrom(requested)
+            return true
         }
     }
 

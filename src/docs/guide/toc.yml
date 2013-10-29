@@ -11,6 +11,7 @@ consuming:
         title: Message Handlers
         basic: Basic Usage
         typed: Typed Message Handlers
+        short: Short-Form Usage
         messagecontext: MessageContext Object
         rpc: RPC-Style Messages
     queues: Subscribing To Queues

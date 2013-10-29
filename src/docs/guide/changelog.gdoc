@@ -1,3 +1,7 @@
+h3. Version 0.1.6 - 10/29/2013
+* Fixed logic to determine if a consumer is valid.
+* Added support for short-form handlers that only take a single parameter.
+
 h3. Version 0.1.5 - 10/28/2013
 * @body@ parameter to the @RabbitMessageBuilder@ is no longer required. It now defaults to an empty byte array.
 
