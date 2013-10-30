@@ -45,19 +45,25 @@ class ConsumerConfiguration {
     boolean retry = false
 
     /**
+     * Number of messages that should be pre-fetched from the queue.
+     */
+    public int prefetchCount = 1
+
+    /**
      * Constructor that parses the options defined in the service consumer.
      *
      * @param options
      */
     public ConsumerConfiguration(Map options) {
-        queue      = parseConfigOption(String, queue, options['queue'])
-        exchange   = parseConfigOption(String, exchange, options['exchange'])
-        routingKey = parseConfigOption(String, routingKey, options['routingKey'])
-        consumers  = parseConfigOption(Integer, consumers, options['consumers'])
-        transacted = parseConfigOption(Boolean, transacted, options['transacted'])
-        autoAck    = parseConfigOption(AutoAck, autoAck, options['autoAck'])
-        convert    = parseConfigOption(MessageConvertMethod, convert, options['convert'])
-        retry      = parseConfigOption(Boolean, retry, options['retry'])
+        queue         = parseConfigOption(String, queue, options['queue'])
+        exchange      = parseConfigOption(String, exchange, options['exchange'])
+        routingKey    = parseConfigOption(String, routingKey, options['routingKey'])
+        consumers     = parseConfigOption(Integer, consumers, options['consumers'])
+        transacted    = parseConfigOption(Boolean, transacted, options['transacted'])
+        autoAck       = parseConfigOption(AutoAck, autoAck, options['autoAck'])
+        convert       = parseConfigOption(MessageConvertMethod, convert, options['convert'])
+        retry         = parseConfigOption(Boolean, retry, options['retry'])
+        prefetchCount = parseConfigOption(Integer, prefetchCount, options['prefetchCount'])
 
         if (transacted) {
             autoAck = AutoAck.POST

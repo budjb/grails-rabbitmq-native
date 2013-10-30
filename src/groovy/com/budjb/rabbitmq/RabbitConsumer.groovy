@@ -132,6 +132,9 @@ class RabbitConsumer extends DefaultConsumer {
                 channel.queueBind(queue, config.exchange, config.routingKey)
             }
 
+            // Set the QOS
+            channel.basicQos(config.prefetchCount)
+
             // Set up the consumer
             channel.basicConsume(
                 queue,
