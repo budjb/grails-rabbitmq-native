@@ -1,3 +1,6 @@
+h3. Version 0.1.8 - 10/31/2013
+* Moved the trigger to start consumers on application launch to the bootstrap.
+
 h3. Version 0.1.7 - 10/30/2013
 * Added the @prefetchCount@ option to the consumer configuration. Defaults to 1.
 * Added the @threads@ option to the connection configuration. Defaults to 5.
