@@ -163,7 +163,9 @@ class RabbitmqNativeGrailsPlugin {
             }.registerBeans(event.ctx)
 
             // Restart the rabbit context
-            restartRabbitContext(application, event.ctx.getBean('rabbitContext'))
+            RabbitContext context = event.ctx.getBean('rabbitContext')
+            restartRabbitContext(application, context)
+            context.startConsumers()
             return
         }
 
@@ -178,7 +180,7 @@ class RabbitmqNativeGrailsPlugin {
                 }
             }.registerBeans(event.ctx)
 
-            // Restart the rabbit context
+            // Restart the consumers
             restartConsumers(application, event.ctx.getBean('rabbitContext'))
             return
         }
@@ -188,7 +190,9 @@ class RabbitmqNativeGrailsPlugin {
      * Handle configuration changes.
      */
     def onConfigChange = { event ->
-        restartRabbitContext(application, event.ctx.getBean('rabbitContext'))
+        RabbitContext context = event.ctx.getBean('rabbitContext')
+        restartRabbitContext(application, context)
+        context.startConsumers()
     }
 
     /**
@@ -211,9 +215,6 @@ class RabbitmqNativeGrailsPlugin {
 
         // Configure up exchanges and queues
         configureQueues(application, context)
-
-        // Start the consumers
-        context.startConsumers()
     }
 
     /**
