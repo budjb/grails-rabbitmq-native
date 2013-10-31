@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>3 Configuration 0.1.6</title>
+    <title>3 Configuration 0.1.7</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -86,7 +86,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 0.1.6</p>
+                    <p><strong>Version:</strong> 0.1.7</p>
 
                     
                 </div>
@@ -122,7 +122,7 @@ The plugin expects the connection configuration to the RabbitMQ server to be def
         password = <span class="java&#45;quote">"bar"</span>
     &#125;
 &#125;</pre></div><p class="paragraph"/>The following table enumerates all the configuration options available to the connection configuration:
-<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Configuration Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>host</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Hostname or IP address of the RabbitMQ server to connect to.</td><td>String</td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>username</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Username to log into the RabbitMQ server with.</td><td>String</td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>password</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Password to log into the RabbitMQ server with.</td><td>String</td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>port</code></td><td>&#160;</td><td>Port to connect to the RabbitMQ server with.</td><td>Integer</td><td>5672</td></tr><tr class="table-odd"><td><code>virtualHost</code></td><td>&#160;</td><td>Name of the virtual host to connect to the RabbitMQ server with.</td><td>String</td><td> <em class="italic">none</em> </td></tr></table>
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Configuration Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>host</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Hostname or IP address of the RabbitMQ server to connect to.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>username</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Username to log into the RabbitMQ server with.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>password</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Password to log into the RabbitMQ server with.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>port</code></td><td>&#160;</td><td>Port to connect to the RabbitMQ server with.</td><td><code>Integer</code></td><td>5672</td></tr><tr class="table-odd"><td><code>virtualHost</code></td><td>&#160;</td><td>Name of the virtual host to connect to the RabbitMQ server with.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>threads</code></td><td>&#160;</td><td>Threadpool size that determines how many concurrent messages can be processed.</td><td><code>String</code></td><td><code>5</code></td></tr></table>
 
 
 
@@ -235,6 +235,9 @@ set the <code>match</code> property for this exchange type, and the value must b
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/port.html">port</a>
                             </div>
                             
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/threads.html">threads</a>
+                            </div>
+                            
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/username.html">username</a>
                             </div>
                             
@@ -257,6 +260,9 @@ set the <code>match</code> property for this exchange type, and the value must b
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Consumer%20Configuration/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/prefetchCount.html">prefetchCount</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Consumer%20Configuration/queue.html">queue</a>

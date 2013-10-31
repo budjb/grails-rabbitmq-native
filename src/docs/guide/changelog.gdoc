@@ -1,3 +1,7 @@
+h3. Version 0.1.7 - 10/30/2013
+* Added the @prefetchCount@ option to the consumer configuration. Defaults to 1.
+* Added the @threads@ option to the connection configuration. Defaults to 5.
+
 h3. Version 0.1.6 - 10/29/2013
 * Fixed logic to determine if a consumer is valid.
 * Added support for short-form handlers that only take a single parameter.

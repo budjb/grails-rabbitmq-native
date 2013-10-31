@@ -1,0 +1,27 @@
+h1. threads
+
+h2. Purpose
+
+Sets the theadpool size of the connection.
+
+h2. Examples
+
+{code}
+rabbitmq {
+    connection {
+        host = "rabbit.example.com"
+        username = "foo"
+        password = "bar"
+        threads = 5
+    }
+}
+{code}
+
+h2. Description
+
+The number of threads determines how many total concurrent consumers will be delivered and processed at a time. The default is 5 threads.
+
+{warning}
+If the total number of consumers exceeds the thread count, the number of concurrently processed messages will be limited by the
+number of threads assigned to the connection.
+{warning}
