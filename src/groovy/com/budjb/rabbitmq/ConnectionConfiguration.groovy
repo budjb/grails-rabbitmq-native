@@ -27,7 +27,7 @@ class ConnectionConfiguration {
     /**
      * Logger.
      */
-    Logger log = Logger.getLogger(getClass())
+    private Logger log = Logger.getLogger(getClass())
 
     /**
      * RabbitMQ host
@@ -52,7 +52,7 @@ class ConnectionConfiguration {
     /**
      * RabbitMQ virtual host
      */
-    public String virtualHost = ''
+    public String virtualHost = '/'
 
     /**
      * The maximum number of concurrent consumer threads that are processed.
@@ -79,7 +79,7 @@ class ConnectionConfiguration {
         }
         username = configuration.username ?: null
         password = configuration.password ?: null
-        virtualHost = configuration.virtualHost ?: ''
+        virtualHost = configuration.virtualHost ?: '/'
         threads = configuration.threads ?: threads
 
         // Ensure we have all we need to continue
