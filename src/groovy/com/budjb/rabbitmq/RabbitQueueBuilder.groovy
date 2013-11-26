@@ -89,8 +89,8 @@ class RabbitQueueBuilder {
             channel.queueBind(queue['name'], exchange, queue['binding'])
         }
         else if (queue['binding'] instanceof Map) {
-            if (!queue['match']) {
-                log.warn("skipping queue binding of queue \"${queue['name']}\" to headers exchange because the \"match\" property was not set")
+            if (!(queue['match'] in ['any', 'all'])) {
+                log.warn("skipping queue binding of queue \"${queue['name']}\" to headers exchange because the \"match\" property was not set or not one of (\"any\", \"all\")")
                 return
             }
             channel.queueBind(queue['name'], exchange, '', queue['binding'] + ['x-match': queue['match']])
