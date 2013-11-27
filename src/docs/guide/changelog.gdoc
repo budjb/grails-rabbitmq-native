@@ -1,3 +1,6 @@
+h3. Version 0.2.1 - 11/27/2013
+* Fixed a bug with the message handler discovery method that caused generically-typed handlers to get called incorrectly.
+
 h3. Version 0.2.0 - 11/27/2013
 * Refactored queue/exchange configuration. It is now possible configure queue binding without having to also configure the exchange being bound to.
 * Added the @match@ property to queue configuration to support headers exchange binding. *This breaks backwards compatibility.*

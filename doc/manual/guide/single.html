@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
     <head>
-        <title>Rabbitmq Native Plugin 0.2.0</title>
+        <title>Rabbitmq Native Plugin 0.2.1</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8" />
         <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8" />
@@ -66,7 +66,7 @@ function addJsClass(el) {
                         <div class="project">
                             <h1>Rabbitmq Native Plugin - Reference Documentation</h1>
                             <p><strong>Authors:</strong> Bud Byrd</p>
-                            <p><strong>Version:</strong> 0.2.0</p>
+                            <p><strong>Version:</strong> 0.2.1</p>
                             
                         </div>
 
@@ -610,7 +610,10 @@ handler, the transaction is automatically rolled back.<p class="paragraph"/>It i
 
 
 <h1 id="changelog">8 Changelog</h1>
-<h3>Version 0.2.0 - 11/27/2013</h3>
+<h3>Version 0.2.1 - 11/27/2013</h3>
+<ul class="star">
+<li>Fixed a bug with the message handler discovery method that caused generically-typed handlers to get called incorrectly.</li>
+</ul><p class="paragraph"/><h3>Version 0.2.0 - 11/27/2013</h3>
 <ul class="star">
 <li>Refactored queue/exchange configuration. It is now possible configure queue binding without having to also configure the exchange being bound to.</li>
 <li>Added the <code>match</code> property to queue configuration to support headers exchange binding. <strong class="bold">This breaks backwards compatibility.</strong></li>
