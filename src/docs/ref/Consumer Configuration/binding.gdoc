@@ -1,0 +1,19 @@
+h1. binding
+
+h2. Purpose
+
+Set the binding criteria to use when subscribing to an exchange.
+
+h2. Examples
+
+{code}
+def rabbitConfig = [
+    exchange: "example.exchange",
+    binding: "example.routing.key"
+]
+{code}
+
+h2. Description
+
+The binding criteria may be necessary depending on the type of exchange is being subscribed to.
+This property is ignored when consuming from a queue. See the guide for more information on this property's usage.

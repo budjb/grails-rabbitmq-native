@@ -2,12 +2,12 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>Rabbitmq Native Plugin 0.1.8</title>
+    <title>3.4 Binding Queues and Exchanges 0.2.0</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <link rel="stylesheet" href="../../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
-    <link rel="stylesheet" href="../../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
     <script type="text/javascript">
-function addJsClass(el) {
+function addJsClass() {
     var classes = document.body.className.split(" ");
     classes.push("js");
     document.body.className = classes.join(" ");
@@ -16,14 +16,13 @@ function addJsClass(el) {
 </head>
 
 <body class="body" onload="addJsClass();">
-
 <div id="navigation">
     <ul>
         <li>
             <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
                 <a href="../../guide/index.html" class="button">Table of contents</a>
 
-                <div id="nav-summary-childs">
+                <div id="nav-summary-childs" style="display:none;">
                     
                     <div class="toc-item" style="margin-left:0"><a href="../../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
                     </div>
@@ -69,15 +68,95 @@ function addJsClass(el) {
 <table id="colset" border="0" cellpadding="0" cellspacing="0">
     <tr>
         <td id="col1">
-            <div id="main" class="reference corner-all">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../../guide/quickstart.html">&lt;&lt; <strong>2</strong><span>Quick Start</span></a></div>
+                
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
-                <h1>routingKey</h1><p class="paragraph"/><h2>Purpose</h2><p class="paragraph"/>Set the routingKey to use when subscribing to an exchange.<p class="paragraph"/><h2>Examples</h2><p class="paragraph"/><div class="code"><pre>def rabbitConfig = &#91;
-    exchange: <span class="java&#45;quote">"example.exchange"</span>,
-    routingKey: <span class="java&#45;quote">"example.routing.key"</span>
-&#93;</pre></div><p class="paragraph"/><h2>Description</h2><p class="paragraph"/>The routing key may be necessary depending on the type of exchange is being subscribed to. This property is ignored when consuming from a queue.
+                
+                    <div class="toc-item next-right"><a href="../../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span> >></a></div>
+                
 
+
+                <div class="project">
+                    <h1>3.4 Binding Queues and Exchanges - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Bud Byrd</p>
+
+                    <p><strong>Version:</strong> 0.2.0</p>
+
+                    
+                </div>
+
+                
+
+                
+
+<h2 id="binding">3.4 Binding Queues and Exchanges</h2>
+Queues can be bound to an exchange by setting the <code>exchange</code> property when declaring the queue to the name of the exchange to
+bind to. This is the preferred method if the application being configured is not responsible for defining and configuring
+the exchange being bound to.<p class="paragraph"/>Queues can also be bound to an exchange by declaring the queues inside of a closure passed as the last parameter of an
+exchange definition. This is a convenient method to do queue binding when your application is responsible for defining
+and configuring the exchange.
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: <span class="java&#45;quote">"example.exchange"</span>, type: <span class="java&#45;quote">"topic"</span>, &#123;
+            queue name: <span class="java&#45;quote">"example.queue"</span>, binding: <span class="java&#45;quote">"sample.binding.&#35;"</span>
+        &#125;
+    &#125;
+&#125;</pre></div>
+This example will create a <strong class="bold">topic</strong> exchange named <strong class="bold">example.exchange</strong>, as well as create a queue named <strong class="bold">example.queue</strong>. The queue will be bound to the exchange with the topic or
+routing key of "sample.binding.#".<p class="paragraph"/>Queues need to have their binding defined specifically for the type of exchange they are bound to.<p class="paragraph"/><h3>Fanout Exchanges</h3>
+Fanout exchanges are the easiest to configure bindings for, since they require none. Fanout exchanges simply send every message it received to every queue bound to it.
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: <span class="java&#45;quote">"example.exchange"</span>, type: <span class="java&#45;quote">"fanout"</span>, &#123;
+            queue name: <span class="java&#45;quote">"example.queue"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/><h3>Topic Exchanges</h3>
+Topic exchanges require queues to define a topic. Topics can be an exact match, but their strength is in their partial matching ability. See the <a href="http://www.rabbitmq.com/documentation.html" target="blank">RabbitMQ documentation</a>
+for details about this kind of exchange.
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: <span class="java&#45;quote">"example.exchange"</span>, type: <span class="java&#45;quote">"topic"</span>, &#123;
+            queue name: <span class="java&#45;quote">"example.queue"</span>, binding: <span class="java&#45;quote">"exmaple.binding.&#35;"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/><h3>Direct Exchanges</h3>
+Direct exchanges are similar to topic exchanges, except that their "topics" only function with direct name matching. The appropriate name for the binding in this case is "routing key". Queues must define a
+routing key when binding to this type of exchange.
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: <span class="java&#45;quote">"example.exchange"</span>, type: <span class="java&#45;quote">"direct"</span>, &#123;
+            queue name: <span class="java&#45;quote">"example.queue"</span>, binding: <span class="java&#45;quote">"exmapleRoutingKey"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/><h3>Header Exchanges</h3>
+Header exchanges are like topic exchanges, but with the ability to define multiple match keywords. The binding for queues allows the queue to match on all or one of multiple header values. The queue must also
+set the <code>match</code> property for this exchange type, and the value must be one of "any" or "all".
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: <span class="java&#45;quote">"example.exchange"</span>, type: <span class="java&#45;quote">"headers"</span>, &#123;
+            queue name: <span class="java&#45;quote">"example.queue"</span>, match: <span class="java&#45;quote">"any"</span>, binding: &#91;
+                <span class="java&#45;quote">"header1"</span>: <span class="java&#45;quote">"header&#45;value&#45;1"</span>,
+                <span class="java&#45;quote">"header2"</span>: <span class="java&#45;quote">"header&#45;value&#45;2"</span>
+            &#93;
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../../guide/quickstart.html">&lt;&lt; <strong>2</strong><span>Quick Start</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span> >></a></div>
+                
+                <div style="clear:both"></div>
             </div>
         </td>
         <td id="col2">
@@ -88,21 +167,17 @@ function addJsClass(el) {
                 </div>
                 <div class="menu">
                     
-                    <div class="menu-block">
-                        <h1 class="menu-title" onclick="toggleRef(nextElement(this))">Command Line</h1>
-                        <div class="menu-sub">
-                            
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Command Line</h1><div class="menu-sub">
+                        
                             
                             <div class="menu-item"><a href="../../ref/Command%20Line/create-consumer.html">create-consumer</a>
                             </div>
                             
-                        </div>
+                            </div>
                     </div>
                     
-                    <div class="menu-block">
-                        <h1 class="menu-title" onclick="toggleRef(nextElement(this))">Connection Configuration</h1>
-                        <div class="menu-sub">
-                            
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Connection Configuration</h1><div class="menu-sub">
+                        
                             
                             <div class="menu-item"><a href="../../ref/Connection%20Configuration/host.html">host</a>
                             </div>
@@ -122,15 +197,16 @@ function addJsClass(el) {
                             <div class="menu-item"><a href="../../ref/Connection%20Configuration/virtualHost.html">virtualHost</a>
                             </div>
                             
-                        </div>
+                            </div>
                     </div>
                     
-                    <div class="menu-block">
-                        <h1 class="menu-title" onclick="toggleRef(nextElement(this))">Consumer Configuration</h1>
-                        <div class="menu-sub selected">
-                            
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Consumer Configuration</h1><div class="menu-sub">
+                        
                             
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/autoAck.html">autoAck</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/binding.html">binding</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/consumers.html">consumers</a>
@@ -142,6 +218,9 @@ function addJsClass(el) {
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/exchange.html">exchange</a>
                             </div>
                             
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/match.html">match</a>
+                            </div>
+                            
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/prefetchCount.html">prefetchCount</a>
                             </div>
                             
@@ -151,19 +230,14 @@ function addJsClass(el) {
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/retry.html">retry</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/routingKey.html">routingKey</a>
-                            </div>
-                            
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/transacted.html">transacted</a>
                             </div>
                             
-                        </div>
+                            </div>
                     </div>
                     
-                    <div class="menu-block">
-                        <h1 class="menu-title" onclick="toggleRef(nextElement(this))">Rabbit Message Builder</h1>
-                        <div class="menu-sub">
-                            
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Builder</h1><div class="menu-sub">
+                        
                             
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/appId.html">appId</a>
                             </div>
@@ -222,7 +296,7 @@ function addJsClass(el) {
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/userId.html">userId</a>
                             </div>
                             
-                        </div>
+                            </div>
                     </div>
                     
                 </div>
@@ -236,8 +310,7 @@ function addJsClass(el) {
     
 </div>
 
-
-<script type="text/javascript" src="../../js/docs.js"></script>
+<script type="text/javascript" src="../js/docs.js"></script>
 
 </body>
 </html>

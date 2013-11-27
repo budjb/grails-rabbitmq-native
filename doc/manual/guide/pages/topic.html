@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>4.3.2 Topic Exchanges 0.1.8</title>
+    <title>4.3.2 Topic Exchanges 0.2.0</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -86,7 +86,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 0.1.8</p>
+                    <p><strong>Version:</strong> 0.2.0</p>
 
                     
                 </div>
@@ -97,12 +97,13 @@ function addJsClass() {
 
 <h2 id="topic">4.3.2 Topic Exchanges</h2>
 A topic exchange will forward messages to queues based on the binding criteria the queue used to register to the exchange. In RabbitMQ terms,
-this is called a routing key. If a routing key is omitted, the queue will receive all messages submitted to the topic exchange. The routing
-key can be either a direct match, or utilize wildcards to do a partial topic match. More information can be found in the RabbitMQ documentation.<p class="paragraph"/><h4>Topic Example</h4>
+this is called a routing key. The routing key can be either a direct match, or utilize wildcards to do a partial topic match. If a routing key
+is omitted, the queue will receive no messages. Use <code>"#"</code> to receive all messages from an exchange.
+More information can be found in the RabbitMQ documentation.<p class="paragraph"/><h4>Topic Example</h4>
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
     <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
         <span class="java&#45;quote">"exchange"</span>: <span class="java&#45;quote">"topic.exchange"</span>,
-        <span class="java&#45;quote">"routingKey"</span>: <span class="java&#45;quote">"foo.bar"</span>
+        <span class="java&#45;quote">"binding"</span>: <span class="java&#45;quote">"foo.bar.&#35;"</span>
     &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
         // <span class="java&#45;object">Process</span> message
     &#125;
@@ -166,6 +167,9 @@ key can be either a direct match, or utilize wildcards to do a partial topic mat
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/autoAck.html">autoAck</a>
                             </div>
                             
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/binding.html">binding</a>
+                            </div>
+                            
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/consumers.html">consumers</a>
                             </div>
                             
@@ -175,6 +179,9 @@ key can be either a direct match, or utilize wildcards to do a partial topic mat
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/exchange.html">exchange</a>
                             </div>
                             
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/match.html">match</a>
+                            </div>
+                            
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/prefetchCount.html">prefetchCount</a>
                             </div>
                             
@@ -182,9 +189,6 @@ key can be either a direct match, or utilize wildcards to do a partial topic mat
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/retry.html">retry</a>
-                            </div>
-                            
-                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/routingKey.html">routingKey</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/transacted.html">transacted</a>

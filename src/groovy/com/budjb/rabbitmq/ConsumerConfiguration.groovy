@@ -1,3 +1,18 @@
+/*
+ * Copyright 2013 Bud Byrd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.budjb.rabbitmq
 
 class ConsumerConfiguration {
@@ -12,11 +27,14 @@ class ConsumerConfiguration {
     public String exchange = null
 
     /**
-     * Routing key.
-     *
-     * This should only be used in conjunction with topic exchange subscriptions.
+     * Consume binding.
      */
-    public String routingKey = ''
+    public Object binding = null
+
+    /**
+     * Headers consume binding requirement.
+     */
+    public String match
 
     /**
      * Number of concurrent consumers.
@@ -57,7 +75,8 @@ class ConsumerConfiguration {
     public ConsumerConfiguration(Map options) {
         queue         = parseConfigOption(String, queue, options['queue'])
         exchange      = parseConfigOption(String, exchange, options['exchange'])
-        routingKey    = parseConfigOption(String, routingKey, options['routingKey'])
+        binding       = parseConfigOption(Object, binding, options['binding'])
+        match         = parseConfigOption(String, match, options['match'])
         consumers     = parseConfigOption(Integer, consumers, options['consumers'])
         transacted    = parseConfigOption(Boolean, transacted, options['transacted'])
         autoAck       = parseConfigOption(AutoAck, autoAck, options['autoAck'])

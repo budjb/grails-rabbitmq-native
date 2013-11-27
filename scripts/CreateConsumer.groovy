@@ -17,7 +17,6 @@
 /**
  * @author Aaron Brown
  */
-
 includeTargets << grailsScript("_GrailsInit")
 includeTargets << grailsScript("_GrailsCreateArtifacts")
 
