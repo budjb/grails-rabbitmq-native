@@ -256,6 +256,9 @@ class RabbitConsumer extends DefaultConsumer {
      * @return Any returned value from the handler.
      */
     private Object processMessage(MessageContext context) {
+        // Track whether the handler is MessageContext only
+        boolean contextOnly = false
+
         // Convert the message body
         Object converted = convertMessage(context)
 
@@ -265,6 +268,9 @@ class RabbitConsumer extends DefaultConsumer {
         // If no method is found, attempt to find the MessageContext handler
         if (!method) {
             method = getHandlerWithSignature([MessageContext])
+            if (method) {
+                contextOnly = true
+            }
         }
 
         // Confirm that there is a handler defined to handle our message.
@@ -289,7 +295,7 @@ class RabbitConsumer extends DefaultConsumer {
 
             // Invoke the handler
             Object response
-            if (method.parameterTypes[0].isAssignableFrom(MessageContext)) {
+            if (contextOnly) {
                 response = handlerBean."${RABBIT_HANDLER_NAME}"(context)
             }
             else if (method.parameterTypes.size() == 2) {
