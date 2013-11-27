@@ -1,0 +1,75 @@
+Queues can be bound to an exchange by setting the @exchange@ property when declaring the queue to the name of the exchange to
+bind to. This is the preferred method if the application being configured is not responsible for defining and configuring
+the exchange being bound to.
+
+Queues can also be bound to an exchange by declaring the queues inside of a closure passed as the last parameter of an
+exchange definition. This is a convenient method to do queue binding when your application is responsible for defining
+and configuring the exchange.
+{code}
+rabbitmq {
+    queues = {
+        exchange name: "example.exchange", type: "topic", {
+            queue name: "example.queue", binding: "sample.binding.#"
+        }
+    }
+}
+{code}
+This example will create a *topic* exchange named *example.exchange*, as well as create a queue named *example.queue*. The queue will be bound to the exchange with the topic or
+routing key of "sample.binding.#".
+
+Queues need to have their binding defined specifically for the type of exchange they are bound to.
+
+h3. Fanout Exchanges
+Fanout exchanges are the easiest to configure bindings for, since they require none. Fanout exchanges simply send every message it received to every queue bound to it.
+{code}
+rabbitmq {
+    queues = {
+        exchange name: "example.exchange", type: "fanout", {
+            queue name: "example.queue"
+        }
+    }
+}
+{code}
+
+h3. Topic Exchanges
+Topic exchanges require queues to define a topic. Topics can be an exact match, but their strength is in their partial matching ability. See the [RabbitMQ documentation|http://www.rabbitmq.com/documentation.html]
+for details about this kind of exchange.
+{code}
+rabbitmq {
+    queues = {
+        exchange name: "example.exchange", type: "topic", {
+            queue name: "example.queue", binding: "exmaple.binding.#"
+        }
+    }
+}
+{code}
+
+h3. Direct Exchanges
+Direct exchanges are similar to topic exchanges, except that their "topics" only function with direct name matching. The appropriate name for the binding in this case is "routing key". Queues must define a
+routing key when binding to this type of exchange.
+{code}
+rabbitmq {
+    queues = {
+        exchange name: "example.exchange", type: "direct", {
+            queue name: "example.queue", binding: "exmapleRoutingKey"
+        }
+    }
+}
+{code}
+
+h3. Header Exchanges
+Header exchanges are like topic exchanges, but with the ability to define multiple match keywords. The binding for queues allows the queue to match on all or one of multiple header values. The queue must also
+set the @match@ property for this exchange type, and the value must be one of "any" or "all".
+{code}
+rabbitmq {
+    queues = {
+        exchange name: "example.exchange", type: "headers", {
+            queue name: "example.queue", match: "any", binding: [
+                "header1": "header-value-1",
+                "header2": "header-value-2"
+            ]
+        }
+    }
+}
+{code}
+

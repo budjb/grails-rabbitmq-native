@@ -1,0 +1,20 @@
+h1. match
+
+h2. Purpose
+
+Set the match criteria to use when subscribing to a headers exchange.
+
+h2. Examples
+
+{code}
+def rabbitConfig = [
+    exchange: "example.exchange",
+    binding: ["foo": "bar"],
+    match: "any"
+]
+{code}
+
+h2. Description
+
+The match property determines with any one header must match or whether all headers must match for the queue's binding. This property
+is only used when binding to a headers exchange.

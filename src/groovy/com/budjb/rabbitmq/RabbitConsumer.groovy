@@ -132,19 +132,47 @@ class RabbitConsumer extends DefaultConsumer {
         List<Channel> channels = []
 
         // Start the consumers
-        log.debug("registering consumer ${handler.shortName} as a RabbitMQ consumer with ${config.consumers} consumer(s)")
-        config.consumers.times {
+        if (config.queue) {
+            log.debug("registering consumer ${handler.shortName} as a RabbitMQ consumer with ${config.consumers} consumer(s)")
+            config.consumers.times {
+                // Create the channel
+                Channel channel = connection.createChannel()
+
+                // Determine the queue
+                String queue = config.queue
+
+                // Set the QOS
+                channel.basicQos(config.prefetchCount)
+
+                // Set up the consumer
+                channel.basicConsume(
+                    queue,
+                    config.autoAck == AutoAck.ALWAYS,
+                    new RabbitConsumer(channel, config, handler)
+                )
+
+                // Store the channel
+                channels << channel
+            }
+        }
+        else {
+            // Log it
+            log.debug("registering consumer ${handler.shortName} as a RabbitMQ subscriber")
+
             // Create the channel
             Channel channel = connection.createChannel()
 
-            // Determine the queue
-            String queue
-            if (config.queue){
-                queue = config.queue
+            // Create a queue
+            String queue = channel.queueDeclare().queue
+            if (!config.binding || config.binding instanceof String) {
+                channel.queueBind(queue, config.exchange, config.binding ?: '')
             }
-            else {
-                queue = channel.queueDeclare().queue
-                channel.queueBind(queue, config.exchange, config.routingKey)
+            else if (config.binding instanceof Map) {
+                if (!(config.match in ['any', 'all'])) {
+                    log.warn("not starting consumer ${handler.shortName} since the match property was not set or not one of (\"any\", \"all\")")
+                    return
+                }
+                channel.queueBind(queue, config.exchange, '', config.binding + ['x-match': config.match])
             }
 
             // Set the QOS

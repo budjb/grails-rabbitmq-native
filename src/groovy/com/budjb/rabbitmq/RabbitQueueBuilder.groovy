@@ -16,7 +16,7 @@ class RabbitQueueBuilder {
     /**
      * Current exchange marker
      */
-    private Map currentExchange
+    private String currentExchange
 
     /**
      * RabbitMQ context bean
@@ -41,6 +41,7 @@ class RabbitQueueBuilder {
     void queue(Map parameters) {
         // Grab required parameters
         String name = parameters['name']
+        String exchange = parameters['exchange']
         boolean autoDelete = Boolean.valueOf(parameters['autoDelete'])
         boolean exclusive = Boolean.valueOf(parameters['exclusive'])
         boolean durable = Boolean.valueOf(parameters['durable'])
@@ -69,6 +70,9 @@ class RabbitQueueBuilder {
         if (currentExchange) {
             bindQueue(parameters, currentExchange)
         }
+        else if (exchange) {
+            bindQueue(parameters, exchange)
+        }
     }
 
     /**
@@ -77,56 +81,22 @@ class RabbitQueueBuilder {
      * @param queue
      * @param exchange
      */
-    void bindQueue(Map queue, Map exchange) {
-        // Track our binding variables
-        String routingKey = ''
-        Map arguments = [:]
-
-        // Set the binding based on the exchange type
-        switch (currentExchange['type']) {
-            case 'direct':
-                if (queue['binding'] && !(queue['binding'] instanceof String)) {
-                    throw new RuntimeException("binding for queue '${queue['name']}' to direct exchange '${currentExchange['name']}' must be a string")
-                }
-
-                routingKey = queue['binding'] ?: queue['name']
-                break
-
-            case 'fanout':
-                routingKey = ''
-                break
-
-            case 'headers':
-                if (!(queue['binding'] instanceof Map)) {
-                    throw new RuntimeException("binding for queue '${queue['name']}' to headers exchange '${currentExchange['name']}' must be declared and must be a map")
-                }
-                if (!queue['match'] || !(queue['match'] in ['any', 'all'])) {
-                    throw new RuntimeException("binding for queue '${queue['name']}' to headers exchange '${exchange['name']}' must have a match type declared ('any' or 'all')")
-                }
-
-                arguments = queue['binding'] + ['x-match': queue['match']]
-                break
-
-            case 'topic':
-                if (!(queue['binding'] instanceof String)) {
-                    throw new RuntimeException("binding for queue '${queue['name']}' to topic exchange '${currentExchange['name']}' must be declared and must be a string")
-                }
-
-                routingKey = queue['binding']
-                break
-        }
-
+    void bindQueue(Map queue, String exchange) {
         // Grab a channel
         Channel channel = getChannel()
 
-        // Bind the queue
-        try {
-            channel.queueBind(queue['name'], currentExchange['name'], routingKey, arguments)
+        if (queue['binding'] instanceof String) {
+            channel.queueBind(queue['name'], exchange, queue['binding'])
         }
-        finally {
-            if (channel.isOpen()) {
-                channel.close()
+        else if (queue['binding'] instanceof Map) {
+            if (!(queue['match'] in ['any', 'all'])) {
+                log.warn("skipping queue binding of queue \"${queue['name']}\" to headers exchange because the \"match\" property was not set or not one of (\"any\", \"all\")")
+                return
             }
+            channel.queueBind(queue['name'], exchange, '', queue['binding'] + ['x-match': queue['match']])
+        }
+        else {
+            channel.queueBind(queue['name'], exchange, '')
         }
     }
 
@@ -176,7 +146,7 @@ class RabbitQueueBuilder {
 
         // Run the closure if given
         if (closure) {
-            currentExchange = parameters
+            currentExchange = parameters['name']
             closure = closure.clone()
             closure.delegate = this
             closure()
