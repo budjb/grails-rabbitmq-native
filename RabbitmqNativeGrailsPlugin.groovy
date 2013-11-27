@@ -33,7 +33,7 @@ class RabbitmqNativeGrailsPlugin {
     /**
      * Version of the plugin.
      */
-    def version = "0.2.1"
+    def version = "1.0.0"
 
     /**
      * Maven group.
