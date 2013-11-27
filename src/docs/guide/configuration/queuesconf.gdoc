@@ -5,7 +5,7 @@ Queue configuration is also done in the @Config.groovy@ file under the rabbitmq 
 {code}
 rabbitmq {
     queues = {
-        queue name: "example.queue", durable: true
+        queue name: "example.queue", durable: true, exchange: "example.exchange"
     }
 }
 {code}
@@ -21,8 +21,9 @@ Below is a table of all of the options available when defining queues:
 *Property* | *Required* | *Description* | *Type* | *Default*
 @arguments@ | | Extra arguments used to create the queue. See the [RabbitMQ documentation|http://www.rabbitmq.com/documentation.html] for more information. | @Map@ | _none_
 @autoDelete@ | | Whether to automatically delete the queue once there are no more consumers listening to it. | @boolean@ | @false@
-@binding@ | | Used in conjunction with exchanges. See the exchanges section for more information. | _Mixed_ | _none_
+@binding@ | | Used in conjunction with exchanges. See the section below for more information. | _Mixed_ | _none_
 @durable@ | | Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts. | @boolean@ | @false@
-@match@ | | Used in conjunction when the headers exchange type. Either "any" or "all". | @String@ | _none_
+@exchange@ | | Binds a queue to an exchange in conjunction with the @binding@ property. Ignored if used inside an exchange declaration. | @String@ | _none_
+@match@ | | Required when binding to a headers exchange. Either "any" or "all". | @String@ | _none_
 @name@ | !/bullet_red.png! | Name of the queue. | @String@ | _none_
 {table}

@@ -5,6 +5,7 @@ configuration:
     connection: Server Connection
     queuesconf: Defining Queues
     exchangesconf: Defining Exchanges
+    binding: Binding Queues and Exchanges
 consuming:
     title: Consuming Messages
     handlers:
@@ -19,6 +20,8 @@ consuming:
         title: Subscribing To Exchanges
         fanout: Fanout Exchanges
         topic: Topic Exchanges
+        direct: Direct Exchanges
+        headers: Headers Exchanges
 publishing:
     title: Publishing Messages
     send: Sending Messages

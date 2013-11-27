@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>8 Changelog 0.1.8</title>
+    <title>8 Changelog 0.2.0</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -84,7 +84,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 0.1.8</p>
+                    <p><strong>Version:</strong> 0.2.0</p>
 
                     
                 </div>
@@ -94,7 +94,12 @@ function addJsClass() {
                 
 
 <h1 id="changelog">8 Changelog</h1>
-<h3>Version 0.1.8 - 10/31/2013</h3>
+<h3>Version 0.2.0 - 11/27/2013</h3>
+<ul class="star">
+<li>Refactored queue/exchange configuration. It is now possible configure queue binding without having to also configure the exchange being bound to.</li>
+<li>Added the <code>match</code> property to queue configuration to support headers exchange binding. <strong class="bold">This breaks backwards compatibility.</strong></li>
+<li>Renaming the <code>routingKey</code> property of the consumer configuration to <code>binding</code> to match queue configuration. <strong class="bold">This breaks backwards compatibility.</strong></li>
+</ul><p class="paragraph"/><h3>Version 0.1.8 - 10/31/2013</h3>
 <ul class="star">
 <li>Moved the trigger to start consumers on application launch to the bootstrap.</li>
 </ul><p class="paragraph"/><h3>Version 0.1.7 - 10/30/2013</h3>
@@ -182,6 +187,9 @@ function addJsClass() {
                             <div class="menu-item"><a href="../ref/Consumer%20Configuration/autoAck.html">autoAck</a>
                             </div>
                             
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/binding.html">binding</a>
+                            </div>
+                            
                             <div class="menu-item"><a href="../ref/Consumer%20Configuration/consumers.html">consumers</a>
                             </div>
                             
@@ -191,6 +199,9 @@ function addJsClass() {
                             <div class="menu-item"><a href="../ref/Consumer%20Configuration/exchange.html">exchange</a>
                             </div>
                             
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/match.html">match</a>
+                            </div>
+                            
                             <div class="menu-item"><a href="../ref/Consumer%20Configuration/prefetchCount.html">prefetchCount</a>
                             </div>
                             
@@ -198,9 +209,6 @@ function addJsClass() {
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Consumer%20Configuration/retry.html">retry</a>
-                            </div>
-                            
-                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/routingKey.html">routingKey</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Consumer%20Configuration/transacted.html">transacted</a>
