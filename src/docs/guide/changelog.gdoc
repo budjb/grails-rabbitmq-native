@@ -1,5 +1,8 @@
+h3. Version 1.0.1 - 11/28/2013
+* Remove the maven group from the plugin definition class.
+
 h3. Version 1.0.0 - 11/27/2013
-- Version bump for general release.
+* Version bump for general release.
 
 h3. Version 0.2.1 - 11/27/2013
 * Fixed a bug with the message handler discovery method that caused generically-typed handlers to get called incorrectly.
