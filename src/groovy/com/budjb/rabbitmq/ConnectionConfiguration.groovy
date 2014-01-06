@@ -57,9 +57,9 @@ class ConnectionConfiguration {
     /**
      * The maximum number of concurrent consumer threads that are processed.
      *
-     * 5 is the RabbitMQ default.
+     * 5 is the RabbitMQ default. 0 means unlimited.
      */
-    public int threads = 5
+    public int threads = 0
 
     /**
      * Constructor that parses the configuration for RabbitMQ's connection properties.
@@ -105,7 +105,13 @@ class ConnectionConfiguration {
         factory.virtualHost = virtualHost
 
         // Create the thread pool service
-        ExecutorService executorService = Executors.newFixedThreadPool(threads)
+        ExecutorService executorService
+        if (threads > 0) {
+            executorService = Executors.newFixedThreadPool(threads)
+        }
+        else {
+            executorService = Executors.newCachedThreadPool()
+        }
 
         return factory.newConnection(executorService)
     }
