@@ -15,7 +15,6 @@
  */
 package com.budjb.rabbitmq;
 
-import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.commons.ArtefactHandlerAdapter;
 
 class MessageConsumerArtefactHandler extends ArtefactHandlerAdapter {
@@ -30,11 +29,6 @@ class MessageConsumerArtefactHandler extends ArtefactHandlerAdapter {
     public static final String SUFFIX = "Consumer";
 
     /**
-     * Logger.
-     */
-    private static final Logger log = Logger.getLogger(MessageConsumerArtefactHandler.class);
-
-    /**
      * Constructor.
      */
     public MessageConsumerArtefactHandler() {
@@ -47,7 +41,7 @@ class MessageConsumerArtefactHandler extends ArtefactHandlerAdapter {
      * @param clazz
      * @return
      */
-    public boolean isArtefactClass(Class clazz) {
+    public boolean isArtefactClass(@SuppressWarnings("rawtypes") Class clazz) {
         if (clazz == null) {
             return false;
         }
@@ -61,7 +55,7 @@ class MessageConsumerArtefactHandler extends ArtefactHandlerAdapter {
      * @param clazz
      * @return
      */
-    public static boolean isConsumer(Class clazz) {
+    public static boolean isConsumer(@SuppressWarnings("rawtypes") Class clazz) {
         return clazz.getName().endsWith(SUFFIX) && RabbitConsumer.isConsumer(clazz);
     }
 }

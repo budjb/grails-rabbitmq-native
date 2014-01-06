@@ -45,6 +45,26 @@ class RabbitConsumer extends DefaultConsumer {
     static final String RABBIT_CONFIG_NAME = 'rabbitConfig'
 
     /**
+     * Name of the method that will be called when a message is received, but before it is processed.
+     */
+    static final String CONSUME_ON_RECEIVE_METHOD_NAME = 'onReceive'
+
+    /**
+     * Name of the method that will be called when a message has been successfully processed.
+     */
+    static final String CONSUME_ON_SUCCESS_METHOD_NAME = 'onSuccess'
+
+    /**
+     * Name of the method that will be called after a message has attempted to be processed, whether it worked or not.
+     */
+    static final String CONSUME_ON_COMPLETE_METHOD_NAME = 'onComplete'
+
+    /**
+     * Name of the method that will be called when an exception is caught handling the message.
+     */
+    static final String CONSUME_ON_FAILURE_METHOD_NAME = 'onFailure'
+
+    /**
      * Handler GrailsClass.
      */
     private GrailsClass handler
@@ -283,11 +303,14 @@ class RabbitConsumer extends DefaultConsumer {
             return
         }
 
+        // Get the handler bean
+        Object handlerBean = getHandlerBean()
+
+        // Call the received message callback
+        onReceive(handlerBean, context)
+
         // Pass off the message
         try {
-            // Get the handler bean
-            Object handlerBean = getHandlerBean()
-
             // Start the transaction if requested
             if (configuration.transacted) {
                 context.channel.txSelect()
@@ -315,6 +338,9 @@ class RabbitConsumer extends DefaultConsumer {
                 context.channel.txCommit()
             }
 
+            // Call the success callback
+            onSuccess(handlerBean, context)
+
             return response
         }
         catch (Exception e) {
@@ -335,7 +361,15 @@ class RabbitConsumer extends DefaultConsumer {
             else {
                 log.error("unhandled exception ${e.getClass().name} caught in RabbitMQ message handler for consumer ${handler.shortName}", e)
             }
+
+            // Call the failure callback
+            onFailure(handlerBean, context)
+
             return null
+        }
+        finally {
+            // Call the complete callback
+            onComplete(handlerBean, context)
         }
     }
 
@@ -435,8 +469,73 @@ class RabbitConsumer extends DefaultConsumer {
         }
 
         return null
-}
+    }
 
+    /**
+     * Initiates one of the callback methods if the method exists.
+     *
+     * @param methodName
+     * @param bean
+     * @param context
+     */
+    private void doCallback(String methodName, Object bean, MessageContext context) {
+        Method method = bean.class.getDeclaredMethods().find {
+            return it.name == methodName && it.parameterTypes.size() == 1 && it.parameterTypes[0].isAssignableFrom(MessageContext)
+        }
+
+        if (!method) {
+            return
+        }
+
+        bean."${methodName}"(context)
+    }
+
+    /**
+     * Initiates the "on received" callback.
+     *
+     * @param bean
+     * @param context
+     */
+    private void onReceive(Object bean, MessageContext context) {
+        doCallback(CONSUME_ON_RECEIVE_METHOD_NAME, bean, context)
+    }
+
+    /**
+     * Initiates the "on success" callback.
+     *
+     * @param bean
+     * @param context
+     */
+    private void onSuccess(Object bean, MessageContext context) {
+        doCallback(CONSUME_ON_SUCCESS_METHOD_NAME, bean, context)
+    }
+
+    /**
+     * Initiates the "on failure" callback.
+     *
+     * @param bean
+     * @param context
+     */
+    private void onComplete(Object bean, MessageContext context) {
+        doCallback(CONSUME_ON_COMPLETE_METHOD_NAME, bean, context)
+    }
+
+    /**
+     * Initiates the "on complete" callback.
+     *
+     * @param bean
+     * @param context
+     */
+    private void onFailure(Object bean, MessageContext context) {
+        doCallback(CONSUME_ON_FAILURE_METHOD_NAME, bean, context)
+    }
+
+    /**
+     * Attempts to locate a message handler that will accept the given object types.
+     *
+     * @param requested
+     * @return
+     */
     private Method getHandlerWithSignature(List<Class> requested) {
         // Get a list of methods that match the handler name
         List<Method> methods = handler.clazz.getDeclaredMethods().findAll { it.name == RABBIT_HANDLER_NAME }
@@ -463,7 +562,7 @@ class RabbitConsumer extends DefaultConsumer {
     }
 
     /**
-     * Returns the bean for the handler grails class.
+     * Returns the bean for the handler Grails class.
      *
      * @return
      */
