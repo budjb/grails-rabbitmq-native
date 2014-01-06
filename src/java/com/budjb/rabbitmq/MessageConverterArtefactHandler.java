@@ -15,7 +15,6 @@
  */
 package com.budjb.rabbitmq;
 
-import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.commons.ArtefactHandlerAdapter;
 
 class MessageConverterArtefactHandler extends ArtefactHandlerAdapter {
@@ -30,11 +29,6 @@ class MessageConverterArtefactHandler extends ArtefactHandlerAdapter {
     public static final String SUFFIX = "Converter";
 
     /**
-     * Logger.
-     */
-    private static final Logger log = Logger.getLogger(MessageConverterArtefactHandler.class);
-
-    /**
      * Constructor.
      */
     public MessageConverterArtefactHandler() {
@@ -47,7 +41,7 @@ class MessageConverterArtefactHandler extends ArtefactHandlerAdapter {
      * @param clazz
      * @return
      */
-    public boolean isArtefactClass(Class clazz) {
+    public boolean isArtefactClass(@SuppressWarnings("rawtypes") Class clazz) {
         if (clazz == null) {
             return false;
         }
@@ -61,7 +55,7 @@ class MessageConverterArtefactHandler extends ArtefactHandlerAdapter {
      * @param clazz
      * @return
      */
-    public static boolean isMessageConverter(Class clazz) {
+    public static boolean isMessageConverter(@SuppressWarnings("rawtypes") Class clazz) {
         return clazz.getName().endsWith(SUFFIX) && MessageConverter.class.isAssignableFrom(clazz);
     }
 }
