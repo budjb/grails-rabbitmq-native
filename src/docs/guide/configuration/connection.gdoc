@@ -18,5 +18,5 @@ The following table enumerates all the configuration options available to the co
 @password@ | !/bullet_red.png! | Password to log into the RabbitMQ server with. | @String@ | _none_
 @port@ | | Port to connect to the RabbitMQ server with. | @Integer@ | 5672
 @virtualHost@ | | Name of the virtual host to connect to the RabbitMQ server with. | @String@ | _none_
-@threads@ | | Threadpool size, if greater than 0, determines how many concurrent messages can be processed at any given time. If set to 0, consumers can consume as many messages as it's configured to. | @String@ | @0@
+@threads@ | | Threadpool size that determines how many concurrent messages can be processed. | @String@ | @5@
 {table}
