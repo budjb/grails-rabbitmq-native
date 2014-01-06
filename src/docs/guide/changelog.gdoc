@@ -1,3 +1,6 @@
+h3. Version 1.0.2 - 11/6/2014
+* Added a cached thread pool so the user does not need to account for the number of threads consumers require. Set the default to 0 so that this is the default.
+
 h3. Version 1.0.1 - 11/28/2013
 * Remove the maven group from the plugin definition class.
 
