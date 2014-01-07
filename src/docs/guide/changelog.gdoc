@@ -1,3 +1,6 @@
+h3. Version 1.0.3 - 11/7/2014
+* Modified the logic to check for the existence of callbacks in consumers.
+
 h3. Version 1.0.2 - 11/6/2014
 * Added a cached thread pool so the user does not need to account for the number of threads consumers require. Set the default to 0 so that this is the default.
 * Added callbacks for messages: onReceive, onSuccess, onFailure, and onComplete.

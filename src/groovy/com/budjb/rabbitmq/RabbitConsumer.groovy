@@ -479,11 +479,7 @@ class RabbitConsumer extends DefaultConsumer {
      * @param context
      */
     private void doCallback(String methodName, Object bean, MessageContext context) {
-        Method method = bean.class.getDeclaredMethods().find {
-            return it.name == methodName && it.parameterTypes.size() == 1 && it.parameterTypes[0].isAssignableFrom(MessageContext)
-        }
-
-        if (!method) {
+        if (!bean.class.metaClass.methods.find { it.name == methodName }) {
             return
         }
 
