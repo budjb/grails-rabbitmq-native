@@ -8,7 +8,7 @@ h2. Examples
 
 {code}
 new RabbitMessageBuilder().send {
-    queue = "example.queue"
+    routingKey = "example.queue"
     userId = "foobar"
     body = "test message"
 }
