@@ -100,7 +100,7 @@ Sending a message means publishing a message to an exchange or queue and not wai
 are a queue or exchange to publish the message to, and the body of the message.<p class="paragraph"/><h4>Send Example</h4>
 <div class="code"><pre>// Send a message
 <span class="java&#45;keyword">new</span> RabbitMessageBuilder().send &#123;
-    queue = <span class="java&#45;quote">"some.queue"</span>
+    routingKey = <span class="java&#45;quote">"some.queue"</span>
     body = <span class="java&#45;quote">"hi!"</span>
 &#125;</pre></div><p class="paragraph"/>RabbitMQ expects the body of a message to be a byte array. Message converters will also work when publishing messages, so if an object type other than <code>byte</code> is
 encountered, a suitable message converter will be found and run against the message body, if one exists.
@@ -230,9 +230,6 @@ encountered, a suitable message converter will be found and run against the mess
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
-                            </div>
-                            
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/queue.html">queue</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>

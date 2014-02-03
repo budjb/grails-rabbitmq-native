@@ -73,13 +73,13 @@ function addJsClass(el) {
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
-                <h1>routingKey</h1><p class="paragraph"/><h2>Purpose</h2><p class="paragraph"/>The routing key is used in conjunction with the <a href="../../ref/Rabbit Message Builder/exchange.html" class="RabbitMessageBuilder">exchange</a> property to assign a routing key to the published message.<p class="paragraph"/><h2>Examples</h2><p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">new</span> RabbitMessageBuilder().send &#123;
+                <h1>routingKey</h1><p class="paragraph"/><h2>Purpose</h2><p class="paragraph"/>The routing key is used in conjunction with an exchange to publish a message.<p class="paragraph"/><h2>Examples</h2><p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">new</span> RabbitMessageBuilder().send &#123;
     exchange = <span class="java&#45;quote">"example.exchange"</span>
     routingKey = <span class="java&#45;quote">"example.topic"</span>
     body = <span class="java&#45;quote">"message"</span>
 &#125;</pre></div><p class="paragraph"/><h2>Description</h2><p class="paragraph"/>The routing key is useful when publishing messages to <strong class="bold">topic</strong> or <strong class="bold">direct</strong> exchanges. When used on <strong class="bold">direct</strong> exchanges, the routing key must match
 the binding a queue used to bind to an exchange, or the message will become unroutable (and possibly lost). See the RabbitMQ documentation for
-more information on routing keys and exchanges.
+more information on routing keys and exchanges.<p class="paragraph"/>The <code>exchange</code> can be omitted, in which case the <code>routingKey</code> can be used to send a message directly to a queue.
 
             </div>
         </td>
@@ -205,9 +205,6 @@ more information on routing keys and exchanges.
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
-                            </div>
-                            
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/queue.html">queue</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>

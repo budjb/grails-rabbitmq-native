@@ -74,7 +74,7 @@ function addJsClass(el) {
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
                 <h1>body</h1><p class="paragraph"/><h2>Purpose</h2><p class="paragraph"/>Body of the message to send to the RabbitMQ server.<p class="paragraph"/><h2>Examples</h2><p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">new</span> RabbitMessageBuilder().send &#123;
-    queue = <span class="java&#45;quote">"example.queue"</span>
+    routingKey = <span class="java&#45;quote">"example.queue"</span>
     body = <span class="java&#45;quote">"test message"</span>
 &#125;</pre></div><p class="paragraph"/><h2>Description</h2><p class="paragraph"/>The body is a required part of the message to transmit. The RabbitMQ server expects the message to be in a byte array format, but the plugin attempts to handle the conversion of objects for you via the
 <a href="../../guide/single.html#converters" class="guide">MessageConverter</a> objects. You may assign any type of object to this property as long as there is a message converter available to convert the object to a byte array.
@@ -203,9 +203,6 @@ function addJsClass(el) {
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
-                            </div>
-                            
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/queue.html">queue</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>

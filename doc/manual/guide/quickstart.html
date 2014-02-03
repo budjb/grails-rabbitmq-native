@@ -135,7 +135,7 @@ Create a controller by using the following command:
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.RabbitMessageBuilder<p class="paragraph"/>class TestController &#123;
     def index = &#123;
         render <span class="java&#45;keyword">new</span> RabbitMessageBuilder().rpc &#123;
-            queue = <span class="java&#45;quote">"testqueue"</span>
+            routingKey = <span class="java&#45;quote">"testqueue"</span>
             body = <span class="java&#45;quote">"Hello!"</span>
         &#125;
     &#125;
@@ -269,9 +269,6 @@ You should see the message "Hello!" printed the application's output console, an
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
-                            </div>
-                            
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/queue.html">queue</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>

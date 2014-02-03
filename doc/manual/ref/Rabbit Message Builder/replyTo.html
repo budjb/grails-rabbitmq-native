@@ -74,7 +74,7 @@ function addJsClass(el) {
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
                 <h1>replyTo</h1><p class="paragraph"/><h2>Purpose</h2><p class="paragraph"/>Sets the replyTo queue name.<p class="paragraph"/><h2>Examples</h2><p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">new</span> RabbitMessageBuilder().send &#123;
-    queue = <span class="java&#45;quote">"example.queue"</span>
+    routingKey = <span class="java&#45;quote">"example.queue"</span>
     replyTo = <span class="java&#45;quote">"reply.queue"</span>
     body = <span class="java&#45;quote">"test message"</span>
 &#125;</pre></div><p class="paragraph"/><h2>Description</h2><p class="paragraph"/>Setting the replyTo property of the message lets the consumer know that the publisher expects a response to the message. The value of this property should be an existent queue the client is consuming on.<p class="paragraph"/><blockquote class="note">
@@ -205,9 +205,6 @@ This property is automatically set when the <code>RabbitMessageBuilder.rpc()</co
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
-                            </div>
-                            
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/queue.html">queue</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>

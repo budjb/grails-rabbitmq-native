@@ -118,7 +118,7 @@ Sending a message means publishing a message to an exchange or queue and not wai
 are a queue or exchange to publish the message to, and the body of the message.<p class="paragraph"/><h4>Send Example</h4>
 <div class="code"><pre>// Send a message
 <span class="java&#45;keyword">new</span> RabbitMessageBuilder().send &#123;
-    queue = <span class="java&#45;quote">"some.queue"</span>
+    routingKey = <span class="java&#45;quote">"some.queue"</span>
     body = <span class="java&#45;quote">"hi!"</span>
 &#125;</pre></div><p class="paragraph"/>RabbitMQ expects the body of a message to be a byte array. Message converters will also work when publishing messages, so if an object type other than <code>byte</code> is
 encountered, a suitable message converter will be found and run against the message body, if one exists.
@@ -129,7 +129,7 @@ encountered, a suitable message converter will be found and run against the mess
 Publishing an RPC message is as easy as sending messages, except the returned message is returned from the function.<p class="paragraph"/><h4>RPC Example</h4>
 <div class="code"><pre>// Send a message
 def result = <span class="java&#45;keyword">new</span> RabbitMessageBuilder().rpc &#123;
-    queue = <span class="java&#45;quote">"some.queue"</span>
+    routingKey = <span class="java&#45;quote">"some.queue"</span>
     body = <span class="java&#45;quote">"hi!"</span>
     timeout = RabbitMessageBuilder.DEFAULT_TIMEOUT
 &#125;</pre></div><p class="paragraph"/>While this documentation will not deep-dive into the configuration options for the builder, the <a href="../ref/Rabbit Message Builder/timeout.html" class="Rabbit Message Builder">timeout</a> option is especially important for RPC-style messages. The
@@ -261,9 +261,6 @@ will be thrown. If the timeout is set to 0, the client will wait indefinitely fo
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
-                            </div>
-                            
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/queue.html">queue</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>
