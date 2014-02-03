@@ -4,7 +4,7 @@ h4. RPC Example
 {code}
 // Send a message
 def result = new RabbitMessageBuilder().rpc {
-    queue = "some.queue"
+    routingKey = "some.queue"
     body = "hi!"
     timeout = RabbitMessageBuilder.DEFAULT_TIMEOUT
 }
