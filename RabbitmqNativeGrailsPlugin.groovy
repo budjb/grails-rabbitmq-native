@@ -214,6 +214,9 @@ class RabbitmqNativeGrailsPlugin {
         // Stop the rabbit context
         context.stop()
 
+        // Load the configuration
+        context.loadConfiguration()
+
         // Register message converters
         registerConverters(application, context)
 

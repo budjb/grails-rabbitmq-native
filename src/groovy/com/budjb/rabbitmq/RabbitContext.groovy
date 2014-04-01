@@ -15,6 +15,7 @@
  */
 package com.budjb.rabbitmq
 
+import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -24,11 +25,6 @@ import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
 
 class RabbitContext {
-    /**
-     * Connection configuration
-     */
-    protected ConnectionConfiguration connectionConfiguration
-
     /**
      * Grails application bean
      */
@@ -40,29 +36,19 @@ class RabbitContext {
     Logger log = Logger.getLogger(this.getClass())
 
     /**
-     * Connection to the RabbitMQ server
+     * List of current connection contexts.
      */
-    protected Connection connection
+    protected List<ConnectionContext> connections = []
 
     /**
-     * List of active channels
-     */
-    protected List<Channel> channels = []
-
-    /**
-     * A list of registered message converters
+     * A list of registered message converters.
      */
     public List<MessageConverter> messageConverters = []
 
     /**
-     * A list of services that are set up as consumers
+     * Loads and initializes the configuration.
      */
-    protected List<Object> consumers = []
-
-    /**
-     * Initializes the rabbit driver.
-     */
-    public void start() {
+    public void loadConfiguration() {
         // Check for the configuration
         if (!grailsApplication.config.rabbitmq?.connection) {
             if (grailsApplication.config.rabbitmq?.connectionFactory) {
@@ -72,26 +58,38 @@ class RabbitContext {
         }
 
         // Load the configuration
-        connectionConfiguration = new ConnectionConfiguration(grailsApplication.config.rabbitmq.connection)
+        connections = ConnectionBuilder.loadConnections(grailsApplication.config.rabbitmq.connection)
 
-        // Connect to the server
-        connect()
+        // Ensure we have at least one connection
+        if (connections.size() == 0) {
+            throw new InvalidConfigurationException("no RabbitMQ connections were configured")
+        }
+
+        // Ensure we don't have more than one default connection
+        if (connections.findAll { it.isDefault == true }.size() > 1) {
+            throw new InvalidConfigurationException("more than one default RabbitMQ server connections were configured as default")
+        }
+    }
+
+    /**
+     * Connects to each configured RabbitMQ broker.
+     */
+    public void start() {
+        connections*.openConnection()
     }
 
     /**
      * Starts the individual consumers.
      */
     public void startConsumers() {
-        consumers.each {
-            channels += RabbitConsumer.startConsumer(connection, it)
-        }
+        connections*.startConsumers()
     }
 
     /**
-     * Reloads the RabbitMQ connection and consumers.
+     * Reloads message consumers, but leaves the connections intact.
      */
     public void restartConsumers() {
-        // Close the existing channels and connection
+        // Close the existing channels
         stopConsumers()
 
         // Start the channels again
@@ -102,28 +100,21 @@ class RabbitContext {
      * Closes any active channels and the connection to the RabbitMQ server.
      */
     public void stopConsumers() {
-        if (channels) {
-            log.debug("closing RabbitMQ channels")
-            channels.each { channel ->
-                if (channel.isOpen()) {
-                    channel.close()
-                }
-            }
-            channels = []
-        }
-        consumers = []
+        connections*.stopConsumers()
     }
 
     /**
      * Closes all active channels and disconnects from the RabbitMQ server.
      */
     public void stop() {
+        // Stop consumers
         stopConsumers()
-        if (connection?.isOpen()) {
-            log.debug("closing connection to the RabbitMQ server")
-            connection.close()
-            connection = null
-        }
+
+        // Disconnect
+        connections*.closeConnection()
+        connections = []
+
+        // Clear message converters
         messageConverters = []
     }
 
@@ -132,6 +123,7 @@ class RabbitContext {
      */
     public void restart() {
         stop()
+        loadConfiguration()
         start()
         startConsumers()
     }
@@ -140,28 +132,7 @@ class RabbitContext {
      * Creates the connection to the RabbitMQ server.
      */
     protected void connect() {
-        // Ensure we don't already have a connection
-        if (connection) {
-            throw new Exception('will not connect to RabbitMQ; there is already an active connection')
-        }
-
-        // Log it
-        if (connectionConfiguration.virtualHost) {
-            log.info("connecting to RabbitMQ server at '${connectionConfiguration.host}:${connectionConfiguration.port}' on virtual host '${connectionConfiguration.virtualHost}'")
-        }
-        else {
-            log.info("connecting to RabbitMQ server at '${connectionConfiguration.host}:${connectionConfiguration.port}'")
-        }
-
-        // Create the connection
-        connection = connectionConfiguration.connection
-    }
-
-    /**
-     * Closes the connection to the RabbitMQ server when the object is destroyed.
-     */
-    public void finalize() {
-        stop()
+        connections*.openConnection()
     }
 
     /**
@@ -181,11 +152,18 @@ class RabbitContext {
      * @return
      */
     public boolean registerConsumer(DefaultGrailsMessageConsumerClass candidate) {
+        // Validate the consumer configuration
         if (!RabbitConsumer.isConsumer(candidate)) {
             log.warn("not starting '${candidate.shortName}' as a RabbitMQ message consumer because it is not properly configured")
             return false
         }
-        consumers << candidate
+
+        // Get the proper connection
+        ConnectionContext connection = getConnectionByName(RabbitConsumer.getConnectionName(candidate))
+
+        // Add the consumer to the connection
+        connection.registerConsumer(candidate)
+
         return true
     }
 
@@ -196,7 +174,33 @@ class RabbitContext {
      *
      * @return
      */
-    public Channel createChannel() {
-        return connection.createChannel()
+    public Channel createChannel(String connectionName = null) {
+        return getConnectionByName(connectionName).createChannel()
+    }
+
+    /**
+     * Returns a connection by its name, or the default if the name is null.
+     *
+     * @return
+     */
+    public ConnectionContext getConnectionByName(String name = null) {
+        ConnectionContext context
+
+        if (!name) {
+            context = connections.find { it.isDefault == true }
+
+            if (!context) {
+                throw new Exception("no connection name configured for consumer, and no default connection found")
+            }
+        }
+        else {
+            context = connections.find { it.name == name }
+
+            if (!context) {
+                throw new Exception("no connection with name '${name}' found")
+            }
+        }
+
+        return context
     }
 }

@@ -80,6 +80,26 @@ class RabbitConsumer extends DefaultConsumer {
     private ConsumerConfiguration configuration
 
     /**
+     * Retrieve the name of the connection the consumer belongs to.
+     *
+     * @param clazz
+     * @return
+     */
+    public static String getConnectionName(GrailsClass clazz) {
+        return getConnectionName(clazz.clazz)
+    }
+
+    /**
+     * Retrieve the name of the connection the consumer belongs to.
+     *
+     * @param clazz
+     * @return
+     */
+    public static String getConnectionName(Class clazz) {
+        return (clazz)."${RABBIT_CONFIG_NAME}"['connection'] ?: null
+    }
+
+    /**
      * Determines if a handler is a RabbitMQ consumer.
      *
      * @param clazz
@@ -127,7 +147,7 @@ class RabbitConsumer extends DefaultConsumer {
      * @param handler Handler object to wrap a RabbitMQ consumer around.
      * @return A list of channels that were created for the consumer.
      */
-    public static List<Channel> startConsumer(Connection connection, GrailsClass handler) {
+    public static List<Channel> startConsumer(ConnectionContext connectionContext, GrailsClass handler) {
         // Check if the object wants to be a consumer
         if (!RabbitConsumer.isConsumer(handler)) {
             return []
@@ -138,13 +158,13 @@ class RabbitConsumer extends DefaultConsumer {
 
         // Make sure a queue or an exchange was specified
         if (!config.queue && !config.exchange) {
-            log.warn("RabbitMQ configuration for consumer ${handler.shortName} is missing a queue or an exchange")
+            log.warn("RabbitMQ configuration for consumer '${handler.shortName}' is missing a queue or an exchange")
             return []
         }
 
         // Make sure that only a queue or an exchange was specified
         if (config.queue && config.exchange) {
-            log.warn("RabbitMQ configuration for consumer ${handler.shortName} can not have both a queue and an exchange")
+            log.warn("RabbitMQ configuration for consumer '${handler.shortName}' can not have both a queue and an exchange")
             return []
         }
 
@@ -153,10 +173,10 @@ class RabbitConsumer extends DefaultConsumer {
 
         // Start the consumers
         if (config.queue) {
-            log.debug("registering consumer ${handler.shortName} as a RabbitMQ consumer with ${config.consumers} consumer(s)")
+            log.debug("registering consumer '${handler.shortName}' as a RabbitMQ consumer on connection '${connectionContext.name}' with ${config.consumers} consumer(s)")
             config.consumers.times {
                 // Create the channel
-                Channel channel = connection.createChannel()
+                Channel channel = connectionContext.connection.createChannel()
 
                 // Determine the queue
                 String queue = config.queue
@@ -177,10 +197,10 @@ class RabbitConsumer extends DefaultConsumer {
         }
         else {
             // Log it
-            log.debug("registering consumer ${handler.shortName} as a RabbitMQ subscriber")
+            log.debug("registering consumer '${handler.shortName}' on connection '${connectionContext.name}' as a RabbitMQ subscriber")
 
             // Create the channel
-            Channel channel = connection.createChannel()
+            Channel channel = connectionContext.connection.createChannel()
 
             // Create a queue
             String queue = channel.queueDeclare().queue
@@ -189,7 +209,7 @@ class RabbitConsumer extends DefaultConsumer {
             }
             else if (config.binding instanceof Map) {
                 if (!(config.match in ['any', 'all'])) {
-                    log.warn("not starting consumer ${handler.shortName} since the match property was not set or not one of (\"any\", \"all\")")
+                    log.warn("not starting consumer '${handler.shortName}' since the match property was not set or not one of (\"any\", \"all\")")
                     return
                 }
                 channel.queueBind(queue, config.exchange, '', config.binding + ['x-match': config.match])

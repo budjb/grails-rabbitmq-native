@@ -1,3 +1,18 @@
+/*
+ * Copyright 2014 Bud Byrd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.budjb.rabbitmq
 
 import com.rabbitmq.client.Channel
@@ -16,17 +31,28 @@ class RabbitQueueBuilder {
     /**
      * Current exchange marker
      */
-    private String currentExchange
+    private String currentExchange = null
+
+    /**
+     * Current connection to create exchanges/queues against
+     */
+    private ConnectionContext currentConnection = null
 
     /**
      * RabbitMQ context bean
      */
-    private RabbitContext rabbitContext
+    private RabbitContext rabbitContext = null
 
     /**
      * Constructor
      *
-     * @param context
+     * @param context        // Determine the connection
+        ConnectionContext connection = currentConnection
+        if (!currentConnection) {
+            connection = rabbitContext.getConnectionByName(parameters['connection'] ?: null)
+        }
+
+
      */
     public RabbitQueueBuilder(RabbitContext context) {
         rabbitContext = context
@@ -52,26 +78,32 @@ class RabbitQueueBuilder {
             throw new RuntimeException("name is required to declare a queue")
         }
 
+        // Determine the connection
+        ConnectionContext connection = currentConnection
+        if (!currentConnection) {
+            connection = rabbitContext.getConnectionByName(parameters['connection'] ?: null)
+        }
+
         // Grab a channel
-        Channel channel = getChannel()
+        Channel channel = connection.createChannel()
 
         // Declare the queue
         try {
             channel.queueDeclare(name, durable, exclusive, autoDelete, arguments)
+
+            // If we are nested inside of an exchange definition, create
+            // a binding between the queue and the exchange.
+            if (currentExchange) {
+                bindQueue(parameters, currentExchange, channel)
+            }
+            else if (exchange) {
+                bindQueue(parameters, exchange, channel)
+            }
         }
         finally {
             if (channel.isOpen()) {
                 channel.close()
             }
-        }
-
-        // If we are nested inside of an exchange definition, create
-        // a binding between the queue and the exchange.
-        if (currentExchange) {
-            bindQueue(parameters, currentExchange)
-        }
-        else if (exchange) {
-            bindQueue(parameters, exchange)
         }
     }
 
@@ -81,10 +113,7 @@ class RabbitQueueBuilder {
      * @param queue
      * @param exchange
      */
-    void bindQueue(Map queue, String exchange) {
-        // Grab a channel
-        Channel channel = getChannel()
-
+    void bindQueue(Map queue, String exchange, Channel channel) {
         if (queue['binding'] instanceof String) {
             channel.queueBind(queue['name'], exchange, queue['binding'])
         }
@@ -131,8 +160,14 @@ class RabbitQueueBuilder {
             throw new RuntimeException("a type must be provided for the exchange '${name}'")
         }
 
+        // Determine the connection
+        ConnectionContext connection = currentConnection
+        if (!currentConnection) {
+            connection = rabbitContext.getConnectionByName(parameters['connection'] ?: null)
+        }
+
         // Grab a channel
-        Channel channel = getChannel()
+        Channel channel = connection.createChannel()
 
         // Declare the exchange
         try {
@@ -146,12 +181,46 @@ class RabbitQueueBuilder {
 
         // Run the closure if given
         if (closure) {
+            boolean resetConnection = (currentConnection == null)
+
             currentExchange = parameters['name']
+            currentConnection = connection
             closure = closure.clone()
             closure.delegate = this
             closure()
             currentExchange = null
+
+            if (resetConnection) {
+                currentConnection = null
+            }
         }
+    }
+
+    /**
+     * Lets the exchange and queue methods know what connection to build against.
+     *
+     * @param name
+     * @param closure
+     */
+    void connection(String name, Closure closure) {
+        // Sanity check
+        if (currentConnection) {
+            throw new RuntimeException("unexpected connection in the queue configuration; there is a current connection already open")
+        }
+
+        // Find the connection
+        ConnectionContext context = rabbitContext.getConnectionByName(name)
+
+        // Store the context
+        currentConnection = context
+
+        // Run the closure
+        closure = closure.clone()
+        closure.delegate = this
+        closure()
+
+        // Clear the context
+        currentConnection = null
     }
 
     /**
