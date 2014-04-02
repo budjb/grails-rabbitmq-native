@@ -60,6 +60,11 @@ class ConnectionConfiguration {
      * 5 is the RabbitMQ default. 0 means unlimited.
      */
     public int threads = 0
+	
+    /**
+     * Use SSL
+     */
+    public boolean ssl = false
 
     /**
      * Constructor that parses the configuration for RabbitMQ's connection properties.
@@ -81,7 +86,8 @@ class ConnectionConfiguration {
         password = configuration.password ?: null
         virtualHost = configuration.virtualHost ?: '/'
         threads = configuration.threads ?: threads
-
+        ssl = configuration.ssl ?: false
+		
         // Ensure we have all we need to continue
         if (!host || !username || !password) {
             throw new Exception('The host, username, and password configuration options are required for RabbitMQ')
@@ -104,6 +110,10 @@ class ConnectionConfiguration {
         factory.host = host
         factory.virtualHost = virtualHost
 
+        if (ssl) {
+            factory.useSslProtocol()	
+        }
+		
         // Create the thread pool service
         ExecutorService executorService
         if (threads > 0) {
