@@ -80,6 +80,11 @@ class RabbitConsumer extends DefaultConsumer {
     private ConsumerConfiguration configuration
 
     /**
+     * Connection context associated with this consumer.
+     */
+    private ConnectionContext connectionContext
+
+    /**
      * Retrieve the name of the connection the consumer belongs to.
      *
      * @param clazz
@@ -188,7 +193,7 @@ class RabbitConsumer extends DefaultConsumer {
                 channel.basicConsume(
                     queue,
                     config.autoAck == AutoAck.ALWAYS,
-                    new RabbitConsumer(channel, config, handler)
+                    new RabbitConsumer(channel, config, connectionContext, handler)
                 )
 
                 // Store the channel
@@ -222,7 +227,7 @@ class RabbitConsumer extends DefaultConsumer {
             channel.basicConsume(
                 queue,
                 config.autoAck == AutoAck.ALWAYS,
-                new RabbitConsumer(channel, config, handler)
+                new RabbitConsumer(channel, config, connectionContext, handler)
             )
 
             // Store the channel
@@ -238,7 +243,7 @@ class RabbitConsumer extends DefaultConsumer {
      * @param channel
      * @param grailsClass
      */
-    public RabbitConsumer(Channel channel, ConsumerConfiguration configuration, GrailsClass handler) {
+    public RabbitConsumer(Channel channel, ConsumerConfiguration configuration, ConnectionContext connectionContext, GrailsClass handler) {
         // Run the parent
         super(channel)
 
@@ -250,6 +255,9 @@ class RabbitConsumer extends DefaultConsumer {
 
         // Store the configuration
         this.configuration = configuration
+
+        // Store the connection context
+        this.connectionContext = connectionContext
     }
 
     /**
@@ -267,7 +275,8 @@ class RabbitConsumer extends DefaultConsumer {
             consumerTag: consumerTag,
             envelope: envelope,
             properties: properties,
-            body: body
+            body: body,
+            connectionContext: connectionContext
         )
 
         // Process and hand off the message to the consumer

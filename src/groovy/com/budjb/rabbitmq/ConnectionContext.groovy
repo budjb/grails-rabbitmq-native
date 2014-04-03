@@ -16,10 +16,10 @@
 package com.budjb.rabbitmq
 
 import com.rabbitmq.client.Channel
-import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
 
-import groovy.util.ConfigObject;
+import groovy.util.ConfigObject
 
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors

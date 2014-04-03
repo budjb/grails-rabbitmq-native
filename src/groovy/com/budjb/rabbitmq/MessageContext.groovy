@@ -44,4 +44,9 @@ class MessageContext {
      * Raw message body
      */
     byte[] body
+
+    /**
+     * Connection context associated with the message.
+     */
+    ConnectionContext connectionContext
 }
