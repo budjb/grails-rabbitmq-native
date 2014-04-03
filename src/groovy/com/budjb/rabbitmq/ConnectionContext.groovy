@@ -75,6 +75,11 @@ class ConnectionContext {
     public int threads = 0
 
     /**
+     * Whether to use SSL.
+     */
+    public boolean ssl = false
+
+    /**
      * List of message consumers for this connection.
      */
     List<DefaultGrailsMessageConsumerClass> consumers = []
@@ -160,6 +165,11 @@ class ConnectionContext {
         factory.host = host
         factory.virtualHost = virtualHost
         factory.automaticRecovery = automaticReconnect
+
+        // Optionally enable SSL
+        if (ssl) {
+            factory.useSslProtocol()
+        }
 
         // Create the thread pool service
         ExecutorService executorService
