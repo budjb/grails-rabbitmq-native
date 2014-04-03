@@ -63,6 +63,11 @@ class ConnectionContext {
     public String virtualHost = '/'
 
     /**
+     * Whether to automatically reconnect.
+     */
+    public boolean automaticReconnect = true
+
+    /**
      * The maximum number of concurrent consumer threads that are processed.
      *
      * 5 is the RabbitMQ default. 0 means unlimited.
@@ -154,6 +159,7 @@ class ConnectionContext {
         factory.port = port
         factory.host = host
         factory.virtualHost = virtualHost
+        factory.automaticRecovery = automaticReconnect
 
         // Create the thread pool service
         ExecutorService executorService

@@ -11,7 +11,7 @@ grails.project.dependency.resolution = {
     }
 
     dependencies {
-        compile 'com.rabbitmq:amqp-client:3.1.3'
+        compile 'com.rabbitmq:amqp-client:3.3.0'
     }
 
     plugins {
