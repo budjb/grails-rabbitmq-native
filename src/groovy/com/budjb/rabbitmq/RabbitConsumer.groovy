@@ -28,6 +28,7 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsClass
 import grails.util.Holders
 
+@SuppressWarnings("unchecked")
 class RabbitConsumer extends DefaultConsumer {
     /**
      * Logger

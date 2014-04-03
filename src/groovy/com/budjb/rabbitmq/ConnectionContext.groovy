@@ -26,6 +26,7 @@ import java.util.concurrent.Executors
 
 import org.apache.log4j.Logger
 
+@SuppressWarnings("unchecked")
 class ConnectionContext {
     /**
      * RabbitMQ host
