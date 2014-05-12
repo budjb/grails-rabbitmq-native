@@ -46,13 +46,7 @@ class RabbitQueueBuilder {
     /**
      * Constructor
      *
-     * @param context        // Determine the connection
-        ConnectionContext connection = currentConnection
-        if (!currentConnection) {
-            connection = rabbitContext.getConnectionByName(parameters['connection'] ?: null)
-        }
-
-
+     * @param context
      */
     public RabbitQueueBuilder(RabbitContext context) {
         rabbitContext = context
@@ -81,7 +75,16 @@ class RabbitQueueBuilder {
         // Determine the connection
         ConnectionContext connection = currentConnection
         if (!currentConnection) {
-            connection = rabbitContext.getConnectionByName(parameters['connection'] ?: null)
+            String connectionName = parameters['connection'] ?: null
+            connection = rabbitContext.getConnection(connectionName)
+            if (!connection) {
+                if (!connectionName) {
+                    throw new Exception("no default connection found")
+                }
+                else {
+                    throw new Exception("no connection with name '${connectionName}' found")
+                }
+            }
         }
 
         // Grab a channel
@@ -163,7 +166,16 @@ class RabbitQueueBuilder {
         // Determine the connection
         ConnectionContext connection = currentConnection
         if (!currentConnection) {
-            connection = rabbitContext.getConnectionByName(parameters['connection'] ?: null)
+            String connectionName = parameters['connection'] ?: null
+            connection = rabbitContext.getConnection(connectionName)
+            if (!connection) {
+                if (!connectionName) {
+                    throw new Exception("no default connection found")
+                }
+                else {
+                    throw new Exception("no connection with name '${connectionName}' found")
+                }
+            }
         }
 
         // Grab a channel
@@ -209,7 +221,15 @@ class RabbitQueueBuilder {
         }
 
         // Find the connection
-        ConnectionContext context = rabbitContext.getConnectionByName(name)
+        ConnectionContext context = rabbitContext.getConnection(name)
+        if (!context) {
+            if (!name) {
+                throw new Exception("no default connection found")
+            }
+            else {
+                throw new Exception("no connection with name '${name}' found")
+            }
+        }
 
         // Store the context
         currentConnection = context

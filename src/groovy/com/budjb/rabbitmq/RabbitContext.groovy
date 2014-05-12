@@ -159,7 +159,12 @@ class RabbitContext {
         }
 
         // Get the proper connection
-        ConnectionContext connection = getConnectionByName(RabbitConsumer.getConnectionName(candidate))
+        ConnectionContext connection = getConnection(RabbitConsumer.getConnectionName(candidate))
+
+        // If the connection wasn't found, bail out
+        if (!connection) {
+            return false
+        }
 
         // Add the consumer to the connection
         connection.registerConsumer(candidate)
@@ -175,7 +180,19 @@ class RabbitContext {
      * @return
      */
     public Channel createChannel(String connectionName = null) {
-        return getConnectionByName(connectionName).createChannel()
+        // Get the requested connection
+        ConnectionContext connection = getConnection(connectionName)
+
+        if (!connection) {
+            if (!connectionName) {
+                throw new Exception("no default connection found")
+            }
+            else {
+                throw new Exception("no connection with name '${connectionName}' found")
+            }
+        }
+
+        return connection.createChannel()
     }
 
     /**
@@ -183,21 +200,22 @@ class RabbitContext {
      *
      * @return
      */
-    public ConnectionContext getConnectionByName(String name = null) {
+    public ConnectionContext getConnection(String name = null) {
         ConnectionContext context
 
         if (!name) {
             context = connections.find { it.isDefault == true }
 
             if (!context) {
-                throw new Exception("no connection name configured for consumer, and no default connection found")
+                log.error("no default connection found")
+                return null
             }
         }
         else {
             context = connections.find { it.name == name }
 
             if (!context) {
-                throw new Exception("no connection with name '${name}' found")
+                log.error("no connection with name '${name}' found")
             }
         }
 
