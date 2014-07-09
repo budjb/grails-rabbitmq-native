@@ -26,6 +26,10 @@ import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsClass
+import org.hibernate.Session
+import org.hibernate.SessionFactory
+import org.springframework.orm.hibernate3.SessionHolder
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import grails.util.Holders
 
 @SuppressWarnings("unchecked")
@@ -84,6 +88,11 @@ class RabbitConsumer extends DefaultConsumer {
      * Connection context associated with this consumer.
      */
     private ConnectionContext connectionContext
+
+    /**
+     * Hibernate session factory.
+     */
+    SessionFactory sessionFactory
 
     /**
      * Retrieve the name of the connection the consumer belongs to.
@@ -259,6 +268,11 @@ class RabbitConsumer extends DefaultConsumer {
 
         // Store the connection context
         this.connectionContext = connectionContext
+
+        // Store the session factory bean
+        this.sessionFactory = Holders.applicationContext.getBean('sessionFactory')
+
+
     }
 
     /**
@@ -336,6 +350,9 @@ class RabbitConsumer extends DefaultConsumer {
         // Get the handler bean
         Object handlerBean = getHandlerBean()
 
+        // Open a session
+        Session hibernateSession = openSession()
+
         // Call the received message callback
         onReceive(handlerBean, context)
 
@@ -400,6 +417,11 @@ class RabbitConsumer extends DefaultConsumer {
         finally {
             // Call the complete callback
             onComplete(handlerBean, context)
+
+            // Close the session
+            if (hibernateSession) {
+                closeSession(hibernateSession)
+            }
         }
     }
 
@@ -594,5 +616,60 @@ class RabbitConsumer extends DefaultConsumer {
      */
     protected Object getHandlerBean() {
         return Holders.applicationContext.getBean(handler.fullName)
+    }
+
+    /**
+     * Creates a new session, or null if one could not be created.
+     *
+     * @return
+     */
+    protected Session openSession() {
+        // No session if the session factory is not found
+        if (!sessionFactory) {
+            return null
+        }
+
+        // Get the current session holder
+        SessionHolder sessionHolder = TransactionSynchronizationManager.getResource(sessionFactory)
+
+        // If there's a current session, don't create a new one
+        if (sessionHolder?.session) {
+            return null
+        }
+
+        // Create the session
+        Session session = sessionFactory.openSession()
+
+        // If the holder is null, create it, otherwise just add the new session
+        if (sessionHolder == null) {
+            sessionHolder = new SessionHolder(session)
+            TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder)
+        }
+        else {
+            sessionHolder.addSession(session)
+        }
+
+        return session
+    }
+
+    /**
+     * Closes the current session.
+     *
+     * @param session
+     */
+    protected void closeSession(Session session) {
+        // Get the current session holder
+        SessionHolder sessionHolder = TransactionSynchronizationManager.getResource(sessionFactory)
+
+        // Close the session
+        if (session.isOpen()) {
+            session.close()
+        }
+
+        // Remove the session
+        sessionHolder.removeSession(session)
+
+        // Unbind the thread
+        TransactionSynchronizationManager.unbindResource(sessionFactory)
     }
 }
