@@ -20,6 +20,7 @@ import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
+import com.rabbitmq.client.impl.recovery.AutorecoveringChannel
 import groovy.json.JsonSlurper
 import java.lang.reflect.Field
 import java.lang.reflect.Method
@@ -192,6 +193,12 @@ class RabbitConsumer extends DefaultConsumer {
             config.consumers.times {
                 // Create the channel
                 Channel channel = connectionContext.connection.createChannel()
+
+                // Add listeners
+                channel.addShutdownListener(new ChannelShutdownListener())
+                if (channel instanceof AutorecoveringChannel) {
+                    ((AutorecoveringChannel)channel).addRecoveryListener(new AutorecoveryListener())
+                }
 
                 // Determine the queue
                 String queue = config.queue
@@ -660,6 +667,9 @@ class RabbitConsumer extends DefaultConsumer {
     protected void closeSession(Session session) {
         // Get the current session holder
         SessionHolder sessionHolder = TransactionSynchronizationManager.getResource(sessionFactory)
+
+        // Flush the session
+        session.flush()
 
         // Close the session
         if (session.isOpen()) {
