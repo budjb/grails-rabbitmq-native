@@ -16,6 +16,31 @@ The above code will define a queue named *example.queue*, and its durable flag w
 Be sure to note that the queues property is a closure. You must ensure that the *@=@* is present for this feature to function properly.
 {warning}
 
+If using the multi-server feature of the plugin, it is important to consider what server the queue should be defined in.  The @connection@ property
+specifies which server to create the queue in, illustrated below:
+
+{code}
+rabbitmq {
+    queues = {
+        // Assume there is a connection with the name "server1"...
+        queue name: "example.queue", connection: "server1", durable: true
+    }
+}
+{code}
+
+If there are many queues to be defined for a specific server connection, the connection method provides a convenient way to bunch queue creation.
+{code}
+rabbitmq {
+    queues = {
+        // Assume there is a connection with the name "server1"...
+        connection name: "server1", {
+            queue name: "example.queue", durable: true
+            queue name: "example2.queue", durable: true
+        }
+    }
+}
+{code}
+
 Below is a table of all of the options available when defining queues:
 {table}
 *Property* | *Required* | *Description* | *Type* | *Default*
@@ -26,4 +51,5 @@ Below is a table of all of the options available when defining queues:
 @exchange@ | | Binds a queue to an exchange in conjunction with the @binding@ property. Ignored if used inside an exchange declaration. | @String@ | _none_
 @match@ | | Required when binding to a headers exchange. Either "any" or "all". | @String@ | _none_
 @name@ | !/bullet_red.png! | Name of the queue. | @String@ | _none_
+@connection@ | | Name of the connection to create the queue with.  Uses the default connection if omitted. | @String@ | _none_
 {table}
