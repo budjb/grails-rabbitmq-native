@@ -12,7 +12,7 @@ In @grails-app/conf/BuildConfig.groovy@, under the @plugins@ section, add:
     plugins {
         // ...
 
-        compile ":rabbitmq-native:latest.release"
+        compile name: "rabbitmq-native", version: "latest.release"
 
         // ...
     }
