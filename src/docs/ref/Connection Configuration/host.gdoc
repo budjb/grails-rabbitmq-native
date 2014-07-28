@@ -8,10 +8,12 @@ h2. Examples
 
 {code}
 rabbitmq {
-    connection {
-        host = "rabbit.example.com"
-        username = "foo"
-        password = "bar"
+    connection = {
+        connection(
+            host: "rabbit.example.com",
+            username: "foo",
+            password: "bar"
+        )
     }
 }
 {code}

@@ -1,0 +1,28 @@
+h1. ssl
+
+h2. Purpose
+
+Sets whether SSL should be used for a connection.
+
+h2. Examples
+
+{code}
+rabbitmq {
+    connection = {
+        connection(
+            host: "rabbit.example.com",
+            username: "foo",
+            password: "bar",
+            ssl: true
+        )
+    }
+}
+{code}
+
+h2. Description
+
+If true, the connection will connect to the RabbitMQ server with SSL.
+
+{note}
+The SSL trust is all-trusting, so self-signed and potentially invalid certs will be accepted.
+{note}

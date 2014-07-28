@@ -8,11 +8,13 @@ h2. Examples
 
 {code}
 rabbitmq {
-    connection {
-        host = "rabbit.example.com"
-        username = "foo"
-        password = "bar"
-        threads = 5
+    connection = {
+        connection(
+            host: "rabbit.example.com",
+            username: "foo",
+            password: "bar",
+            threads: 5
+        )
     }
 }
 {code}
