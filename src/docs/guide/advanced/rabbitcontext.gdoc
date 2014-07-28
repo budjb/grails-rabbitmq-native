@@ -18,4 +18,5 @@ class TestObject {
 }
 {code}
 
-Of particular importance is the @connection@ property of the @RabbitContext@ bean, which is an instance of RabbitMQ's @Connection@ object.
+Of particular importance is the @getConnection()@ method of the @RabbitContext@ bean.  This method returns a @ConnectionContext@ object, which
+exposes the RabbitMQ @Connection@ object through its own @getConnection()@ method.
