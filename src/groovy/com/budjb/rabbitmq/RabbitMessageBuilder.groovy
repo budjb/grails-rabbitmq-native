@@ -144,6 +144,11 @@ class RabbitMessageBuilder {
     boolean autoConvert = true
 
     /**
+     * Connection name.
+     */
+    String connection = null
+
+    /**
      * Constructor
      *
      * Loads the rabbit template bean registered from the grails plugin.
@@ -181,7 +186,7 @@ class RabbitMessageBuilder {
 
         // If we weren't passed a channel, create a temporary one
         if (!channel) {
-            channel = rabbitContext.createChannel()
+            channel = rabbitContext.createChannel(connection)
             tempChannel = true
         }
 
@@ -286,7 +291,7 @@ class RabbitMessageBuilder {
 
         // If a channel wasn't given, create one
         if (!channel) {
-            channel = rabbitContext.connection.createChannel()
+            channel = rabbitContext.createChannel(connection)
             tempChannel = true
         }
 

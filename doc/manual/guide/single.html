@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
     <head>
-        <title>Rabbitmq Native Plugin 1.0.3</title>
+        <title>Rabbitmq Native Plugin 2.0.4</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8" />
         <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8" />
@@ -66,7 +66,7 @@ function addJsClass(el) {
                         <div class="project">
                             <h1>Rabbitmq Native Plugin - Reference Documentation</h1>
                             <p><strong>Authors:</strong> Bud Byrd</p>
-                            <p><strong>Version:</strong> 1.0.3</p>
+                            <p><strong>Version:</strong> 2.0.4</p>
                             
                         </div>
 
@@ -114,6 +114,8 @@ function addJsClass(el) {
                             
                             <div class="toc-item" style="margin-left:20px"><a href="#headers"><strong>4.3.4</strong><span>Headers Exchanges</span></a></div>
                             
+                            <div class="toc-item" style="margin-left:10px"><a href="#consmulti"><strong>4.4</strong><span>Multi-Server</span></a></div>
+                            
                             <div class="toc-item" style="margin-left:0px"><a href="#publishing"><strong>5</strong><span>Publishing Messages</span></a></div>
                             
                             <div class="toc-item" style="margin-left:10px"><a href="#send"><strong>5.1</strong><span>Sending Messages</span></a></div>
@@ -153,18 +155,24 @@ or its Java library.  More information can be found in their <a href="http://www
 <h1 id="quickstart">2 Quick Start</h1>
 This is a quick and dirty how-to detailing how to quickly begin using the plugin. While there is a lot of configurability offered by this plugin, this is a very basic demonstration of its usage.<p class="paragraph"/><h3>Create The Application</h3>
 Create a project named <strong class="bold">RabbitExample</strong>. You can do this by entering:
-<div class="code"><pre>grails create&#45;app RabbitExample</pre></div><p class="paragraph"/><h3>Configuring</h3>
+<div class="code"><pre>grails create&#45;app RabbitExample</pre></div><p class="paragraph"/><h3>Add The Plugin</h3>
+In <code>grails-app/conf/BuildConfig.groovy</code>, under the <code>plugins</code> section, add:
+<div class="code"><pre>plugins &#123;
+        // ...<p class="paragraph"/>        compile name: <span class="java&#45;quote">"rabbitmq&#45;<span class="java&#45;keyword">native</span>"</span>, version: <span class="java&#45;quote">"latest.release"</span><p class="paragraph"/>        // &#8230;
+    &#125;</pre></div><p class="paragraph"/>Then, refresh the project's dependencies:
+<div class="code"><pre>grails refresh&#45;dependencies</pre></div><p class="paragraph"/><h3>Configuring</h3>
 In <code>grails-app/conf/Config.groovy</code>, add:
 <div class="code"><pre>rabbitmq &#123;
-    connection &#123;
-        host = <span class="java&#45;quote">"changeme"</span>
-        username = <span class="java&#45;quote">"changeme"</span>
-        password = <span class="java&#45;quote">"changeme"</span>
+    connection = &#123;
+        connection host: <span class="java&#45;quote">"changeme"</span>, username: <span class="java&#45;quote">"changeme"</span>, password: <span class="java&#45;quote">"changeme"</span>
     &#125;
     queues = &#123;
         queue name: <span class="java&#45;quote">"testqueue"</span>
     &#125;
-&#125;</pre></div><p class="paragraph"/><h3>Consumer</h3>
+&#125;</pre></div>
+<blockquote class="note">
+Be sure to replace the appropriate values for your RabbitMQ server and user credentials.
+</blockquote><p class="paragraph"/><h3>Consumer</h3>
 Create the a consumer by using the following command:
 <div class="code"><pre>grails create&#45;consumer com.example.Test</pre></div><p class="paragraph"/>Update the consumer to reflect the following:
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.MessageContext<p class="paragraph"/>class TestConsumer &#123;
@@ -188,9 +196,9 @@ Create the a consumer by using the following command:
 Create a controller by using the following command:
 <div class="code"><pre>grails create&#45;controller com.example.Test</pre></div><p class="paragraph"/>Update the controller to reflect the following:
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.RabbitMessageBuilder<p class="paragraph"/>class TestController &#123;
-    def index = &#123;
+    def index() &#123;
         render <span class="java&#45;keyword">new</span> RabbitMessageBuilder().rpc &#123;
-            queue = <span class="java&#45;quote">"testqueue"</span>
+            routingKey = <span class="java&#45;quote">"testqueue"</span>
             body = <span class="java&#45;quote">"Hello!"</span>
         &#125;
     &#125;
@@ -208,13 +216,16 @@ Configuration of the connection to the RabbitMQ server is done in your project's
 
 <h2 id="connection">3.1 Server Connection</h2>
 The plugin expects the connection configuration to the RabbitMQ server to be defined. A bare minimum configuration example looks like:<p class="paragraph"/><div class="code"><pre>rabbitmq &#123;
-    connection &#123;
-        host = <span class="java&#45;quote">"example.com"</span>
-        username = <span class="java&#45;quote">"foo"</span>
-        password = <span class="java&#45;quote">"bar"</span>
+    connection = &#123;
+        connection host: <span class="java&#45;quote">"example.com"</span>, username: <span class="java&#45;quote">"foo"</span>, password: <span class="java&#45;quote">"bar"</span>
+    &#125;
+&#125;</pre></div><p class="paragraph"/>Connections to many different RabbitMQ servers can be configured.  A multi-server configuration looks like:<p class="paragraph"/><div class="code"><pre>rabbitmq &#123;
+    connection = &#123;
+        connection host: <span class="java&#45;quote">"rabbit1.example.com"</span>, username: <span class="java&#45;quote">"foo"</span>, password: <span class="java&#45;quote">"bar"</span>
+        connection host: <span class="java&#45;quote">"rabbit2.example.com"</span>, username: <span class="java&#45;quote">"foo"</span>, password: <span class="java&#45;quote">"bar"</span>
     &#125;
 &#125;</pre></div><p class="paragraph"/>The following table enumerates all the configuration options available to the connection configuration:
-<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Configuration Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>host</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Hostname or IP address of the RabbitMQ server to connect to.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>username</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Username to log into the RabbitMQ server with.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>password</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Password to log into the RabbitMQ server with.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>port</code></td><td>&#160;</td><td>Port to connect to the RabbitMQ server with.</td><td><code>Integer</code></td><td>5672</td></tr><tr class="table-odd"><td><code>virtualHost</code></td><td>&#160;</td><td>Name of the virtual host to connect to the RabbitMQ server with.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>threads</code></td><td>&#160;</td><td>Threadpool size, if greater than 0, determines how many concurrent messages can be processed at any given time. If set to 0, consumers can consume as many messages as it's configured to.</td><td><code>String</code></td><td><code>0</code></td></tr></table>
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Configuration Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>host</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Hostname or IP address of the RabbitMQ server to connect to.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>username</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Username to log into the RabbitMQ server with.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>password</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Password to log into the RabbitMQ server with.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>name</code></td><td>&#160;</td><td>Name of the connection. This is used while sending messages to a specific RabbitMQ server when using multiple servers.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>isDefault</code></td><td>&#160;</td><td>A connection with this set to true will be the server messages are sent to if no specific connection is specified when sending the message.</td><td><code>booleang</code></td><td><code>false</code></td></tr><tr class="table-even"><td><code>port</code></td><td>&#160;</td><td>Port to connect to the RabbitMQ server with.</td><td><code>Integer</code></td><td>5672</td></tr><tr class="table-odd"><td><code>virtualHost</code></td><td>&#160;</td><td>Name of the virtual host to connect to the RabbitMQ server with.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>ssl</code></td><td>&#160;</td><td>Whether to use SSL when connecting to a RabbitMQ server.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>threads</code></td><td>&#160;</td><td>Threadpool size, if greater than 0, determines how many concurrent messages can be processed at any given time. If set to 0, consumers can consume as many messages as it's configured to.</td><td><code>String</code></td><td><code>0</code></td></tr><tr class="table-even"><td><code>automaticReconnect</code></td><td>&#160;</td><td>If true, will cause the application to automatically reconnect to a server when its connection is dropped.</td><td><code>boolean</code></td><td><code>true</code></td></tr></table>
 
 
 
@@ -227,8 +238,23 @@ having to manually create the exchanges and queues prior to running the applicat
     &#125;
 &#125;</pre></div><p class="paragraph"/>The above code will define a queue named <strong class="bold">example.queue</strong>, and its durable flag will be set.<p class="paragraph"/><blockquote class="warning">
 Be sure to note that the queues property is a closure. You must ensure that the <strong class="bold"><code>=</code></strong> is present for this feature to function properly.
-</blockquote><p class="paragraph"/>Below is a table of all of the options available when defining queues:
-<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>arguments</code></td><td>&#160;</td><td>Extra arguments used to create the queue. See the <a href="http://www.rabbitmq.com/documentation.html" target="blank">RabbitMQ documentation</a> for more information.</td><td><code>Map</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>autoDelete</code></td><td>&#160;</td><td>Whether to automatically delete the queue once there are no more consumers listening to it.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>binding</code></td><td>&#160;</td><td>Used in conjunction with exchanges. See the section below for more information.</td><td> <em class="italic">Mixed</em> </td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>durable</code></td><td>&#160;</td><td>Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>exchange</code></td><td>&#160;</td><td>Binds a queue to an exchange in conjunction with the <code>binding</code> property. Ignored if used inside an exchange declaration.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>match</code></td><td>&#160;</td><td>Required when binding to a headers exchange. Either "any" or "all".</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>name</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Name of the queue.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr></table>
+</blockquote><p class="paragraph"/>If using the multi-server feature of the plugin, it is important to consider what server the queue should be defined in.  The <code>connection</code> property
+specifies which server to create the queue in, illustrated below:<p class="paragraph"/><div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        // Assume there is a connection with the name <span class="java&#45;quote">"server1"</span>&#8230;
+        queue name: <span class="java&#45;quote">"example.queue"</span>, connection: <span class="java&#45;quote">"server1"</span>, durable: <span class="java&#45;keyword">true</span>
+    &#125;
+&#125;</pre></div><p class="paragraph"/>If there are many queues to be defined for a specific server connection, the connection method provides a convenient way to bunch queue creation.
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        // Assume there is a connection with the name <span class="java&#45;quote">"server1"</span>&#8230;
+        connection name: <span class="java&#45;quote">"server1"</span>, &#123;
+            queue name: <span class="java&#45;quote">"example.queue"</span>, durable: <span class="java&#45;keyword">true</span>
+            queue name: <span class="java&#45;quote">"example2.queue"</span>, durable: <span class="java&#45;keyword">true</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/>Below is a table of all of the options available when defining queues:
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>arguments</code></td><td>&#160;</td><td>Extra arguments used to create the queue. See the <a href="http://www.rabbitmq.com/documentation.html" target="blank">RabbitMQ documentation</a> for more information.</td><td><code>Map</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>autoDelete</code></td><td>&#160;</td><td>Whether to automatically delete the queue once there are no more consumers listening to it.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>binding</code></td><td>&#160;</td><td>Used in conjunction with exchanges. See the section below for more information.</td><td> <em class="italic">Mixed</em> </td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>durable</code></td><td>&#160;</td><td>Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>exchange</code></td><td>&#160;</td><td>Binds a queue to an exchange in conjunction with the <code>binding</code> property. Ignored if used inside an exchange declaration.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>match</code></td><td>&#160;</td><td>Required when binding to a headers exchange. Either "any" or "all".</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>name</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Name of the queue.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>connection</code></td><td>&#160;</td><td>Name of the connection to create the queue with.  Uses the default connection if omitted.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr></table>
 
 
 
@@ -239,7 +265,9 @@ Defining exchanges is very similar to defining queues. The following code illust
         exchange name: <span class="java&#45;quote">"example.exchange"</span>, type: <span class="java&#45;quote">"topic"</span>
     &#125;
 &#125;</pre></div><p class="paragraph"/>The above example will create an exchange with the name <strong class="bold">example.exchange</strong> and of the type <strong class="bold">topic</strong>. Below is a list of all the options availble when creating exchanges:
-<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>arguments</code></td><td>&#160;</td><td>Extra arguments used to create the exchange. See the <a href="http://www.rabbitmq.com/documentation.html" target="blank">RabbitMQ documentation</a> for more information.</td><td><code>Map</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>autoDelete</code></td><td>&#160;</td><td>Whether to automatically delete the exchange once there are no longer any queues bound to it.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>durable</code></td><td>&#160;</td><td>Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-even"><td><code>name</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Name of the exchange.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>type</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>One of "fanout", "topic", "direct", or "headers".</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr></table>
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>arguments</code></td><td>&#160;</td><td>Extra arguments used to create the exchange. See the <a href="http://www.rabbitmq.com/documentation.html" target="blank">RabbitMQ documentation</a> for more information.</td><td><code>Map</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>autoDelete</code></td><td>&#160;</td><td>Whether to automatically delete the exchange once there are no longer any queues bound to it.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>durable</code></td><td>&#160;</td><td>Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-even"><td><code>name</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Name of the exchange.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>type</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>One of "fanout", "topic", "direct", or "headers".</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>connection</code></td><td>&#160;</td><td>Name of the connection to create the exchange with.  Uses the default connection if omitted.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr></table><p class="paragraph"/><blockquote class="note">
+The same connection considerations exist for exchanges as with queues.  The same <code>connection</code> method works for exchanges as well.
+</blockquote>
 
 
 
@@ -472,10 +500,26 @@ to match.<p class="paragraph"/><h4>Headers Example</h4>
 
 
 
+<h2 id="consmulti">4.4 Multi-Server</h2>
+When using a multi-server setup, it is important to consider what server a consumer should listen on.  Use the <code>connection</code> property in the <code>rabbitConfig</code>
+to specify which server the consumer should be bound to.  If the <code>connection</code> is omitted, the consumer will be bound to the default connection.<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
+        <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"test.queue"</span>,
+        <span class="java&#45;quote">"connection"</span>: <span class="java&#45;quote">"server1"</span> // Where <span class="java&#45;quote">"server1"</span> is a connection configured with that name.
+    &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // Do work
+    &#125;
+&#125;</pre></div>
+
+
+
 <h1 id="publishing">5 Publishing Messages</h1>
 Publishing messages through the plugin is achieved by using the <code>RabbitMessageBuilder</code> class. This class utilizes a closure-based configuration method to both send messages
 without waiting for a response, and sending rpc-style messages. There are many options available to the <code>RabbitMessageBuilder</code> which are documented in the reference, but
-this guide will only demonstrate basic usage.
+this guide will only demonstrate basic usage.<p class="paragraph"/><blockquote class="note">
+In a multi-server setup, it is important to consider what server to send a message to. Like configuration and consumers, the <code>connection</code> property
+is used to route the message to the proper server connection.
+</blockquote>
 
 
 
@@ -484,7 +528,7 @@ Sending a message means publishing a message to an exchange or queue and not wai
 are a queue or exchange to publish the message to, and the body of the message.<p class="paragraph"/><h4>Send Example</h4>
 <div class="code"><pre>// Send a message
 <span class="java&#45;keyword">new</span> RabbitMessageBuilder().send &#123;
-    queue = <span class="java&#45;quote">"some.queue"</span>
+    routingKey = <span class="java&#45;quote">"some.queue"</span>
     body = <span class="java&#45;quote">"hi!"</span>
 &#125;</pre></div><p class="paragraph"/>RabbitMQ expects the body of a message to be a byte array. Message converters will also work when publishing messages, so if an object type other than <code>byte</code> is
 encountered, a suitable message converter will be found and run against the message body, if one exists.
@@ -495,12 +539,16 @@ encountered, a suitable message converter will be found and run against the mess
 Publishing an RPC message is as easy as sending messages, except the returned message is returned from the function.<p class="paragraph"/><h4>RPC Example</h4>
 <div class="code"><pre>// Send a message
 def result = <span class="java&#45;keyword">new</span> RabbitMessageBuilder().rpc &#123;
-    queue = <span class="java&#45;quote">"some.queue"</span>
+    routingKey = <span class="java&#45;quote">"some.queue"</span>
     body = <span class="java&#45;quote">"hi!"</span>
     timeout = RabbitMessageBuilder.DEFAULT_TIMEOUT
-&#125;</pre></div><p class="paragraph"/>While this documentation will not deep-dive into the configuration options for the builder, the <a href="../ref/Rabbit Message Builder/timeout.html" class="Rabbit Message Builder">timeout</a> option is especially important for RPC-style messages. The
-timeout property is the amount of time (in milliseconds) the client will wait for the server to respond. If the timeout is reached, a <code>TimeoutException</code>
-will be thrown. If the timeout is set to 0, the client will wait indefinitely for a response. The default value of the timeout, if not passed, is 5 seconds.
+&#125;</pre></div><p class="paragraph"/><blockquote class="warning">
+The <a href="../ref/Rabbit Message Builder/timeout.html" class="Rabbit Message Builder">timeout</a> option is especially important for RPC-style messages. The timeout property is the amount of time (in milliseconds)
+the client will wait for the server to respond. If the timeout is reached, a <code>TimeoutException</code> will be thrown. If the timeout is set to 0, the client
+will wait indefinitely for a response. The default value of the timeout, if not passed, is 5 seconds.
+</blockquote><p class="paragraph"/><blockquote class="note">
+More options for the <code>RabbitMessageBuilder</code> can be found in the <strong class="bold">Quick Reference</strong>.
+</blockquote>
 
 
 
@@ -584,7 +632,8 @@ The bean responsible for connecting to the RabbitMQ server and keeping track of 
     def testMethod() &#123;
         RabbitContext context = Holders.applicationContext.getBean('rabbitContext')
     &#125;
-&#125;</pre></div><p class="paragraph"/>Of particular importance is the <code>connection</code> property of the <code>RabbitContext</code> bean, which is an instance of RabbitMQ's <code>Connection</code> object.
+&#125;</pre></div><p class="paragraph"/>Of particular importance is the <code>getConnection()</code> method of the <code>RabbitContext</code> bean.  This method returns a <code>ConnectionContext</code> object, which
+exposes the RabbitMQ <code>Connection</code> object through its own <code>getConnection()</code> method.
 
 
 
@@ -610,10 +659,19 @@ handler, the transaction is automatically rolled back.<p class="paragraph"/>It i
 
 
 <h1 id="changelog">8 Changelog</h1>
-<h3>Version 1.0.3 - 11/7/2014</h3>
+<h3>Version 2.0.4 - ?/?/????</h3>
+<ul class="star">
+<li>Added multi-server support to all aspects of the plugin.</li>
+<li>Added SSL support for connections.</li>
+<li>Added auto-reconnect support for dropped connections.</li>
+<li>Added logic to wrap a Hibernate session around calls to consumers.</li>
+<li>Updated the RabbitMQ library to version 3.3.0.</li>
+<li>Added logging for connection/channel reconnects and channel shutdowns.</li>
+<li>Changed format for connection configurations. The old style is still supported, but will likely be removed at some point.</li>
+</ul><p class="paragraph"/><h3>Version 1.0.3 - 1/7/2014</h3>
 <ul class="star">
 <li>Modified the logic to check for the existence of callbacks in consumers.</li>
-</ul><p class="paragraph"/><h3>Version 1.0.2 - 11/6/2014</h3>
+</ul><p class="paragraph"/><h3>Version 1.0.2 - 1/6/2014</h3>
 <ul class="star">
 <li>Added a cached thread pool so the user does not need to account for the number of threads consumers require. Set the default to 0 so that this is the default.</li>
 <li>Added callbacks for messages: onReceive, onSuccess, onFailure, and onComplete.</li>
@@ -686,13 +744,25 @@ handler, the transaction is automatically rolled back.<p class="paragraph"/>It i
                     <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Connection Configuration</h1><div class="menu-sub">
                         
                         
+                        <div class="menu-item"><a href="../ref/Connection%20Configuration/automaticReconnect.html">automaticReconnect</a>
+                        </div>
+                        
                         <div class="menu-item"><a href="../ref/Connection%20Configuration/host.html">host</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Connection%20Configuration/isDefault.html">isDefault</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Connection%20Configuration/name.html">name</a>
                         </div>
                         
                         <div class="menu-item"><a href="../ref/Connection%20Configuration/password.html">password</a>
                         </div>
                         
                         <div class="menu-item"><a href="../ref/Connection%20Configuration/port.html">port</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Connection%20Configuration/ssl.html">ssl</a>
                         </div>
                         
                         <div class="menu-item"><a href="../ref/Connection%20Configuration/threads.html">threads</a>
@@ -714,6 +784,9 @@ handler, the transaction is automatically rolled back.<p class="paragraph"/>It i
                         </div>
                         
                         <div class="menu-item"><a href="../ref/Consumer%20Configuration/binding.html">binding</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Consumer%20Configuration/connection.html">connection</a>
                         </div>
                         
                         <div class="menu-item"><a href="../ref/Consumer%20Configuration/consumers.html">consumers</a>
@@ -755,6 +828,9 @@ handler, the transaction is automatically rolled back.<p class="paragraph"/>It i
                         <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/body.html">body</a>
                         </div>
                         
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/connection.html">connection</a>
+                        </div>
+                        
                         <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/contentEncoding.html">contentEncoding</a>
                         </div>
                         
@@ -780,9 +856,6 @@ handler, the transaction is automatically rolled back.<p class="paragraph"/>It i
                         </div>
                         
                         <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
-                        </div>
-                        
-                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/queue.html">queue</a>
                         </div>
                         
                         <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>

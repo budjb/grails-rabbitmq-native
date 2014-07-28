@@ -15,4 +15,9 @@ The above example will create an exchange with the name *example.exchange* and o
 @durable@ | | Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts. | @boolean@ | @false@
 @name@ | !/bullet_red.png! | Name of the exchange. | @String@ | _none_
 @type@ | !/bullet_red.png! | One of "fanout", "topic", "direct", or "headers". | @String@| _none_
+@connection@ | | Name of the connection to create the exchange with.  Uses the default connection if omitted. | @String@ | _none_
 {table}
+
+{note}
+The same connection considerations exist for exchanges as with queues.  The same @connection@ method works for exchanges as well.
+{note}

@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>4 Consuming Messages 1.0.3</title>
+    <title>4 Consuming Messages 2.0.4</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -86,7 +86,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 1.0.3</p>
+                    <p><strong>Version:</strong> 2.0.4</p>
 
                     
                 </div>
@@ -129,6 +129,9 @@ function addJsClass() {
                     </div>
                     
                     <div class="toc-item" style="margin-left:10px"><a href="#headers"><strong>4.3.4</strong><span>Headers Exchanges</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#consmulti"><strong>4.4</strong><span>Multi-Server</span></a>
                     </div>
                     
                 </div>
@@ -310,6 +313,19 @@ to match.<p class="paragraph"/><h4>Headers Example</h4>
 
 
 
+<h2 id="consmulti">4.4 Multi-Server</h2>
+When using a multi-server setup, it is important to consider what server a consumer should listen on.  Use the <code>connection</code> property in the <code>rabbitConfig</code>
+to specify which server the consumer should be bound to.  If the <code>connection</code> is omitted, the consumer will be bound to the default connection.<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
+        <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"test.queue"</span>,
+        <span class="java&#45;quote">"connection"</span>: <span class="java&#45;quote">"server1"</span> // Where <span class="java&#45;quote">"server1"</span> is a connection configured with that name.
+    &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // Do work
+    &#125;
+&#125;</pre></div>
+
+
+
                 <div style="clear:both;margin-top:15px;"></div>
                 
                     <div class="toc-item prev-left"><a href="../guide/configuration.html">&lt;&lt; <strong>3</strong><span>Configuration</span></a></div>
@@ -339,13 +355,25 @@ to match.<p class="paragraph"/><h4>Headers Example</h4>
                     <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Connection Configuration</h1><div class="menu-sub">
                         
                             
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/automaticReconnect.html">automaticReconnect</a>
+                            </div>
+                            
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/host.html">host</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/isDefault.html">isDefault</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/name.html">name</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/password.html">password</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/port.html">port</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/ssl.html">ssl</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/threads.html">threads</a>
@@ -367,6 +395,9 @@ to match.<p class="paragraph"/><h4>Headers Example</h4>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Consumer%20Configuration/binding.html">binding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/connection.html">connection</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Consumer%20Configuration/consumers.html">consumers</a>
@@ -408,6 +439,9 @@ to match.<p class="paragraph"/><h4>Headers Example</h4>
                             <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/body.html">body</a>
                             </div>
                             
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/connection.html">connection</a>
+                            </div>
+                            
                             <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/contentEncoding.html">contentEncoding</a>
                             </div>
                             
@@ -433,9 +467,6 @@ to match.<p class="paragraph"/><h4>Headers Example</h4>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
-                            </div>
-                            
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/queue.html">queue</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>

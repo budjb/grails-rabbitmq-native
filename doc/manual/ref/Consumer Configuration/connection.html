@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>Rabbitmq Native Plugin 1.0.3</title>
+    <title>Rabbitmq Native Plugin 2.0.4</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -73,12 +73,11 @@ function addJsClass(el) {
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
-                <h1>queue</h1><p class="paragraph"/><h2>Purpose</h2><p class="paragraph"/>Define the queue to publish a message to.<p class="paragraph"/><h2>Examples</h2><p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">new</span> RabbitMessageBuilder().send &#123;
-    queue = <span class="java&#45;quote">"example.queue"</span>
-    body = <span class="java&#45;quote">"message"</span>
-&#125;</pre></div><p class="paragraph"/><h2>Description</h2><p class="paragraph"/>Setting this property lets the <code>RabbitMessageBuilder</code> know to publish the message to a queue.<p class="paragraph"/><blockquote class="note">
-A publish operation with the <code>RabbitMessageBuilder</code> may only be done with either an exchange or a queue, but not both.  Attemping to use both will result in an error.
-</blockquote>
+                <h1>connection</h1><p class="paragraph"/><h2>Purpose</h2><p class="paragraph"/>Sets which connection should be used to consume messages from.<p class="paragraph"/><h2>Examples</h2><p class="paragraph"/><div class="code"><pre>def rabbitConfig = &#91;
+    queue: <span class="java&#45;quote">"foobar"</span>,
+    connection: <span class="java&#45;quote">"server1"</span>
+&#93;</pre></div><p class="paragraph"/><h2>Description</h2><p class="paragraph"/>The connection property should be used in multi-server configurations to specify which connection should be used to consume messages from.
+If the connection property is omitted, the default connection will be used.
 
             </div>
         </td>
@@ -106,13 +105,25 @@ A publish operation with the <code>RabbitMessageBuilder</code> may only be done 
                         <div class="menu-sub">
                             
                             
+                            <div class="menu-item"><a href="../../ref/Connection%20Configuration/automaticReconnect.html">automaticReconnect</a>
+                            </div>
+                            
                             <div class="menu-item"><a href="../../ref/Connection%20Configuration/host.html">host</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Connection%20Configuration/isDefault.html">isDefault</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Connection%20Configuration/name.html">name</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Connection%20Configuration/password.html">password</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Connection%20Configuration/port.html">port</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Connection%20Configuration/ssl.html">ssl</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Connection%20Configuration/threads.html">threads</a>
@@ -129,13 +140,16 @@ A publish operation with the <code>RabbitMessageBuilder</code> may only be done 
                     
                     <div class="menu-block">
                         <h1 class="menu-title" onclick="toggleRef(nextElement(this))">Consumer Configuration</h1>
-                        <div class="menu-sub">
+                        <div class="menu-sub selected">
                             
                             
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/autoAck.html">autoAck</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/binding.html">binding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/connection.html">connection</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/consumers.html">consumers</a>
@@ -167,7 +181,7 @@ A publish operation with the <code>RabbitMessageBuilder</code> may only be done 
                     
                     <div class="menu-block">
                         <h1 class="menu-title" onclick="toggleRef(nextElement(this))">Rabbit Message Builder</h1>
-                        <div class="menu-sub selected">
+                        <div class="menu-sub">
                             
                             
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/appId.html">appId</a>
@@ -177,6 +191,9 @@ A publish operation with the <code>RabbitMessageBuilder</code> may only be done 
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/body.html">body</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/connection.html">connection</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/contentEncoding.html">contentEncoding</a>
@@ -204,9 +221,6 @@ A publish operation with the <code>RabbitMessageBuilder</code> may only be done 
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
-                            </div>
-                            
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/queue.html">queue</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>

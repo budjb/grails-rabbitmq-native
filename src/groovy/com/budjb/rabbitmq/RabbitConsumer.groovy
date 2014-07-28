@@ -20,14 +20,20 @@ import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
+import com.rabbitmq.client.impl.recovery.AutorecoveringChannel
 import groovy.json.JsonSlurper
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsClass
+import org.hibernate.Session
+import org.hibernate.SessionFactory
+import org.springframework.orm.hibernate3.SessionHolder
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import grails.util.Holders
 
+@SuppressWarnings("unchecked")
 class RabbitConsumer extends DefaultConsumer {
     /**
      * Logger
@@ -80,6 +86,36 @@ class RabbitConsumer extends DefaultConsumer {
     private ConsumerConfiguration configuration
 
     /**
+     * Connection context associated with this consumer.
+     */
+    private ConnectionContext connectionContext
+
+    /**
+     * Hibernate session factory.
+     */
+    SessionFactory sessionFactory
+
+    /**
+     * Retrieve the name of the connection the consumer belongs to.
+     *
+     * @param clazz
+     * @return
+     */
+    public static String getConnectionName(GrailsClass clazz) {
+        return getConnectionName(clazz.clazz)
+    }
+
+    /**
+     * Retrieve the name of the connection the consumer belongs to.
+     *
+     * @param clazz
+     * @return
+     */
+    public static String getConnectionName(Class clazz) {
+        return (clazz)."${RABBIT_CONFIG_NAME}"['connection'] ?: null
+    }
+
+    /**
      * Determines if a handler is a RabbitMQ consumer.
      *
      * @param clazz
@@ -127,7 +163,7 @@ class RabbitConsumer extends DefaultConsumer {
      * @param handler Handler object to wrap a RabbitMQ consumer around.
      * @return A list of channels that were created for the consumer.
      */
-    public static List<Channel> startConsumer(Connection connection, GrailsClass handler) {
+    public static List<Channel> startConsumer(ConnectionContext connectionContext, GrailsClass handler) {
         // Check if the object wants to be a consumer
         if (!RabbitConsumer.isConsumer(handler)) {
             return []
@@ -138,13 +174,13 @@ class RabbitConsumer extends DefaultConsumer {
 
         // Make sure a queue or an exchange was specified
         if (!config.queue && !config.exchange) {
-            log.warn("RabbitMQ configuration for consumer ${handler.shortName} is missing a queue or an exchange")
+            log.warn("RabbitMQ configuration for consumer '${handler.shortName}' is missing a queue or an exchange")
             return []
         }
 
         // Make sure that only a queue or an exchange was specified
         if (config.queue && config.exchange) {
-            log.warn("RabbitMQ configuration for consumer ${handler.shortName} can not have both a queue and an exchange")
+            log.warn("RabbitMQ configuration for consumer '${handler.shortName}' can not have both a queue and an exchange")
             return []
         }
 
@@ -153,10 +189,16 @@ class RabbitConsumer extends DefaultConsumer {
 
         // Start the consumers
         if (config.queue) {
-            log.debug("registering consumer ${handler.shortName} as a RabbitMQ consumer with ${config.consumers} consumer(s)")
+            log.debug("registering consumer '${handler.shortName}' as a RabbitMQ consumer on connection '${connectionContext.name}' with ${config.consumers} consumer(s)")
             config.consumers.times {
                 // Create the channel
-                Channel channel = connection.createChannel()
+                Channel channel = connectionContext.connection.createChannel()
+
+                // Add listeners
+                channel.addShutdownListener(new ChannelShutdownListener())
+                if (channel instanceof AutorecoveringChannel) {
+                    ((AutorecoveringChannel)channel).addRecoveryListener(new AutorecoveryListener())
+                }
 
                 // Determine the queue
                 String queue = config.queue
@@ -168,7 +210,7 @@ class RabbitConsumer extends DefaultConsumer {
                 channel.basicConsume(
                     queue,
                     config.autoAck == AutoAck.ALWAYS,
-                    new RabbitConsumer(channel, config, handler)
+                    new RabbitConsumer(channel, config, connectionContext, handler)
                 )
 
                 // Store the channel
@@ -177,10 +219,10 @@ class RabbitConsumer extends DefaultConsumer {
         }
         else {
             // Log it
-            log.debug("registering consumer ${handler.shortName} as a RabbitMQ subscriber")
+            log.debug("registering consumer '${handler.shortName}' on connection '${connectionContext.name}' as a RabbitMQ subscriber")
 
             // Create the channel
-            Channel channel = connection.createChannel()
+            Channel channel = connectionContext.connection.createChannel()
 
             // Create a queue
             String queue = channel.queueDeclare().queue
@@ -189,7 +231,7 @@ class RabbitConsumer extends DefaultConsumer {
             }
             else if (config.binding instanceof Map) {
                 if (!(config.match in ['any', 'all'])) {
-                    log.warn("not starting consumer ${handler.shortName} since the match property was not set or not one of (\"any\", \"all\")")
+                    log.warn("not starting consumer '${handler.shortName}' since the match property was not set or not one of (\"any\", \"all\")")
                     return
                 }
                 channel.queueBind(queue, config.exchange, '', config.binding + ['x-match': config.match])
@@ -202,7 +244,7 @@ class RabbitConsumer extends DefaultConsumer {
             channel.basicConsume(
                 queue,
                 config.autoAck == AutoAck.ALWAYS,
-                new RabbitConsumer(channel, config, handler)
+                new RabbitConsumer(channel, config, connectionContext, handler)
             )
 
             // Store the channel
@@ -218,7 +260,7 @@ class RabbitConsumer extends DefaultConsumer {
      * @param channel
      * @param grailsClass
      */
-    public RabbitConsumer(Channel channel, ConsumerConfiguration configuration, GrailsClass handler) {
+    public RabbitConsumer(Channel channel, ConsumerConfiguration configuration, ConnectionContext connectionContext, GrailsClass handler) {
         // Run the parent
         super(channel)
 
@@ -230,6 +272,14 @@ class RabbitConsumer extends DefaultConsumer {
 
         // Store the configuration
         this.configuration = configuration
+
+        // Store the connection context
+        this.connectionContext = connectionContext
+
+        // Store the session factory bean
+        this.sessionFactory = Holders.applicationContext.getBean('sessionFactory')
+
+
     }
 
     /**
@@ -247,7 +297,8 @@ class RabbitConsumer extends DefaultConsumer {
             consumerTag: consumerTag,
             envelope: envelope,
             properties: properties,
-            body: body
+            body: body,
+            connectionContext: connectionContext
         )
 
         // Process and hand off the message to the consumer
@@ -305,6 +356,9 @@ class RabbitConsumer extends DefaultConsumer {
 
         // Get the handler bean
         Object handlerBean = getHandlerBean()
+
+        // Open a session
+        Session hibernateSession = openSession()
 
         // Call the received message callback
         onReceive(handlerBean, context)
@@ -370,6 +424,11 @@ class RabbitConsumer extends DefaultConsumer {
         finally {
             // Call the complete callback
             onComplete(handlerBean, context)
+
+            // Close the session
+            if (hibernateSession) {
+                closeSession(hibernateSession)
+            }
         }
     }
 
@@ -564,5 +623,63 @@ class RabbitConsumer extends DefaultConsumer {
      */
     protected Object getHandlerBean() {
         return Holders.applicationContext.getBean(handler.fullName)
+    }
+
+    /**
+     * Creates a new session, or null if one could not be created.
+     *
+     * @return
+     */
+    protected Session openSession() {
+        // No session if the session factory is not found
+        if (!sessionFactory) {
+            return null
+        }
+
+        // Get the current session holder
+        SessionHolder sessionHolder = TransactionSynchronizationManager.getResource(sessionFactory)
+
+        // If there's a current session, don't create a new one
+        if (sessionHolder?.session) {
+            return null
+        }
+
+        // Create the session
+        Session session = sessionFactory.openSession()
+
+        // If the holder is null, create it, otherwise just add the new session
+        if (sessionHolder == null) {
+            sessionHolder = new SessionHolder(session)
+            TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder)
+        }
+        else {
+            sessionHolder.addSession(session)
+        }
+
+        return session
+    }
+
+    /**
+     * Closes the current session.
+     *
+     * @param session
+     */
+    protected void closeSession(Session session) {
+        // Get the current session holder
+        SessionHolder sessionHolder = TransactionSynchronizationManager.getResource(sessionFactory)
+
+        // Flush the session
+        session.flush()
+
+        // Close the session
+        if (session.isOpen()) {
+            session.close()
+        }
+
+        // Remove the session
+        sessionHolder.removeSession(session)
+
+        // Unbind the thread
+        TransactionSynchronizationManager.unbindResource(sessionFactory)
     }
 }

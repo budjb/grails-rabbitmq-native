@@ -1,0 +1,30 @@
+h1. isDefault
+
+h2. Purpose
+
+Sets whether the connection should be considered the *default* connection when a connection is not specified for an operation.
+
+h2. Examples
+
+{code}
+rabbitmq {
+    connection = {
+        connection(
+            host: "rabbit.example.com",
+            name: "defaultConnection",
+            isDefault: true,
+            username: "foo",
+            password: "bar"
+        )
+    }
+}
+{code}
+
+h2. Description
+
+Setting the default connection is useful in multi-server configurations.  When a connection is marked as default, consumers or publishers
+that do not specify a specific connection will use the default connection.
+
+{note}
+In single-server configurations where only a single connection is configured, it is automatically marked as the default connection.
+{note}

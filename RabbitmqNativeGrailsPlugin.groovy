@@ -33,7 +33,7 @@ class RabbitmqNativeGrailsPlugin {
     /**
      * Version of the plugin.
      */
-    def version = "1.0.3"
+    def version = "2.0.4"
 
     /**
      * The version or versions of Grails the plugin is designed for.
@@ -104,13 +104,14 @@ class RabbitmqNativeGrailsPlugin {
     ]
 
     /**
+     * Plugins this one depends on.
+     */
+    def dependsOn = ['hibernate': '2.0.0 > *']
+
+    /**
      * Logger.
      */
     Logger log = Logger.getLogger('com.budjb.rabbitmq.RabbitmqNativeGrailsPlugin')
-
-    /**
-     * Rabbit context name.
-     */
 
     /**
      * Spring actions.
@@ -213,6 +214,9 @@ class RabbitmqNativeGrailsPlugin {
     void restartRabbitContext(GrailsApplication application, RabbitContext context) {
         // Stop the rabbit context
         context.stop()
+
+        // Load the configuration
+        context.loadConfiguration()
 
         // Register message converters
         registerConverters(application, context)

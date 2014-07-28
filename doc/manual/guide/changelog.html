@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>8 Changelog 1.0.3</title>
+    <title>8 Changelog 2.0.4</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -84,7 +84,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 1.0.3</p>
+                    <p><strong>Version:</strong> 2.0.4</p>
 
                     
                 </div>
@@ -94,10 +94,19 @@ function addJsClass() {
                 
 
 <h1 id="changelog">8 Changelog</h1>
-<h3>Version 1.0.3 - 11/7/2014</h3>
+<h3>Version 2.0.4 - ?/?/????</h3>
+<ul class="star">
+<li>Added multi-server support to all aspects of the plugin.</li>
+<li>Added SSL support for connections.</li>
+<li>Added auto-reconnect support for dropped connections.</li>
+<li>Added logic to wrap a Hibernate session around calls to consumers.</li>
+<li>Updated the RabbitMQ library to version 3.3.0.</li>
+<li>Added logging for connection/channel reconnects and channel shutdowns.</li>
+<li>Changed format for connection configurations. The old style is still supported, but will likely be removed at some point.</li>
+</ul><p class="paragraph"/><h3>Version 1.0.3 - 1/7/2014</h3>
 <ul class="star">
 <li>Modified the logic to check for the existence of callbacks in consumers.</li>
-</ul><p class="paragraph"/><h3>Version 1.0.2 - 11/6/2014</h3>
+</ul><p class="paragraph"/><h3>Version 1.0.2 - 1/6/2014</h3>
 <ul class="star">
 <li>Added a cached thread pool so the user does not need to account for the number of threads consumers require. Set the default to 0 so that this is the default.</li>
 <li>Added callbacks for messages: onReceive, onSuccess, onFailure, and onComplete.</li>
@@ -176,13 +185,25 @@ function addJsClass() {
                     <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Connection Configuration</h1><div class="menu-sub">
                         
                             
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/automaticReconnect.html">automaticReconnect</a>
+                            </div>
+                            
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/host.html">host</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/isDefault.html">isDefault</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/name.html">name</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/password.html">password</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/port.html">port</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/ssl.html">ssl</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/threads.html">threads</a>
@@ -204,6 +225,9 @@ function addJsClass() {
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Consumer%20Configuration/binding.html">binding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/connection.html">connection</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Consumer%20Configuration/consumers.html">consumers</a>
@@ -245,6 +269,9 @@ function addJsClass() {
                             <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/body.html">body</a>
                             </div>
                             
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/connection.html">connection</a>
+                            </div>
+                            
                             <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/contentEncoding.html">contentEncoding</a>
                             </div>
                             
@@ -270,9 +297,6 @@ function addJsClass() {
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
-                            </div>
-                            
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/queue.html">queue</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>
