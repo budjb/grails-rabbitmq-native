@@ -1,4 +1,4 @@
-h3. Version 2.0.4 - ?/?/????
+h3. Version 2.0.4 - 7/28/2014
 * Added multi-server support to all aspects of the plugin.
 * Added SSL support for connections.
 * Added auto-reconnect support for dropped connections.
