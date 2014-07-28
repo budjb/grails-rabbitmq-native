@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
     <head>
-        <title>Rabbitmq Native Plugin 1.0.3</title>
+        <title>Rabbitmq Native Plugin 2.0.4</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link rel="stylesheet" href="./css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8" />
         <link rel="stylesheet" href="./css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8" />
@@ -66,7 +66,7 @@ function addJsClass(el) {
                         <div class="project">
                             <h1>Rabbitmq Native Plugin - Reference Documentation</h1>
                             <p><strong>Authors:</strong> Bud Byrd</p>
-                            <p><strong>Version:</strong> 1.0.3</p>
+                            <p><strong>Version:</strong> 2.0.4</p>
                             
                         </div>
 
@@ -114,6 +114,8 @@ function addJsClass(el) {
                             
                             <div class="toc-item" style="margin-left:20px"><a href="./guide/consuming.html#headers"><strong>4.3.4</strong><span>Headers Exchanges</span></a></div>
                             
+                            <div class="toc-item" style="margin-left:10px"><a href="./guide/consuming.html#consmulti"><strong>4.4</strong><span>Multi-Server</span></a></div>
+                            
                             <div class="toc-item" style="margin-left:0px"><a href="./guide/publishing.html"><strong>5</strong><span>Publishing Messages</span></a></div>
                             
                             <div class="toc-item" style="margin-left:10px"><a href="./guide/publishing.html#send"><strong>5.1</strong><span>Sending Messages</span></a></div>
@@ -160,13 +162,25 @@ function addJsClass(el) {
                     <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Connection Configuration</h1><div class="menu-sub">
                         
                         
+                        <div class="menu-item"><a href="./ref/Connection%20Configuration/automaticReconnect.html">automaticReconnect</a>
+                        </div>
+                        
                         <div class="menu-item"><a href="./ref/Connection%20Configuration/host.html">host</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="./ref/Connection%20Configuration/isDefault.html">isDefault</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="./ref/Connection%20Configuration/name.html">name</a>
                         </div>
                         
                         <div class="menu-item"><a href="./ref/Connection%20Configuration/password.html">password</a>
                         </div>
                         
                         <div class="menu-item"><a href="./ref/Connection%20Configuration/port.html">port</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="./ref/Connection%20Configuration/ssl.html">ssl</a>
                         </div>
                         
                         <div class="menu-item"><a href="./ref/Connection%20Configuration/threads.html">threads</a>
@@ -188,6 +202,9 @@ function addJsClass(el) {
                         </div>
                         
                         <div class="menu-item"><a href="./ref/Consumer%20Configuration/binding.html">binding</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="./ref/Consumer%20Configuration/connection.html">connection</a>
                         </div>
                         
                         <div class="menu-item"><a href="./ref/Consumer%20Configuration/consumers.html">consumers</a>
@@ -227,6 +244,9 @@ function addJsClass(el) {
                         </div>
                         
                         <div class="menu-item"><a href="./ref/Rabbit%20Message%20Builder/body.html">body</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="./ref/Rabbit%20Message%20Builder/connection.html">connection</a>
                         </div>
                         
                         <div class="menu-item"><a href="./ref/Rabbit%20Message%20Builder/contentEncoding.html">contentEncoding</a>

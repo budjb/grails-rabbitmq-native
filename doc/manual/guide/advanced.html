@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>7 Advanced Usage 1.0.3</title>
+    <title>7 Advanced Usage 2.0.4</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -86,7 +86,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 1.0.3</p>
+                    <p><strong>Version:</strong> 2.0.4</p>
 
                     
                 </div>
@@ -123,7 +123,8 @@ The bean responsible for connecting to the RabbitMQ server and keeping track of 
     def testMethod() &#123;
         RabbitContext context = Holders.applicationContext.getBean('rabbitContext')
     &#125;
-&#125;</pre></div><p class="paragraph"/>Of particular importance is the <code>connection</code> property of the <code>RabbitContext</code> bean, which is an instance of RabbitMQ's <code>Connection</code> object.
+&#125;</pre></div><p class="paragraph"/>Of particular importance is the <code>getConnection()</code> method of the <code>RabbitContext</code> bean.  This method returns a <code>ConnectionContext</code> object, which
+exposes the RabbitMQ <code>Connection</code> object through its own <code>getConnection()</code> method.
 
 
 
@@ -177,13 +178,25 @@ handler, the transaction is automatically rolled back.<p class="paragraph"/>It i
                     <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Connection Configuration</h1><div class="menu-sub">
                         
                             
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/automaticReconnect.html">automaticReconnect</a>
+                            </div>
+                            
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/host.html">host</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/isDefault.html">isDefault</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/name.html">name</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/password.html">password</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/port.html">port</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/ssl.html">ssl</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/threads.html">threads</a>
@@ -205,6 +218,9 @@ handler, the transaction is automatically rolled back.<p class="paragraph"/>It i
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Consumer%20Configuration/binding.html">binding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/connection.html">connection</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Consumer%20Configuration/consumers.html">consumers</a>
@@ -244,6 +260,9 @@ handler, the transaction is automatically rolled back.<p class="paragraph"/>It i
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/body.html">body</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/connection.html">connection</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/contentEncoding.html">contentEncoding</a>

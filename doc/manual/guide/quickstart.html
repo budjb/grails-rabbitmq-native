@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>2 Quick Start 1.0.3</title>
+    <title>2 Quick Start 2.0.4</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -86,7 +86,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 1.0.3</p>
+                    <p><strong>Version:</strong> 2.0.4</p>
 
                     
                 </div>
@@ -98,18 +98,24 @@ function addJsClass() {
 <h1 id="quickstart">2 Quick Start</h1>
 This is a quick and dirty how-to detailing how to quickly begin using the plugin. While there is a lot of configurability offered by this plugin, this is a very basic demonstration of its usage.<p class="paragraph"/><h3>Create The Application</h3>
 Create a project named <strong class="bold">RabbitExample</strong>. You can do this by entering:
-<div class="code"><pre>grails create&#45;app RabbitExample</pre></div><p class="paragraph"/><h3>Configuring</h3>
+<div class="code"><pre>grails create&#45;app RabbitExample</pre></div><p class="paragraph"/><h3>Add The Plugin</h3>
+In <code>grails-app/conf/BuildConfig.groovy</code>, under the <code>plugins</code> section, add:
+<div class="code"><pre>plugins &#123;
+        // ...<p class="paragraph"/>        compile name: <span class="java&#45;quote">"rabbitmq&#45;<span class="java&#45;keyword">native</span>"</span>, version: <span class="java&#45;quote">"latest.release"</span><p class="paragraph"/>        // &#8230;
+    &#125;</pre></div><p class="paragraph"/>Then, refresh the project's dependencies:
+<div class="code"><pre>grails refresh&#45;dependencies</pre></div><p class="paragraph"/><h3>Configuring</h3>
 In <code>grails-app/conf/Config.groovy</code>, add:
 <div class="code"><pre>rabbitmq &#123;
-    connection &#123;
-        host = <span class="java&#45;quote">"changeme"</span>
-        username = <span class="java&#45;quote">"changeme"</span>
-        password = <span class="java&#45;quote">"changeme"</span>
+    connection = &#123;
+        connection host: <span class="java&#45;quote">"changeme"</span>, username: <span class="java&#45;quote">"changeme"</span>, password: <span class="java&#45;quote">"changeme"</span>
     &#125;
     queues = &#123;
         queue name: <span class="java&#45;quote">"testqueue"</span>
     &#125;
-&#125;</pre></div><p class="paragraph"/><h3>Consumer</h3>
+&#125;</pre></div>
+<blockquote class="note">
+Be sure to replace the appropriate values for your RabbitMQ server and user credentials.
+</blockquote><p class="paragraph"/><h3>Consumer</h3>
 Create the a consumer by using the following command:
 <div class="code"><pre>grails create&#45;consumer com.example.Test</pre></div><p class="paragraph"/>Update the consumer to reflect the following:
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.MessageContext<p class="paragraph"/>class TestConsumer &#123;
@@ -133,7 +139,7 @@ Create the a consumer by using the following command:
 Create a controller by using the following command:
 <div class="code"><pre>grails create&#45;controller com.example.Test</pre></div><p class="paragraph"/>Update the controller to reflect the following:
 <div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.RabbitMessageBuilder<p class="paragraph"/>class TestController &#123;
-    def index = &#123;
+    def index() &#123;
         render <span class="java&#45;keyword">new</span> RabbitMessageBuilder().rpc &#123;
             routingKey = <span class="java&#45;quote">"testqueue"</span>
             body = <span class="java&#45;quote">"Hello!"</span>
@@ -175,13 +181,25 @@ You should see the message "Hello!" printed the application's output console, an
                     <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Connection Configuration</h1><div class="menu-sub">
                         
                             
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/automaticReconnect.html">automaticReconnect</a>
+                            </div>
+                            
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/host.html">host</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/isDefault.html">isDefault</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/name.html">name</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/password.html">password</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/port.html">port</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/ssl.html">ssl</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Connection%20Configuration/threads.html">threads</a>
@@ -203,6 +221,9 @@ You should see the message "Hello!" printed the application's output console, an
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Consumer%20Configuration/binding.html">binding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/connection.html">connection</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Consumer%20Configuration/consumers.html">consumers</a>
@@ -242,6 +263,9 @@ You should see the message "Hello!" printed the application's output console, an
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/body.html">body</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/connection.html">connection</a>
                             </div>
                             
                             <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/contentEncoding.html">contentEncoding</a>

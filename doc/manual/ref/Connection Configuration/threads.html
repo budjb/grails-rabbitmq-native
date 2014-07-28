@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>Rabbitmq Native Plugin 1.0.3</title>
+    <title>Rabbitmq Native Plugin 2.0.4</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -74,11 +74,13 @@ function addJsClass(el) {
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
                 <h1>threads</h1><p class="paragraph"/><h2>Purpose</h2><p class="paragraph"/>Sets the theadpool size of the connection.<p class="paragraph"/><h2>Examples</h2><p class="paragraph"/><div class="code"><pre>rabbitmq &#123;
-    connection &#123;
-        host = <span class="java&#45;quote">"rabbit.example.com"</span>
-        username = <span class="java&#45;quote">"foo"</span>
-        password = <span class="java&#45;quote">"bar"</span>
-        threads = 5
+    connection = &#123;
+        connection(
+            host: <span class="java&#45;quote">"rabbit.example.com"</span>,
+            username: <span class="java&#45;quote">"foo"</span>,
+            password: <span class="java&#45;quote">"bar"</span>,
+            threads: 5
+        )
     &#125;
 &#125;</pre></div><p class="paragraph"/><h2>Description</h2><p class="paragraph"/>The number of threads determines how many total concurrent consumers will be delivered and processed at a time. The default is 5 threads.<p class="paragraph"/><blockquote class="warning">
 If the total number of consumers exceeds the thread count, the number of concurrently processed messages will be limited by the
@@ -111,13 +113,25 @@ number of threads assigned to the connection.
                         <div class="menu-sub selected">
                             
                             
+                            <div class="menu-item"><a href="../../ref/Connection%20Configuration/automaticReconnect.html">automaticReconnect</a>
+                            </div>
+                            
                             <div class="menu-item"><a href="../../ref/Connection%20Configuration/host.html">host</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Connection%20Configuration/isDefault.html">isDefault</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Connection%20Configuration/name.html">name</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Connection%20Configuration/password.html">password</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Connection%20Configuration/port.html">port</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Connection%20Configuration/ssl.html">ssl</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Connection%20Configuration/threads.html">threads</a>
@@ -141,6 +155,9 @@ number of threads assigned to the connection.
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/binding.html">binding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/connection.html">connection</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Consumer%20Configuration/consumers.html">consumers</a>
@@ -182,6 +199,9 @@ number of threads assigned to the connection.
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/body.html">body</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/connection.html">connection</a>
                             </div>
                             
                             <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/contentEncoding.html">contentEncoding</a>
