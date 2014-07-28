@@ -22,6 +22,7 @@ consuming:
         topic: Topic Exchanges
         direct: Direct Exchanges
         headers: Headers Exchanges
+    consmulti: Multi-Server
 publishing:
     title: Publishing Messages
     send: Sending Messages

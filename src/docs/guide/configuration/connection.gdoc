@@ -2,10 +2,19 @@ The plugin expects the connection configuration to the RabbitMQ server to be def
 
 {code}
 rabbitmq {
-    connection {
-        host = "example.com"
-        username = "foo"
-        password = "bar"
+    connection = {
+        connection host: "example.com", username: "foo", password: "bar"
+    }
+}
+{code}
+
+Connections to many different RabbitMQ servers can be configured.  A multi-server configuration looks like:
+
+{code}
+rabbitmq {
+    connection = {
+        connection host: "rabbit1.example.com", username: "foo", password: "bar"
+        connection host: "rabbit2.example.com", username: "foo", password: "bar"
     }
 }
 {code}
@@ -16,7 +25,11 @@ The following table enumerates all the configuration options available to the co
 @host@ | !/bullet_red.png! | Hostname or IP address of the RabbitMQ server to connect to. | @String@ | _none_
 @username@ | !/bullet_red.png! | Username to log into the RabbitMQ server with. | @String@ | _none_
 @password@ | !/bullet_red.png! | Password to log into the RabbitMQ server with. | @String@ | _none_
+@name@ | | Name of the connection. This is used while sending messages to a specific RabbitMQ server when using multiple servers. | @String@ | _none_
+@isDefault@ | | A connection with this set to true will be the server messages are sent to if no specific connection is specified when sending the message. | @booleang@ | @false@
 @port@ | | Port to connect to the RabbitMQ server with. | @Integer@ | 5672
 @virtualHost@ | | Name of the virtual host to connect to the RabbitMQ server with. | @String@ | _none_
+@ssl@ | | Whether to use SSL when connecting to a RabbitMQ server. | @boolean@ | @false@
 @threads@ | | Threadpool size, if greater than 0, determines how many concurrent messages can be processed at any given time. If set to 0, consumers can consume as many messages as it's configured to. | @String@ | @0@
+@automaticReconnect@ | | If true, will cause the application to automatically reconnect to a server when its connection is dropped. | @boolean@ | @true@
 {table}

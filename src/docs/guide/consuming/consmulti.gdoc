@@ -1,0 +1,17 @@
+When using a multi-server setup, it is important to consider what server a consumer should listen on.  Use the @connection@ property in the @rabbitConfig@
+to specify which server the consumer should be bound to.  If the @connection@ is omitted, the consumer will be bound to the default connection.
+
+{code}
+package com.example
+
+class ExampleConsumer {
+    static rabbitConfig = [
+        "queue": "test.queue",
+        "connection": "server1" // Where "server1" is a connection configured with that name.
+    ]
+
+    def handleMessage(def body, MessageContext context) {
+        // Do work
+    }
+}
+{code}

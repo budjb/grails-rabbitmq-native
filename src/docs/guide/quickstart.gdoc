@@ -6,20 +6,38 @@ Create a project named *RabbitExample*. You can do this by entering:
 grails create-app RabbitExample
 {code}
 
+h3. Add The Plugin
+In @grails-app/conf/BuildConfig.groovy@, under the @plugins@ section, add:
+{code}
+    plugins {
+        // ...
+
+        compile name: "rabbitmq-native", version: "latest.release"
+
+        // ...
+    }
+{code}
+
+Then, refresh the project's dependencies:
+{code}
+grails refresh-dependencies
+{code}
+
 h3. Configuring
 In @grails-app/conf/Config.groovy@, add:
 {code}
 rabbitmq {
-    connection {
-        host = "changeme"
-        username = "changeme"
-        password = "changeme"
+    connection = {
+        connection host: "changeme", username: "changeme", password: "changeme"
     }
     queues = {
         queue name: "testqueue"
     }
 }
 {code}
+{note}
+Be sure to replace the appropriate values for your RabbitMQ server and user credentials.
+{note}
 
 h3. Consumer
 Create the a consumer by using the following command:
@@ -68,7 +86,7 @@ package com.example
 import com.budjb.rabbitmq.RabbitMessageBuilder
 
 class TestController {
-    def index = {
+    def index() {
         render new RabbitMessageBuilder().rpc {
             routingKey = "testqueue"
             body = "Hello!"
