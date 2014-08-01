@@ -76,6 +76,12 @@ class ConnectionContext {
     public int threads = 0
 
     /**
+     * The requested heartbeat delay, in seconds, that the server sends in the connection.tune frame.
+     * If set to 0, heartbeats are disabled.
+     */
+    public int requestedHeartbeat = 0
+
+    /**
      * Whether to use SSL.
      */
     public boolean ssl = false
@@ -166,6 +172,7 @@ class ConnectionContext {
         factory.host = host
         factory.virtualHost = virtualHost
         factory.automaticRecovery = automaticReconnect
+        factory.requestedHeartbeat = requestedHeartbeat ?: factory.requestedHeartbeat
 
         // Optionally enable SSL
         if (ssl) {
