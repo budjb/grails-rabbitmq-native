@@ -32,4 +32,5 @@ The following table enumerates all the configuration options available to the co
 @ssl@ | | Whether to use SSL when connecting to a RabbitMQ server. | @boolean@ | @false@
 @threads@ | | Threadpool size, if greater than 0, determines how many concurrent messages can be processed at any given time. If set to 0, consumers can consume as many messages as it's configured to. | @String@ | @0@
 @automaticReconnect@ | | If true, will cause the application to automatically reconnect to a server when its connection is dropped. | @boolean@ | @true@
+@requestedHeartbeat@ | | Heartbeat interval, in seconds. A value of @0@ disables heartbeats. | @Integer@ | @0@
 {table}

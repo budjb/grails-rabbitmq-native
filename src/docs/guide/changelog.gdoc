@@ -1,3 +1,7 @@
+h3. Version 2.0.5 - 8/01/2014
+* Added heartbeat configuration for connections (thanks LuisMuniz @GitHub).
+* Refactored Hibernate session support so that Hibernate is no longer a dependency of the plugin, and will now work with or without Hibernate present.
+
 h3. Version 2.0.4 - 7/28/2014
 * Added multi-server support to all aspects of the plugin.
 * Added SSL support for connections.

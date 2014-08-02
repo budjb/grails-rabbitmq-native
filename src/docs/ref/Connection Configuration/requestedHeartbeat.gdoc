@@ -1,0 +1,28 @@
+h1. requestedHeartbeat
+
+h2. Purpose
+
+Sets Heartbeat interval, in seconds.
+
+h2. Examples
+
+{code}
+rabbitmq {
+    connection = {
+        connection(
+            host: "rabbit.example.com",
+            username: "foo",
+            password: "bar",
+            requestedHeartbeat: 5
+        )
+    }
+}
+{code}
+
+h2. Description
+
+Sets Heartbeat interval, in seconds.
+
+{note}
+A value of @0@ disables heartbeats.
+{note}
