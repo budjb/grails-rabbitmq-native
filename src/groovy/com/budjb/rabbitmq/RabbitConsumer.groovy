@@ -610,16 +610,15 @@ class RabbitConsumer extends DefaultConsumer {
     }
 
     /**
-     * Creates a new session, or null if one could not be created.
-     *
-     * @return
+     * Binds a Hibernate session to the current thread if Hibernate is present.
      */
     protected void openSession() {
         // Get the persistence interceptor
-        def persistenceInterceptor = Holders.applicationContext.getBean('persistenceInterceptor')
-
-        // No session if there's no persistence interceptor
-        if (!persistenceInterceptor) {
+        def persistenceInterceptor
+        try {
+            persistenceInterceptor = Holders.applicationContext.getBean('persistenceInterceptor')
+        }
+        catch (NoSuchBeanDefinitionException) {
             return
         }
 
@@ -628,16 +627,15 @@ class RabbitConsumer extends DefaultConsumer {
     }
 
     /**
-     * Closes the current session.
-     *
-     * @param session
+     * Closes the bound Hibernate session if Hibernate is present.
      */
     protected void closeSession() {
         // Get the persistence interceptor
-        def persistenceInterceptor = Holders.applicationContext.getBean('persistenceInterceptor')
-
-        // No session if there's no persistence interceptor
-        if (!persistenceInterceptor) {
+        def persistenceInterceptor
+        try {
+            persistenceInterceptor = Holders.applicationContext.getBean('persistenceInterceptor')
+        }
+        catch (NoSuchBeanDefinitionException) {
             return
         }
 
