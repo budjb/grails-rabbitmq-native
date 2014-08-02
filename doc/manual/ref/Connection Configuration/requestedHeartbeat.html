@@ -73,16 +73,18 @@ function addJsClass(el) {
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
-                <h1>virtualHost</h1><p class="paragraph"/><h2>Purpose</h2><p class="paragraph"/>Sets the virtual host to use on the connection.<p class="paragraph"/><h2>Examples</h2><p class="paragraph"/><div class="code"><pre>rabbitmq &#123;
+                <h1>requestedHeartbeat</h1><p class="paragraph"/><h2>Purpose</h2><p class="paragraph"/>Sets Heartbeat interval, in seconds.<p class="paragraph"/><h2>Examples</h2><p class="paragraph"/><div class="code"><pre>rabbitmq &#123;
     connection = &#123;
         connection(
             host: <span class="java&#45;quote">"rabbit.example.com"</span>,
             username: <span class="java&#45;quote">"foo"</span>,
             password: <span class="java&#45;quote">"bar"</span>,
-            virtualHost: <span class="java&#45;quote">"vhost1"</span>
+            requestedHeartbeat: 5
         )
     &#125;
-&#125;</pre></div><p class="paragraph"/><h2>Description</h2><p class="paragraph"/>The virtual host is useful to segregate exchanges and queues when multiple applications are using the same physical RabbitMQ server. If this is omitted, the default virtual host is used.
+&#125;</pre></div><p class="paragraph"/><h2>Description</h2><p class="paragraph"/>Sets Heartbeat interval, in seconds.<p class="paragraph"/><blockquote class="note">
+A value of <code>0</code> disables heartbeats.
+</blockquote>
 
             </div>
         </td>
