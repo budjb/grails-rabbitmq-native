@@ -104,11 +104,6 @@ class RabbitmqNativeGrailsPlugin {
     ]
 
     /**
-     * Plugins this one depends on.
-     */
-    def dependsOn = ['hibernate': '2.0.0 > *']
-
-    /**
      * Logger.
      */
     Logger log = Logger.getLogger('com.budjb.rabbitmq.RabbitmqNativeGrailsPlugin')

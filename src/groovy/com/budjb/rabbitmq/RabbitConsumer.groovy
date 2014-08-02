@@ -27,10 +27,6 @@ import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsClass
-import org.hibernate.Session
-import org.hibernate.SessionFactory
-import org.springframework.orm.hibernate3.SessionHolder
-import org.springframework.transaction.support.TransactionSynchronizationManager
 import grails.util.Holders
 
 @SuppressWarnings("unchecked")
@@ -89,11 +85,6 @@ class RabbitConsumer extends DefaultConsumer {
      * Connection context associated with this consumer.
      */
     private ConnectionContext connectionContext
-
-    /**
-     * Hibernate session factory.
-     */
-    SessionFactory sessionFactory
 
     /**
      * Retrieve the name of the connection the consumer belongs to.
@@ -275,11 +266,6 @@ class RabbitConsumer extends DefaultConsumer {
 
         // Store the connection context
         this.connectionContext = connectionContext
-
-        // Store the session factory bean
-        this.sessionFactory = Holders.applicationContext.getBean('sessionFactory')
-
-
     }
 
     /**
@@ -358,7 +344,7 @@ class RabbitConsumer extends DefaultConsumer {
         Object handlerBean = getHandlerBean()
 
         // Open a session
-        Session hibernateSession = openSession()
+        openSession()
 
         // Call the received message callback
         onReceive(handlerBean, context)
@@ -426,9 +412,7 @@ class RabbitConsumer extends DefaultConsumer {
             onComplete(handlerBean, context)
 
             // Close the session
-            if (hibernateSession) {
-                closeSession(hibernateSession)
-            }
+            closeSession()
         }
     }
 
@@ -630,33 +614,17 @@ class RabbitConsumer extends DefaultConsumer {
      *
      * @return
      */
-    protected Session openSession() {
-        // No session if the session factory is not found
-        if (!sessionFactory) {
-            return null
+    protected void openSession() {
+        // Get the persistence interceptor
+        def persistenceInterceptor = Holders.applicationContext.getBean('persistenceInterceptor')
+
+        // No session if there's no persistence interceptor
+        if (!persistenceInterceptor) {
+            return
         }
 
-        // Get the current session holder
-        SessionHolder sessionHolder = TransactionSynchronizationManager.getResource(sessionFactory)
-
-        // If there's a current session, don't create a new one
-        if (sessionHolder?.session) {
-            return null
-        }
-
-        // Create the session
-        Session session = sessionFactory.openSession()
-
-        // If the holder is null, create it, otherwise just add the new session
-        if (sessionHolder == null) {
-            sessionHolder = new SessionHolder(session)
-            TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder)
-        }
-        else {
-            sessionHolder.addSession(session)
-        }
-
-        return session
+        // Bind a session
+        persistenceInterceptor.init()
     }
 
     /**
@@ -664,22 +632,19 @@ class RabbitConsumer extends DefaultConsumer {
      *
      * @param session
      */
-    protected void closeSession(Session session) {
-        // Get the current session holder
-        SessionHolder sessionHolder = TransactionSynchronizationManager.getResource(sessionFactory)
+    protected void closeSession() {
+        // Get the persistence interceptor
+        def persistenceInterceptor = Holders.applicationContext.getBean('persistenceInterceptor')
 
-        // Flush the session
-        session.flush()
-
-        // Close the session
-        if (session.isOpen()) {
-            session.close()
+        // No session if there's no persistence interceptor
+        if (!persistenceInterceptor) {
+            return
         }
 
-        // Remove the session
-        sessionHolder.removeSession(session)
+        // Flush the session
+        persistenceInterceptor.flush()
 
-        // Unbind the thread
-        TransactionSynchronizationManager.unbindResource(sessionFactory)
+        // Close the session
+        persistenceInterceptor.destroy()
     }
 }
