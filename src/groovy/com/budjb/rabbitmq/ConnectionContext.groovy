@@ -46,7 +46,7 @@ class ConnectionContext {
     /**
      * RabbitMQ port
      */
-    public int port = 5672
+    public int port = ConnectionFactory.DEFAULT_AMQP_PORT
 
     /**
      * RabbitMQ username
@@ -61,7 +61,7 @@ class ConnectionContext {
     /**
      * RabbitMQ virtual host
      */
-    public String virtualHost = '/'
+    public String virtualHost = ConnectionFactory.DEFAULT_VHOST
 
     /**
      * Whether to automatically reconnect.
@@ -79,7 +79,7 @@ class ConnectionContext {
      * The requested heartbeat delay, in seconds, that the server sends in the connection.tune frame.
      * If set to 0, heartbeats are disabled.
      */
-    public int requestedHeartbeat = 0
+    public int requestedHeartbeat = ConnectionFactory.DEFAULT_HEARTBEAT
 
     /**
      * Whether to use SSL.
@@ -172,7 +172,7 @@ class ConnectionContext {
         factory.host = host
         factory.virtualHost = virtualHost
         factory.automaticRecovery = automaticReconnect
-        factory.requestedHeartbeat = requestedHeartbeat ?: factory.requestedHeartbeat
+        factory.requestedHeartbeat = requestedHeartbeat
 
         // Optionally enable SSL
         if (ssl) {

@@ -14,3 +14,6 @@ stacktrace.log
 /out/
 /web-app/plugins
 /web-app/WEB-INF
+*.bak
+.classpath
+.project
