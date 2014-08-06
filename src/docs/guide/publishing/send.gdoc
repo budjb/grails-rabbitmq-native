@@ -5,7 +5,7 @@ h4. Send Example
 {code}
 // Send a message
 new RabbitMessageBuilder().send {
-    routingKey = "some.queue"
+    exchange = "some.exchange"
     routingKey = "some.routingKey"
     body = "hi!"
 }
