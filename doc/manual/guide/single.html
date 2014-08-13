@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
     <head>
-        <title>Rabbitmq Native Plugin 2.0.5</title>
+        <title>Rabbitmq Native Plugin 2.0.6</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8" />
         <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8" />
@@ -66,7 +66,7 @@ function addJsClass(el) {
                         <div class="project">
                             <h1>Rabbitmq Native Plugin - Reference Documentation</h1>
                             <p><strong>Authors:</strong> Bud Byrd</p>
-                            <p><strong>Version:</strong> 2.0.5</p>
+                            <p><strong>Version:</strong> 2.0.6</p>
                             
                         </div>
 
@@ -528,7 +528,8 @@ Sending a message means publishing a message to an exchange or queue and not wai
 are a queue or exchange to publish the message to, and the body of the message.<p class="paragraph"/><h4>Send Example</h4>
 <div class="code"><pre>// Send a message
 <span class="java&#45;keyword">new</span> RabbitMessageBuilder().send &#123;
-    routingKey = <span class="java&#45;quote">"some.queue"</span>
+    exchange = <span class="java&#45;quote">"some.exchange"</span>
+    routingKey = <span class="java&#45;quote">"some.routingKey"</span>
     body = <span class="java&#45;quote">"hi!"</span>
 &#125;</pre></div><p class="paragraph"/>RabbitMQ expects the body of a message to be a byte array. Message converters will also work when publishing messages, so if an object type other than <code>byte</code> is
 encountered, a suitable message converter will be found and run against the message body, if one exists.
@@ -539,7 +540,8 @@ encountered, a suitable message converter will be found and run against the mess
 Publishing an RPC message is as easy as sending messages, except the returned message is returned from the function.<p class="paragraph"/><h4>RPC Example</h4>
 <div class="code"><pre>// Send a message
 def result = <span class="java&#45;keyword">new</span> RabbitMessageBuilder().rpc &#123;
-    routingKey = <span class="java&#45;quote">"some.queue"</span>
+    exchange = <span class="java&#45;quote">"some.exchange"</span>
+    routingKey = <span class="java&#45;quote">"some.routingKey"</span>
     body = <span class="java&#45;quote">"hi!"</span>
     timeout = RabbitMessageBuilder.DEFAULT_TIMEOUT
 &#125;</pre></div><p class="paragraph"/><blockquote class="warning">
@@ -659,7 +661,12 @@ handler, the transaction is automatically rolled back.<p class="paragraph"/>It i
 
 
 <h1 id="changelog">8 Changelog</h1>
-<h3>Version 2.0.5 - 8/01/2014</h3>
+<h3>Version 2.0.6 - 8/13/2014</h3>
+<ul class="star">
+<li>Updated copyright notices.</li>
+<li>Added GString message converter.</li>
+<li>Updated publishing guide docs to make RabbitMessageBuilder usage more clear (thanks marcDeSantis @GitHub).</li>
+</ul><p class="paragraph"/><h3>Version 2.0.5 - 8/01/2014</h3>
 <ul class="star">
 <li>Added heartbeat configuration for connections (thanks LuisMuniz @GitHub).</li>
 <li>Refactored Hibernate session support so that Hibernate is no longer a dependency of the plugin, and will now work with or without Hibernate present.</li>

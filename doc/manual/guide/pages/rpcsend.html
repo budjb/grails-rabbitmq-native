@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>5.2 RPC Messages 2.0.5</title>
+    <title>5.2 RPC Messages 2.0.6</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -86,7 +86,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 2.0.5</p>
+                    <p><strong>Version:</strong> 2.0.6</p>
 
                     
                 </div>
@@ -99,7 +99,8 @@ function addJsClass() {
 Publishing an RPC message is as easy as sending messages, except the returned message is returned from the function.<p class="paragraph"/><h4>RPC Example</h4>
 <div class="code"><pre>// Send a message
 def result = <span class="java&#45;keyword">new</span> RabbitMessageBuilder().rpc &#123;
-    routingKey = <span class="java&#45;quote">"some.queue"</span>
+    exchange = <span class="java&#45;quote">"some.exchange"</span>
+    routingKey = <span class="java&#45;quote">"some.routingKey"</span>
     body = <span class="java&#45;quote">"hi!"</span>
     timeout = RabbitMessageBuilder.DEFAULT_TIMEOUT
 &#125;</pre></div><p class="paragraph"/><blockquote class="warning">
