@@ -120,7 +120,7 @@ class RabbitmqNativeGrailsPlugin {
 
         // Configure built-in converters
         "${StringMessageConverter.name}"(StringMessageConverter)
-        "${GStringMessageConverter.name}"(StringMessageConverter)
+        "${GStringMessageConverter.name}"(GStringMessageConverter)
         "${IntegerMessageConverter.name}"(IntegerMessageConverter)
         "${MapMessageConverter.name}"(MapMessageConverter)
         "${ListMessageConverter.name}"(ListMessageConverter)

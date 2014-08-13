@@ -29,12 +29,12 @@ class GStringMessageConverter extends MessageConverter<GString> {
     }
 
     @Override
-    public String convertTo(byte[] input) {
+    public GString convertTo(byte[] input) {
         throw new IllegalStateException("can not convert to a GString")
     }
 
     @Override
-    public byte[] convertFrom(String input) {
+    public byte[] convertFrom(GString input) {
         return input.toString().getBytes()
     }
 
