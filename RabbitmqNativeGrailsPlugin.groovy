@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Bud Byrd
+ * Copyright 2013-2014 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,6 +120,7 @@ class RabbitmqNativeGrailsPlugin {
 
         // Configure built-in converters
         "${StringMessageConverter.name}"(StringMessageConverter)
+        "${GStringMessageConverter.name}"(StringMessageConverter)
         "${IntegerMessageConverter.name}"(IntegerMessageConverter)
         "${MapMessageConverter.name}"(MapMessageConverter)
         "${ListMessageConverter.name}"(ListMessageConverter)
@@ -293,6 +294,7 @@ class RabbitmqNativeGrailsPlugin {
         context.registerMessageConverter(application.mainContext.getBean("${IntegerMessageConverter.name}"))
         context.registerMessageConverter(application.mainContext.getBean("${MapMessageConverter.name}"))
         context.registerMessageConverter(application.mainContext.getBean("${ListMessageConverter.name}"))
+        context.registerMessageConverter(application.mainContext.getBean("${GStringMessageConverter.name}"))
         context.registerMessageConverter(application.mainContext.getBean("${StringMessageConverter.name}"))
     }
 }

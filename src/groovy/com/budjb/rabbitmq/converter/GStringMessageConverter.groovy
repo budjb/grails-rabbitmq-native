@@ -17,7 +17,7 @@ package com.budjb.rabbitmq.converter
 
 import com.budjb.rabbitmq.MessageConverter
 
-class IntegerMessageConverter extends MessageConverter<Integer> {
+class GStringMessageConverter extends MessageConverter<GString> {
     @Override
     public boolean canConvertFrom() {
         return true
@@ -25,20 +25,16 @@ class IntegerMessageConverter extends MessageConverter<Integer> {
 
     @Override
     public boolean canConvertTo() {
-        return true
+        return false
     }
 
     @Override
-    public Integer convertTo(byte[] input) {
-        String string = new String(input)
-        if (!string.isInteger()) {
-            return null
-        }
-        return string.toInteger()
+    public String convertTo(byte[] input) {
+        throw new IllegalStateException("can not convert to a GString")
     }
 
     @Override
-    public byte[] convertFrom(Integer input) {
+    public byte[] convertFrom(String input) {
         return input.toString().getBytes()
     }
 
@@ -46,5 +42,4 @@ class IntegerMessageConverter extends MessageConverter<Integer> {
     public String getContentType() {
         return null
     }
-
 }
