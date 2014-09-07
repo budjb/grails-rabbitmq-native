@@ -89,12 +89,12 @@ class ConnectionContext {
     /**
      * List of message consumers for this connection.
      */
-    List<DefaultGrailsMessageConsumerClass> consumers = []
+    List<DefaultGrailsMessageConsumerClass> consumers = new ArrayList<DefaultGrailsMessageConsumerClass>()
 
     /**
      * List of open channels in use by consumers.
      */
-    List<Channel> channels = []
+    List<Channel> channels = new ArrayList<Channel>()
 
     /**
      * Lazy-loaded connection to RabbitMQ.
@@ -199,6 +199,8 @@ class ConnectionContext {
             return
         }
 
+        stopConsumers()
+
         log.debug("closing connection to the RabbitMQ server")
         connection.close()
         connection = null
@@ -217,16 +219,16 @@ class ConnectionContext {
      * Stops all consumers associated with this connection.
      */
     public void stopConsumers() {
-        if (channels) {
+        if (channels.size()) {
             log.debug("closing RabbitMQ channels")
             channels.each { channel ->
                 if (channel.isOpen()) {
                     channel.close()
                 }
             }
-            channels = []
+            channels.clear()
         }
-        consumers = []
+        consumers.clear()
     }
 
     /**
