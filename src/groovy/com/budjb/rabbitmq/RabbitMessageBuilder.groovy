@@ -289,67 +289,78 @@ class RabbitMessageBuilder {
         // Whether this is a temporary channel
         boolean tempChannel = false
 
+        // Track whether we've started consuming
+        boolean consuming = false
+
         // If a channel wasn't given, create one
         if (!channel) {
             channel = rabbitContext.createChannel(connection)
             tempChannel = true
         }
 
-        // Set the reply queue
-        properties.replyTo = channel.queueDeclare().queue
-
         // Generate a consumer tag
         String consumerTag = UUID.randomUUID().toString()
 
-        // Create the sync object
-        SynchronousQueue<MessageContext> replyHandoff = new SynchronousQueue<MessageContext>()
+        try {
+            // Set the reply queue
+            properties.replyTo = channel.queueDeclare().queue
 
-        // Define the handler
-        DefaultConsumer consumer = new DefaultConsumer(channel) {
-            @Override
-            public void handleDelivery(String replyConsumerTag, Envelope replyEnvelope, AMQP.BasicProperties replyProperties, byte[] replyBody) throws IOException {
-                MessageContext context = new MessageContext(
-                    channel: null,
-                    consumerTag: replyConsumerTag,
-                    envelope: replyEnvelope,
-                    properties: replyProperties,
-                    body: replyBody
-                )
-                try {
-                    replyHandoff.put(context)
-                }
-                catch (InterruptedException e) {
-                    Thread.currentThread().interrupt()
+            // Create the sync object
+            SynchronousQueue<MessageContext> replyHandoff = new SynchronousQueue<MessageContext>()
+
+            // Define the handler
+            DefaultConsumer consumer = new DefaultConsumer(channel) {
+                @Override
+                public void handleDelivery(String replyConsumerTag, Envelope replyEnvelope, AMQP.BasicProperties replyProperties, byte[] replyBody) throws IOException {
+                    MessageContext context = new MessageContext(
+                        channel: null,
+                        consumerTag: replyConsumerTag,
+                        envelope: replyEnvelope,
+                        properties: replyProperties,
+                        body: replyBody
+                    )
+                    try {
+                        replyHandoff.put(context)
+                    }
+                    catch (InterruptedException e) {
+                        Thread.currentThread().interrupt()
+                    }
                 }
             }
+
+            // Start the consumer
+            channel.basicConsume(properties.replyTo, false, consumerTag, true, true, null, consumer)
+
+            // Send the message
+            channel.basicPublish(exchange, routingKey, properties, body)
+
+            // Wait for the reply
+            MessageContext reply = (timeout < 0) ? replyHandoff.take() : replyHandoff.poll(timeout, TimeUnit.MILLISECONDS)
+
+            // If the reply is null, assume the timeout was reached
+            if (reply == null) {
+                throw new TimeoutException("timeout of ${timeout} milliseconds reached while waiting for a response in an RPC message to exchange '${exchange}' and routingKey '${routingKey}'")
+            }
+
+            // If auto convert is disabled, return the MessageContext
+            if (!autoConvert) {
+                return reply
+            }
+
+            return convertMessageFromBytes(reply.body)
         }
+        finally {
+            // If we've started consuming, stop consumption
+            if (consuming) {
+                channel.basicCancel(consumerTag)
+            }
 
-        // Start the consumer
-        channel.basicConsume(properties.replyTo, false, consumerTag, true, true, null, consumer)
-
-        // Send the message
-        channel.basicPublish(exchange, routingKey, properties, body)
-
-        // Wait for the reply
-        MessageContext reply = (timeout < 0) ? replyHandoff.take() : replyHandoff.poll(timeout, TimeUnit.MILLISECONDS)
-
-        // Close the channel
-        if (tempChannel) {
-            channel.close()
-            channel = null
+            // Close the channel if a temporary one was opened
+            if (tempChannel) {
+                channel.close()
+                channel = null
+            }
         }
-
-        // If the reply is null, assume the timeout was reached
-        if (reply == null) {
-            throw new TimeoutException("timeout of ${timeout} milliseconds reached while waiting for a response in an RPC message to exchange '${exchange}' and routingKey '${routingKey}'")
-        }
-
-        // If auto convert is disabled, return the MessageContext
-        if (!autoConvert) {
-            return reply
-        }
-
-        return convertMessageFromBytes(reply.body)
     }
 
     /**
