@@ -328,8 +328,9 @@ class RabbitMessageBuilder {
                 }
             }
 
-            // Start the consumer
+            // Start the consumer and mark it
             channel.basicConsume(properties.replyTo, false, consumerTag, true, true, null, consumer)
+            consuming = true
 
             // Send the message
             channel.basicPublish(exchange, routingKey, properties, body)
