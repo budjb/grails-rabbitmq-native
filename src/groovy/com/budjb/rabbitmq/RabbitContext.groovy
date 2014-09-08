@@ -38,12 +38,12 @@ class RabbitContext {
     /**
      * List of current connection contexts.
      */
-    protected List<ConnectionContext> connections = []
+    protected List<ConnectionContext> connections = new ArrayList<ConnectionContext>()
 
     /**
      * A list of registered message converters.
      */
-    public List<MessageConverter> messageConverters = []
+    public List<MessageConverter> messageConverters = new ArrayList<MessageConverter>()
 
     /**
      * Loads and initializes the configuration.
@@ -112,10 +112,10 @@ class RabbitContext {
 
         // Disconnect
         connections*.closeConnection()
-        connections = []
+        connections.clear()
 
         // Clear message converters
-        messageConverters = []
+        messageConverters.clear()
     }
 
     /**

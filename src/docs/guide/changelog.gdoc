@@ -1,3 +1,7 @@
+h3. Version 2.0.7 - 9/8/2014
+* Add @basicCancel()@ to @RabbitMessageBuilder@ in an attempt to address a memory leak.
+* Improve cleaning up of resources in RPC calls.
+
 h3. Version 2.0.6 - 8/13/2014
 * Updated copyright notices.
 * Added GString message converter.
