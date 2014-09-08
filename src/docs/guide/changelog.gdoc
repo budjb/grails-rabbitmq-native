@@ -1,3 +1,6 @@
+h3. Version 2.0.8 - 9/8/2014
+* Fix bug introduced by rushing the previous fix. Mark consuming = true.
+
 h3. Version 2.0.7 - 9/8/2014
 * Add @basicCancel()@ to @RabbitMessageBuilder@ in an attempt to address a memory leak.
 * Improve cleaning up of resources in RPC calls.
