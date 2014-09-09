@@ -22,6 +22,7 @@ import com.rabbitmq.client.Envelope
 import com.rabbitmq.client.MessageProperties
 import com.rabbitmq.client.RpcClient
 import com.rabbitmq.client.ShutdownSignalException
+import com.rabbitmq.client.impl.recovery.AutorecoveringChannel
 import grails.converters.JSON
 import grails.util.Holders
 import groovy.json.JsonBuilder
@@ -286,11 +287,14 @@ class RabbitMessageBuilder {
         // Convert the object and create the message
         byte[] body = convertMessageToBytes(this.body)
 
-        // Whether this is a temporary channel
+        // Track whether this is a temporary channel
         boolean tempChannel = false
 
         // Track whether we've started consuming
         boolean consuming = false
+
+        // Track the temporary queue name
+        String temporaryQueue
 
         // If a channel wasn't given, create one
         if (!channel) {
@@ -302,8 +306,11 @@ class RabbitMessageBuilder {
         String consumerTag = UUID.randomUUID().toString()
 
         try {
+            // Create a temporary queue
+            temporaryQueue = channel.queueDeclare().queue
+
             // Set the reply queue
-            properties.replyTo = channel.queueDeclare().queue
+            properties.replyTo = temporaryQueue
 
             // Create the sync object
             SynchronousQueue<MessageContext> replyHandoff = new SynchronousQueue<MessageContext>()
@@ -351,9 +358,21 @@ class RabbitMessageBuilder {
             return convertMessageFromBytes(reply.body)
         }
         finally {
-            // If we've started consuming, stop consumption
+            // If we've started consuming, stop consumption.
+            // This cleans up some tracking objects internal to the RabbitMQ
+            // library when using auto-recovering connections.
+            // A memory leak results without this.
             if (consuming) {
                 channel.basicCancel(consumerTag)
+            }
+
+            // This cleans up some tracking objects internal to the RabbitMQ
+            // library when using auto-recovering connections.  A memory leak
+            // results without this.  This is pretty nasty since deleteRecordedQueue
+            // is a private member of the channel class.  Thankfully, groovy doesn't
+            // care about that :)
+            if (temporaryQueue && channel instanceof AutorecoveringChannel) {
+                ((AutorecoveringChannel)channel).deleteRecordedQueue(temporaryQueue)
             }
 
             // Close the channel if a temporary one was opened
