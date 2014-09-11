@@ -33,7 +33,7 @@ class RabbitmqNativeGrailsPlugin {
     /**
      * Version of the plugin.
      */
-    def version = "2.0.9"
+    def version = "2.0.10"
 
     /**
      * The version or versions of Grails the plugin is designed for.
@@ -112,6 +112,12 @@ class RabbitmqNativeGrailsPlugin {
      * Spring actions.
      */
     def doWithSpring = {
+        // Do nothing if the plugin's disabled.
+        if (application.config.rabbitmq.enabled == false) {
+            log.warn("The rabbitmq-native plugin has been disabled by the application's configuration.")
+            return
+        }
+
         // Setup the rabbit context
         "rabbitContext"(RabbitContext) { bean ->
             bean.scope = 'singleton'
@@ -146,6 +152,11 @@ class RabbitmqNativeGrailsPlugin {
      * Application context actions.
      */
     def doWithApplicationContext = { applicationContext ->
+        // Do nothing if the plugin's disabled.
+        if (application.config.rabbitmq.enabled == false) {
+            return
+        }
+
         restartRabbitContext(application, applicationContext.getBean('rabbitContext'))
     }
 
@@ -153,6 +164,11 @@ class RabbitmqNativeGrailsPlugin {
      * Handle Grails service reloads.
      */
     def onChange = { event ->
+        // Do nothing if the plugin's disabled.
+        if (application.config.rabbitmq.enabled == false) {
+            return
+        }
+
         // Bail if no context
         if (!event.ctx) {
             return
@@ -197,6 +213,11 @@ class RabbitmqNativeGrailsPlugin {
      * Handle configuration changes.
      */
     def onConfigChange = { event ->
+        // Do nothing if the plugin's disabled.
+        if (application.config.rabbitmq.enabled == false) {
+            return
+        }
+
         RabbitContext context = event.ctx.getBean('rabbitContext')
         restartRabbitContext(application, context)
         context.startConsumers()
