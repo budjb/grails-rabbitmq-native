@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 import com.budjb.rabbitmq.RabbitContext
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 class RabbitmqNativeBootStrap {
     RabbitContext rabbitContext
+    GrailsApplication grailsApplication
 
     def init = { servletContext ->
+        if (grailsApplication.config.rabbitmq.enabled == false) {
+            return
+        }
         rabbitContext.startConsumers()
     }
 }

@@ -577,8 +577,9 @@ class RabbitMessageBuilder {
      */
     protected Object convertMessageFromBytes(byte[] input) {
         for (MessageConverter converter in rabbitContext.messageConverters) {
+            // Skip if the converter doesn't support converting from bytes
             if (!converter.canConvertTo()) {
-                return null
+                continue
             }
 
             try {

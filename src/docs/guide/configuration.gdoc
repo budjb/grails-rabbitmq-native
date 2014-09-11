@@ -1,1 +1,8 @@
 Configuration of the connection to the RabbitMQ server is done in your project's @grails-app/conf/Config.groovy@ file.
+
+Currently, there is one global configuration parameter.
+
+{table}
+*Configuration Property* | *Required* | *Description* | *Type* | *Default*
+@enabled@ | | If false, will completely disable the plugin's initialization. | @String@ | @true@
+{table}

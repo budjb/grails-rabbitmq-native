@@ -1,3 +1,7 @@
+h3. Version 2.0.10 - 9/11/2014
+* Fix bug with converters that prevented converters later in the processing list from executing if another convert is unable to marshall data from bytes.
+* Add @enabled@ flag to the configuration. If false, completely disables the plugin from starting.
+
 h3. Version 2.0.9 - 9/9/2014
 * Additional fix for memory leak associated with RPC calls and auto-recovering connections.
 
