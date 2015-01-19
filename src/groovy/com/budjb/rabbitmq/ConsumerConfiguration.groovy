@@ -89,6 +89,10 @@ class ConsumerConfiguration {
         }
     }
 
+    public ConsumerConfiguration(ConfigObject options) {
+        this(buildMap(options))
+    }
+
     /**
      * Assigns the option provided by the consumer's config, or returns the default
      * value if the option was not provided or it was unable to be converted to
@@ -107,6 +111,20 @@ class ConsumerConfiguration {
         }
         catch (Exception e) {
             return defaultValue
+        }
+    }
+
+    /**
+     * builds a Map instance from a config object
+     *
+     * @param config a ConfigObject instance to transform into a Map
+     * @return the resulting Map instance
+     */
+    static private buildMap(ConfigObject config) {
+        if (config) {
+            return config.collectEntries {it}
+        } else {
+            return [:]
         }
     }
 }
