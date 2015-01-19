@@ -103,7 +103,11 @@ class RabbitConsumer extends DefaultConsumer {
      * @return
      */
     public static String getConnectionName(Class clazz) {
-        return (clazz)."${RABBIT_CONFIG_NAME}"['connection'] ?: null
+        try {
+            return (clazz)."${RABBIT_CONFIG_NAME}"['connection'] ?: null
+        } catch (MissingPropertyException e) {
+            return null
+        }
     }
 
     /**
@@ -123,24 +127,52 @@ class RabbitConsumer extends DefaultConsumer {
      * @return
      */
     public static boolean isConsumer(Class clazz) {
+        def shortClassName = clazz.name.split('\\.').last()
+        def configTest = false
         // Ensure the config field is set
         try {
             Field field = clazz.getDeclaredField(RABBIT_CONFIG_NAME)
             if (!Modifier.isStatic(field.modifiers)) {
-                return false
+                configTest = false
             }
         }
         catch (NoSuchFieldException e) {
-            return false
+            configTest = false
+        }
+        try {
+            // Ensure the config field is a map
+            if (!Map.class.isAssignableFrom(clazz."${RABBIT_CONFIG_NAME}".getClass())) {
+                configTest = false
+            } else {
+                // if we get there, no need to check the application configuration later
+                if (log.isDebugEnabled()) {
+                    def staticConf = clazz."${RABBIT_CONFIG_NAME}"
+                    log.debug("$shortClassName: Using static configuration ${staticConf}")
+                }
+                configTest = true
+            }
+        } catch (MissingPropertyException e) {
+            configTest = false
         }
 
-        // Ensure the config field is a map
-        if (!Map.class.isAssignableFrom(clazz."${RABBIT_CONFIG_NAME}".getClass())) {
-            return false
+        if (!configTest) {
+            // at last resort, try to find the config in the application config
+            def rabbitConf = Holders.config?.rabbitmq?.consumers?."${shortClassName}"
+            log.debug("isConsumer(): checking ${shortClassName} rabbitmq configuration: ${rabbitConf}")
+            if (!rabbitConf) {
+                log.debug("${shortClassName}: no RabbitMQ configuration found after trying ${RABBIT_CONFIG_NAME} static property " +
+                        "and app config => isConsumer(): false")
+                return false
+            } else {
+                if(!Map.class.isAssignableFrom(rabbitConf.getClass())) {
+                    log.debug("$shortClassName: configuration is not a Map instance !")
+                    return false
+                }
+            }
         }
-
         // Check if we find any handler defined
         if (clazz.getDeclaredMethods().any { it.name == RABBIT_HANDLER_NAME }) {
+            log.debug("\\o/ $shortClassName is a well configured RabbitMQ handler ! \\o/ ")
             return true
         }
 
@@ -160,8 +192,22 @@ class RabbitConsumer extends DefaultConsumer {
             return []
         }
 
+        Map handlerConfig = handler.getPropertyValue(RABBIT_CONFIG_NAME)
+        if (!handlerConfig) {
+            log.debug("${handler.shortName}: Didn't find 'rabbitConfig' static property, checking application config")
+            def appConfig = Holders.config.rabbitmq?.consumers?."${handler.shortName}"
+            if (!appConfig) {
+                log.warn("RabbitMQ configuration for consumer '${handler.shortName}' has no 'rabbitConfig' static property, and i can't find the 'rabbitmq.consumers.${handler.shortName}' key in application's configuration")
+                return []
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("${handler.shortName}: Using application config : ${appConfig}")
+            }
+            handlerConfig = appConfig
+        }
+
         // Load the rabbit config properties into a configuration holder
-        ConsumerConfiguration config = new ConsumerConfiguration(handler.getPropertyValue(RABBIT_CONFIG_NAME))
+        ConsumerConfiguration config = new ConsumerConfiguration(handlerConfig)
 
         // Make sure a queue or an exchange was specified
         if (!config.queue && !config.exchange) {
