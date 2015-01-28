@@ -1,11 +1,10 @@
 Message consumers can subscribe to either queues or exchanges. When a consumer is registered to a queue, the consumer will receive messages from the queue as
 the RabbitMQ server determines that it's the consumer's turn to receive a message, since there may be multiple listeners on the same queue.
 
-Each message consumer class must have a configuration defined. There are 2 possible options to specify the configuration:
+Each message consumer class must have a configuration defined. There are 2 methods to specify the configuration:
 
-* The configuration should be a Map, assigned to a static variable named @rabbitConfig@. To subscribe to queues, the only
- required configuration option is the @queue@ variable, which is the name of the queue to subscribe to.
-* Using @rabbitmq.consumers.<ClassName>@ in the application's configuration file
+* The consumer class can have a @Map@ assigned to a static variable named @rabbitConfig@. To subscribe to queues, the only required configuration option is the @queue@ variable, which is the name of the queue to subscribe to.
+* The application's configuration file can contain the configuration with the path @rabbitmq.consumers.<ClassName>@.
 
 Here is a simple example of a consumer subscribing to a queue.
 {code}
@@ -21,7 +20,8 @@ class ExampleConsumer {
     }
 }
 {code}
-The exact same configuration would be defined using this in the application's Config.groovy
+
+The exact same configuration can be defined in the application's configuration (@Config.groovy@).
 {code}
 // ...
 rabbitmq {
