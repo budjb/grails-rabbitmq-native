@@ -103,11 +103,13 @@ class RabbitConsumer extends DefaultConsumer {
      * @return
      */
     public static String getConnectionName(Class clazz) {
-        try {
-            return (clazz)."${RABBIT_CONFIG_NAME}"['connection'] ?: null
-        } catch (MissingPropertyException e) {
+        Map configuration = getConfiguration(clazz)
+
+        if (!configuration) {
             return null
         }
+
+        return configuration['connection'] ?: null
     }
 
     /**
@@ -120,39 +122,61 @@ class RabbitConsumer extends DefaultConsumer {
         return isConsumer(clazz.clazz)
     }
 
-    protected static boolean isLocallyConfiguredConsumer(Class clazz) {
+    /**
+     * Finds and returns a consumer's local configuration, or null if it doesn't exist.
+     *
+     * @param clazz
+     * @return
+     */
+    protected static Map getLocalConfiguration(Class clazz) {
         // Ensure the config field is set and is static
         try {
             Field field = clazz.getDeclaredField(RABBIT_CONFIG_NAME)
             if (!Modifier.isStatic(field.modifiers)) {
-                return false
+                return null
             }
         }
         catch (NoSuchFieldException e) {
-            return false
+            return null
         }
 
         // Ensure the config field is a map
         if (!Map.class.isAssignableFrom(clazz."${RABBIT_CONFIG_NAME}".getClass())) {
-            return false
+            return null
         }
 
-        return true
+        return clazz."${RABBIT_CONFIG_NAME}"
     }
 
-    protected static boolean isCentrallyConfiguredConsumer(Class clazz) {
+    /**
+     * Finds and returns a consumer's central configuration, or null if it isn't defined.
+     *
+     * @param clazz
+     * @return
+     */
+    protected static Map getCentralConfiguration(Class clazz) {
         // Get the short name of the class
         String shortName = clazz.simpleName
 
         // Attempt to find a configuration path that matches the class name
-        def rabbitConf = Holders.config.rabbitmq.consumers."${shortName}"
+        def configuration = Holders.config.rabbitmq.consumers."${shortName}"
 
         // Ensure it exists and is a map
-        if (!rabbitConf || !Map.class.isAssignableFrom(rabbitConf.getClass())) {
-            return false
+        if (!configuration || !Map.class.isAssignableFrom(configuration.getClass())) {
+            return null
         }
 
-        return true
+        return configuration
+    }
+
+    /**
+     * Finds and returns the consumer's configuration, or null if one is not defined.
+     *
+     * @param clazz
+     * @return
+     */
+    protected static Map getConfiguration(Class clazz) {
+        return getLocalConfiguration(clazz) ?: getCentralConfiguration(clazz)
     }
 
     /**
@@ -163,16 +187,16 @@ class RabbitConsumer extends DefaultConsumer {
      */
     public static boolean isConsumer(Class clazz) {
         // Check if there is either a local or central configuration
-        if (!isLocallyConfiguredConsumer(clazz) || !isCentrallyConfiguredConsumer(clazz)) {
+        if (!getConfiguration(clazz)) {
             return false
         }
 
         // Check if we find any handler defined
-        if (clazz.getDeclaredMethods().any { it.name == RABBIT_HANDLER_NAME }) {
-            return true
+        if (!clazz.getDeclaredMethods().any { it.name == RABBIT_HANDLER_NAME }) {
+            return false
         }
 
-        return false
+        return true
     }
 
     /**
@@ -188,18 +212,13 @@ class RabbitConsumer extends DefaultConsumer {
             return []
         }
 
-        Map handlerConfig = handler.getPropertyValue(RABBIT_CONFIG_NAME)
+        // Get the consumer's configuration
+        Map handlerConfig = getConfiguration(handler.clazz)
+
+        // This shouldn't happen, but a good sanity check nonetheless
         if (!handlerConfig) {
-            log.debug("${handler.shortName}: Didn't find 'rabbitConfig' static property, checking application config")
-            def appConfig = Holders.config.rabbitmq?.consumers?."${handler.shortName}"
-            if (!appConfig) {
-                log.warn("RabbitMQ configuration for consumer '${handler.shortName}' has no 'rabbitConfig' static property, and i can't find the 'rabbitmq.consumers.${handler.shortName}' key in application's configuration")
-                return []
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("${handler.shortName}: Using application config : ${appConfig}")
-            }
-            handlerConfig = appConfig
+            log.error("unable to find configuration for consumer ${handler.shortName}, but found one earlier")
+            return []
         }
 
         // Load the rabbit config properties into a configuration holder
