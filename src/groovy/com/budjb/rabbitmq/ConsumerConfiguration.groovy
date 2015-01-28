@@ -89,6 +89,11 @@ class ConsumerConfiguration {
         }
     }
 
+    /**
+     * Construct the configuration from the application's configuration.
+     *
+     * @param options
+     */
     public ConsumerConfiguration(ConfigObject options) {
         this(buildMap(options))
     }
@@ -115,15 +120,16 @@ class ConsumerConfiguration {
     }
 
     /**
-     * builds a Map instance from a config object
+     * Builds a Map instance from a config object.
      *
-     * @param config a ConfigObject instance to transform into a Map
-     * @return the resulting Map instance
+     * @param config A ConfigObject instance to transform into a Map.
+     * @return The resulting Map instance.
      */
-    static private buildMap(ConfigObject config) {
+    static private Map buildMap(ConfigObject config) {
         if (config) {
-            return config.collectEntries {it}
-        } else {
+            return config.collectEntries { it }
+        }
+        else {
             return [:]
         }
     }

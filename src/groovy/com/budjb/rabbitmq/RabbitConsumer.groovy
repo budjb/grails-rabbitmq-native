@@ -120,6 +120,41 @@ class RabbitConsumer extends DefaultConsumer {
         return isConsumer(clazz.clazz)
     }
 
+    protected static boolean isLocallyConfiguredConsumer(Class clazz) {
+        // Ensure the config field is set and is static
+        try {
+            Field field = clazz.getDeclaredField(RABBIT_CONFIG_NAME)
+            if (!Modifier.isStatic(field.modifiers)) {
+                return false
+            }
+        }
+        catch (NoSuchFieldException e) {
+            return false
+        }
+
+        // Ensure the config field is a map
+        if (!Map.class.isAssignableFrom(clazz."${RABBIT_CONFIG_NAME}".getClass())) {
+            return false
+        }
+
+        return true
+    }
+
+    protected static boolean isCentrallyConfiguredConsumer(Class clazz) {
+        // Get the short name of the class
+        String shortName = clazz.simpleName
+
+        // Attempt to find a configuration path that matches the class name
+        def rabbitConf = Holders.config.rabbitmq.consumers."${shortName}"
+
+        // Ensure it exists and is a map
+        if (!rabbitConf || !Map.class.isAssignableFrom(rabbitConf.getClass())) {
+            return false
+        }
+
+        return true
+    }
+
     /**
      * Determines if a handler is a RabbitMQ consumer.
      *
@@ -127,52 +162,13 @@ class RabbitConsumer extends DefaultConsumer {
      * @return
      */
     public static boolean isConsumer(Class clazz) {
-        def shortClassName = clazz.name.split('\\.').last()
-        def configTest = false
-        // Ensure the config field is set
-        try {
-            Field field = clazz.getDeclaredField(RABBIT_CONFIG_NAME)
-            if (!Modifier.isStatic(field.modifiers)) {
-                configTest = false
-            }
-        }
-        catch (NoSuchFieldException e) {
-            configTest = false
-        }
-        try {
-            // Ensure the config field is a map
-            if (!Map.class.isAssignableFrom(clazz."${RABBIT_CONFIG_NAME}".getClass())) {
-                configTest = false
-            } else {
-                // if we get there, no need to check the application configuration later
-                if (log.isDebugEnabled()) {
-                    def staticConf = clazz."${RABBIT_CONFIG_NAME}"
-                    log.debug("$shortClassName: Using static configuration ${staticConf}")
-                }
-                configTest = true
-            }
-        } catch (MissingPropertyException e) {
-            configTest = false
+        // Check if there is either a local or central configuration
+        if (!isLocallyConfiguredConsumer(clazz) || !isCentrallyConfiguredConsumer(clazz)) {
+            return false
         }
 
-        if (!configTest) {
-            // at last resort, try to find the config in the application config
-            def rabbitConf = Holders.config?.rabbitmq?.consumers?."${shortClassName}"
-            log.debug("isConsumer(): checking ${shortClassName} rabbitmq configuration: ${rabbitConf}")
-            if (!rabbitConf) {
-                log.debug("${shortClassName}: no RabbitMQ configuration found after trying ${RABBIT_CONFIG_NAME} static property " +
-                        "and app config => isConsumer(): false")
-                return false
-            } else {
-                if(!Map.class.isAssignableFrom(rabbitConf.getClass())) {
-                    log.debug("$shortClassName: configuration is not a Map instance !")
-                    return false
-                }
-            }
-        }
         // Check if we find any handler defined
         if (clazz.getDeclaredMethods().any { it.name == RABBIT_HANDLER_NAME }) {
-            log.debug("\\o/ $shortClassName is a well configured RabbitMQ handler ! \\o/ ")
             return true
         }
 
