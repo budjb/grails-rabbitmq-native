@@ -366,15 +366,6 @@ class RabbitMessageBuilder {
                 channel.basicCancel(consumerTag)
             }
 
-            // This cleans up some tracking objects internal to the RabbitMQ
-            // library when using auto-recovering connections.  A memory leak
-            // results without this.  This is pretty nasty since deleteRecordedQueue
-            // is a private member of the channel class.  Thankfully, groovy doesn't
-            // care about that :)
-            if (temporaryQueue && channel instanceof AutorecoveringChannel) {
-                ((AutorecoveringChannel)channel).deleteRecordedQueue(temporaryQueue)
-            }
-
             // Close the channel if a temporary one was opened
             if (tempChannel) {
                 channel.close()
