@@ -27,7 +27,7 @@ The exact same configuration can be defined in the application's configuration (
 rabbitmq {
     consumers {
         ExampleConsumer {
-            queue: "test.queue"
+            queue = "test.queue"
         }
     }
 }
