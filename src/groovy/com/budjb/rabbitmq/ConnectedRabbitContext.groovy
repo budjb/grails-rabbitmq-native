@@ -301,6 +301,9 @@ class ConnectedRabbitContext implements RabbitContext, ApplicationContextAware {
         }
     }
 
+    /**
+     * Loads the configuration and registers any consumers and converters.
+     */
     @Override
     public void load() {
         // Load the configuration
@@ -313,6 +316,9 @@ class ConnectedRabbitContext implements RabbitContext, ApplicationContextAware {
         loadConsumers()
     }
 
+    /**
+     * Returns a list of all registered message converters.
+     */
     @Override
     public List<MessageConverter> getMessageConverters() {
         return messageConverters

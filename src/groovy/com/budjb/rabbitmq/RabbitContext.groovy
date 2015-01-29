@@ -4,7 +4,7 @@ import com.rabbitmq.client.Channel
 
 public interface RabbitContext {
     /**
-     * Self-loads the context from the Grails configuration.
+     * Loads the configuration and registers any consumers or converters.
      */
     public void load()
 

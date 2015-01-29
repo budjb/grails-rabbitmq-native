@@ -19,6 +19,7 @@ import org.apache.log4j.Logger
 
 import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.ConnectedRabbitContext
+import com.budjb.rabbitmq.NullRabbitContext
 import com.budjb.rabbitmq.RabbitConsumer
 import com.budjb.rabbitmq.MessageConverterArtefactHandler
 import com.budjb.rabbitmq.MessageConsumerArtefactHandler
@@ -115,9 +116,9 @@ class RabbitmqNativeGrailsPlugin {
     def doWithSpring = {
         // Create the rabbit context bean
         Class rabbitContextClass
-        if (false || application.config.rabbitmq.enabled == false) {
-            // TODO: set up a null rabbitcontext object if the plugin is disabled
-            rabbitContextClass = RabbitContext
+        if (application.config.rabbitmq.enabled == false) {
+            // Set a null rabbitcontext object if the plugin is disabled
+            rabbitContextClass = NullRabbitContext
             log.warn("The rabbitmq-native plugin has been disabled by the application's configuration.")
         }
         else {
