@@ -17,18 +17,27 @@ package com.budjb.rabbitmq
 
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
+
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsClass
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
+
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
 
-class RabbitContext {
+class RabbitContext implements RabbitContextInterface, ApplicationContextAware {
     /**
      * Grails application bean
      */
     GrailsApplication grailsApplication
+
+    /**
+     * Spring application context
+     */
+    ApplicationContext applicationContext
 
     /**
      * Logger
@@ -43,12 +52,12 @@ class RabbitContext {
     /**
      * A list of registered message converters.
      */
-    public List<MessageConverter> messageConverters = new ArrayList<MessageConverter>()
+    protected List<MessageConverter> messageConverters = new ArrayList<MessageConverter>()
 
     /**
      * Loads and initializes the configuration.
      */
-    public void loadConfiguration() {
+    protected void loadConfiguration() {
         // Check for the configuration
         if (!grailsApplication.config.rabbitmq?.connection) {
             if (grailsApplication.config.rabbitmq?.connectionFactory) {
@@ -74,8 +83,40 @@ class RabbitContext {
     /**
      * Connects to each configured RabbitMQ broker.
      */
+    @Override
     public void start() {
+        start(false)
+    }
+
+    @Override
+    public void start(boolean skipConsumers) {
         connections*.openConnection()
+        configureQueues()
+        if (!skipConsumers) {
+            startConsumers()
+        }
+    }
+
+    /**
+     * Creates the exchanges and queues that are defined in the Grails configuration.
+     */
+    protected void configureQueues() {
+        // Skip if the config isn't defined
+        if (!(grailsApplication.config.rabbitmq?.queues instanceof Closure)) {
+            return
+        }
+
+        // Grab the config closure
+        Closure config = grailsApplication.config.rabbitmq.queues
+
+        // Create the queue builder
+        RabbitQueueBuilder queueBuilder = new RabbitQueueBuilder(this)
+
+        // Run the config
+        config = config.clone()
+        config.delegate = queueBuilder
+        config.resolveStrategy = Closure.DELEGATE_FIRST
+        config()
     }
 
     /**
@@ -86,20 +127,9 @@ class RabbitContext {
     }
 
     /**
-     * Reloads message consumers, but leaves the connections intact.
-     */
-    public void restartConsumers() {
-        // Close the existing channels
-        stopConsumers()
-
-        // Start the channels again
-        startConsumers()
-    }
-
-    /**
      * Closes any active channels and the connection to the RabbitMQ server.
      */
-    public void stopConsumers() {
+    protected void stopConsumers() {
         connections*.stopConsumers()
     }
 
@@ -123,9 +153,8 @@ class RabbitContext {
      */
     public void restart() {
         stop()
-        loadConfiguration()
+        load()
         start()
-        startConsumers()
     }
 
     /**
@@ -151,11 +180,11 @@ class RabbitContext {
      * @param candidate
      * @return
      */
-    public boolean registerConsumer(DefaultGrailsMessageConsumerClass candidate) {
+    public void registerConsumer(DefaultGrailsMessageConsumerClass candidate) {
         // Validate the consumer configuration
         if (!RabbitConsumer.isConsumer(candidate)) {
-            log.warn("not starting '${candidate.shortName}' as a RabbitMQ message consumer because it is not properly configured")
-            return false
+            log.warn("not registering '${candidate.shortName}' as a RabbitMQ message consumer because it is not properly configured")
+            return
         }
 
         // Get the proper connection
@@ -163,23 +192,35 @@ class RabbitContext {
 
         // If the connection wasn't found, bail out
         if (!connection) {
-            return false
+            log.warn("not registering '${candidate.shortName}' as a RabbitMQ message consumer because a suitable connection could not be found")
+            return
         }
 
         // Add the consumer to the connection
         connection.registerConsumer(candidate)
-
-        return true
     }
 
     /**
-     * Creates a new untracked channel.
+     * Creates a new channel with the default connection.
      *
-     * The caller must make sure to clean this up (channel.close()).
+     * Note that this channel must be manually closed.
      *
      * @return
      */
-    public Channel createChannel(String connectionName = null) {
+    @Override
+    public Channel createChannel() {
+        return createChannel(null)
+    }
+
+    /**
+     * Creates a new channel with the specified connection.
+     *
+     * Note that this channel must be manually closed.
+     *
+     * @return
+     */
+    @Override
+    public Channel createChannel(String connectionName) {
         // Get the requested connection
         ConnectionContext connection = getConnection(connectionName)
 
@@ -196,11 +237,22 @@ class RabbitContext {
     }
 
     /**
-     * Returns a connection by its name, or the default if the name is null.
+     * Returns the ConnectionContext associated with the default connection.
      *
      * @return
      */
-    public ConnectionContext getConnection(String name = null) {
+    @Override
+    public ConnectionContext getConnection() {
+        return getConnection(null)
+    }
+
+    /**
+     * Returns the ConnectionContext associated with the default connection.
+     *
+     * @return
+     */
+    @Override
+    public ConnectionContext getConnection(String name) {
         ConnectionContext context
 
         if (!name) {
@@ -220,5 +272,49 @@ class RabbitContext {
         }
 
         return context
+    }
+
+    /**
+     * Loads message converters.
+     */
+    protected void loadMessageConverters() {
+        // Register application-provided converters
+        grailsApplication.messageConverterClasses.each { GrailsClass clazz ->
+            registerMessageConverter(applicationContext.getBean(clazz.fullName))
+        }
+
+        // Register built-in message converters
+        // Note: the order matters, we want string to be the last one
+        context.registerMessageConverter(application.mainContext.getBean("${IntegerMessageConverter.name}"))
+        context.registerMessageConverter(application.mainContext.getBean("${MapMessageConverter.name}"))
+        context.registerMessageConverter(application.mainContext.getBean("${ListMessageConverter.name}"))
+        context.registerMessageConverter(application.mainContext.getBean("${GStringMessageConverter.name}"))
+        context.registerMessageConverter(application.mainContext.getBean("${StringMessageConverter.name}"))
+    }
+
+    /**
+     * Loads message consumers.
+     */
+    protected void loadConsumers() {
+        grailsApplication.messageConsumerClasses.each { GrailsClass clazz ->
+            registerConsumer(clazz)
+        }
+    }
+
+    @Override
+    public void load() {
+        // Load the configuration
+        loadConfiguration()
+
+        // Load message converters
+        loadMessageConverters()
+
+        // Load consumers
+        loadConsumers()
+    }
+
+    @Override
+    public List<MessageConverter> getMessageConverters() {
+        return messageConverters
     }
 }

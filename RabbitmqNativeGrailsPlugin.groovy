@@ -112,26 +112,29 @@ class RabbitmqNativeGrailsPlugin {
      * Spring actions.
      */
     def doWithSpring = {
-        // Do nothing if the plugin's disabled.
-        if (application.config.rabbitmq.enabled == false) {
+        // Create the rabbit context bean
+        Class rabbitContextClass
+        if (false || application.config.rabbitmq.enabled == false) {
+            // TODO: set up a null rabbitcontext object if the plugin is disabled
+            rabbitContextClass = RabbitContext
             log.warn("The rabbitmq-native plugin has been disabled by the application's configuration.")
-            return
         }
-
-        // Setup the rabbit context
-        "rabbitContext"(RabbitContext) { bean ->
+        else {
+            rabbitContextClass = RabbitContext
+        }
+        "rabbitContext"(rabbitContextClass) { bean ->
             bean.scope = 'singleton'
             bean.autowire = true
         }
 
-        // Configure built-in converters
+        // Create the built-in converter beans
         "${StringMessageConverter.name}"(StringMessageConverter)
         "${GStringMessageConverter.name}"(GStringMessageConverter)
         "${IntegerMessageConverter.name}"(IntegerMessageConverter)
         "${MapMessageConverter.name}"(MapMessageConverter)
         "${ListMessageConverter.name}"(ListMessageConverter)
 
-        // Configure application-provided converters
+        // Create application-provided converter beans
         application.messageConverterClasses.each { GrailsClass clazz ->
             "${clazz.fullName}"(clazz.clazz) { bean ->
                 bean.scope = 'singleton'
@@ -139,7 +142,7 @@ class RabbitmqNativeGrailsPlugin {
             }
         }
 
-        // Configure consumers
+        // Create consumer beans
         application.messageConsumerClasses.each { GrailsClass clazz ->
             "${clazz.fullName}"(clazz.clazz) { bean ->
                 bean.scope = 'singleton'
@@ -157,7 +160,10 @@ class RabbitmqNativeGrailsPlugin {
             return
         }
 
-        restartRabbitContext(application, applicationContext.getBean('rabbitContext'))
+        // Load and start the rabbit service, without starting consumers.
+        RabbitContext rabbitContext = applicationContext.getBean('rabbitContext')
+        rabbitContext.load()
+        rabbitContext.start(true)
     }
 
     /**
@@ -187,8 +193,7 @@ class RabbitmqNativeGrailsPlugin {
 
             // Restart the rabbit context
             RabbitContext context = event.ctx.getBean('rabbitContext')
-            restartRabbitContext(application, context)
-            context.startConsumers()
+            context.restart()
             return
         }
 
@@ -204,7 +209,8 @@ class RabbitmqNativeGrailsPlugin {
             }.registerBeans(event.ctx)
 
             // Restart the consumers
-            restartConsumers(application, event.ctx.getBean('rabbitContext'))
+            RabbitContext context = event.ctx.getBean('rabbitContext')
+            context.restart()
             return
         }
     }
@@ -219,103 +225,6 @@ class RabbitmqNativeGrailsPlugin {
         }
 
         RabbitContext context = event.ctx.getBean('rabbitContext')
-        restartRabbitContext(application, context)
-        context.startConsumers()
-    }
-
-    /**
-     * Restarts the rabbit context.
-     *
-     * @param context
-     */
-    void restartRabbitContext(GrailsApplication application, RabbitContext context) {
-        // Stop the rabbit context
-        context.stop()
-
-        // Load the configuration
-        context.loadConfiguration()
-
-        // Register message converters
-        registerConverters(application, context)
-
-        // Register consumers
-        registerConsumers(application, context)
-
-        // Start the rabbit context
-        context.start()
-
-        // Configure up exchanges and queues
-        configureQueues(application, context)
-    }
-
-    /**
-     * Configure queues based on the application's configuration.
-     *
-     * @param application
-     */
-    void configureQueues(GrailsApplication application, RabbitContext context) {
-        // Skip if the config isn't defined
-        if (!(application.config.rabbitmq?.queues instanceof Closure)) {
-            return
-        }
-
-        // Grab the config closure
-        Closure config = application.config.rabbitmq.queues
-
-        // Create the queue builder
-        RabbitQueueBuilder queueBuilder = new RabbitQueueBuilder(context)
-
-        // Run the config
-        config = config.clone()
-        config.delegate = queueBuilder
-        config.resolveStrategy = Closure.DELEGATE_FIRST
-        config()
-    }
-
-    /**
-     * Restarts the rabbit consumers.
-     *
-     * @param context
-     */
-    void restartConsumers(GrailsApplication application, RabbitContext context) {
-        // Stop the consumers
-        context.stopConsumers()
-
-        // Register consumers again
-        registerConsumers(application, context)
-
-        // Start the consumers
-        context.startConsumers()
-    }
-
-    /**
-     * Registers consumers against the rabbit context.
-     *
-     * @param context
-     */
-    void registerConsumers(GrailsApplication application, RabbitContext context) {
-        application.messageConsumerClasses.each { GrailsClass clazz ->
-            context.registerConsumer(clazz)
-        }
-    }
-
-    /**
-     * Registers message converters against the rabbit context.
-     *
-     * @param context
-     */
-    void registerConverters(GrailsApplication application, RabbitContext context) {
-        // Register application-provided converters
-        application.messageConverterClasses.each { GrailsClass clazz ->
-            context.registerMessageConverter(application.mainContext.getBean(clazz.fullName))
-        }
-
-        // Register built-in message converters
-        // Note: the order matters, we want string to be the last one
-        context.registerMessageConverter(application.mainContext.getBean("${IntegerMessageConverter.name}"))
-        context.registerMessageConverter(application.mainContext.getBean("${MapMessageConverter.name}"))
-        context.registerMessageConverter(application.mainContext.getBean("${ListMessageConverter.name}"))
-        context.registerMessageConverter(application.mainContext.getBean("${GStringMessageConverter.name}"))
-        context.registerMessageConverter(application.mainContext.getBean("${StringMessageConverter.name}"))
+        context.restart()
     }
 }
