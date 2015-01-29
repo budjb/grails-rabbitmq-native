@@ -2,7 +2,7 @@ package com.budjb.rabbitmq
 
 import com.rabbitmq.client.Channel
 
-public interface RabbitContextInterface {
+public interface RabbitContext {
     /**
      * Self-loads the context from the Grails configuration.
      */
