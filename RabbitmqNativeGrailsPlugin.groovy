@@ -18,6 +18,7 @@ import grails.util.Holders
 import org.apache.log4j.Logger
 
 import com.budjb.rabbitmq.RabbitContext
+import com.budjb.rabbitmq.ConnectedRabbitContext
 import com.budjb.rabbitmq.RabbitConsumer
 import com.budjb.rabbitmq.MessageConverterArtefactHandler
 import com.budjb.rabbitmq.MessageConsumerArtefactHandler
@@ -120,7 +121,7 @@ class RabbitmqNativeGrailsPlugin {
             log.warn("The rabbitmq-native plugin has been disabled by the application's configuration.")
         }
         else {
-            rabbitContextClass = RabbitContext
+            rabbitContextClass = ConnectedRabbitContext
         }
         "rabbitContext"(rabbitContextClass) { bean ->
             bean.scope = 'singleton'

@@ -28,7 +28,7 @@ import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
 
-class RabbitContext implements RabbitContextInterface, ApplicationContextAware {
+class ConnectedRabbitContext implements RabbitContextInterface, ApplicationContextAware {
     /**
      * Grails application bean
      */
