@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import com.budjb.rabbitmq.exception.MessageConvertException
 
+@Deprecated
 class RabbitMessageBuilder {
     /**
      * Default timeout for RPC calls (5 seconds).
