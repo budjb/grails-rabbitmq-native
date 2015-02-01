@@ -68,9 +68,7 @@ class RabbitMessagePublisher {
      * @param closure Closure to configure the message properties.
      */
     public void send(Closure closure) throws IllegalArgumentException {
-        RabbitMessageProperties properties = new RabbitMessageProperties()
-        properties.build(closure)
-        send(properties)
+        send(new RabbitMessageProperties().build(closure))
     }
 
     /**
@@ -216,7 +214,7 @@ class RabbitMessagePublisher {
             BasicProperties basicProperties = properties.toBasicProperties()
 
             // Create the sync object
-            SynchronousQueue<MessageContext> replyHandoff = new SynchronousQueue<MessageContext>()
+            SynchronousQueue<MessageContext> replyHandoff = createResponseQueue()
 
             // Define the response consumer handler
             DefaultConsumer consumer = new DefaultConsumer(channel) {
@@ -338,5 +336,14 @@ class RabbitMessagePublisher {
             delegate.routingKey = routingKey
             delegate.body = body
         })
+    }
+
+    /**
+     * Creates and returns a synchronous queue for use in the RPC consumer.
+     *
+     * @return
+     */
+    SynchronousQueue<MessageContext> createResponseQueue() {
+        return new SynchronousQueue<MessageContext>()
     }
 }

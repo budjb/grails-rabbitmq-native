@@ -112,12 +112,14 @@ class RabbitMessageProperties {
     Channel channel
 
     /**
-     * Builds the properties class from a provided closure.
+     * Builds the properties class from a provided closure and returns itself.
      *
      * @param closure
+     * @return This object.
      */
-    public void build(Closure closure) {
+    public RabbitMessageProperties build(Closure closure) {
         run(closure)
+        return this
     }
 
     /**
