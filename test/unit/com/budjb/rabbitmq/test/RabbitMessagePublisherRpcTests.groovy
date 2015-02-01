@@ -2,12 +2,13 @@ package com.budjb.rabbitmq.test
 
 import static org.mockito.Mockito.*
 
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.TimeoutException
 
-import com.budjb.rabbitmq.MessageContext;
+import com.budjb.rabbitmq.MessageContext
 import com.budjb.rabbitmq.RabbitMessageProperties
-import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk;
+import com.rabbitmq.client.Channel
+import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk
 
 class RabbitMessagePublisherRpcTests extends RabbitMessagePublisherTest {
     /**
@@ -147,5 +148,72 @@ class RabbitMessagePublisherRpcTests extends RabbitMessagePublisherTest {
                 timeout = 500
             }
         }
+    }
+
+    /**
+     * Test that no channel is created from the rabbit context if one is provided.
+     */
+    void testProvidedChannel() {
+        // Mock for a basic RPC test
+        mockBasicRpc(BASIC_RESPONSE_MESSAGE.getBytes())
+
+        // Mock a new channel
+        Channel channel = mock(Channel)
+
+        // Mock a temporary queue
+        when(channel.queueDeclare()).thenReturn(new DeclareOk('temporary-queue', 0, 0))
+
+        // Send a message
+        rabbitMessagePublisher.rpc {
+            routingKey = BASIC_PUBLISH_ROUTING_KEY
+            delegate.channel = channel
+        }
+
+        // Ensure a channel was not created from the rabbit context
+        verify(rabbitContext, never()).createChannel()
+
+        // Ensure the channel was not closed
+        verify(channel, never()).close()
+    }
+
+    /**
+     * Test that a channel is created and closed when one is not provided.
+     */
+    void testCreatedChannel() {
+        // Mock for a basic RPC test
+        mockBasicRpc(BASIC_RESPONSE_MESSAGE.getBytes())
+
+        // Send a message
+        rabbitMessagePublisher.rpc {
+            routingKey = BASIC_PUBLISH_ROUTING_KEY
+        }
+
+        // Ensure a channel was created
+        verify(rabbitContext, times(1)).createChannel(null)
+
+        // Ensure the channel was closed
+        verify(channel, times(1)).close()
+    }
+
+    /**
+     * Verify mechanical operation of publishing and consuming.
+     */
+    void testPublishConsumeMechanics() {
+        // Mock for a basic RPC test
+        mockBasicRpc(BASIC_RESPONSE_MESSAGE.getBytes())
+
+        // Send a message
+        rabbitMessagePublisher.rpc {
+            routingKey = BASIC_PUBLISH_ROUTING_KEY
+        }
+
+        // Ensure that a publish was issued
+        verify(channel, times(1)).basicPublish(any(), any(), any(), any())
+
+        // Ensure a consume was issued
+        verify(channel, times(1)).basicConsume(any(), eq(false), any(), eq(true), eq(true), eq(null), any())
+
+        // Ensure consuming was canceled
+        verify(channel, times(1)).basicCancel(any())
     }
 }
