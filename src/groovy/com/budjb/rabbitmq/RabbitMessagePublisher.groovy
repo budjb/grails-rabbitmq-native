@@ -130,8 +130,7 @@ class RabbitMessagePublisher {
             }
         }
 
-        // TODO: make a custom exception
-        throw new Exception("unable to find a converter for type ${source.getClass().name}")
+        throw new IllegalArgumentException("unable to find a converter for type ${source.getClass().name}")
     }
 
     /**
