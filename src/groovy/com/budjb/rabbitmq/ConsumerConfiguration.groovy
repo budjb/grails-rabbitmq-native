@@ -68,6 +68,11 @@ class ConsumerConfiguration {
     public int prefetchCount = 1
 
     /**
+     * Name of the connection that should be used to consume from.
+     */
+    String connection = null
+
+    /**
      * Constructor that parses the options defined in the service consumer.
      *
      * @param options
@@ -83,6 +88,7 @@ class ConsumerConfiguration {
         convert       = parseConfigOption(MessageConvertMethod, convert, options['convert'])
         retry         = parseConfigOption(Boolean, retry, options['retry'])
         prefetchCount = parseConfigOption(Integer, prefetchCount, options['prefetchCount'])
+        connection    = parseConfigOption(String, connection, options['connection'])
 
         if (transacted) {
             autoAck = AutoAck.POST
