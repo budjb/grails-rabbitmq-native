@@ -12,7 +12,10 @@ grails.project.dependency.resolution = {
 
     dependencies {
         compile 'com.rabbitmq:amqp-client:3.4.3'
-        test 'org.mockito:mockito-all:1.10.19', {
+        test 'org.mockito:mockito-all:1.9.5', {
+            export = false
+        }
+        test 'com.cyrusinnovation:mockito-groovy-support:1.3', {
             export = false
         }
     }

@@ -16,7 +16,11 @@
 package com.budjb.rabbitmq.exception
 
 class MessageConvertException extends Exception {
-    public MessageConvertException(Class clazz) {
-        super("unable to convert class ${clazz} to a byte array")
+    public MessageConvertException(String message) {
+        super(message)
+    }
+
+    public MessageConvertException(String message, Throwable cause) {
+        super(message, cause)
     }
 }

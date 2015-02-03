@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq
 
-import com.rabbitmq.client.AMQP
+import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope
 
@@ -38,7 +38,7 @@ class MessageContext {
     /**
      * Message properties
      */
-    AMQP.BasicProperties properties
+    BasicProperties properties
 
     /**
      * Raw message body

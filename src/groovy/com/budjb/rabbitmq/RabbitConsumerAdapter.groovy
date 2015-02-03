@@ -11,6 +11,7 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsClass
 import org.springframework.context.ApplicationContext
 
+import com.budjb.rabbitmq.exception.MessageConvertException
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.DefaultConsumer
@@ -19,7 +20,41 @@ import com.rabbitmq.client.impl.recovery.AutorecoveringChannel
 
 @SuppressWarnings("unchecked")
 class RabbitConsumerAdapter {
-    class RabbitConsumer extends DefaultConsumer {
+    /**
+     * Builder to simplify creating adapters.
+     */
+    public static class RabbitConsumerAdapterBuilder {
+        Object consumer
+        GrailsApplication grailsApplication
+        RabbitContext rabbitContext
+        MessageConverterManager messageConverterManager
+        Object persistenceInterceptor
+
+        /**
+         * Returns a new rabbit consumer adapter instance.
+         *
+         * @param closure
+         * @return
+         */
+        public RabbitConsumerAdapter build(Closure closure) {
+            closure.delegate = this
+            closure.resolveStrategy = Closure.OWNER_FIRST
+            closure.run()
+
+            return new RabbitConsumerAdapter(
+                consumer,
+                grailsApplication,
+                rabbitContext,
+                messageConverterManager,
+                persistenceInterceptor,
+            )
+        }
+    }
+
+    /**
+     * Consumer object used to receive messages from the RabbitMQ library.
+     */
+    protected class RabbitConsumer extends DefaultConsumer {
         /**
          * Consumer adapter containing the context for this consumer.
          */
@@ -134,7 +169,12 @@ class RabbitConsumerAdapter {
     /**
      * Persistence intercepter for Hibernate session handling.
      */
-    public Object persistenceInterceptor
+    Object persistenceInterceptor
+
+    /**
+     * Message converter manager.
+     */
+    MessageConverterManager messageConverterManager
 
     /**
      * Constructor.
@@ -142,10 +182,11 @@ class RabbitConsumerAdapter {
      * @param clazz
      * @param grailsApplication
      */
-    public RabbitConsumerAdapter(Object consumer, GrailsApplication grailsApplication, RabbitContext rabbitContext, Object persistenceInterceptor) {
+    public RabbitConsumerAdapter(Object consumer, GrailsApplication grailsApplication, RabbitContext rabbitContext, MessageConverterManager messageConverterManager, Object persistenceInterceptor) {
         this.consumer = consumer
         this.grailsApplication = grailsApplication
         this.rabbitContext = rabbitContext
+        this.messageConverterManager = messageConverterManager
         this.persistenceInterceptor = persistenceInterceptor
     }
 
@@ -248,6 +289,7 @@ class RabbitConsumerAdapter {
 
     /**
      * Returns the consumer's short name.
+     *
      * @return
      */
     public String getConsumerName() {
@@ -272,6 +314,9 @@ class RabbitConsumerAdapter {
             log.warn("attempted to start consumers but active consumers already exist")
             return
         }
+
+        // Get the configuration
+        ConsumerConfiguration configuration = getConfiguration()
 
         // Get the connection context
         ConnectionContext connectionContext = rabbitContext.getConnection(configuration.connection)
@@ -365,7 +410,7 @@ class RabbitConsumerAdapter {
             }
         }
         catch (Exception e) {
-            log.error("unexpected exception ${e.getClass()} encountered in the rabbit consumer associated with handler ${consumer.shortName}", e)
+            log.error("unexpected exception ${e.getClass()} encountered in the rabbit consumer associated with handler ${getConsumerName()}", e)
         }
     }
 
@@ -376,6 +421,9 @@ class RabbitConsumerAdapter {
      * @return Any returned value from the handler.
      */
     private Object processMessage(MessageContext context) {
+        // Get the configuration
+        ConsumerConfiguration configuration = getConfiguration()
+
         // Track whether the handler is MessageContext only
         boolean contextOnly = false
 
@@ -486,6 +534,9 @@ class RabbitConsumerAdapter {
      * @return
      */
     private Object convertMessage(MessageContext context) {
+        // Get the configuration
+        ConsumerConfiguration configuration = getConfiguration()
+
         // Check if the consumers wants us to not convert
         if (configuration.convert == MessageConvertMethod.DISABLED) {
             return context.body
@@ -493,15 +544,11 @@ class RabbitConsumerAdapter {
 
         // If a content-type this converter is aware of is given, respect it.
         if (context.properties.contentType) {
-            // Find a converter
-            List<MessageConverter> converters = rabbitContext.messageConverters.findAll { it.contentType == context.properties.contentType }
-
-            // If converters are found and it can convert to its type, allow it to do so
-            for (MessageConverter converter in converters) {
-                Object converted = attemptConversion(converter, context)
-                if (converted != null) {
-                    return converted
-                }
+            try {
+                return messageConverterManager.convertFromBytes(context.body, context.properties.contentType)
+            }
+            catch (MessageConvertException e) {
+                // Continue
             }
         }
 
@@ -510,12 +557,12 @@ class RabbitConsumerAdapter {
             return context.body
         }
 
-        // Iterate through converters until we have success
-        for (MessageConverter converter in rabbitContext.messageConverters) {
-            Object converted = attemptConversion(converter, context)
-            if (converted != null) {
-                return converted
-            }
+        // Try all message converters
+        try {
+            return messageConverterManager.convertFromBytes(context.body)
+        }
+        catch (MessageConvertException e) {
+            // Continue
         }
 
         // No converters worked, so fall back to the byte array
@@ -573,35 +620,6 @@ class RabbitConsumerAdapter {
 
             return true
         }
-    }
-
-    /**
-     * Attempts to convert a message with the given converter.
-     *
-     * @param converter
-     * @param context
-     * @return
-     */
-    public Object attemptConversion(MessageConverter converter, MessageContext context) {
-        // Skip if the converter can't convert the message from a byte array
-        if (!converter.canConvertTo()) {
-            return null
-        }
-
-        try {
-            // Convert the message
-            Object converted = converter.convertTo(context.body)
-
-            // If conversion worked and a handler is defined for the type, we're done
-            if (converted != null && getHandlerMethodForType(converted.getClass())) {
-                return converted
-            }
-        }
-        catch (Exception e) {
-            log.error("unhandled exception caught from message converter ${converter.class.simpleName}", e)
-        }
-
-        return null
     }
 
     /**

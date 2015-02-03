@@ -15,6 +15,8 @@
  */
 package com.budjb.rabbitmq
 
+import java.util.List
+
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
 
@@ -50,9 +52,9 @@ class ConnectedRabbitContext implements RabbitContext, ApplicationContextAware {
     protected List<ConnectionContext> connections = new ArrayList<ConnectionContext>()
 
     /**
-     * A list of registered message converters.
+     * The message converter manager.
      */
-    protected List<MessageConverter> messageConverters = new ArrayList<MessageConverter>()
+    public MessageConverterManager messageConverterManager
 
     /**
      * Loads and initializes the configuration.
@@ -145,7 +147,7 @@ class ConnectedRabbitContext implements RabbitContext, ApplicationContextAware {
         connections.clear()
 
         // Clear message converters
-        messageConverters.clear()
+        messageConverterManager.reset()
     }
 
     /**
@@ -162,16 +164,6 @@ class ConnectedRabbitContext implements RabbitContext, ApplicationContextAware {
      */
     protected void connect() {
         connections*.openConnection()
-    }
-
-    /**
-     * Registers a message converter against the rabbit context.
-     *
-     * @param converter
-     */
-    public void registerMessageConverter(MessageConverter converter) {
-        log.debug("registering message converter '${converter.class.simpleName}' for type '${converter.type}'")
-        messageConverters << converter
     }
 
     /**
@@ -285,11 +277,11 @@ class ConnectedRabbitContext implements RabbitContext, ApplicationContextAware {
 
         // Register built-in message converters
         // Note: the order matters, we want string to be the last one
-        context.registerMessageConverter(application.mainContext.getBean("${IntegerMessageConverter.name}"))
-        context.registerMessageConverter(application.mainContext.getBean("${MapMessageConverter.name}"))
-        context.registerMessageConverter(application.mainContext.getBean("${ListMessageConverter.name}"))
-        context.registerMessageConverter(application.mainContext.getBean("${GStringMessageConverter.name}"))
-        context.registerMessageConverter(application.mainContext.getBean("${StringMessageConverter.name}"))
+        messageConverterManager.registerMessageConverter(application.mainContext.getBean("${IntegerMessageConverter.name}"))
+        messageConverterManager.registerMessageConverter(application.mainContext.getBean("${MapMessageConverter.name}"))
+        messageConverterManager.registerMessageConverter(application.mainContext.getBean("${ListMessageConverter.name}"))
+        messageConverterManager.registerMessageConverter(application.mainContext.getBean("${GStringMessageConverter.name}"))
+        messageConverterManager.registerMessageConverter(application.mainContext.getBean("${StringMessageConverter.name}"))
     }
 
     /**
@@ -317,10 +309,25 @@ class ConnectedRabbitContext implements RabbitContext, ApplicationContextAware {
     }
 
     /**
-     * Returns a list of all registered message converters.
+     * Registers a message converter with the message converter manager.
+     *
+     * @param converter
      */
     @Override
+    @Deprecated
+    public void registerMessageConverter(MessageConverter converter) {
+        messageConverterManager.registerMessageConverter(converter)
+
+    }
+
+    /**
+     * Returns a list of all registered message converters.
+     *
+     * @param converter
+     */
+    @Override
+    @Deprecated
     public List<MessageConverter> getMessageConverters() {
-        return messageConverters
+        return messageConverterManager.getMessageConverters()
     }
 }

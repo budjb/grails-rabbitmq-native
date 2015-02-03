@@ -37,6 +37,7 @@ public interface RabbitContext {
      *
      * @param converter
      */
+    @Deprecated
     public void registerMessageConverter(MessageConverter converter)
 
     /**
@@ -44,6 +45,7 @@ public interface RabbitContext {
      *
      * @return
      */
+    @Deprecated
     public List<MessageConverter> getMessageConverters()
 
     /**
