@@ -56,6 +56,6 @@ class MessageConverterArtefactHandler extends ArtefactHandlerAdapter {
      * @return
      */
     public static boolean isMessageConverter(@SuppressWarnings("rawtypes") Class clazz) {
-        return clazz.getName().endsWith(SUFFIX) && MessageConverter.class.isAssignableFrom(clazz);
+        return clazz.getName().endsWith(SUFFIX);
     }
 }

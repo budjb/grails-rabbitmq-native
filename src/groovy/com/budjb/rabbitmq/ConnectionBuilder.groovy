@@ -16,8 +16,10 @@
 package com.budjb.rabbitmq
 
 import groovy.util.ConfigObject
+
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+
 import org.apache.log4j.Logger
 
 import com.rabbitmq.client.Connection

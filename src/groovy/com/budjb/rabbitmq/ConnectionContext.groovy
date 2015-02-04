@@ -31,70 +31,70 @@ class ConnectionContext {
     /**
      * RabbitMQ host
      */
-    public String host
+    protected String host
 
     /**
      * Name of the connection for use with message consumer configurations.
      */
-    public String name
+    protected String name
 
     /**
      * Whether the connection is the default for message consumers without a named connection.
      */
-    public boolean isDefault = false
+    protected boolean isDefault = false
 
     /**
      * RabbitMQ port
      */
-    public int port = ConnectionFactory.DEFAULT_AMQP_PORT
+    protected int port = ConnectionFactory.DEFAULT_AMQP_PORT
 
     /**
      * RabbitMQ username
      */
-    public String username
+    protected String username
 
     /**
      * RabbitMQ password
      */
-    public String password
+    protected String password
 
     /**
      * RabbitMQ virtual host
      */
-    public String virtualHost = ConnectionFactory.DEFAULT_VHOST
+    protected String virtualHost = ConnectionFactory.DEFAULT_VHOST
 
     /**
      * Whether to automatically reconnect.
      */
-    public boolean automaticReconnect = true
+    protected boolean automaticReconnect = true
 
     /**
      * The maximum number of concurrent consumer threads that are processed.
      *
      * 5 is the RabbitMQ default. 0 means unlimited.
      */
-    public int threads = 0
+    protected int threads = 0
 
     /**
      * The requested heartbeat delay, in seconds, that the server sends in the connection.tune frame.
      * If set to 0, heartbeats are disabled.
      */
-    public int requestedHeartbeat = ConnectionFactory.DEFAULT_HEARTBEAT
+    protected int requestedHeartbeat = ConnectionFactory.DEFAULT_HEARTBEAT
 
     /**
      * Whether to use SSL.
      */
-    public boolean ssl = false
+    protected boolean ssl = false
 
     /**
      * List of message consumers for this connection.
      */
-    List<DefaultGrailsMessageConsumerClass> consumers = new ArrayList<DefaultGrailsMessageConsumerClass>()
+    protected List<DefaultGrailsMessageConsumerClass> consumers = new ArrayList<DefaultGrailsMessageConsumerClass>()
 
     /**
      * List of open channels in use by consumers.
      */
-    List<Channel> channels = new ArrayList<Channel>()
+    protected List<Channel> channels = new ArrayList<Channel>()
 
     /**
      * Lazy-loaded connection to RabbitMQ.
@@ -247,5 +247,167 @@ class ConnectionContext {
      */
     public void registerConsumer(DefaultGrailsMessageConsumerClass clazz) {
         consumers << clazz
+    }
+
+    /**
+     * Returns the RabbitMQ host.
+     */
+    public String getHost() {
+        return host
+    }
+
+    /**
+     * Sets the RabbitMQ host.
+     */
+    public void setHost(String host) {
+        this.host = host
+    }
+
+    /**
+     * Returns the name of the connection.
+     */
+    public String getName() {
+        return name
+    }
+
+    /**
+     * Sets the name of the connection.
+     */
+    public void setName(String name) {
+        this.name = name
+    }
+
+    /**
+     * Returns whether the connection is the default connection.
+     */
+    public boolean getIsDefault() {
+        return isDefault
+    }
+
+    /**
+     * Sets whether the connection is the default connection.
+     */
+    public void setIsDefault(boolean isDefault) {
+        this.isDefault = isDefault
+    }
+
+    /**
+     * Returns the RabbitMQ broker port.
+     */
+    public int getPort() {
+        return port
+    }
+
+    /**
+     * Sets the RabbitMQ broker port.
+     */
+    public void setPort(int port) {
+        this.port = port
+    }
+
+    /**
+     * Returns the RabbitMQ username.
+     */
+    public String getUsername() {
+        return username
+    }
+
+    /**
+     * Sets the RabbitMQ username.
+     */
+    public void setUsername(String username) {
+        this.username = username
+    }
+
+    /**
+     * Returns the RabbitMQ password.
+     */
+    public String getPassword() {
+        return password
+    }
+
+    /**
+     * Sets the RabbitMQ password.
+     */
+    public void setPassword(String password) {
+        this.password = password
+    }
+
+    /**
+     * Returns the RabbitMQ virtual host.
+     */
+    public String getVirtualHost() {
+        return virtualHost
+    }
+
+    /**
+     * Sets the RabbitMQ virtual host.
+     */
+    public void setVirtualHost(String virtualHost) {
+        this.virtualHost = virtualHost
+    }
+
+    /**
+     * Returns whether the connection will automatically reconnect.
+     */
+    public boolean getAutomaticReconnect() {
+        return automaticReconnect
+    }
+
+    /**
+     * Sets whether the connection will automatically reconnect.
+     */
+    public void setAutomaticReconnect(boolean automaticReconnect) {
+        this.automaticReconnect = automaticReconnect
+    }
+
+    /**
+     * Returns the maximum number of concurrent consumer threads that are processed.
+     *
+     * 5 is the RabbitMQ default. 0 means unlimited.
+     */
+    public int getThreads() {
+        return threads
+    }
+
+    /**
+     * Sets the maximum number of concurrent consumer threads that are processed.
+     *
+     * 5 is the RabbitMQ default. 0 means unlimited.
+     */
+    public void setThreads(int threads) {
+        this.threads = threads
+    }
+
+    /**
+     * Returns the requested heartbeat delay, in seconds, that the server sends in the connection.tune frame.
+     *
+     * If set to 0, heartbeats are disabled.
+     */
+    public int getRequestedHeartbeat() {
+        return requestedHeartbeat
+    }
+
+    /**
+     * Sets the requested heartbeat delay, in seconds, that the server sends in the connection.tune frame.
+     *
+     * If set to 0, heartbeats are disabled.
+     */
+    public void setRequestedHeartbeat(int requestedHeartbeat) {
+        this.requestedHeartbeat = requestedHeartbeat
+    }
+
+    /**
+     * Returns whether to use SSL.
+     */
+    public boolean getSsl() {
+        return ssl
+    }
+
+    /**
+     * Sets whether to use SSL.
+     */
+    public void setSsl(boolean ssl) {
+        this.ssl = ssl
     }
 }

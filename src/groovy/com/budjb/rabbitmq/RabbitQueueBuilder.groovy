@@ -16,7 +16,9 @@
 package com.budjb.rabbitmq
 
 import com.rabbitmq.client.Channel
+
 import grails.util.Holders
+
 import org.apache.log4j.Logger
 
 /**

@@ -60,7 +60,7 @@ class ConsumerConfiguration {
     /**
      * Whether to retry the message on failure.
      */
-    boolean retry = false
+    protected boolean retry = false
 
     /**
      * Number of messages that should be pre-fetched from the queue.

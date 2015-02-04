@@ -329,7 +329,7 @@ class RabbitConsumerAdapter {
             // Create all requested consumer instances
             configuration.consumers.times {
                 // Create the channel
-                Channel channel = connectionContext.connection.createChannel()
+                Channel channel = connectionContext.createChannel()
 
                 // Determine the queue
                 String queue = configuration.queue
@@ -338,7 +338,7 @@ class RabbitConsumerAdapter {
                 channel.basicQos(configuration.prefetchCount)
 
                 // Create the rabbit consumer object
-                RabbitConsumer consumer = new RabbitConsumer(channel, connectionContext)
+                RabbitConsumer consumer = new RabbitConsumer(channel, this, connectionContext)
 
                 // Set up the consumer
                 channel.basicConsume(

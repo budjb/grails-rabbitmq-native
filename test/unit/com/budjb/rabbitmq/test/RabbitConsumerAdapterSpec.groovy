@@ -4,17 +4,9 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import spock.lang.Specification
 
-import com.budjb.rabbitmq.ConnectionContext
-import com.budjb.rabbitmq.ConsumerConfiguration
-import com.budjb.rabbitmq.MessageContext
-import com.budjb.rabbitmq.MessageConverterManager
-import com.budjb.rabbitmq.RabbitConsumerAdapter
-import com.budjb.rabbitmq.RabbitContext
-import com.budjb.rabbitmq.converter.GStringMessageConverter
-import com.budjb.rabbitmq.converter.IntegerMessageConverter
-import com.budjb.rabbitmq.converter.ListMessageConverter
-import com.budjb.rabbitmq.converter.MapMessageConverter
-import com.budjb.rabbitmq.converter.StringMessageConverter
+import com.budjb.rabbitmq.*
+import com.budjb.rabbitmq.converter.*
+
 import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope
@@ -231,22 +223,28 @@ class RabbitConsumerAdapterSpec extends Specification {
         1 * consumer.onFailure(context)
     }
 
-    /*
-    void testStart() {
+    void 'Start a basic consumer'() {
+        setup:
         // Mock the grails applicaton config
-        GrailsApplication grailsApplication = mock(GrailsApplication)
-        when(grailsApplication.getConfig()).thenReturn(new ConfigObject())
-
-        //  Mock a rabbit context
-        RabbitContext rabbitContext = mock(RabbitContext)
+        GrailsApplication grailsApplication = Mock(GrailsApplication)
+        grailsApplication.getConfig() >> new ConfigObject()
 
         // Mock a connection context
-        ConnectionContext context = mock(ConnectionContext)
-        context.name = 'default'
+        ConnectionContext context = Mock(ConnectionContext)
+        context.getName() >> 'default'
+        context.createChannel(*_) >> {
+            Channel channel = Mock(Channel)
+            return channel
+        }
+
+        //  Mock a rabbit context that returns the mocked connection context
+        RabbitContext rabbitContext = Mock(RabbitContext)
+        rabbitContext.getConnection(*_) >> context
 
         // Create a consumer
         LocalConfigConsumer consumer = new LocalConfigConsumer()
 
+        when:
         // Create the adapter
         RabbitConsumerAdapter adapter = new RabbitConsumerAdapter.RabbitConsumerAdapterBuilder().build {
             delegate.consumer = consumer
@@ -258,8 +256,10 @@ class RabbitConsumerAdapterSpec extends Specification {
         // Start the adapter
         adapter.start()
 
+        then:
+        adapter.consumers.size() == 5
     }
-    */
+
     /**
      * Used to test a consumer with a local configuration.
      */
