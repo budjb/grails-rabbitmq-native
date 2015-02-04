@@ -6,10 +6,10 @@ import spock.lang.Specification
 
 import com.budjb.rabbitmq.*
 import com.budjb.rabbitmq.converter.*
-
 import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope
+import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk
 
 
 class RabbitConsumerAdapterSpec extends Specification {
@@ -260,6 +260,83 @@ class RabbitConsumerAdapterSpec extends Specification {
         adapter.consumers.size() == 5
     }
 
+    def 'If the consumer has already been started and tried to start again, throw an IllegalStateException'() {
+        setup:
+        // Mock the grails applicaton config
+        GrailsApplication grailsApplication = Mock(GrailsApplication)
+        grailsApplication.getConfig() >> new ConfigObject()
+
+        // Mock a connection context
+        ConnectionContext context = Mock(ConnectionContext)
+        context.getName() >> 'default'
+        context.createChannel(*_) >> {
+            Channel channel = Mock(Channel)
+            return channel
+        }
+
+        //  Mock a rabbit context that returns the mocked connection context
+        RabbitContext rabbitContext = Mock(RabbitContext)
+        rabbitContext.getConnection(*_) >> context
+
+        // Create a consumer
+        LocalConfigConsumer consumer = new LocalConfigConsumer()
+
+        when:
+        // Create the adapter
+        RabbitConsumerAdapter adapter = new RabbitConsumerAdapter.RabbitConsumerAdapterBuilder().build {
+            delegate.consumer = consumer
+            delegate.grailsApplication = grailsApplication
+            delegate.rabbitContext = rabbitContext
+            delegate.messageConverterManager= messageConverterManager
+        }
+
+        // Start the adapter twice
+        adapter.start()
+        adapter.start()
+
+        then:
+        thrown IllegalStateException
+    }
+
+    def 'If using an exchange and binding, there should only be one consumer created'() {
+        setup:
+        // Mock the grails applicaton config
+        GrailsApplication grailsApplication = Mock(GrailsApplication)
+        grailsApplication.getConfig() >> new ConfigObject()
+
+        // Create a mocked channel
+        Channel channel = Mock(Channel)
+        channel.queueDeclare(*_) >> { new DeclareOk('temp-queue', 0, 0) }
+
+        // Mock a connection context
+        ConnectionContext context = Mock(ConnectionContext)
+        context.getName() >> 'default'
+        context.createChannel(*_) >> channel
+
+        //  Mock a rabbit context that returns the mocked connection context
+        RabbitContext rabbitContext = Mock(RabbitContext)
+        rabbitContext.getConnection(*_) >> context
+
+        // Create a consumer
+        SubscriberConsumer consumer = new SubscriberConsumer()
+
+        when:
+        // Create the adapter
+        RabbitConsumerAdapter adapter = new RabbitConsumerAdapter.RabbitConsumerAdapterBuilder().build {
+            delegate.consumer = consumer
+            delegate.grailsApplication = grailsApplication
+            delegate.rabbitContext = rabbitContext
+            delegate.messageConverterManager= messageConverterManager
+        }
+
+        // Start the adapter
+        adapter.start()
+
+        then:
+        adapter.consumers.size() == 1
+        1 * channel.basicConsume('temp-queue', _, _)
+    }
+
     /**
      * Used to test a consumer with a local configuration.
      */
@@ -305,6 +382,20 @@ class RabbitConsumerAdapterSpec extends Specification {
         }
 
         def onFailure(def context) {
+
+        }
+    }
+
+    /**
+     * Used to test subscriber-based configs.
+     */
+    class SubscriberConsumer {
+        static rabbitConfig = [
+            'exchange': 'test-exchange',
+            'binding': 'test-binding'
+        ]
+
+        def handleMessage(def body, def messageContext) {
 
         }
     }

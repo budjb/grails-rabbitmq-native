@@ -311,8 +311,7 @@ class RabbitConsumerAdapter {
 
         // Ensure there are no active consumers
         if (consumers.size()) {
-            log.warn("attempted to start consumers but active consumers already exist")
-            return
+            throw new IllegalStateException("attempted to start consumers but active consumers already exist")
         }
 
         // Get the configuration
@@ -356,7 +355,7 @@ class RabbitConsumerAdapter {
             log.debug("registering consumer '${getConsumerName()}' on connection '${connectionContext.name}' as a RabbitMQ subscriber")
 
             // Create the channel
-            Channel channel = connectionContext.connection.createChannel()
+            Channel channel = connectionContext.createChannel()
 
             // Create a queue
             String queue = channel.queueDeclare().queue
@@ -375,7 +374,7 @@ class RabbitConsumerAdapter {
             channel.basicQos(configuration.prefetchCount)
 
             // Create the rabbit consumer object
-            RabbitConsumer consumer = new RabbitConsumer(channel, connectionContext)
+            RabbitConsumer consumer = new RabbitConsumer(channel, this, connectionContext)
 
             // Set up the consumer
             channel.basicConsume(
