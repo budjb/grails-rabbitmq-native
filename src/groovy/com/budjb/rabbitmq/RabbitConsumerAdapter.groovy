@@ -303,7 +303,7 @@ class RabbitConsumerAdapter {
      * @param handler Handler object to wrap a RabbitMQ consumer around.
      * @return A list of channels that were created for the consumer.
      */
-    public void startConsumer() {
+    public void start() {
         // Ensure the object is a consumer
         if (!isConsumerValid()) {
             return

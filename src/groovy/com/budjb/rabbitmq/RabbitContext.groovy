@@ -89,4 +89,8 @@ public interface RabbitContext {
      * @return
      */
     public ConnectionContext getConnection(String name)
+
+    public void setMessageConverterManager(MessageConverterManager messageConverterManager)
+
+    public MessageConverterManager getMessageConverterManager()
 }

@@ -20,7 +20,6 @@ import org.apache.log4j.Logger
 import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.ConnectedRabbitContext
 import com.budjb.rabbitmq.NullRabbitContext
-import com.budjb.rabbitmq.RabbitConsumer
 import com.budjb.rabbitmq.MessageConverterArtefactHandler
 import com.budjb.rabbitmq.MessageConsumerArtefactHandler
 import com.budjb.rabbitmq.converter.*

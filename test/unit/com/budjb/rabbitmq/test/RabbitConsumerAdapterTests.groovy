@@ -38,7 +38,7 @@ class RabbitConsumerAdapterTests {
     /**
      * Used to test a consumer with a local configuration.
      */
-    static class LocalConfigConsumer {
+    class LocalConfigConsumer {
         static rabbitConfig = [
             'queue': 'local-config-queue',
             'consumers': 5,
@@ -53,7 +53,7 @@ class RabbitConsumerAdapterTests {
     /**
      * Used to test a consumer with a central configuration.
      */
-    static class CentralConfigConsumer {
+    class CentralConfigConsumer {
         def handleMessage(def body, def context) {
 
         }
@@ -269,5 +269,33 @@ class RabbitConsumerAdapterTests {
         verify(consumer, never()).onSuccess(context)
         verify(consumer, times(1)).onComplete(context)
         verify(consumer, times(1)).onFailure(context)
+    }
+
+    void testStart() {
+        // Mock the grails applicaton config
+        GrailsApplication grailsApplication = mock(GrailsApplication)
+        when(grailsApplication.getConfig()).thenReturn(new ConfigObject())
+
+        //  Mock a rabbit context
+        RabbitContext rabbitContext = mock(RabbitContext)
+
+        // Mock a connection context
+        ConnectionContext context = mock(ConnectionContext)
+        context.name = 'default'
+
+        // Create a consumer
+        LocalConfigConsumer consumer = new LocalConfigConsumer()
+
+        // Create the adapter
+        RabbitConsumerAdapter adapter = new RabbitConsumerAdapter.RabbitConsumerAdapterBuilder().build {
+            delegate.consumer = consumer
+            delegate.grailsApplication = grailsApplication
+            delegate.rabbitContext = rabbitContext
+            delegate.messageConverterManager= messageConverterManager
+        }
+
+        // Start the adapter
+        adapter.start()
+
     }
 }

@@ -330,4 +330,14 @@ class ConnectedRabbitContext implements RabbitContext, ApplicationContextAware {
     public List<MessageConverter> getMessageConverters() {
         return messageConverterManager.getMessageConverters()
     }
+
+    @Override
+    public void setMessageConverterManager(MessageConverterManager messageConverterManager) {
+        this.messageConverterManager = messageConverterManager
+    }
+
+    @Override
+    public MessageConverterManager getMessageConverterManager() {
+        return messageConverterManager
+    }
 }

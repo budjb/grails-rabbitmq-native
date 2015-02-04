@@ -111,4 +111,14 @@ class NullRabbitContext implements RabbitContext {
         throw new UnsupportedOperationException("unable to retrieve a connection with a disabled RabbitContext")
     }
 
+    @Override
+    public void setMessageConverterManager(MessageConverterManager messageConverterManager) {
+
+    }
+
+    @Override
+    public MessageConverterManager getMessageConverterManager() {
+
+    }
+
 }
