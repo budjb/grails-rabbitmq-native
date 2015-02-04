@@ -1,10 +1,8 @@
 package com.budjb.rabbitmq.test
 
-import static org.mockito.Mockito.*
-
 import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.junit.Before
-import org.mockito.Mockito
+
+import spock.lang.Specification
 
 import com.budjb.rabbitmq.ConnectionContext
 import com.budjb.rabbitmq.ConsumerConfiguration
@@ -22,11 +20,16 @@ import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope
 
 
-class RabbitConsumerAdapterTests {
+class RabbitConsumerAdapterSpec extends Specification {
+    /**
+     * Message converter manager.
+     */
     MessageConverterManager messageConverterManager
 
-    @Before
-    void setup() {
+    /**
+     * Sets up the mocked environment for each test.
+     */
+    def setup() {
         messageConverterManager = new MessageConverterManager()
         messageConverterManager.registerMessageConverter(new IntegerMessageConverter())
         messageConverterManager.registerMessageConverter(new MapMessageConverter())
@@ -35,6 +38,228 @@ class RabbitConsumerAdapterTests {
         messageConverterManager.registerMessageConverter(new StringMessageConverter())
     }
 
+    /**
+     * Test that the adapter accurately handles configurations defined locally inside a consumer.
+     */
+    void 'Validate the parsed consumer configuration for a locally defined configuration'() {
+        setup:
+        // Mock the grails application bean and a blank config
+        GrailsApplication grailsApplication = Mock(GrailsApplication)
+        grailsApplication.getConfig() >> new ConfigObject()
+
+        //  Mock the rabbit context
+        RabbitContext rabbitContext = Mock(RabbitContext)
+
+        when:
+        // Create the adapter
+        RabbitConsumerAdapter adapter = new RabbitConsumerAdapter.RabbitConsumerAdapterBuilder().build {
+            delegate.consumer = new LocalConfigConsumer()
+            delegate.grailsApplication = grailsApplication
+            delegate.rabbitContext = rabbitContext
+            delegate.messageConverterManager= messageConverterManager
+        }
+
+        // Get the configuration
+        ConsumerConfiguration configuration = adapter.configuration
+
+        then:
+        // Validate the consumer
+        adapter.getConsumerName() == 'LocalConfigConsumer'
+
+        // Validate the configuration options
+        configuration.queue == 'local-config-queue'
+        configuration.consumers == 5
+        configuration.retry == false
+
+        // Validate that the consumer is valid
+        adapter.isConsumerValid() == true
+    }
+
+    /**
+     * Test that the adapter accurately handles configurations defined centrally in the application configuration.
+     */
+    void 'Validate the parsed consumer configuration for a centrally defined configuration'() {
+        setup:
+        // Mock the grails applicaton config
+        GrailsApplication grailsApplication = Mock(GrailsApplication)
+        grailsApplication.getConfig() >> new ConfigObject([
+            'rabbitmq': [
+                'consumers': [
+                    'CentralConfigConsumer': [
+                        'queue': 'central-config-queue',
+                        'consumers': 10,
+                        'retry': true
+                    ]
+                ]
+            ]
+        ])
+
+        //  Mock a rabbit context
+        RabbitContext rabbitContext = Mock(RabbitContext)
+
+        when:
+        // Create the adapter
+        RabbitConsumerAdapter adapter = new RabbitConsumerAdapter.RabbitConsumerAdapterBuilder().build {
+            delegate.consumer = new CentralConfigConsumer()
+            delegate.grailsApplication = grailsApplication
+            delegate.rabbitContext = rabbitContext
+            delegate.messageConverterManager= messageConverterManager
+        }
+
+        // Get the configuration
+        ConsumerConfiguration configuration = adapter.configuration
+
+        then:
+        // Validate the consumer name
+        adapter.getConsumerName() == 'CentralConfigConsumer'
+
+        // Validate the configuration options
+        configuration.queue == 'central-config-queue'
+        configuration.consumers == 10
+        configuration.retry == true
+
+        // Validate that the consumer is valid
+        adapter.isConsumerValid() == true
+    }
+
+    /**
+     * Test most of the callbacks.
+     */
+    void 'Verify that the proper consumer callbacks are invoked for a successful message'() {
+        setup:
+        // Mock the grails applicaton config
+        GrailsApplication grailsApplication = Mock(GrailsApplication)
+        grailsApplication.getConfig() >> new ConfigObject([
+            'rabbitmq': [
+                'consumers': [
+                    'CallbackConsumer': [
+                        'queue': 'callback-queue'
+                    ]
+                ]
+            ]
+        ])
+
+        //  Mock a rabbit context
+        RabbitContext rabbitContext = Mock(RabbitContext)
+
+        // Create a mocked consumer
+        CallbackConsumer consumer = Mock(CallbackConsumer)
+
+        // Create the adapter
+        RabbitConsumerAdapter adapter = Spy(RabbitConsumerAdapter, constructorArgs: [
+            consumer, grailsApplication, rabbitContext, messageConverterManager, null
+        ])
+
+        // Mock the consumer name (sigh)
+        adapter.getConsumerName() >> 'CallbackConsumer'
+
+        // Mock a message context
+        MessageContext context = new MessageContext(
+            channel: Mock(Channel),
+            consumerTag: '',
+            envelope: Mock(Envelope),
+            properties: Mock(BasicProperties),
+            body: 'test body'.getBytes(),
+            connectionContext: Mock(ConnectionContext)
+        )
+
+        when:
+        // Hand off the message to the adapter
+        adapter.deliverMessage(context)
+
+        then:
+        // Ensure that the callbacks were called
+        1 * consumer.onReceive(context)
+        1 * consumer.onSuccess(context)
+        1 * consumer.onComplete(context)
+        0 * consumer.onFailure(context)
+    }
+
+    /**
+     * Test most of the callbacks.
+     */
+    void 'Verify that the proper consumer callbacks are invoked for an unsuccessful message'() {
+        setup:
+        // Mock the grails applicaton config
+        GrailsApplication grailsApplication = Mock(GrailsApplication)
+        grailsApplication.getConfig() >> new ConfigObject([
+            'rabbitmq': [
+                'consumers': [
+                    'CallbackConsumer': [
+                        'queue': 'callback-queue'
+                    ]
+                ]
+            ]
+        ])
+
+        //  Mock a rabbit context
+        RabbitContext rabbitContext = Mock(RabbitContext)
+
+        // Create a mocked consumer
+        CallbackConsumer consumer = Mock(CallbackConsumer)
+
+        // Force an exception when the handler is called
+        consumer.handleMessage(*_) >> { throw new RuntimeException() }
+
+        // Create the adapter
+        RabbitConsumerAdapter adapter = Spy(RabbitConsumerAdapter, constructorArgs: [
+            consumer, grailsApplication, rabbitContext, messageConverterManager, null
+        ])
+
+        // Mock the consumer name (sigh)
+        adapter.getConsumerName() >> 'CallbackConsumer'
+
+        // Mock a message context
+        MessageContext context = new MessageContext(
+            channel: Mock(Channel),
+            consumerTag: '',
+            envelope: Mock(Envelope),
+            properties: Mock(BasicProperties),
+            body: 'test body'.getBytes(),
+            connectionContext: Mock(ConnectionContext)
+        )
+
+        when:
+        // Hand off the message to the adapter
+        adapter.deliverMessage(context)
+
+        then:
+        // Ensure that the callbacks were called
+        1 * consumer.onReceive(context)
+        0 * consumer.onSuccess(context)
+        1 * consumer.onComplete(context)
+        1 * consumer.onFailure(context)
+    }
+
+    /*
+    void testStart() {
+        // Mock the grails applicaton config
+        GrailsApplication grailsApplication = mock(GrailsApplication)
+        when(grailsApplication.getConfig()).thenReturn(new ConfigObject())
+
+        //  Mock a rabbit context
+        RabbitContext rabbitContext = mock(RabbitContext)
+
+        // Mock a connection context
+        ConnectionContext context = mock(ConnectionContext)
+        context.name = 'default'
+
+        // Create a consumer
+        LocalConfigConsumer consumer = new LocalConfigConsumer()
+
+        // Create the adapter
+        RabbitConsumerAdapter adapter = new RabbitConsumerAdapter.RabbitConsumerAdapterBuilder().build {
+            delegate.consumer = consumer
+            delegate.grailsApplication = grailsApplication
+            delegate.rabbitContext = rabbitContext
+            delegate.messageConverterManager= messageConverterManager
+        }
+
+        // Start the adapter
+        adapter.start()
+
+    }
+    */
     /**
      * Used to test a consumer with a local configuration.
      */
@@ -82,220 +307,5 @@ class RabbitConsumerAdapterTests {
         def onFailure(def context) {
 
         }
-    }
-
-    /**
-     * Test that the adapter accurately handles configurations defined locally inside a consumer.
-     */
-    void testLocalConfiguration() {
-        // Mock the grails applicaton config
-        GrailsApplication grailsApplication = mock(GrailsApplication)
-        when(grailsApplication.getConfig()).thenReturn(new ConfigObject())
-
-        //  Mock a rabbit context
-        RabbitContext rabbitContext = mock(RabbitContext)
-
-        // Create the adapter
-        RabbitConsumerAdapter adapter = new RabbitConsumerAdapter.RabbitConsumerAdapterBuilder().build {
-            delegate.consumer = new LocalConfigConsumer()
-            delegate.grailsApplication = grailsApplication
-            delegate.rabbitContext = rabbitContext
-            delegate.messageConverterManager= messageConverterManager
-        }
-
-        // Get the configuration
-        ConsumerConfiguration configuration = adapter.configuration
-
-        // Validate the consumer name
-        assert adapter.getConsumerName() == 'LocalConfigConsumer'
-
-        // Validate the configuration options
-        assert configuration.queue == 'local-config-queue'
-        assert configuration.consumers == 5
-        assert configuration.retry == false
-
-        // Validate that the consumer is valid
-        assert adapter.isConsumerValid() == true
-    }
-
-    /**
-     * Test that the adapter accurately handles configurations defined centrally in the application configuration.
-     */
-    void testCentralConfiguration() {
-        // Mock the grails applicaton config
-        GrailsApplication grailsApplication = mock(GrailsApplication)
-        when(grailsApplication.getConfig()).thenReturn(new ConfigObject([
-            'rabbitmq': [
-                'consumers': [
-                    'CentralConfigConsumer': [
-                        'queue': 'central-config-queue',
-                        'consumers': 10,
-                        'retry': true
-                    ]
-                ]
-            ]
-        ]))
-
-        //  Mock a rabbit context
-        RabbitContext rabbitContext = mock(RabbitContext)
-
-        // Create the adapter
-        RabbitConsumerAdapter adapter = new RabbitConsumerAdapter.RabbitConsumerAdapterBuilder().build {
-            delegate.consumer = new CentralConfigConsumer()
-            delegate.grailsApplication = grailsApplication
-            delegate.rabbitContext = rabbitContext
-            delegate.messageConverterManager= messageConverterManager
-        }
-
-        // Get the configuration
-        ConsumerConfiguration configuration = adapter.configuration
-
-        // Validate the consumer name
-        assert adapter.getConsumerName() == 'CentralConfigConsumer'
-
-        // Validate the configuration options
-        assert configuration.queue == 'central-config-queue'
-        assert configuration.consumers == 10
-        assert configuration.retry == true
-
-        // Validate that the consumer is valid
-        assert adapter.isConsumerValid() == true
-    }
-
-    /**
-     * Test most of the callbacks.
-     */
-    void testCallbacks() {
-        // Mock the grails applicaton config
-        GrailsApplication grailsApplication = mock(GrailsApplication)
-        when(grailsApplication.getConfig()).thenReturn(new ConfigObject([
-            'rabbitmq': [
-                'consumers': [
-                    'CallbackConsumer': [
-                        'queue': 'callback-queue'
-                    ]
-                ]
-            ]
-        ]))
-
-        //  Mock a rabbit context
-        RabbitContext rabbitContext = mock(RabbitContext)
-
-        // Create a mocked consumer
-        CallbackConsumer consumer = mock(CallbackConsumer)
-
-        // Create the adapter
-        RabbitConsumerAdapter adapter = spy(new RabbitConsumerAdapter.RabbitConsumerAdapterBuilder().build {
-            delegate.consumer = consumer
-            delegate.grailsApplication = grailsApplication
-            delegate.rabbitContext = rabbitContext
-            delegate.messageConverterManager= messageConverterManager
-        })
-
-        // Mock the consumer name (sigh)
-        doReturn('CallbackConsumer').when(adapter).getConsumerName()
-
-        // Mock a message context
-        MessageContext context = new MessageContext(
-            channel: mock(Channel),
-            consumerTag: '',
-            envelope: mock(Envelope),
-            properties: mock(BasicProperties),
-            body: 'test body'.getBytes(),
-            connectionContext: mock(ConnectionContext)
-        )
-
-        // Hand off the message to the adapter
-        adapter.deliverMessage(context)
-
-        // Ensure that the callbacks were called
-        verify(consumer, times(1)).onReceive(context)
-        verify(consumer, times(1)).onSuccess(context)
-        verify(consumer, times(1)).onComplete(context)
-        verify(consumer, never()).onFailure(context)
-    }
-
-    /**
-     * Test most of the callbacks.
-     */
-    void testFailureCallbacks() {
-        // Mock the grails applicaton config
-        GrailsApplication grailsApplication = mock(GrailsApplication)
-        when(grailsApplication.getConfig()).thenReturn(new ConfigObject([
-            'rabbitmq': [
-                'consumers': [
-                    'CallbackConsumer': [
-                        'queue': 'callback-queue'
-                    ]
-                ]
-            ]
-        ]))
-
-        //  Mock a rabbit context
-        RabbitContext rabbitContext = mock(RabbitContext)
-
-        // Create a mocked consumer
-        CallbackConsumer consumer = mock(CallbackConsumer)
-
-        // Force an exception when the handler is called
-        when(consumer.handleMessage(any(), any())).thenThrow(new RuntimeException())
-
-        // Create the adapter
-        RabbitConsumerAdapter adapter = spy(new RabbitConsumerAdapter.RabbitConsumerAdapterBuilder().build {
-            delegate.consumer = consumer
-            delegate.grailsApplication = grailsApplication
-            delegate.rabbitContext = rabbitContext
-            delegate.messageConverterManager= messageConverterManager
-        })
-
-        // Mock the consumer name (sigh)
-        doReturn('CallbackConsumer').when(adapter).getConsumerName()
-
-        // Mock a message context
-        MessageContext context = new MessageContext(
-            channel: mock(Channel),
-            consumerTag: '',
-            envelope: mock(Envelope),
-            properties: mock(BasicProperties),
-            body: 'test body'.getBytes(),
-            connectionContext: mock(ConnectionContext)
-        )
-
-        // Hand off the message to the adapter
-        adapter.deliverMessage(context)
-
-        // Ensure that the callbacks were called
-        verify(consumer, times(1)).onReceive(context)
-        verify(consumer, never()).onSuccess(context)
-        verify(consumer, times(1)).onComplete(context)
-        verify(consumer, times(1)).onFailure(context)
-    }
-
-    void testStart() {
-        // Mock the grails applicaton config
-        GrailsApplication grailsApplication = mock(GrailsApplication)
-        when(grailsApplication.getConfig()).thenReturn(new ConfigObject())
-
-        //  Mock a rabbit context
-        RabbitContext rabbitContext = mock(RabbitContext)
-
-        // Mock a connection context
-        ConnectionContext context = mock(ConnectionContext)
-        context.name = 'default'
-
-        // Create a consumer
-        LocalConfigConsumer consumer = new LocalConfigConsumer()
-
-        // Create the adapter
-        RabbitConsumerAdapter adapter = new RabbitConsumerAdapter.RabbitConsumerAdapterBuilder().build {
-            delegate.consumer = consumer
-            delegate.grailsApplication = grailsApplication
-            delegate.rabbitContext = rabbitContext
-            delegate.messageConverterManager= messageConverterManager
-        }
-
-        // Start the adapter
-        adapter.start()
-
     }
 }

@@ -81,9 +81,6 @@ class RabbitMessagePublisherSendSpec extends Specification {
 
     }
 
-    /**
-     * Test the send method given a routing key and body.
-     */
     def 'Basic send() with only a routing key'() {
         when:
         rabbitMessagePublisher.send(BASIC_PUBLISH_ROUTING_KEY, BASIC_PUBLISH_MESSAGE)
@@ -92,9 +89,6 @@ class RabbitMessagePublisherSendSpec extends Specification {
         1 * channel.basicPublish('', BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
     }
 
-    /**
-     * Test the send method given an exchange, routing key, and body.
-     */
     def 'Basic send() with an exchange and routing key'() {
         when:
         rabbitMessagePublisher.send(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, BASIC_PUBLISH_MESSAGE)
@@ -103,9 +97,6 @@ class RabbitMessagePublisherSendSpec extends Specification {
         1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
     }
 
-    /**
-     * Test the send method given a properties object.
-     */
     def 'Basic send() with a provided RabbitMessageProperties object'() {
         when:
         rabbitMessagePublisher.send(new RabbitMessageProperties().build {
@@ -118,9 +109,6 @@ class RabbitMessagePublisherSendSpec extends Specification {
         1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
     }
 
-    /**
-     * Test the send method given a closure.
-     */
     def 'Basic send() configured by a closure'() {
         when:
         rabbitMessagePublisher.send {
@@ -133,9 +121,6 @@ class RabbitMessagePublisherSendSpec extends Specification {
         1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
     }
 
-    /**
-     * Test for failure when no exchange and routing key are present.
-     */
     def 'Send with no parameters provided (routing key and/or exchange are required)'() {
         when:
         rabbitMessagePublisher.send { }
@@ -144,9 +129,6 @@ class RabbitMessagePublisherSendSpec extends Specification {
         thrown IllegalArgumentException
     }
 
-    /**
-     * Test that no channel is created from the rabbit context if one is provided.
-     */
     def 'If a channel is provided ensure one\'s not created and it\'s not closed'() {
         setup:
         Channel channel = Mock(Channel)
@@ -162,9 +144,6 @@ class RabbitMessagePublisherSendSpec extends Specification {
         0 * channel.close()
     }
 
-    /**
-     * Test that a channel is created and closed when one is not provided.
-     */
     def 'If no channel is provided, ensure one\'s created and closed'() {
         when:
         rabbitMessagePublisher.send {
@@ -177,9 +156,6 @@ class RabbitMessagePublisherSendSpec extends Specification {
         1 * channel.close()
     }
 
-    /**
-     * Tests that a failure occurs when content marshaling fails.
-     */
     def 'Ensure an exception is thrown when content can\'t be marshaled'() {
         when:
         rabbitMessagePublisher.send(BASIC_PUBLISH_ROUTING_KEY, new DummyObject())

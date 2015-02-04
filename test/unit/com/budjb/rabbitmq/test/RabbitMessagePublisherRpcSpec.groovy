@@ -53,6 +53,9 @@ class RabbitMessagePublisherRpcSpec extends Specification {
      */
     Channel channel
 
+    /**
+     * Set up the environment for each test.
+     */
     def setup() {
         // Mock the rabbit context
         rabbitContext = Mock(RabbitContext)
@@ -79,6 +82,14 @@ class RabbitMessagePublisherRpcSpec extends Specification {
         rabbitMessagePublisher.rabbitContext = rabbitContext
     }
 
+    /**
+     * Additional mocking for most of the RPC calls.
+     *
+     * This isn't rolled in to the setup method because some calls need this not to be done.
+     *
+     * @param response
+     * @return
+     */
     def mockBasicRpc(byte[] response) {
         // Mock temporary queue creation
         channel.queueDeclare() >> new DeclareOk('temporary-queue', 0, 0)
@@ -106,9 +117,7 @@ class RabbitMessagePublisherRpcSpec extends Specification {
         queue.take() >> responseMessageContext
 
     }
-    /**
-     * Tests the RPC method given a routing key and body.
-     */
+
     def 'RPC with only a routing key'() {
         setup:
         mockBasicRpc(BASIC_RESPONSE_MESSAGE.getBytes())
@@ -121,9 +130,6 @@ class RabbitMessagePublisherRpcSpec extends Specification {
         1 * channel.basicPublish('', BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
     }
 
-    /**
-     * Tests the RPC method given an exchange, routing key, and body.
-     */
     def 'RPC with an exchange and routing key'() {
         setup:
         mockBasicRpc(BASIC_RESPONSE_MESSAGE.getBytes())
@@ -136,9 +142,6 @@ class RabbitMessagePublisherRpcSpec extends Specification {
         1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
     }
 
-    /**
-     * Tests the RPC method given a properties object.
-     */
     def 'RPC call with a RabbitMessageProperties object'() {
         setup:
         mockBasicRpc(BASIC_RESPONSE_MESSAGE.getBytes())
@@ -155,9 +158,6 @@ class RabbitMessagePublisherRpcSpec extends Specification {
         1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
     }
 
-    /**
-     * Tests the RPC method given a closure.
-     */
     def 'RPC call configured by a closure'() {
         setup:
         mockBasicRpc(BASIC_RESPONSE_MESSAGE.getBytes())
@@ -174,9 +174,6 @@ class RabbitMessagePublisherRpcSpec extends Specification {
         1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
     }
 
-    /**
-     * Test the timeout functionality for an RPC call.
-     */
     def 'Ensure that an RPC timeout throws an exception'() {
         setup:
         channel.queueDeclare() >> new DeclareOk('temporary-queue', 0, 0)
@@ -195,9 +192,6 @@ class RabbitMessagePublisherRpcSpec extends Specification {
         thrown TimeoutException
     }
 
-    /**
-     * Test that no channel is created from the rabbit context if one is provided.
-     */
     def 'If a channel is provided, ensure it is not closed and another one is not created'() {
         setup:
         mockBasicRpc(BASIC_RESPONSE_MESSAGE.getBytes())
@@ -215,9 +209,6 @@ class RabbitMessagePublisherRpcSpec extends Specification {
         0 * channel.close()
     }
 
-    /**
-     * Test that a channel is created and closed when one is not provided.
-     */
     def 'If no channel is provided, ensure one is created and closed'() {
         setup:
         mockBasicRpc(BASIC_RESPONSE_MESSAGE.getBytes())
@@ -232,9 +223,6 @@ class RabbitMessagePublisherRpcSpec extends Specification {
         1 * channel.close()
     }
 
-    /**
-     * Verify mechanical operation of publishing and consuming.
-     */
     def 'Verify that an RPC call publishes a message, consumes from a queue, and cancels consuming'() {
         setup:
         mockBasicRpc(BASIC_RESPONSE_MESSAGE.getBytes())

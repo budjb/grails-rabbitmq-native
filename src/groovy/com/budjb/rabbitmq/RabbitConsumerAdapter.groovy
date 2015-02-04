@@ -293,7 +293,7 @@ class RabbitConsumerAdapter {
      * @return
      */
     public String getConsumerName() {
-        return consumer.class.simpleName
+        return consumer.getClass().simpleName
     }
 
     /**
