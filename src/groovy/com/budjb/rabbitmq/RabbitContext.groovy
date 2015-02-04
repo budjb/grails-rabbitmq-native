@@ -90,7 +90,17 @@ public interface RabbitContext {
      */
     public ConnectionContext getConnection(String name)
 
+    /**
+     * Sets the message converter manager.
+     *
+     * @param messageConverterManager
+     */
     public void setMessageConverterManager(MessageConverterManager messageConverterManager)
 
+    /**
+     * Returns the message converter manager.
+     *
+     * @return
+     */
     public MessageConverterManager getMessageConverterManager()
 }

@@ -306,6 +306,7 @@ class RabbitConsumerAdapter {
     public void start() {
         // Ensure the object is a consumer
         if (!isConsumerValid()) {
+            log.warn("not registering '${getConsumerName()}' as a RabbitMQ message consumer because it is not properly configured")
             return
         }
 
@@ -319,6 +320,12 @@ class RabbitConsumerAdapter {
 
         // Get the connection context
         ConnectionContext connectionContext = rabbitContext.getConnection(configuration.connection)
+
+        // Ensure we have a connection
+        if (!connectionContext) {
+            log.warn("not registering '${getConsumerName()}' as a RabbitMQ message consumer because a suitable connection could not be found")
+            return
+        }
 
         // Start the consumers
         if (configuration.queue) {

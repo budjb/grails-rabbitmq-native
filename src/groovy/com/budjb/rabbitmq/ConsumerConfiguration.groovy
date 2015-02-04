@@ -19,43 +19,43 @@ class ConsumerConfiguration {
     /**
      * Queue to listen on.
      */
-    public String queue = null
+    protected String queue = null
 
     /**
      * Exchange to subscribe to.
      */
-    public String exchange = null
+    protected String exchange = null
 
     /**
-     * Consume binding.
+     * Consumer binding.
      */
-    public Object binding = null
+    protected Object binding = null
 
     /**
      * Headers consume binding requirement.
      */
-    public String match
+    protected String match
 
     /**
      * Number of concurrent consumers.
      */
-    public int consumers = 1
+    protected int consumers = 1
 
     /**
      * Whether to mark the consumer as transacted.
      */
-    public boolean transacted = false
+    protected boolean transacted = false
 
     /**
      * Whether the consumer should auto acknowledge.
      */
-    public AutoAck autoAck = AutoAck.POST
+    protected AutoAck autoAck = AutoAck.POST
 
     /**
      * Whether to attempt conversion of incoming messages.
      * This also depends on the appropriate handler signature being present.
      */
-    public MessageConvertMethod convert = MessageConvertMethod.ALWAYS
+    protected MessageConvertMethod convert = MessageConvertMethod.ALWAYS
 
     /**
      * Whether to retry the message on failure.
@@ -65,12 +65,12 @@ class ConsumerConfiguration {
     /**
      * Number of messages that should be pre-fetched from the queue.
      */
-    public int prefetchCount = 1
+    protected int prefetchCount = 1
 
     /**
      * Name of the connection that should be used to consume from.
      */
-    String connection = null
+    protected String connection = null
 
     /**
      * Constructor that parses the options defined in the service consumer.
@@ -96,15 +96,6 @@ class ConsumerConfiguration {
     }
 
     /**
-     * Construct the configuration from the application's configuration.
-     *
-     * @param options
-     */
-    public ConsumerConfiguration(ConfigObject options) {
-        this(buildMap(options))
-    }
-
-    /**
      * Assigns the option provided by the consumer's config, or returns the default
      * value if the option was not provided or it was unable to be converted to
      * the correct data type.
@@ -126,17 +117,158 @@ class ConsumerConfiguration {
     }
 
     /**
-     * Builds a Map instance from a config object.
-     *
-     * @param config A ConfigObject instance to transform into a Map.
-     * @return The resulting Map instance.
+     * Returns whether the consumer should auto acknowledge.
      */
-    static private Map buildMap(ConfigObject config) {
-        if (config) {
-            return config.collectEntries { it }
-        }
-        else {
-            return [:]
-        }
+    public AutoAck getAutoAck() {
+        return autoAck
+    }
+
+    /**
+     * Sets whether the consumer should auto acknowledge.
+     */
+    public void setAutoAck(AutoAck autoAck) {
+        this.autoAck = autoAck
+    }
+
+    /**
+     * Returns the consumer binding.
+     */
+    public Object getBinding() {
+        return binding
+    }
+
+    /**
+     * Sets the consumer binding.
+     */
+    public void setBinding(Object binding) {
+        this.binding = binding
+    }
+
+    /**
+     * Returns the name of the connection that should be used to consume from.
+     */
+    public String getConnection() {
+        return connection
+    }
+
+    /**
+     * Sets the name of the connection that should be used to consume from.
+     */
+    public void setConnection(String connection) {
+        this.connection = connection
+    }
+
+    /**
+     * Returns the number of concurrent consumers.
+     */
+    public int getConsumers() {
+        return consumers
+    }
+
+    /**
+     * Sets the number of concurrent consumers.
+     */
+    public void setConsumers(int consumers) {
+        this.consumers = consumers
+    }
+
+    /**
+     * Returns whether to attempt conversion of incoming messages.
+     * This also depends on the appropriate handler signature being present.
+     */
+    public MessageConvertMethod getConvert() {
+        return convert
+    }
+
+    /**
+     * Sets whether to attempt conversion of incoming messages.
+     * This also depends on the appropriate handler signature being present.
+     */
+    public void setConvert(MessageConvertMethod convert) {
+        this.convert = convert
+    }
+
+    /**
+     * Returns the exchange to subscribe to.
+     */
+    public String getExchange() {
+        return exchange
+    }
+
+    /**
+     * Sets the exchange to subscribe to.
+     */
+    public void setExchange(String exchange) {
+        this.exchange = exchange
+    }
+
+    /**
+     * Returns the headers consume binding requirement.
+     */
+    public String getMatch() {
+        return match
+    }
+
+    /**
+     * Sets the headers consume binding requirement.
+     */
+    public void setMatch(String match) {
+        this.match = match
+    }
+
+    /**
+     * Returns the number of messages that should be pre-fetched from the queue.
+     */
+    public int getPrefetchCount() {
+        return prefetchCount
+    }
+
+    /**
+     * Sets the number of messages that should be pre-fetched from the queue.
+     */
+    public void setPrefetchCount(int prefetchCount) {
+        this.prefetchCount = prefetchCount
+    }
+
+    /**
+     * Returns the queue to listen on.
+     */
+    public String getQueue() {
+        return queue
+    }
+
+    /**
+     * Sets the queue to listen on.
+     */
+    public void setQueue(String queue) {
+        this.queue = queue
+    }
+
+    /**
+     * Returns whether to retry the message on failure.
+     */
+    public boolean getRetry() {
+        return retry
+    }
+
+    /**
+     * Sets whether to retry the message on failure.
+     */
+    public void setRetry(int retry) {
+        this.retry = retry
+    }
+
+    /**
+     * Returns whether to mark the consumer as transacted.
+     */
+    public boolean getTransacted() {
+        return transacted
+    }
+
+    /**
+     * Sets whether to mark the consumer as transacted.
+     */
+    public void setTransacted(boolean transacted) {
+        this.transacted = transacted
     }
 }

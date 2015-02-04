@@ -18,7 +18,7 @@ import grails.util.Holders
 import org.apache.log4j.Logger
 
 import com.budjb.rabbitmq.RabbitContext
-import com.budjb.rabbitmq.ConnectedRabbitContext
+import com.budjb.rabbitmq.RabbitContextImpl
 import com.budjb.rabbitmq.NullRabbitContext
 import com.budjb.rabbitmq.MessageConverterArtefactHandler
 import com.budjb.rabbitmq.MessageConsumerArtefactHandler

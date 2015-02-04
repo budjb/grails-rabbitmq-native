@@ -30,7 +30,7 @@ import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
 
-class ConnectedRabbitContext implements RabbitContext, ApplicationContextAware {
+class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
     /**
      * Grails application bean
      */
@@ -54,7 +54,7 @@ class ConnectedRabbitContext implements RabbitContext, ApplicationContextAware {
     /**
      * The message converter manager.
      */
-    public MessageConverterManager messageConverterManager
+    protected MessageConverterManager messageConverterManager
 
     /**
      * Loads and initializes the configuration.
@@ -173,23 +173,24 @@ class ConnectedRabbitContext implements RabbitContext, ApplicationContextAware {
      * @return
      */
     public void registerConsumer(DefaultGrailsMessageConsumerClass candidate) {
-        // Validate the consumer configuration
-        if (!RabbitConsumer.isConsumer(candidate)) {
-            log.warn("not registering '${candidate.shortName}' as a RabbitMQ message consumer because it is not properly configured")
+        // Create the adapter
+        RabbitConsumerAdapter adapter = new RabbitConsumerAdapter.RabbitConsumerAdapterBuilder().build {
+            delegate.rabbitContext = this
+            delegate.messageConverterManager = messageConverterManager
+            delegate.persistenceInterceptor = applicationContext.getBean('persistenceInterceptor')
+            delegate.grailsApplication = grailsApplication
+            delegate.consumer = applicationContext.getBean(candidate.fullName)
+        }
+
+        // Find the appropriate connection context
+        ConnectionContext context = getConnection(adapter.getConfiguration().getConnection())
+
+        if (!context) {
+            log.warn('unable to register ${candidate.shortName} as a consumer because its connection could not be found')
             return
         }
 
-        // Get the proper connection
-        ConnectionContext connection = getConnection(RabbitConsumer.getConnectionName(candidate))
-
-        // If the connection wasn't found, bail out
-        if (!connection) {
-            log.warn("not registering '${candidate.shortName}' as a RabbitMQ message consumer because a suitable connection could not be found")
-            return
-        }
-
-        // Add the consumer to the connection
-        connection.registerConsumer(candidate)
+        context.registerConsumer(adapter)
     }
 
     /**
@@ -213,7 +214,6 @@ class ConnectedRabbitContext implements RabbitContext, ApplicationContextAware {
      */
     @Override
     public Channel createChannel(String connectionName) {
-        // Get the requested connection
         ConnectionContext connection = getConnection(connectionName)
 
         if (!connection) {
@@ -272,7 +272,7 @@ class ConnectedRabbitContext implements RabbitContext, ApplicationContextAware {
     protected void loadMessageConverters() {
         // Register application-provided converters
         grailsApplication.messageConverterClasses.each { GrailsClass clazz ->
-            registerMessageConverter(applicationContext.getBean(clazz.fullName))
+            messageConverterManager.registerMessageConverter(applicationContext.getBean(clazz.fullName))
         }
 
         // Register built-in message converters
@@ -331,11 +331,17 @@ class ConnectedRabbitContext implements RabbitContext, ApplicationContextAware {
         return messageConverterManager.getMessageConverters()
     }
 
+    /**
+     * Sets the message converter manager.
+     */
     @Override
     public void setMessageConverterManager(MessageConverterManager messageConverterManager) {
         this.messageConverterManager = messageConverterManager
     }
 
+    /**
+     * Returns the message converter manager.
+     */
     @Override
     public MessageConverterManager getMessageConverterManager() {
         return messageConverterManager
