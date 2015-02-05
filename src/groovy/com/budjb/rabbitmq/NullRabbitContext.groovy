@@ -1,5 +1,10 @@
 package com.budjb.rabbitmq
 
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.context.ApplicationContext
+
+import com.budjb.rabbitmq.connection.ConnectionContext
+import com.budjb.rabbitmq.converter.*
 import com.rabbitmq.client.Channel
 
 /**
@@ -121,4 +126,27 @@ class NullRabbitContext implements RabbitContext {
 
     }
 
+    @Override
+    public GrailsApplication getGrailsApplication() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setGrailsApplication(GrailsApplication grailsApplication) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public ApplicationContext getApplicationContext() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        // TODO Auto-generated method stub
+
+    }
 }

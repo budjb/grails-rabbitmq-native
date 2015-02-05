@@ -33,6 +33,8 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import com.budjb.rabbitmq.exception.MessageConvertException
 
+import com.budjb.rabbitmq.converter.*
+
 @Deprecated
 class RabbitMessageBuilder {
     /**

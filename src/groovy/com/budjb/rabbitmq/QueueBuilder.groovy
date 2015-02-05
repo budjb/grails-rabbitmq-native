@@ -15,6 +15,7 @@
  */
 package com.budjb.rabbitmq
 
+import com.budjb.rabbitmq.connection.ConnectionContext
 import com.rabbitmq.client.Channel
 
 import grails.util.Holders
@@ -24,11 +25,11 @@ import org.apache.log4j.Logger
 /**
  * This class is based off of the queue builder present in the official Grails RabbitMQ plugin.
  */
-class RabbitQueueBuilder {
+class QueueBuilder {
     /**
      * Logger
      */
-    private static Logger log = Logger.getLogger(RabbitQueueBuilder)
+    private static Logger log = Logger.getLogger(QueueBuilder)
 
     /**
      * Current exchange marker
@@ -50,7 +51,7 @@ class RabbitQueueBuilder {
      *
      * @param context
      */
-    public RabbitQueueBuilder(RabbitContext context) {
+    public QueueBuilder(RabbitContext context) {
         rabbitContext = context
     }
 

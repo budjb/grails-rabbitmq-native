@@ -15,6 +15,7 @@
  */
 package com.budjb.rabbitmq
 
+import com.budjb.rabbitmq.connection.ConnectionContext
 import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope

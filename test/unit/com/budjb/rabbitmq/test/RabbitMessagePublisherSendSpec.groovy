@@ -4,7 +4,6 @@ import spock.lang.Specification
 
 import com.budjb.rabbitmq.*
 import com.budjb.rabbitmq.converter.*
-
 import com.rabbitmq.client.Channel
 
 import grails.test.mixin.*

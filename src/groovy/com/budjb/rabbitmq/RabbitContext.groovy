@@ -1,5 +1,10 @@
 package com.budjb.rabbitmq
 
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.context.ApplicationContext
+
+import com.budjb.rabbitmq.connection.ConnectionContext
+import com.budjb.rabbitmq.converter.*
 import com.rabbitmq.client.Channel
 
 public interface RabbitContext {
@@ -103,4 +108,24 @@ public interface RabbitContext {
      * @return
      */
     public MessageConverterManager getMessageConverterManager()
+
+    /**
+     * Returns the grails application bean.
+     */
+    public GrailsApplication getGrailsApplication()
+
+    /**
+     * Sets the grails application bean.
+     */
+    public void setGrailsApplication(GrailsApplication grailsApplication)
+
+    /**
+     * Returns the application context.
+     */
+    public ApplicationContext getApplicationContext()
+
+    /**
+     * Sets the application context.
+     */
+    public void setApplicationContext(ApplicationContext applicationContext)
 }

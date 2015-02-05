@@ -9,6 +9,8 @@ import java.util.concurrent.TimeoutException
 
 import org.apache.log4j.Logger
 
+import com.budjb.rabbitmq.converter.*
+
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.DefaultConsumer

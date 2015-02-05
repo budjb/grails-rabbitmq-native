@@ -15,8 +15,6 @@
  */
 package com.budjb.rabbitmq.converter
 
-import com.budjb.rabbitmq.MessageConverter
-
 class IntegerMessageConverter extends MessageConverter<Integer> {
     @Override
     public boolean canConvertFrom() {

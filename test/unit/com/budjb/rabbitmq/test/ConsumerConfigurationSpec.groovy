@@ -1,9 +1,9 @@
 package com.budjb.rabbitmq.test
 
 import com.budjb.rabbitmq.*
+import com.budjb.rabbitmq.converter.MessageConvertMethod
 
 import groovy.util.ConfigObject
-
 import spock.lang.Specification
 
 class ConsumerConfigurationSpec extends Specification {

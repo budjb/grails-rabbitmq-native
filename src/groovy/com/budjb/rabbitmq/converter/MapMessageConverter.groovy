@@ -15,7 +15,6 @@
  */
 package com.budjb.rabbitmq.converter
 
-import com.budjb.rabbitmq.MessageConverter
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 

@@ -15,8 +15,6 @@
  */
 package com.budjb.rabbitmq.converter
 
-import com.budjb.rabbitmq.MessageConverter
-
 class GStringMessageConverter extends MessageConverter<GString> {
     @Override
     public boolean canConvertFrom() {

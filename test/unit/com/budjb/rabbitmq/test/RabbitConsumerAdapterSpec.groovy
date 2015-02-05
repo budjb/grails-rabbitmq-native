@@ -5,6 +5,8 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import spock.lang.Specification
 
 import com.budjb.rabbitmq.*
+import com.budjb.rabbitmq.connection.ConnectionConfiguration
+import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.converter.*
 import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
@@ -229,9 +231,13 @@ class RabbitConsumerAdapterSpec extends Specification {
         GrailsApplication grailsApplication = Mock(GrailsApplication)
         grailsApplication.getConfig() >> new ConfigObject()
 
+        // Mock a connection configuration
+        ConnectionConfiguration connectionConfiguration = Mock(ConnectionConfiguration)
+        connectionConfiguration.getName() >> 'default'
+
         // Mock a connection context
         ConnectionContext context = Mock(ConnectionContext)
-        context.getName() >> 'default'
+        context.getConfiguration() >> connectionConfiguration
         context.createChannel(*_) >> {
             Channel channel = Mock(Channel)
             return channel
@@ -266,9 +272,13 @@ class RabbitConsumerAdapterSpec extends Specification {
         GrailsApplication grailsApplication = Mock(GrailsApplication)
         grailsApplication.getConfig() >> new ConfigObject()
 
+        // Mock a connection configuration
+        ConnectionConfiguration connectionConfiguration = Mock(ConnectionConfiguration)
+        connectionConfiguration.getName() >> 'default'
+
         // Mock a connection context
         ConnectionContext context = Mock(ConnectionContext)
-        context.getName() >> 'default'
+        context.getConfiguration() >> connectionConfiguration
         context.createChannel(*_) >> {
             Channel channel = Mock(Channel)
             return channel
@@ -308,9 +318,13 @@ class RabbitConsumerAdapterSpec extends Specification {
         Channel channel = Mock(Channel)
         channel.queueDeclare(*_) >> { new DeclareOk('temp-queue', 0, 0) }
 
+        // Mock a connection configuration
+        ConnectionConfiguration connectionConfiguration = Mock(ConnectionConfiguration)
+        connectionConfiguration.getName() >> 'default'
+
         // Mock a connection context
         ConnectionContext context = Mock(ConnectionContext)
-        context.getName() >> 'default'
+        context.getConfiguration() >> connectionConfiguration
         context.createChannel(*_) >> channel
 
         //  Mock a rabbit context that returns the mocked connection context

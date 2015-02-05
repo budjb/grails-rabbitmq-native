@@ -24,7 +24,6 @@ import com.budjb.rabbitmq.MessageConverterArtefactHandler
 import com.budjb.rabbitmq.MessageConsumerArtefactHandler
 import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.GrailsMessageConverterClass
-import com.budjb.rabbitmq.RabbitQueueBuilder
 
 import org.codehaus.groovy.grails.commons.AbstractInjectableGrailsClass
 import org.codehaus.groovy.grails.commons.GrailsApplication

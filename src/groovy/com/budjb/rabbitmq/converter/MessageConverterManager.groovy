@@ -1,4 +1,4 @@
-package com.budjb.rabbitmq
+package com.budjb.rabbitmq.converter
 
 import org.apache.log4j.Logger
 

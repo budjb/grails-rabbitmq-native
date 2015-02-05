@@ -11,6 +11,9 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsClass
 import org.springframework.context.ApplicationContext
 
+import com.budjb.rabbitmq.connection.ConnectionContext
+import com.budjb.rabbitmq.converter.MessageConvertMethod
+import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.MessageConvertException
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
@@ -196,7 +199,7 @@ class RabbitConsumerAdapter {
      * @return
      */
     public String getConnectionName() {
-        return getConfiguration().connection
+        return getConfiguration().getConnection()
     }
 
     /**
@@ -273,13 +276,13 @@ class RabbitConsumerAdapter {
         }
 
         // Make sure a queue or an exchange was specified
-        if (!configuration.queue && !configuration.exchange) {
+        if (!configuration.getQueue() && !configuration.getExchange()) {
             log.warn("RabbitMQ configuration for consumer '${getConsumerName()}' is missing a queue or an exchange")
             return false
         }
 
         // Make sure that only a queue or an exchange was specified
-        if (configuration.queue && configuration.exchange) {
+        if (configuration.getQueue() && configuration.getExchange()) {
             log.warn("RabbitMQ configuration for consumer '${getConsumerName()}' can not have both a queue and an exchange")
             return false
         }
@@ -293,7 +296,7 @@ class RabbitConsumerAdapter {
      * @return
      */
     public String getConsumerName() {
-        return consumer.getClass().simpleName
+        return consumer.getClass().getSimpleName()
     }
 
     /**
@@ -319,7 +322,7 @@ class RabbitConsumerAdapter {
         ConsumerConfiguration configuration = getConfiguration()
 
         // Get the connection context
-        ConnectionContext connectionContext = rabbitContext.getConnection(configuration.connection)
+        ConnectionContext connectionContext = rabbitContext.getConnection(configuration.getConnection())
 
         // Ensure we have a connection
         if (!connectionContext) {
@@ -330,18 +333,18 @@ class RabbitConsumerAdapter {
         // Start the consumers
         if (configuration.queue) {
             // Log our intentions
-            log.debug("registering consumer '${getConsumerName()}' as a RabbitMQ consumer on connection '${connectionContext.name}' with ${configuration.consumers} consumer(s)")
+            log.debug("registering consumer '${getConsumerName()}' as a RabbitMQ consumer on connection '${connectionContext.getConfiguration().getName()}' with ${configuration.getConsumers()} consumer(s)")
 
             // Create all requested consumer instances
-            configuration.consumers.times {
+            configuration.getConsumers().times {
                 // Create the channel
                 Channel channel = connectionContext.createChannel()
 
                 // Determine the queue
-                String queue = configuration.queue
+                String queue = configuration.getQueue()
 
                 // Set the QOS
-                channel.basicQos(configuration.prefetchCount)
+                channel.basicQos(configuration.getPrefetchCount())
 
                 // Create the rabbit consumer object
                 RabbitConsumer consumer = new RabbitConsumer(channel, this, connectionContext)
@@ -349,7 +352,7 @@ class RabbitConsumerAdapter {
                 // Set up the consumer
                 channel.basicConsume(
                     queue,
-                    configuration.autoAck == AutoAck.ALWAYS,
+                    configuration.getAutoAck() == AutoAck.ALWAYS,
                     consumer
                 )
 
@@ -359,26 +362,26 @@ class RabbitConsumerAdapter {
         }
         else {
             // Log our intentions
-            log.debug("registering consumer '${getConsumerName()}' on connection '${connectionContext.name}' as a RabbitMQ subscriber")
+            log.debug("registering consumer '${getConsumerName()}' on connection '${connectionContext.getConfiguration().getName()}' as a RabbitMQ subscriber")
 
             // Create the channel
             Channel channel = connectionContext.createChannel()
 
             // Create a queue
             String queue = channel.queueDeclare().queue
-            if (!configuration.binding || configuration.binding instanceof String) {
-                channel.queueBind(queue, configuration.exchange, configuration.binding ?: '')
+            if (!configuration.getBinding() || configuration.getBinding() instanceof String) {
+                channel.queueBind(queue, configuration.getExchange(), configuration.getBinding() ?: '')
             }
-            else if (configuration.binding instanceof Map) {
-                if (!(configuration.match in ['any', 'all'])) {
+            else if (configuration.getBinding() instanceof Map) {
+                if (!(configuration.getMatch() in ['any', 'all'])) {
                     log.warn("not starting consumer '${getConsumerName()}' since the match property was not set or not one of (\"any\", \"all\")")
                     return
                 }
-                channel.queueBind(queue, configuration.exchange, '', configuration.binding + ['x-match': configuration.match])
+                channel.queueBind(queue, configuration.getExchange(), '', configuration.getBinding() + ['x-match': configuration.getMatch()])
             }
 
             // Set the QOS
-            channel.basicQos(configuration.prefetchCount)
+            channel.basicQos(configuration.getPrefetchCount())
 
             // Create the rabbit consumer object
             RabbitConsumer consumer = new RabbitConsumer(channel, this, connectionContext)
@@ -450,8 +453,8 @@ class RabbitConsumerAdapter {
         // Confirm that there is a handler defined to handle our message.
         if (!method) {
             // Reject the message
-            if (configuration.autoAck == AutoAck.POST) {
-                context.channel.basicReject(context.envelope.deliveryTag, configuration.retry)
+            if (configuration.getAutoAck() == AutoAck.POST) {
+                context.channel.basicReject(context.envelope.deliveryTag, configuration.getRetry())
             }
             log.error("${getConsumerName()} does not have a message handler defined to handle class type ${converted.getClass()}")
             return
@@ -466,7 +469,7 @@ class RabbitConsumerAdapter {
         // Pass off the message
         try {
             // Start the transaction if requested
-            if (configuration.transacted) {
+            if (configuration.getTransacted()) {
                 context.channel.txSelect()
             }
 
@@ -483,12 +486,12 @@ class RabbitConsumerAdapter {
             }
 
             // Ack the message
-            if (configuration.autoAck == AutoAck.POST) {
+            if (configuration.getAutoAck() == AutoAck.POST) {
                 context.channel.basicAck(context.envelope.deliveryTag, false)
             }
 
             // Commit the transaction if requested
-            if (configuration.transacted) {
+            if (configuration.getTransacted()) {
                 context.channel.txCommit()
             }
 
@@ -499,17 +502,17 @@ class RabbitConsumerAdapter {
         }
         catch (Exception e) {
             // Rollback the transaction
-            if (configuration.transacted) {
+            if (configuration.getTransacted()) {
                 context.channel.txRollback()
             }
 
             // Reject the message, optionally submitting for requeue
-            if (configuration.autoAck == AutoAck.POST) {
-                context.channel.basicReject(context.envelope.deliveryTag, configuration.retry)
+            if (configuration.getAutoAck() == AutoAck.POST) {
+                context.channel.basicReject(context.envelope.deliveryTag, configuration.getRetry())
             }
 
             // Log the error
-            if (configuration.transacted) {
+            if (configuration.getTransacted()) {
                 log.error("transaction rolled back due to unhandled exception ${e.getClass().name} caught in RabbitMQ message handler for consumer ${getConsumerName()}", e)
             }
             else {
@@ -544,7 +547,7 @@ class RabbitConsumerAdapter {
         ConsumerConfiguration configuration = getConfiguration()
 
         // Check if the consumers wants us to not convert
-        if (configuration.convert == MessageConvertMethod.DISABLED) {
+        if (configuration.getConvert() == MessageConvertMethod.DISABLED) {
             return context.body
         }
 
@@ -559,7 +562,7 @@ class RabbitConsumerAdapter {
         }
 
         // If no content-type was handled, the config may specify to stop
-        if (configuration.convert == MessageConvertMethod.HEADER) {
+        if (configuration.getConvert() == MessageConvertMethod.HEADER) {
             return context.body
         }
 
