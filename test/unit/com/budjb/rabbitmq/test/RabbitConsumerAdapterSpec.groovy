@@ -144,9 +144,12 @@ class RabbitConsumerAdapterSpec extends Specification {
         // Create a mocked consumer
         CallbackConsumer consumer = Mock(CallbackConsumer)
 
+        // Mock a persistence intercepter
+        def persistenceInterceptor = Mock(PersistenceInterceptor)
+
         // Create the adapter
         RabbitConsumerAdapter adapter = Spy(RabbitConsumerAdapter, constructorArgs: [
-            consumer, grailsApplication, rabbitContext, messageConverterManager, null
+            consumer, grailsApplication, rabbitContext, messageConverterManager, persistenceInterceptor
         ])
 
         // Mock the consumer name (sigh)
@@ -172,6 +175,10 @@ class RabbitConsumerAdapterSpec extends Specification {
         1 * consumer.onSuccess(context)
         1 * consumer.onComplete(context)
         0 * consumer.onFailure(context)
+
+        1 * persistenceInterceptor.init()
+        1 * persistenceInterceptor.flush()
+        1 * persistenceInterceptor.destroy()
     }
 
     /**
@@ -420,5 +427,11 @@ class RabbitConsumerAdapterSpec extends Specification {
         def handleMessage(def body, def messageContext) {
 
         }
+    }
+
+    class PersistenceInterceptor {
+        void init() { }
+        void flush() { }
+        void destroy() { }
     }
 }
