@@ -1,4 +1,4 @@
-package com.budjb.rabbitmq
+package com.budjb.rabbitmq.consumer
 
 import java.lang.reflect.Field
 import java.lang.reflect.Method
@@ -11,6 +11,10 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsClass
 import org.springframework.context.ApplicationContext
 
+import com.budjb.rabbitmq.AutoAck
+import com.budjb.rabbitmq.MessageContext
+import com.budjb.rabbitmq.RabbitContext
+import com.budjb.rabbitmq.RabbitMessageBuilder
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.converter.MessageConvertMethod
 import com.budjb.rabbitmq.converter.MessageConverterManager
@@ -23,37 +27,6 @@ import com.rabbitmq.client.impl.recovery.AutorecoveringChannel
 
 @SuppressWarnings("unchecked")
 class RabbitConsumerAdapter {
-    /**
-     * Builder to simplify creating adapters.
-     */
-    public static class RabbitConsumerAdapterBuilder {
-        Object consumer
-        GrailsApplication grailsApplication
-        RabbitContext rabbitContext
-        MessageConverterManager messageConverterManager
-        Object persistenceInterceptor
-
-        /**
-         * Returns a new rabbit consumer adapter instance.
-         *
-         * @param closure
-         * @return
-         */
-        public RabbitConsumerAdapter build(Closure closure) {
-            closure.delegate = this
-            closure.resolveStrategy = Closure.OWNER_FIRST
-            closure.run()
-
-            return new RabbitConsumerAdapter(
-                consumer,
-                grailsApplication,
-                rabbitContext,
-                messageConverterManager,
-                persistenceInterceptor,
-            )
-        }
-    }
-
     /**
      * Consumer object used to receive messages from the RabbitMQ library.
      */
@@ -185,7 +158,13 @@ class RabbitConsumerAdapter {
      * @param clazz
      * @param grailsApplication
      */
-    public RabbitConsumerAdapter(Object consumer, GrailsApplication grailsApplication, RabbitContext rabbitContext, MessageConverterManager messageConverterManager, Object persistenceInterceptor) {
+    public RabbitConsumerAdapter(
+        Object consumer,
+        GrailsApplication grailsApplication,
+        RabbitContext rabbitContext,
+        MessageConverterManager messageConverterManager,
+        Object persistenceInterceptor) {
+
         this.consumer = consumer
         this.grailsApplication = grailsApplication
         this.rabbitContext = rabbitContext
@@ -398,6 +377,13 @@ class RabbitConsumerAdapter {
         }
     }
 
+    /**
+     * Closes all channels and clears all consumers.
+     */
+    public void stop() {
+        consumers*.getChannel()*.close()
+        consumers.clear()
+    }
     /**
      * Processes and delivers an incoming message to the consumer.
      *

@@ -4,7 +4,11 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.context.ApplicationContext
 
 import com.budjb.rabbitmq.connection.ConnectionContext
+import com.budjb.rabbitmq.connection.ConnectionManager
+import com.budjb.rabbitmq.consumer.RabbitConsumerManager
+
 import com.budjb.rabbitmq.converter.*
+
 import com.rabbitmq.client.Channel
 
 /**
@@ -61,18 +65,10 @@ class NullRabbitContext implements RabbitContext {
     }
 
     /* (non-Javadoc)
-     * @see com.budjb.rabbitmq.RabbitContext#getMessageConverters()
-     */
-    @Override
-    public List<MessageConverter> getMessageConverters() {
-        return []
-    }
-
-    /* (non-Javadoc)
      * @see com.budjb.rabbitmq.RabbitContext#registerConsumer(com.budjb.rabbitmq.DefaultGrailsMessageConsumerClass)
      */
     @Override
-    public void registerConsumer(DefaultGrailsMessageConsumerClass candidate) {
+    public void registerConsumer(Object candidate) {
 
     }
 
@@ -122,31 +118,24 @@ class NullRabbitContext implements RabbitContext {
     }
 
     @Override
-    public MessageConverterManager getMessageConverterManager() {
-
-    }
-
-    @Override
-    public GrailsApplication getGrailsApplication() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public void setGrailsApplication(GrailsApplication grailsApplication) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public ApplicationContext getApplicationContext() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public void setConnectionManager(ConnectionManager connectionManager) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void setRabbitConsumerManager(RabbitConsumerManager rabbitConsumerManager) {
     }
 }

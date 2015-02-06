@@ -7,6 +7,8 @@ import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitContextImpl
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionContext
+import com.budjb.rabbitmq.connection.ConnectionManager
+import com.budjb.rabbitmq.consumer.RabbitConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
@@ -14,242 +16,73 @@ import com.budjb.rabbitmq.exception.MissingConfigurationException
 import spock.lang.Specification
 
 class RabbitContextSpec extends Specification {
-    def 'Happy path test of loading map-based configuration'() {
-        setup:
-        ConfigObject config = new ConfigObject()
-        config.putAll([
-            'rabbitmq': [
-                'connection': [
-                    'host': 'test.budjb.com',
-                    'username': 'test-user',
-                    'password': 'test-password'
-                ]
-            ]
-        ])
+    GrailsApplication grailsApplication
+    MessageConverterManager messageConverterManager
+    ConnectionManager connectionManager
+    RabbitConsumerManager rabbitConsumerManager
+    RabbitContext rabbitContext
 
-        GrailsApplication grailsApplication = Mock(GrailsApplication)
-        grailsApplication.getConfig() >> config
-        grailsApplication.getArtefacts('MessageConverter') >> []
-        grailsApplication.getArtefacts('MessageConsumer') >> []
+    def setup() {
+        grailsApplication = Mock(GrailsApplication)
+        messageConverterManager = Mock(MessageConverterManager)
+        connectionManager = Mock(ConnectionManager)
+        rabbitConsumerManager = Mock(RabbitConsumerManager)
 
-        MessageConverterManager messageConverterManager = Mock(MessageConverterManager)
-
-        RabbitContext rabbitContext = new RabbitContextImpl()
+        rabbitContext = new RabbitContextImpl()
         rabbitContext.setGrailsApplication(grailsApplication)
         rabbitContext.setMessageConverterManager(messageConverterManager)
-
-        when:
-        rabbitContext.load()
-
-        then:
-        rabbitContext.getConnection() != null
-
-        ConnectionConfiguration configuration = rabbitContext.getConnection().getConfiguration()
-        configuration.getHost() == 'test.budjb.com'
-    }
-
-    def 'Happy path test of loading closure-based configuration'() {
-        setup:
-        ConfigObject config = new ConfigObject()
-        config.putAll([
-            'rabbitmq': [
-                'connection': {
-                    connection(
-                        'name': 'defaultConnection',
-                        'isDefault': true,
-                        'host': 'test.budjb.com',
-                        'username': 'test-user',
-                        'password': 'test-password'
-                    )
-                    connection(
-                        'name': 'secondaryConnection',
-                        'host': 'test2.budjb.com',
-                        'username': 'test-user-2',
-                        'password': 'test-password-2'
-                    )
-                }
-            ]
-        ])
-
-        GrailsApplication grailsApplication = Mock(GrailsApplication)
-        grailsApplication.getConfig() >> config
-        grailsApplication.getArtefacts('MessageConverter') >> []
-        grailsApplication.getArtefacts('MessageConsumer') >> []
-
-        MessageConverterManager messageConverterManager = Mock(MessageConverterManager)
-
-        RabbitContext rabbitContext = new RabbitContextImpl()
-        rabbitContext.setGrailsApplication(grailsApplication)
-        rabbitContext.setMessageConverterManager(messageConverterManager)
-
-        when:
-        rabbitContext.load()
-
-        then:
-        ConnectionContext connection1 = rabbitContext.getConnection()
-        ConnectionContext connection2 = rabbitContext.getConnection('secondaryConnection')
-
-        connection1 != null
-        connection2 != null
-
-        connection1.getConfiguration().getIsDefault() == true
-        connection1.getConfiguration().getName() == 'defaultConnection'
-        connection1.getConfiguration().getHost() == 'test.budjb.com'
-
-        connection2.getConfiguration().getIsDefault() == false
-        connection2.getConfiguration().getName() == 'secondaryConnection'
-        connection2.getConfiguration().getHost() == 'test2.budjb.com'
-    }
-
-    def 'When no configuration is defined, an exception should be thrown'() {
-        setup:
-        ConfigObject config = new ConfigObject()
-
-        GrailsApplication grailsApplication = Mock(GrailsApplication)
-        grailsApplication.getConfig() >> config
-        grailsApplication.getArtefacts('MessageConverter') >> []
-        grailsApplication.getArtefacts('MessageConsumer') >> []
-
-        MessageConverterManager messageConverterManager = Mock(MessageConverterManager)
-
-        RabbitContext rabbitContext = new RabbitContextImpl()
-        rabbitContext.setGrailsApplication(grailsApplication)
-        rabbitContext.setMessageConverterManager(messageConverterManager)
-
-        when:
-        rabbitContext.load()
-
-        then:
-        thrown MissingConfigurationException
-    }
-
-    def 'An InvalidConfigurationException should be thrown when no connections are specified'() {
-        setup:
-        ConfigObject config = new ConfigObject()
-        config.putAll([
-            'rabbitmq': [
-                'connection': { }
-            ]
-        ])
-
-        GrailsApplication grailsApplication = Mock(GrailsApplication)
-        grailsApplication.getConfig() >> config
-        grailsApplication.getArtefacts('MessageConverter') >> []
-        grailsApplication.getArtefacts('MessageConsumer') >> []
-
-        MessageConverterManager messageConverterManager = Mock(MessageConverterManager)
-
-        RabbitContext rabbitContext = new RabbitContextImpl()
-        rabbitContext.setGrailsApplication(grailsApplication)
-        rabbitContext.setMessageConverterManager(messageConverterManager)
-
-        when:
-        rabbitContext.load()
-
-        then:
-        thrown InvalidConfigurationException
-    }
-
-    def 'If multiple default connections are configured, and InvalidConfigurationException should be thrown'() {
-        setup:
-        ConfigObject config = new ConfigObject()
-        config.putAll([
-            'rabbitmq': [
-                'connection': {
-                    connection(
-                        'name': 'defaultConnection',
-                        'isDefault': true,
-                        'host': 'test.budjb.com',
-                        'username': 'test-user',
-                        'password': 'test-password'
-                    )
-                    connection(
-                        'name': 'secondaryConnection',
-                        'isDefault': true,
-                        'host': 'test2.budjb.com',
-                        'username': 'test-user-2',
-                        'password': 'test-password-2'
-                    )
-                }
-            ]
-        ])
-
-        GrailsApplication grailsApplication = Mock(GrailsApplication)
-        grailsApplication.getConfig() >> config
-        grailsApplication.getArtefacts('MessageConverter') >> []
-        grailsApplication.getArtefacts('MessageConsumer') >> []
-
-        MessageConverterManager messageConverterManager = Mock(MessageConverterManager)
-
-        RabbitContext rabbitContext = new RabbitContextImpl()
-        rabbitContext.setGrailsApplication(grailsApplication)
-        rabbitContext.setMessageConverterManager(messageConverterManager)
-
-        when:
-        rabbitContext.load()
-
-        then:
-        thrown InvalidConfigurationException
+        rabbitContext.setConnectionManager(connectionManager)
+        rabbitContext.setRabbitConsumerManager(rabbitConsumerManager)
     }
 
     def 'Basic test of start/stop/restart functionality'() {
-        setup:
-        ConfigObject config = new ConfigObject()
-        config.putAll([
-            'rabbitmq': [
-                'connection': {
-                    connection(
-                        'name': 'defaultConnection',
-                        'isDefault': true,
-                        'host': 'test.budjb.com',
-                        'username': 'test-user',
-                        'password': 'test-password'
-                    )
-                    connection(
-                        'name': 'secondaryConnection',
-                        'host': 'test2.budjb.com',
-                        'username': 'test-user-2',
-                        'password': 'test-password-2'
-                    )
-                }
-            ]
-        ])
-
-        GrailsApplication grailsApplication = Mock(GrailsApplication)
-        grailsApplication.getConfig() >> config
-        grailsApplication.getArtefacts('MessageConverter') >> []
-        grailsApplication.getArtefacts('MessageConsumer') >> []
-
-        MessageConverterManager messageConverterManager = Mock(MessageConverterManager)
-
-        RabbitContext rabbitContext = Spy(RabbitContextImpl)
-        rabbitContext.setGrailsApplication(grailsApplication)
-        rabbitContext.setMessageConverterManager(messageConverterManager)
+        when:
         rabbitContext.load()
+
+        then:
+        1 * connectionManager.load()
+        1 * messageConverterManager.load()
+        1 * rabbitConsumerManager.load()
 
         when:
         rabbitContext.start()
 
         then:
-        //1 * rabbitContext.start(false)
-        1 == 1
+        1 * connectionManager.open()
+        1 * connectionManager.start()
 
-        /*
         when:
-        rabbitContext.restart()
+        rabbitContext.start(true)
 
         then:
+        1 * connectionManager.open()
+        0 * connectionManager.start()
 
-        1 * rabbitContext.stop()
-        1 * rabbitContext.load()
-        1 * rabbitContext.start()
-        1 * rabbitContext.start(false)
+        when:
+        rabbitContext.startConsumers()
+
+        then:
+        1 * connectionManager.start()
 
         when:
         rabbitContext.stop()
 
         then:
+        1 * connectionManager.reset()
         1 * messageConverterManager.reset()
-        */
+    }
+
+    def 'Ensure createChannel() is passed through to the connectionManager'() {
+        when:
+        rabbitContext.createChannel()
+
+        then:
+        1 * connectionManager.createChannel()
+
+        when:
+        rabbitContext.createChannel('test-connection')
+
+        then:
+        1 * connectionManager.createChannel('test-connection')
     }
 }

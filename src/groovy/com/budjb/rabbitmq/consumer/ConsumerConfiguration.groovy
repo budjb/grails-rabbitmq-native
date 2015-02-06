@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.budjb.rabbitmq
+package com.budjb.rabbitmq.consumer
 
+import com.budjb.rabbitmq.AutoAck
 import com.budjb.rabbitmq.converter.MessageConvertMethod
 
 class ConsumerConfiguration {

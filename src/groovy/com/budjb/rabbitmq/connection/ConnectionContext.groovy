@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq.connection
 
-import com.budjb.rabbitmq.RabbitConsumerAdapter
+import com.budjb.rabbitmq.consumer.RabbitConsumerAdapter
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
@@ -42,7 +42,14 @@ class ConnectionContext {
     /**
      * Lazy-loaded connection to RabbitMQ.
      */
-    protected Connection connection = null
+    protected Connection connection
+
+    /**
+     * Connection factory to use to create a connection.
+     *
+     * This is here for injection during testing.
+     */
+    protected ConnectionFactory connectionFactory
 
     /**
      * Logger.
@@ -54,7 +61,7 @@ class ConnectionContext {
      *
      * @param parameters
      */
-    private ConnectionContext(ConnectionConfiguration configuration) {
+    public ConnectionContext(ConnectionConfiguration configuration) {
         this.configuration = configuration
     }
 
@@ -85,16 +92,16 @@ class ConnectionContext {
         }
 
         // Create the connection factory
-        ConnectionFactory factory = new ConnectionFactory()
+        ConnectionFactory factory = getConnectionFactory()
 
         // Configure it
-        factory.username            = configuration.getUsername()
-        factory.password            = configuration.getPassword()
-        factory.port                = configuration.getPort()
-        factory.host                = configuration.getHost()
-        factory.virtualHost         = configuration.getVirtualHost()
-        factory.automaticRecovery   = configuration.getAutomaticReconnect()
-        factory.requestedHeartbeat  = configuration.getRequestedHeartbeat()
+        factory.setUsername(configuration.getUsername())
+        factory.setPassword(configuration.getPassword())
+        factory.setPort(configuration.getPort())
+        factory.setHost(configuration.getHost())
+        factory.setVirtualHost(configuration.getVirtualHost())
+        factory.setAutomaticRecoveryEnabled(configuration.getAutomaticReconnect())
+        factory.setRequestedHeartbeat(configuration.getRequestedHeartbeat())
 
         // Optionally enable SSL
         if (configuration.getSsl()) {
@@ -158,5 +165,25 @@ class ConnectionContext {
      */
     public void registerConsumer(RabbitConsumerAdapter adapter) {
         adapters << adapter
+    }
+
+    /**
+     * Sets the connection factory to create a connection with.
+     *
+     * @param connectionFactory
+     */
+    public void setConnectionFactory(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory
+    }
+
+    /**
+     * Returns the connection factory to create a connection with.
+     * @return
+     */
+    protected ConnectionFactory getConnectionFactory() {
+        if (!connectionFactory) {
+            this.connectionFactory = new ConnectionFactory()
+        }
+        return connectionFactory
     }
 }

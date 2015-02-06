@@ -1,6 +1,7 @@
 package com.budjb.rabbitmq.test
 
 import com.budjb.rabbitmq.*
+import com.budjb.rabbitmq.consumer.ConsumerConfiguration
 import com.budjb.rabbitmq.converter.MessageConvertMethod
 
 import groovy.util.ConfigObject

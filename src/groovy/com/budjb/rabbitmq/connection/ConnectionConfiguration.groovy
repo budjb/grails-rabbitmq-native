@@ -65,7 +65,7 @@ class ConnectionConfiguration {
     /**
      * Port to use to connect to the RabbitMQ broker.
      */
-    private int port = 5672
+    private int port = ConnectionFactory.DEFAULT_AMQP_PORT
 
     /**
      * Constructor.
@@ -79,11 +79,15 @@ class ConnectionConfiguration {
         isDefault           = parseConfigOption(Boolean, isDefault, configuration['isDefault'])
         name                = parseConfigOption(String, name, configuration['name'])
         password            = parseConfigOption(String, password, configuration['password'])
+        port                = parseConfigOption(Integer, port, configuration['port'])
         requestedHeartbeat  = parseConfigOption(Integer, requestedHeartbeat, configuration['requestedHeartbeat'])
         ssl                 = parseConfigOption(Boolean, ssl, configuration['ssl'])
         threads             = parseConfigOption(Integer, threads, configuration['threads'])
         username            = parseConfigOption(String, username, configuration['username'])
         virtualHost         = parseConfigOption(String, virtualHost, configuration['virtualHost'])
+
+        // Validate the configuration
+        validateConfiguration()
     }
 
     /**

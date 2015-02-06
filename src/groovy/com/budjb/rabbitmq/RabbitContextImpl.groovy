@@ -17,9 +17,9 @@ package com.budjb.rabbitmq
 
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionContext
-
+import com.budjb.rabbitmq.connection.ConnectionManager
+import com.budjb.rabbitmq.consumer.RabbitConsumerManager
 import com.budjb.rabbitmq.converter.*
-
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
 
@@ -50,116 +50,19 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
     protected Logger log = Logger.getLogger(RabbitContextImpl)
 
     /**
-     * List of current connection contexts.
-     */
-    protected List<ConnectionContext> connections = []
-
-    /**
      * The message converter manager.
      */
     protected MessageConverterManager messageConverterManager
 
     /**
-     * Loads and initializes the configuration.
+     * The connection context manager.
      */
-    protected void loadConfiguration() {
-        // Grab the configuration
-        Object configuration = grailsApplication.config.rabbitmq?.connection
-
-        // Check for the configuration
-        if (!configuration) {
-            if (grailsApplication.config.rabbitmq?.connectionFactory) {
-                log.warn("An unsupported legacy config was found. Please refer to the documentation for proper configuration (http://budjb.github.io/grails-rabbitmq-native/doc/manual/)")
-            }
-            throw new MissingConfigurationException("unable to start application because the RabbitMQ connection configuration was not found")
-        }
-
-        // Make sure we have a supported configuration type
-        if (!(configuration instanceof Map || configuration instanceof Closure)) {
-            throw new Exception('RabbitMQ connection configuration is not a Map or a Closure')
-        }
-
-        // Load connections
-        loadConnections(configuration)
-
-        // Ensure we have at least one connection
-        if (connections.size() == 0) {
-            throw new InvalidConfigurationException("no RabbitMQ connections were configured")
-        }
-
-        // Ensure we don't have more than one default connection
-        if (connections.findAll { it.getConfiguration().getIsDefault() == true }.size() > 1) {
-            throw new InvalidConfigurationException("more than one default RabbitMQ server connections were configured as default")
-        }
-    }
+    protected ConnectionManager connectionManager
 
     /**
-     * Load connections from a Map.
-     *
-     * @param configuration
+     * Rabbit consumer factory.
      */
-    protected void loadConnections(Map configuration) {
-        // Create the connection builder
-        ConnectionBuilder connectionBuilder = new ConnectionBuilder()
-
-        // Load the connection
-        connectionBuilder.connection(configuration)
-
-        // Force it to be default
-        connectionBuilder.getConnectionContexts()[0].getConfiguration().setIsDefault(true)
-
-        // Add the connections created by the builder
-        connections += connectionBuilder.getConnectionContexts()
-    }
-
-    /**
-     * Loads connections from a Closure.
-     *
-     * @param configuration
-     */
-    protected void loadConnections(Closure configuration) {
-        // Create the connection builder
-        ConnectionBuilder connectionBuilder = new ConnectionBuilder()
-
-        // Set up and run the closure
-        configuration = configuration.clone()
-        configuration.delegate = connectionBuilder
-        configuration.resolveStrategy = Closure.DELEGATE_FIRST
-        configuration()
-
-        // If only one connection was configured, force it as default
-        if (connectionBuilder.getConnectionContexts().size() == 1) {
-            connectionBuilder.getConnectionContexts()[0].getConfiguration().setIsDefault(true)
-        }
-
-        // Add the connections created by the builder
-        connections += connectionBuilder.getConnectionContexts()
-    }
-
-    /**
-     * Stars the RabbitMQ system.
-     */
-    @Override
-    public void start() {
-        start(false)
-    }
-
-    /**
-     * Starts the RabbitMQ system.
-     */
-    @Override
-    public void start(boolean skipConsumers) {
-        // Start the connections
-        connections*.openConnection()
-
-        // Set up any configured queues/exchanges
-        configureQueues()
-
-        // Start consumers if requested
-        if (!skipConsumers) {
-            startConsumers()
-        }
-    }
+    protected RabbitConsumerManager rabbitConsumerManager
 
     /**
      * Creates the exchanges and queues that are defined in the Grails configuration.
@@ -167,6 +70,8 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
      * TODO move this into its own bean
      */
     protected void configureQueues() {
+        // TODO: remove this!!!
+        return
         // Skip if the config isn't defined
         if (!(grailsApplication.config.rabbitmq?.queues instanceof Closure)) {
             return
@@ -186,29 +91,43 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
     }
 
     /**
-     * Starts the individual consumers.
+     * Stars the RabbitMQ system.
      */
-    public void startConsumers() {
-        connections*.startConsumers()
+    @Override
+    public void start() {
+        start(false)
     }
 
     /**
-     * Closes any active channels and the connection to the RabbitMQ server.
+     * Starts the RabbitMQ system.
      */
-    protected void stopConsumers() {
-        connections*.stopConsumers()
+    @Override
+    public void start(boolean skipConsumers) {
+        // Start the connections
+        connectionManager.open()
+
+        // Set up any configured queues/exchanges
+        configureQueues()
+
+        // Start consumers if requested
+        if (!skipConsumers) {
+            connectionManager.start()
+        }
+    }
+
+    /**
+     * Starts the individual consumers.
+     */
+    public void startConsumers() {
+        connectionManager.start()
     }
 
     /**
      * Closes all active channels and disconnects from the RabbitMQ server.
      */
     public void stop() {
-        // Stop consumers
-        stopConsumers()
-
-        // Disconnect
-        connections*.closeConnection()
-        connections.clear()
+        // Reset the connection manager
+        connectionManager.reset()
 
         // Clear message converters
         messageConverterManager.reset()
@@ -224,30 +143,13 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
     }
 
     /**
-     * Attempts to register a grails class as a consumer.
+     * Registers a new message consumer.
      *
-     * @param candidate
+     * @param consumer
      * @return
      */
-    public void registerConsumer(DefaultGrailsMessageConsumerClass candidate) {
-        // Create the adapter
-        RabbitConsumerAdapter adapter = new RabbitConsumerAdapter.RabbitConsumerAdapterBuilder().build {
-            delegate.rabbitContext = this
-            delegate.messageConverterManager = messageConverterManager
-            delegate.persistenceInterceptor = applicationContext.getBean('persistenceInterceptor')
-            delegate.consumer = applicationContext.getBean(candidate.fullName)
-            delegate.grailsApplication = grailsApplication
-        }
-
-        // Find the appropriate connection context
-        ConnectionContext context = getConnection(adapter.getConfiguration().getConnection())
-
-        if (!context) {
-            log.warn('unable to register ${candidate.shortName} as a consumer because its connection could not be found')
-            return
-        }
-
-        context.registerConsumer(adapter)
+    public void registerConsumer(Object consumer) {
+        rabbitConsumerManager.registerConsumer(consumer)
     }
 
     /**
@@ -259,7 +161,7 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
      */
     @Override
     public Channel createChannel() {
-        return createChannel(null)
+        return connectionManager.createChannel()
     }
 
     /**
@@ -271,18 +173,7 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
      */
     @Override
     public Channel createChannel(String connectionName) {
-        ConnectionContext connection = getConnection(connectionName)
-
-        if (!connection) {
-            if (!connectionName) {
-                throw new Exception("no default connection found")
-            }
-            else {
-                throw new Exception("no connection with name '${connectionName}' found")
-            }
-        }
-
-        return connection.createChannel()
+        return connectionManager.createChannel(connectionName)
     }
 
     /**
@@ -292,7 +183,7 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
      */
     @Override
     public ConnectionContext getConnection() {
-        return getConnection(null)
+        return connectionManager.getConnection()
     }
 
     /**
@@ -302,51 +193,7 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
      */
     @Override
     public ConnectionContext getConnection(String name) {
-        ConnectionContext context
-
-        if (!name) {
-            context = connections.find { it.getConfiguration().getIsDefault() == true }
-
-            if (!context) {
-                log.error("no default connection found")
-                return null
-            }
-        }
-        else {
-            context = connections.find { it.getConfiguration().getName() == name }
-
-            if (!context) {
-                log.error("no connection with name '${name}' found")
-            }
-        }
-
-        return context
-    }
-
-    /**
-     * Loads message converters.
-     */
-    protected void loadMessageConverters() {
-        // Register application-provided converters
-        grailsApplication.getArtefacts('MessageConverter').each {
-            Object consumer = applicationContext.getBean(it.fullName)
-            messageConverterManager.registerMessageConverter(consumer)
-        }
-
-        // Register built-in message converters
-        // Note: the order matters, we want string to be the last one
-        messageConverterManager.registerMessageConverter(new IntegerMessageConverter())
-        messageConverterManager.registerMessageConverter(new MapMessageConverter())
-        messageConverterManager.registerMessageConverter(new ListMessageConverter())
-        messageConverterManager.registerMessageConverter(new GStringMessageConverter())
-        messageConverterManager.registerMessageConverter(new StringMessageConverter())
-    }
-
-    /**
-     * Loads message consumers.
-     */
-    protected void loadConsumers() {
-        grailsApplication.getArtefacts('MessageConverter').each { registerConsumer(it) }
+        return connectionManager.getConnection(name)
     }
 
     /**
@@ -355,13 +202,13 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
     @Override
     public void load() {
         // Load the configuration
-        loadConfiguration()
+        connectionManager.load()
 
         // Load message converters
-        loadMessageConverters()
+        messageConverterManager.load()
 
         // Load consumers
-        loadConsumers()
+        rabbitConsumerManager.load()
     }
 
     /**
@@ -370,21 +217,9 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
      * @param converter
      */
     @Override
-    @Deprecated
     public void registerMessageConverter(MessageConverter converter) {
         messageConverterManager.registerMessageConverter(converter)
 
-    }
-
-    /**
-     * Returns a list of all registered message converters.
-     *
-     * @param converter
-     */
-    @Override
-    @Deprecated
-    public List<MessageConverter> getMessageConverters() {
-        return messageConverterManager.getMessageConverters()
     }
 
     /**
@@ -396,52 +231,6 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
     }
 
     /**
-     * Returns the message converter manager.
-     */
-    @Override
-    public MessageConverterManager getMessageConverterManager() {
-        return messageConverterManager
-    }
-
-    class ConnectionBuilder {
-        /**
-         * List of connections created by the builder.
-         */
-        private List<ConnectionContext> connectionContexts = []
-
-        /**
-         * Creates a connection context from a configuration or closure method.
-         *
-         * @param parameters
-         * @return
-         */
-        public void connection(Map parameters) {
-            // Build the context
-            ConnectionContext context = new ConnectionContext(new ConnectionConfiguration(parameters))
-
-            // Store the context
-            connectionContexts << context
-        }
-
-        /**
-         * Returns the list of connection contexts created by the builder.
-         *
-         * @return
-         */
-        public List<ConnectionContext> getConnectionContexts() {
-            return connectionContexts
-        }
-    }
-
-    /**
-     * Returns the grails application bean.
-     */
-    @Override
-    public GrailsApplication getGrailsApplication() {
-        return grailsApplication
-    }
-
-    /**
      * Sets the grails application bean.
      */
     @Override
@@ -450,18 +239,26 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
     }
 
     /**
-     * Returns the application context bean.
-     */
-    @Override
-    public ApplicationContext getApplicationContext() {
-        return applicationContext
-    }
-
-    /**
      * Sets the application context bean.
      */
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext
+    }
+
+    /**
+     * Sets the connection manager.
+     */
+    @Override
+    public void setConnectionManager(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager
+    }
+
+    /**
+     * Sets the rabbit consumer manager.
+     */
+    @Override
+    public void setRabbitConsumerManager(RabbitConsumerManager rabbitConsumerManager) {
+        this.rabbitConsumerManager = rabbitConsumerManager
     }
 }

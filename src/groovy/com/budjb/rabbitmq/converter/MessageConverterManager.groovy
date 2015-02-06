@@ -1,10 +1,14 @@
 package com.budjb.rabbitmq.converter
 
 import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.beans.BeansException
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
 
 import com.budjb.rabbitmq.exception.MessageConvertException
 
-class MessageConverterManager {
+class MessageConverterManager implements ApplicationContextAware {
     /**
      * Logger.
      */
@@ -14,6 +18,16 @@ class MessageConverterManager {
      * Registered message converters.
      */
     protected List<MessageConverter> messageConverters = []
+
+    /**
+     * Grails application bean.
+     */
+    protected GrailsApplication railsApplication
+
+    /**
+     * Application context.
+     */
+    protected ApplicationContext applicationContext
 
     /**
      * Returns the list of registered message converters.
@@ -127,5 +141,39 @@ class MessageConverterManager {
      */
     public void reset() {
         messageConverters = []
+    }
+
+    /**
+     * Sets the Grails application bean.
+     */
+    public void setGrailsApplication(GrailsApplication grailsApplication) {
+        this.grailsApplication = grailsApplication
+    }
+
+    /**
+     * Sets the application context.
+     */
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext
+    }
+
+    /**
+     * Loads message converters.
+     */
+    public void load() {
+        // Register application-provided converters
+        grailsApplication.getArtefacts('MessageConverter').each {
+            Object consumer = applicationContext.getBean(it.fullName)
+            registerMessageConverter(consumer)
+        }
+
+        // Register built-in message converters
+        // Note: the order matters, we want string to be the last one
+        registerMessageConverter(new IntegerMessageConverter())
+        registerMessageConverter(new MapMessageConverter())
+        registerMessageConverter(new ListMessageConverter())
+        registerMessageConverter(new GStringMessageConverter())
+        registerMessageConverter(new StringMessageConverter())
     }
 }

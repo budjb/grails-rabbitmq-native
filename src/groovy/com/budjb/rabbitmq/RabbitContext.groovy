@@ -4,7 +4,10 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.context.ApplicationContext
 
 import com.budjb.rabbitmq.connection.ConnectionContext
+import com.budjb.rabbitmq.connection.ConnectionManager
+import com.budjb.rabbitmq.consumer.RabbitConsumerManager
 import com.budjb.rabbitmq.converter.*
+
 import com.rabbitmq.client.Channel
 
 public interface RabbitContext {
@@ -42,23 +45,14 @@ public interface RabbitContext {
      *
      * @param converter
      */
-    @Deprecated
     public void registerMessageConverter(MessageConverter converter)
-
-    /**
-     * Returns a list of all registered message converters.
-     *
-     * @return
-     */
-    @Deprecated
-    public List<MessageConverter> getMessageConverters()
 
     /**
      * Registers a consumer.
      *
      * @param candidate
      */
-    public void registerConsumer(DefaultGrailsMessageConsumerClass candidate)
+    public void registerConsumer(Object candidate)
 
     /**
      * Starts the consumers separately from the rest of the RabbitMQ service.
@@ -103,29 +97,22 @@ public interface RabbitContext {
     public void setMessageConverterManager(MessageConverterManager messageConverterManager)
 
     /**
-     * Returns the message converter manager.
-     *
-     * @return
-     */
-    public MessageConverterManager getMessageConverterManager()
-
-    /**
-     * Returns the grails application bean.
-     */
-    public GrailsApplication getGrailsApplication()
-
-    /**
      * Sets the grails application bean.
      */
     public void setGrailsApplication(GrailsApplication grailsApplication)
 
     /**
-     * Returns the application context.
-     */
-    public ApplicationContext getApplicationContext()
-
-    /**
      * Sets the application context.
      */
     public void setApplicationContext(ApplicationContext applicationContext)
+
+    /**
+     * Sets the connection manager.
+     */
+    public void setConnectionManager(ConnectionManager connectionManager)
+
+    /**
+     * Sets the rabbit consumer manager.
+     */
+    public void setRabbitConsumerManager(RabbitConsumerManager rabbitConsumerManager)
 }
