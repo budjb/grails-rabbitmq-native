@@ -3,6 +3,7 @@ package com.budjb.rabbitmq.test
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.consumer.RabbitConsumerAdapter
+import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
 
 import spock.lang.Specification
@@ -40,12 +41,17 @@ class ConnectionContextSpec extends Specification {
             'username': 'guest',
             'password': 'guest'
         ])
+        Connection connection = Mock(Connection)
+        connection.isOpen() >> true
         ConnectionFactory connectionFactory = Mock(ConnectionFactory)
+        connectionFactory.newConnection(*_) >> connection
         ConnectionContext connectionContext = new ConnectionContext(connectionConfiguration)
         connectionContext.setConnectionFactory(connectionFactory)
         connectionContext.registerConsumer(consumer1)
         connectionContext.registerConsumer(consumer2)
         connectionContext.registerConsumer(consumer3)
+
+        connectionContext.openConnection()
 
         when:
         connectionContext.startConsumers()
@@ -62,5 +68,11 @@ class ConnectionContextSpec extends Specification {
         1 * consumer1.stop()
         1 * consumer2.stop()
         1 * consumer3.stop()
+
+        when:
+        connectionContext.closeConnection()
+
+        then:
+        1 * connection.close()
     }
 }

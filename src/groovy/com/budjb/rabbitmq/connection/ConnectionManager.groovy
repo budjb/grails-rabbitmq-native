@@ -42,7 +42,7 @@ class ConnectionManager {
 
         // Make sure we have a supported configuration type
         if (!(configuration instanceof Map || configuration instanceof Closure)) {
-            throw new Exception('RabbitMQ connection configuration is not a Map or a Closure')
+            throw new InvalidConfigurationException('RabbitMQ connection configuration is not a Map or a Closure')
         }
 
         // Load connections
