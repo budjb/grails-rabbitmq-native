@@ -32,7 +32,6 @@ class RabbitContextSpec extends Specification {
         rabbitQueueBuilder = Mock(RabbitQueueBuilder)
 
         rabbitContext = new RabbitContextImpl()
-        rabbitContext.setGrailsApplication(grailsApplication)
         rabbitContext.setMessageConverterManager(messageConverterManager)
         rabbitContext.setConnectionManager(connectionManager)
         rabbitContext.setRabbitConsumerManager(rabbitConsumerManager)

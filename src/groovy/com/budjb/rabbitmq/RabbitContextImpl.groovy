@@ -35,11 +35,6 @@ import com.rabbitmq.client.ConnectionFactory
 
 class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
     /**
-     * Grails application bean
-     */
-    protected GrailsApplication grailsApplication
-
-    /**
      * Spring application context
      */
     protected ApplicationContext applicationContext
@@ -215,14 +210,6 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
     @Override
     public void setMessageConverterManager(MessageConverterManager messageConverterManager) {
         this.messageConverterManager = messageConverterManager
-    }
-
-    /**
-     * Sets the grails application bean.
-     */
-    @Override
-    public void setGrailsApplication(GrailsApplication grailsApplication) {
-        this.grailsApplication = grailsApplication
     }
 
     /**

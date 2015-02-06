@@ -97,11 +97,6 @@ public interface RabbitContext {
     public void setMessageConverterManager(MessageConverterManager messageConverterManager)
 
     /**
-     * Sets the grails application bean.
-     */
-    public void setGrailsApplication(GrailsApplication grailsApplication)
-
-    /**
      * Sets the application context.
      */
     public void setApplicationContext(ApplicationContext applicationContext)

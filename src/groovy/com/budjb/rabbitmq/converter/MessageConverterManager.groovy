@@ -22,7 +22,7 @@ class MessageConverterManager implements ApplicationContextAware {
     /**
      * Grails application bean.
      */
-    protected GrailsApplication railsApplication
+    protected GrailsApplication grailsApplication
 
     /**
      * Application context.

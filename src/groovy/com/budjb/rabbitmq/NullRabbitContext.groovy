@@ -118,12 +118,6 @@ class NullRabbitContext implements RabbitContext {
     }
 
     @Override
-    public void setGrailsApplication(GrailsApplication grailsApplication) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         // TODO Auto-generated method stub
 
