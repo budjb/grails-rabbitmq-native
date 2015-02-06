@@ -115,4 +115,9 @@ public interface RabbitContext {
      * Sets the rabbit consumer manager.
      */
     public void setRabbitConsumerManager(RabbitConsumerManager rabbitConsumerManager)
+
+    /**
+     * Sets the rabbit queue builder.
+     */
+    public void setRabbitQueueBuilder(RabbitQueueBuilder rabbitQueueBuilder)
 }

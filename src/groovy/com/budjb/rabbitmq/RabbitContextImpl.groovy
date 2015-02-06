@@ -65,29 +65,16 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
     protected RabbitConsumerManager rabbitConsumerManager
 
     /**
+     * Rabbit queue builder.
+     */
+    protected RabbitQueueBuilder rabbitQueueBuilder
+
+    /**
      * Creates the exchanges and queues that are defined in the Grails configuration.
      *
      * TODO move this into its own bean
      */
     protected void configureQueues() {
-        // TODO: remove this!!!
-        return
-        // Skip if the config isn't defined
-        if (!(grailsApplication.config.rabbitmq?.queues instanceof Closure)) {
-            return
-        }
-
-        // Grab the config closure
-        Closure config = grailsApplication.config.rabbitmq.queues
-
-        // Create the queue builder
-        QueueBuilder queueBuilder = new QueueBuilder(this)
-
-        // Run the config
-        config = config.clone()
-        config.delegate = queueBuilder
-        config.resolveStrategy = Closure.DELEGATE_FIRST
-        config()
     }
 
     /**
@@ -107,7 +94,7 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
         connectionManager.open()
 
         // Set up any configured queues/exchanges
-        configureQueues()
+        rabbitQueueBuilder.configureQueues()
 
         // Start consumers if requested
         if (!skipConsumers) {
@@ -260,5 +247,13 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
     @Override
     public void setRabbitConsumerManager(RabbitConsumerManager rabbitConsumerManager) {
         this.rabbitConsumerManager = rabbitConsumerManager
+    }
+
+    /**
+     * Sets the rabbit queue builder
+     */
+    @Override
+    public void setRabbitQueueBuilder(RabbitQueueBuilder rabbitQueueBuilder) {
+        this.rabbitQueueBuilder = rabbitQueueBuilder
     }
 }

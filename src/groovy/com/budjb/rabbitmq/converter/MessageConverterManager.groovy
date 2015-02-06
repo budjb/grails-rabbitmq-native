@@ -116,6 +116,17 @@ class MessageConverterManager implements ApplicationContextAware {
      * @throws MessageConvertException
      */
     public byte[] convertToBytes(Object source) throws MessageConvertException {
+        // If the source is null, there's nothing to do
+        if (source == null) {
+            return null
+        }
+
+        // Just return the source if it's already a byte array
+        if (source instanceof byte[]) {
+            return source
+        }
+
+        // Try to find a converter that works
         for (MessageConverter converter in messageConverters) {
             if (!converter.canConvertFrom()) {
                 continue

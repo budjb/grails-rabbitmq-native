@@ -3,7 +3,9 @@ package com.budjb.rabbitmq.test
 import spock.lang.Specification
 
 import com.budjb.rabbitmq.*
+import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.*
+import com.budjb.rabbitmq.exception.MessageConvertException
 import com.rabbitmq.client.Channel
 
 import grails.test.mixin.*
@@ -25,9 +27,9 @@ class RabbitMessagePublisherSendSpec extends Specification {
     private static final String BASIC_PUBLISH_ROUTING_KEY = 'test-routing-key'
 
     /**
-     * Mocked rabbit context.
+     * Mocked connection manager.
      */
-    RabbitContext rabbitContext
+    ConnectionManager connectionManager
 
     /**
      * Live message publisher instance.
@@ -48,8 +50,12 @@ class RabbitMessagePublisherSendSpec extends Specification {
      * Sets up the basic requirements for a mocked RabbitMQ system.
      */
     def setup() {
-        // Mock the rabbit context
-        rabbitContext = Mock(RabbitContext)
+        // Mock a channel
+        channel = Mock(Channel)
+
+        // Mock the connection manager
+        connectionManager = Mock(ConnectionManager)
+        connectionManager.createChannel(null) >> channel
 
         // Create the message converter manager
         messageConverterManager = new MessageConverterManager()
@@ -59,18 +65,10 @@ class RabbitMessagePublisherSendSpec extends Specification {
         messageConverterManager.registerMessageConverter(new GStringMessageConverter())
         messageConverterManager.registerMessageConverter(new StringMessageConverter())
 
-        // Inject the message converter manager into the rabbit context
-        rabbitContext.getMessageConverters() >> messageConverterManager.getMessageConverters()
-
-        // Mock a channel
-        channel = Mock(Channel)
-
-        // Mock a channel return from the rabbit context
-        rabbitContext.createChannel(null) >> channel
-
         // Create the message publisher
         rabbitMessagePublisher = new RabbitMessagePublisher()
-        rabbitMessagePublisher.rabbitContext = rabbitContext
+        rabbitMessagePublisher.connectionManager = connectionManager
+        rabbitMessagePublisher.messageConverterManager = messageConverterManager
     }
 
     /**
@@ -139,7 +137,7 @@ class RabbitMessagePublisherSendSpec extends Specification {
         }
 
         then:
-        0 * rabbitContext.createChannel()
+        0 * connectionManager.createChannel()
         0 * channel.close()
     }
 
@@ -151,7 +149,7 @@ class RabbitMessagePublisherSendSpec extends Specification {
         }
 
         then:
-        1 * rabbitContext.createChannel(null) >> channel
+        1 * connectionManager.createChannel(null) >> channel
         1 * channel.close()
     }
 
@@ -160,6 +158,6 @@ class RabbitMessagePublisherSendSpec extends Specification {
         rabbitMessagePublisher.send(BASIC_PUBLISH_ROUTING_KEY, new DummyObject())
 
         then:
-        thrown IllegalArgumentException
+        thrown MessageConvertException
     }
 }

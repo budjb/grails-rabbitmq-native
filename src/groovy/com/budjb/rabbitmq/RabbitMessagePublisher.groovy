@@ -9,8 +9,10 @@ import java.util.concurrent.TimeoutException
 
 import org.apache.log4j.Logger
 
-import com.budjb.rabbitmq.converter.*
+import com.budjb.rabbitmq.exception.MessageConvertException
 
+import com.budjb.rabbitmq.connection.ConnectionManager
+import com.budjb.rabbitmq.converter.*
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.DefaultConsumer
@@ -19,9 +21,14 @@ import com.rabbitmq.client.ShutdownSignalException
 
 class RabbitMessagePublisher {
     /**
-     * RabbitContext instance.
+     * Connection manager.
      */
-    RabbitContext rabbitContext
+    ConnectionManager connectionManager
+
+    /**
+     * Message converter manager.
+     */
+    MessageConverterManager messageConverterManager
 
     /**
      * Logger
@@ -51,7 +58,7 @@ class RabbitMessagePublisher {
         // If we weren't passed a channel, create a temporary one
         Channel channel = properties.channel
         if (!channel) {
-            channel = rabbitContext.createChannel(properties.connection)
+            channel = connectionManager.createChannel(properties.connection)
             closeChannel = true
         }
 
@@ -108,31 +115,7 @@ class RabbitMessagePublisher {
      * @return
      */
     protected byte[] convertMessageToBytes(Object source) {
-        if (source == null) {
-            return null
-        }
-
-        if (source instanceof byte[]) {
-            return source
-        }
-
-        for (MessageConverter converter in rabbitContext.messageConverters) {
-            if (!converter.type.isAssignableFrom(source.getClass()) || !converter.canConvertFrom()) {
-                continue
-            }
-
-            try {
-                byte[] converted = converter.convertFrom(source)
-                if (converted != null) {
-                    return converted
-                }
-            }
-            catch (Exception e) {
-                log.error("unhandled exception caught from message converter ${converter.class.simpleName}", e)
-            }
-        }
-
-        throw new IllegalArgumentException("unable to find a converter for type ${source.getClass().name}")
+        return messageConverterManager.convertToBytes(source)
     }
 
     /**
@@ -142,24 +125,12 @@ class RabbitMessagePublisher {
      * @return An object converted from a byte array, or the byte array if no conversion could be done.
      */
     protected Object convertMessageFromBytes(byte[] input) {
-        for (MessageConverter converter in rabbitContext.messageConverters) {
-            // Skip if the converter doesn't support converting from bytes
-            if (!converter.canConvertTo()) {
-                continue
-            }
-
-            try {
-                Object converted = converter.convertTo(input)
-                if (converted != null) {
-                    return converted
-                }
-            }
-            catch (Exception e) {
-                log.error("unhandled exception caught from message converter ${converter.class.simpleName}", e)
-            }
+        try {
+            messageConverterManager.convertFromBytes(input)
         }
-
-        return input
+        catch (MessageConvertException e) {
+            return input
+        }
     }
 
     /**
@@ -197,7 +168,7 @@ class RabbitMessagePublisher {
         // If a channel wasn't given, create one
         Channel channel = properties.channel
         if (!channel) {
-            channel = rabbitContext.createChannel(properties.connection)
+            channel = connectionManager.createChannel(properties.connection)
             closeChannel = true
         }
 

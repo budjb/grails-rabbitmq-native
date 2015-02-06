@@ -5,6 +5,8 @@ import java.util.concurrent.TimeoutException
 
 import spock.lang.Specification
 
+import com.budjb.rabbitmq.connection.ConnectionManager
+
 import com.budjb.rabbitmq.*
 import com.budjb.rabbitmq.converter.*
 import com.rabbitmq.client.Channel
@@ -34,9 +36,9 @@ class RabbitMessagePublisherRpcSpec extends Specification {
     private static final String BASIC_PUBLISH_ROUTING_KEY = 'test-routing-key'
 
     /**
-     * Mocked rabbit context.
+     * Mocked connection manager.
      */
-    RabbitContext rabbitContext
+    ConnectionManager connectionManager
 
     /**
      * Live message publisher instance.
@@ -57,8 +59,12 @@ class RabbitMessagePublisherRpcSpec extends Specification {
      * Set up the environment for each test.
      */
     def setup() {
-        // Mock the rabbit context
-        rabbitContext = Mock(RabbitContext)
+        // Mock a channel
+        channel = Mock(Channel)
+
+        // Mock the connection manager
+        connectionManager = Mock(ConnectionManager)
+        connectionManager.createChannel(null) >> channel
 
         // Create the message converter manager
         messageConverterManager = new MessageConverterManager()
@@ -68,18 +74,10 @@ class RabbitMessagePublisherRpcSpec extends Specification {
         messageConverterManager.registerMessageConverter(new GStringMessageConverter())
         messageConverterManager.registerMessageConverter(new StringMessageConverter())
 
-        // Inject the message converter manager into the rabbit context
-        rabbitContext.getMessageConverters() >> messageConverterManager.getMessageConverters()
-
-        // Mock a channel
-        channel = Mock(Channel)
-
-        // Mock a channel return from the rabbit context
-        rabbitContext.createChannel(null) >> channel
-
         // Create the message publisher
         rabbitMessagePublisher = new RabbitMessagePublisher()
-        rabbitMessagePublisher.rabbitContext = rabbitContext
+        rabbitMessagePublisher.connectionManager = connectionManager
+        rabbitMessagePublisher.messageConverterManager = messageConverterManager
     }
 
     /**
@@ -100,8 +98,8 @@ class RabbitMessagePublisherRpcSpec extends Specification {
         // Set up the publisher as a spy (we need partial mocking for rpc calls)
         rabbitMessagePublisher = Spy(RabbitMessagePublisher)
         rabbitMessagePublisher.createResponseQueue() >> queue
-
-        rabbitMessagePublisher.rabbitContext = rabbitContext
+        rabbitMessagePublisher.connectionManager = connectionManager
+        rabbitMessagePublisher.messageConverterManager = messageConverterManager
 
         // Create a mocked response message context
         MessageContext responseMessageContext = new MessageContext(
@@ -180,7 +178,8 @@ class RabbitMessagePublisherRpcSpec extends Specification {
         SynchronousQueue<MessageContext> queue = new SynchronousQueue<MessageContext>()
         rabbitMessagePublisher = Spy(RabbitMessagePublisher)
         rabbitMessagePublisher.createResponseQueue() >> queue
-        rabbitMessagePublisher.rabbitContext = rabbitContext
+        rabbitMessagePublisher.connectionManager = connectionManager
+        rabbitMessagePublisher.messageConverterManager = messageConverterManager
 
         when:
         rabbitMessagePublisher.rpc {
@@ -205,7 +204,7 @@ class RabbitMessagePublisherRpcSpec extends Specification {
         }
 
         then:
-        0 * rabbitContext.createChannel(_)
+        0 * connectionManager.createChannel(_)
         0 * channel.close()
     }
 
@@ -219,7 +218,7 @@ class RabbitMessagePublisherRpcSpec extends Specification {
         }
 
         then:
-        1 * rabbitContext.createChannel(null) >> channel
+        1 * connectionManager.createChannel(null) >> channel
         1 * channel.close()
     }
 

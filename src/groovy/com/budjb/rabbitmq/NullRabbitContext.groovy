@@ -137,5 +137,13 @@ class NullRabbitContext implements RabbitContext {
 
     @Override
     public void setRabbitConsumerManager(RabbitConsumerManager rabbitConsumerManager) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void setRabbitQueueBuilder(RabbitQueueBuilder rabbitQueueBuilder) {
+        // TODO Auto-generated method stub
+
     }
 }
