@@ -7,6 +7,8 @@ import spock.lang.Specification
 import com.budjb.rabbitmq.*
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionContext
+import com.budjb.rabbitmq.connection.ConnectionManager
+
 import com.budjb.rabbitmq.consumer.ConsumerConfiguration
 import com.budjb.rabbitmq.consumer.RabbitConsumerAdapter
 import com.budjb.rabbitmq.consumer.RabbitConsumerManager
@@ -44,13 +46,13 @@ class RabbitConsumerAdapterSpec extends Specification {
         GrailsApplication grailsApplication = Mock(GrailsApplication)
         grailsApplication.getConfig() >> new ConfigObject()
 
-        //  Mock the rabbit context
-        RabbitContext rabbitContext = Mock(RabbitContext)
+        //  Mock the connection  manager
+        ConnectionManager connectionManager = Mock(ConnectionManager)
 
         // Mock the consumer adapter factory
         RabbitConsumerManager rabbitConsumerManager = new RabbitConsumerManager()
         rabbitConsumerManager.grailsApplication = grailsApplication
-        rabbitConsumerManager.rabbitContext = rabbitContext
+        rabbitConsumerManager.connectionManager = connectionManager
         rabbitConsumerManager.messageConverterManager = messageConverterManager
 
         when:
@@ -92,13 +94,13 @@ class RabbitConsumerAdapterSpec extends Specification {
             ]
         ])
 
-        //  Mock a rabbit context
-        RabbitContext rabbitContext = Mock(RabbitContext)
+        //  Mock the connection  manager
+        ConnectionManager connectionManager = Mock(ConnectionManager)
 
         // Mock the consumer adapter factory
         RabbitConsumerManager rabbitConsumerManager = new RabbitConsumerManager()
         rabbitConsumerManager.grailsApplication = grailsApplication
-        rabbitConsumerManager.rabbitContext = rabbitContext
+        rabbitConsumerManager.connectionManager = connectionManager
         rabbitConsumerManager.messageConverterManager = messageConverterManager
 
         when:
@@ -138,8 +140,8 @@ class RabbitConsumerAdapterSpec extends Specification {
             ]
         ])
 
-        //  Mock a rabbit context
-        RabbitContext rabbitContext = Mock(RabbitContext)
+        //  Mock the connection  manager
+        ConnectionManager connectionManager = Mock(ConnectionManager)
 
         // Create a mocked consumer
         CallbackConsumer consumer = Mock(CallbackConsumer)
@@ -149,7 +151,7 @@ class RabbitConsumerAdapterSpec extends Specification {
 
         // Create the adapter
         RabbitConsumerAdapter adapter = Spy(RabbitConsumerAdapter, constructorArgs: [
-            consumer, grailsApplication, rabbitContext, messageConverterManager, persistenceInterceptor
+            consumer, grailsApplication, connectionManager, messageConverterManager, persistenceInterceptor, null
         ])
 
         // Mock the consumer name (sigh)
@@ -198,8 +200,8 @@ class RabbitConsumerAdapterSpec extends Specification {
             ]
         ])
 
-        //  Mock a rabbit context
-        RabbitContext rabbitContext = Mock(RabbitContext)
+        //  Mock the connection  manager
+        ConnectionManager connectionManager = Mock(ConnectionManager)
 
         // Create a mocked consumer
         CallbackConsumer consumer = Mock(CallbackConsumer)
@@ -209,7 +211,7 @@ class RabbitConsumerAdapterSpec extends Specification {
 
         // Create the adapter
         RabbitConsumerAdapter adapter = Spy(RabbitConsumerAdapter, constructorArgs: [
-            consumer, grailsApplication, rabbitContext, messageConverterManager, null
+            consumer, grailsApplication, connectionManager, messageConverterManager, null, null
         ])
 
         // Mock the consumer name (sigh)
@@ -255,9 +257,9 @@ class RabbitConsumerAdapterSpec extends Specification {
             return channel
         }
 
-        //  Mock a rabbit context that returns the mocked connection context
-        RabbitContext rabbitContext = Mock(RabbitContext)
-        rabbitContext.getConnection(*_) >> context
+        //  Mock a connection manager that returns the mocked connection context
+        ConnectionManager connectionManager = Mock(ConnectionManager)
+        connectionManager.getConnection(*_) >> context
 
         // Create a consumer
         LocalConfigConsumer consumer = new LocalConfigConsumer()
@@ -265,7 +267,7 @@ class RabbitConsumerAdapterSpec extends Specification {
         // Mock the consumer adapter factory
         RabbitConsumerManager rabbitConsumerManager = new RabbitConsumerManager()
         rabbitConsumerManager.grailsApplication = grailsApplication
-        rabbitConsumerManager.rabbitContext = rabbitContext
+        rabbitConsumerManager.connectionManager = connectionManager
         rabbitConsumerManager.messageConverterManager = messageConverterManager
 
         when:
@@ -297,9 +299,9 @@ class RabbitConsumerAdapterSpec extends Specification {
             return channel
         }
 
-        //  Mock a rabbit context that returns the mocked connection context
-        RabbitContext rabbitContext = Mock(RabbitContext)
-        rabbitContext.getConnection(*_) >> context
+        //  Mock a connection manager that returns the mocked connection context
+        ConnectionManager connectionManager = Mock(ConnectionManager)
+        connectionManager.getConnection(*_) >> context
 
         // Create a consumer
         LocalConfigConsumer consumer = new LocalConfigConsumer()
@@ -307,7 +309,7 @@ class RabbitConsumerAdapterSpec extends Specification {
         // Mock the consumer adapter factory
         RabbitConsumerManager rabbitConsumerManager = new RabbitConsumerManager()
         rabbitConsumerManager.grailsApplication = grailsApplication
-        rabbitConsumerManager.rabbitContext = rabbitContext
+        rabbitConsumerManager.connectionManager = connectionManager
         rabbitConsumerManager.messageConverterManager = messageConverterManager
 
         when:
@@ -341,9 +343,9 @@ class RabbitConsumerAdapterSpec extends Specification {
         context.getConfiguration() >> connectionConfiguration
         context.createChannel(*_) >> channel
 
-        //  Mock a rabbit context that returns the mocked connection context
-        RabbitContext rabbitContext = Mock(RabbitContext)
-        rabbitContext.getConnection(*_) >> context
+        //  Mock a connection manager that returns the mocked connection context
+        ConnectionManager connectionManager = Mock(ConnectionManager)
+        connectionManager.getConnection(*_) >> context
 
         // Create a consumer
         SubscriberConsumer consumer = new SubscriberConsumer()
@@ -351,7 +353,7 @@ class RabbitConsumerAdapterSpec extends Specification {
         // Mock the consumer adapter factory
         RabbitConsumerManager rabbitConsumerManager = new RabbitConsumerManager()
         rabbitConsumerManager.grailsApplication = grailsApplication
-        rabbitConsumerManager.rabbitContext = rabbitContext
+        rabbitConsumerManager.connectionManager = connectionManager
         rabbitConsumerManager.messageConverterManager = messageConverterManager
 
         when:

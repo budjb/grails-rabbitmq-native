@@ -27,11 +27,6 @@ class RabbitConsumerManager implements ApplicationContextAware {
     Object persistenceInterceptor
 
     /**
-     * Rabbit context object.
-     */
-    RabbitContext rabbitContext
-
-    /**
      * Message converter manager.
      */
     MessageConverterManager messageConverterManager
@@ -47,6 +42,11 @@ class RabbitConsumerManager implements ApplicationContextAware {
     ConnectionManager connectionManager
 
     /**
+     * Application context.
+     */
+    ApplicationContext applicationContext
+
+    /**
      * Logger.
      */
     Logger log = Logger.getLogger(RabbitConsumerManager)
@@ -58,9 +58,10 @@ class RabbitConsumerManager implements ApplicationContextAware {
         return new RabbitConsumerAdapter(
             consumer,
             grailsApplication,
-            rabbitContext,
+            connectionManager,
             messageConverterManager,
-            persistenceInterceptor
+            persistenceInterceptor,
+            rabbitMessagePublisher
         )
     }
 

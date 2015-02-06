@@ -15,7 +15,9 @@ import com.budjb.rabbitmq.AutoAck
 import com.budjb.rabbitmq.MessageContext
 import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitMessageBuilder
+import com.budjb.rabbitmq.RabbitMessagePublisher
 import com.budjb.rabbitmq.connection.ConnectionContext
+import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.MessageConvertMethod
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.MessageConvertException
@@ -133,9 +135,9 @@ class RabbitConsumerAdapter {
     ConsumerConfiguration configuration
 
     /**
-     * Rabbit context.
+     * Connection manager.
      */
-    RabbitContext rabbitContext
+    ConnectionManager connectionManager
 
     /**
      * List of active rabbit consumers.
@@ -153,6 +155,11 @@ class RabbitConsumerAdapter {
     MessageConverterManager messageConverterManager
 
     /**
+     * Rabbit message publisher.
+     */
+    RabbitMessagePublisher rabbitMessagePublisher
+
+    /**
      * Constructor.
      *
      * @param clazz
@@ -161,15 +168,17 @@ class RabbitConsumerAdapter {
     public RabbitConsumerAdapter(
         Object consumer,
         GrailsApplication grailsApplication,
-        RabbitContext rabbitContext,
+        ConnectionManager connectionManager,
         MessageConverterManager messageConverterManager,
-        Object persistenceInterceptor) {
+        Object persistenceInterceptor,
+        RabbitMessagePublisher rabbitMessagePublisher) {
 
         this.consumer = consumer
         this.grailsApplication = grailsApplication
-        this.rabbitContext = rabbitContext
+        this.connectionManager = connectionManager
         this.messageConverterManager = messageConverterManager
         this.persistenceInterceptor = persistenceInterceptor
+        this.rabbitMessagePublisher = rabbitMessagePublisher
     }
 
     /**
@@ -301,7 +310,7 @@ class RabbitConsumerAdapter {
         ConsumerConfiguration configuration = getConfiguration()
 
         // Get the connection context
-        ConnectionContext connectionContext = rabbitContext.getConnection(configuration.getConnection())
+        ConnectionContext connectionContext = connectionManager.getConnection(configuration.getConnection())
 
         // Ensure we have a connection
         if (!connectionContext) {
