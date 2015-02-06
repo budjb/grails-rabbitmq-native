@@ -53,6 +53,7 @@ class RabbitContextSpec extends Specification {
 
         then:
         1 * connectionManager.open()
+        1 * rabbitQueueBuilder.configureQueues()
         1 * connectionManager.start()
 
         when:
@@ -60,6 +61,7 @@ class RabbitContextSpec extends Specification {
 
         then:
         1 * connectionManager.open()
+        1 * rabbitQueueBuilder.configureQueues()
         0 * connectionManager.start()
 
         when:
