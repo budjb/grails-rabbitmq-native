@@ -12,7 +12,6 @@ import org.codehaus.groovy.grails.commons.GrailsClass
 import org.springframework.context.ApplicationContext
 
 import com.budjb.rabbitmq.AutoAck
-import com.budjb.rabbitmq.MessageContext
 import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitMessageBuilder
 import com.budjb.rabbitmq.RabbitMessagePublisher

@@ -7,6 +7,7 @@ import spock.lang.Specification
 
 import com.budjb.rabbitmq.*
 import com.budjb.rabbitmq.connection.ConnectionManager
+import com.budjb.rabbitmq.consumer.MessageContext
 import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.exception.MessageConvertException
 import com.rabbitmq.client.Channel

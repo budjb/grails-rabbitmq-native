@@ -8,10 +8,10 @@ import com.budjb.rabbitmq.*
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
-
 import com.budjb.rabbitmq.consumer.ConsumerConfiguration
 import com.budjb.rabbitmq.consumer.ConsumerAdapter
 import com.budjb.rabbitmq.consumer.ConsumerManager
+import com.budjb.rabbitmq.consumer.MessageContext
 import com.budjb.rabbitmq.converter.*
 import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
