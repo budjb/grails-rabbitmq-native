@@ -52,6 +52,11 @@ class RabbitMessageBuilder {
     protected static Logger log = Logger.getLogger(RabbitMessageBuilder)
 
     /**
+     * Rabbit message publisher.
+     */
+    protected RabbitMessagePublisher rabbitMessagePublisher
+
+    /**
      * Rabbit context.
      */
     RabbitContext rabbitContext
@@ -170,42 +175,56 @@ class RabbitMessageBuilder {
     }
 
     /**
-     * Sends a message to the rabbit service.
+     * Builds a RabbitMessageProperties object to submit to the message publisher.
      *
-     * @throws IllegalArgumentException
+     * @return
      */
-    protected void doSend() throws IllegalArgumentException {
-        // Make sure an exchange or a routing key were provided
-        if (!exchange && !routingKey) {
-            throw new IllegalArgumentException("exchange and/or routing key required")
+    protected RabbitMessageProperties buildMessageProperties() {
+        RabbitMessageProperties properties = new RabbitMessageProperties()
+
+        properties.appId = appId
+        properties.autoConvert = autoConvert
+        properties.body = body
+        properties.channel = channel
+        properties.connection = connection
+        properties.contentEncoding = contentEncoding
+        properties.contentType = contentType
+        properties.correlationId = correlationId
+        properties.deliveryMode = deliveryMode
+        properties.exchange = exchange
+        properties.expiration = expiration
+        properties.headers = headers
+        properties.messageId = messageId
+        properties.priority = priority
+        properties.replyTo = replyTo
+        properties.routingKey = routingKey
+        properties.timeout = timeout
+        properties.timestamp = timestamp
+        properties.type = type
+        properties.userId = userId
+
+        return properties
+    }
+
+    /**
+     * Returns the rabbit message publisher bean, loading it if necessary.
+     *
+     * @return
+     */
+    protected RabbitMessagePublisher getRabbitMessagePublisher() {
+        if (!rabbitMessagePublisher) {
+            rabbitMessagePublisher = Holders.applicationContext.getBean('rabbitMessagePublisher')
         }
+        return rabbitMessagePublisher
+    }
 
-        // Default body to a byte array
-        this.body = (this.body == null) ? new byte[0] : this.body
-
-        // Build properties
-        AMQP.BasicProperties properties = buildProperties()
-
-        // Convert the object and create the message
-        byte[] body = convertMessageToBytes(this.body)
-
-        // Whether the channel is a temporary channel
-        boolean tempChannel = false
-
-        // If we weren't passed a channel, create a temporary one
-        if (!channel) {
-            channel = rabbitContext.createChannel(connection)
-            tempChannel = true
-        }
-
-        // Send the message
-        channel.basicPublish(exchange, routingKey, properties, body)
-
-        // Close the channel
-        if (tempChannel) {
-            channel.close()
-            channel = null
-        }
+    /**
+     * Sets the rabbit message publisher bean.
+     *
+     * @param rabbitMessagePublisher
+     */
+    public void setRabbitMessagePublisher(RabbitMessagePublisher rabbitMessagePublisher) {
+        this.rabbitMessagePublisher = rabbitMessagePublisher
     }
 
     /**
@@ -213,6 +232,16 @@ class RabbitMessageBuilder {
      *
      * @throws IllegalArgumentException
      */
+    protected void doSend() throws IllegalArgumentException {
+        getRabbitMessagePublisher().send(buildMessageProperties())
+    }
+
+    /**
+     * Sends a message to the rabbit service.
+     *
+     * @throws IllegalArgumentException
+     */
+    @Deprecated
     public void send() throws IllegalArgumentException {
         doSend()
     }
@@ -223,6 +252,7 @@ class RabbitMessageBuilder {
      * @param closure
      * @throws IllegalArgumentException
      */
+    @Deprecated
     public void send(Closure closure) throws IllegalArgumentException {
         // Run the closure
         run closure
@@ -238,6 +268,7 @@ class RabbitMessageBuilder {
      * @param body Message payload.
      * @throws IllegalArgumentException
      */
+    @Deprecated
     public void send(String routingKey, Object body) throws IllegalArgumentException {
         // Set the params
         this.routingKey = routingKey
@@ -255,6 +286,7 @@ class RabbitMessageBuilder {
      * @param body Message payload.
      * @throws IllegalArgumentException
      */
+    @Deprecated
     public void send(String exchange, String routingKey, Object body) throws IllegalArgumentException {
         // Set the params
         this.exchange = exchange
@@ -280,105 +312,7 @@ class RabbitMessageBuilder {
      * @return
      */
     protected Object doRpc() throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
-        // Make sure an exchange or a routing key were provided
-        if (!exchange && !routingKey) {
-            throw new IllegalArgumentException("exchange and/or routing key required")
-        }
-
-        // Default body to a byte array
-        this.body = (this.body == null) ? new byte[0] : this.body
-
-        // Build properties
-        AMQP.BasicProperties properties = buildProperties()
-
-        // Convert the object and create the message
-        byte[] body = convertMessageToBytes(this.body)
-
-        // Track whether this is a temporary channel
-        boolean tempChannel = false
-
-        // Track whether we've started consuming
-        boolean consuming = false
-
-        // Track the temporary queue name
-        String temporaryQueue
-
-        // If a channel wasn't given, create one
-        if (!channel) {
-            channel = rabbitContext.createChannel(connection)
-            tempChannel = true
-        }
-
-        // Generate a consumer tag
-        String consumerTag = UUID.randomUUID().toString()
-
-        try {
-            // Create a temporary queue
-            temporaryQueue = channel.queueDeclare().queue
-
-            // Set the reply queue
-            properties.replyTo = temporaryQueue
-
-            // Create the sync object
-            SynchronousQueue<MessageContext> replyHandoff = new SynchronousQueue<MessageContext>()
-
-            // Define the handler
-            DefaultConsumer consumer = new DefaultConsumer(channel) {
-                @Override
-                public void handleDelivery(String replyConsumerTag, Envelope replyEnvelope, AMQP.BasicProperties replyProperties, byte[] replyBody) throws IOException {
-                    MessageContext context = new MessageContext(
-                        channel: null,
-                        consumerTag: replyConsumerTag,
-                        envelope: replyEnvelope,
-                        properties: replyProperties,
-                        body: replyBody
-                    )
-                    try {
-                        replyHandoff.put(context)
-                    }
-                    catch (InterruptedException e) {
-                        Thread.currentThread().interrupt()
-                    }
-                }
-            }
-
-            // Start the consumer and mark it
-            channel.basicConsume(properties.replyTo, false, consumerTag, true, true, null, consumer)
-            consuming = true
-
-            // Send the message
-            channel.basicPublish(exchange, routingKey, properties, body)
-
-            // Wait for the reply
-            MessageContext reply = (timeout < 0) ? replyHandoff.take() : replyHandoff.poll(timeout, TimeUnit.MILLISECONDS)
-
-            // If the reply is null, assume the timeout was reached
-            if (reply == null) {
-                throw new TimeoutException("timeout of ${timeout} milliseconds reached while waiting for a response in an RPC message to exchange '${exchange}' and routingKey '${routingKey}'")
-            }
-
-            // If auto convert is disabled, return the MessageContext
-            if (!autoConvert) {
-                return reply
-            }
-
-            return convertMessageFromBytes(reply.body)
-        }
-        finally {
-            // If we've started consuming, stop consumption.
-            // This cleans up some tracking objects internal to the RabbitMQ
-            // library when using auto-recovering connections.
-            // A memory leak results without this.
-            if (consuming) {
-                channel.basicCancel(consumerTag)
-            }
-
-            // Close the channel if a temporary one was opened
-            if (tempChannel) {
-                channel.close()
-                channel = null
-            }
-        }
+        return getRabbitMessagePublisher().rpc(buildMessageProperties())
     }
 
     /**
@@ -390,6 +324,7 @@ class RabbitMessageBuilder {
      * @throws IOException
      * @throws IllegalArgumentException
      */
+    @Deprecated
     public Object rpc() throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         return doRpc()
     }
@@ -407,6 +342,7 @@ class RabbitMessageBuilder {
      * @throws IOException
      * @throws IllegalArgumentException
      */
+    @Deprecated
     public Object rpc(Closure closure) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         // Run the closure
         run closure
@@ -429,6 +365,7 @@ class RabbitMessageBuilder {
      * @throws IOException
      * @throws IllegalArgumentException
      */
+    @Deprecated
     public Object rpc(String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         // Set the params
         this.routingKey = routingKey
@@ -453,6 +390,7 @@ class RabbitMessageBuilder {
      * @throws IOException
      * @throws IllegalArgumentException
      */
+    @Deprecated
     public Object rpc(String exchange, String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         // Set the params
         this.exchange = exchange
