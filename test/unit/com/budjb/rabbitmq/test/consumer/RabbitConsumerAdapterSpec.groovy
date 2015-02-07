@@ -1,4 +1,4 @@
-package com.budjb.rabbitmq.test
+package com.budjb.rabbitmq.test.consumer
 
 import org.codehaus.groovy.grails.commons.GrailsApplication
 

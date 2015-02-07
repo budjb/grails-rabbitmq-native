@@ -1,4 +1,4 @@
-package com.budjb.rabbitmq.test
+package com.budjb.rabbitmq.test.connection
 
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.rabbitmq.client.ConnectionFactory

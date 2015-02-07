@@ -9,7 +9,7 @@ class RabbitMessageProperties {
     /**
      * Default timeout for RPC calls (5 seconds).
      */
-    private static final int DEFAULT_TIMEOUT = 5000
+    public static final int DEFAULT_TIMEOUT = 5000
 
     /**
      * Routing key to send the message to.
