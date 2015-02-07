@@ -5,7 +5,7 @@ import org.springframework.context.ApplicationContext
 
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
-import com.budjb.rabbitmq.consumer.RabbitConsumerManager
+import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.*
 
 import com.rabbitmq.client.Channel
@@ -109,7 +109,7 @@ public interface RabbitContext {
     /**
      * Sets the rabbit consumer manager.
      */
-    public void setRabbitConsumerManager(RabbitConsumerManager rabbitConsumerManager)
+    public void setConsumerManager(ConsumerManager consumerManager)
 
     /**
      * Sets the rabbit queue builder.

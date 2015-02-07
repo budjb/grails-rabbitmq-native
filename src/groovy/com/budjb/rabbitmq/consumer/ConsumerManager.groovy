@@ -13,7 +13,7 @@ import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
 
-class RabbitConsumerManager implements ApplicationContextAware {
+class ConsumerManager implements ApplicationContextAware {
     /**
      * Grails application bean.
      */
@@ -49,7 +49,7 @@ class RabbitConsumerManager implements ApplicationContextAware {
     /**
      * Logger.
      */
-    protected Logger log = Logger.getLogger(RabbitConsumerManager)
+    protected Logger log = Logger.getLogger(ConsumerManager)
 
     /**
      * Creates a new ConsumerAdapter.

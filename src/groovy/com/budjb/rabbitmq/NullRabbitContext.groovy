@@ -4,7 +4,7 @@ import org.springframework.context.ApplicationContext
 
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
-import com.budjb.rabbitmq.consumer.RabbitConsumerManager
+import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.rabbitmq.client.Channel
@@ -92,7 +92,7 @@ class NullRabbitContext implements RabbitContext {
     }
 
     @Override
-    public void setRabbitConsumerManager(RabbitConsumerManager rabbitConsumerManager) {
+    public void setConsumerManager(ConsumerManager consumerManager) {
 
     }
 

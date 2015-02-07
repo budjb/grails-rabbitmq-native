@@ -9,18 +9,18 @@ import com.budjb.rabbitmq.RabbitMessagePublisher
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerAdapter
-import com.budjb.rabbitmq.consumer.RabbitConsumerManager
+import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
 
 import spock.lang.Specification
 
-class RabbitConsumerManagerSpec extends Specification {
+class ConsumerManagerSpec extends Specification {
     GrailsApplication grailsApplication
     Object persistenceInterceptor
     MessageConverterManager messageConverterManager
     RabbitMessagePublisher rabbitMessagePublisher
     ConnectionManager connectionManager
-    RabbitConsumerManager rabbitConsumerManager
+    ConsumerManager consumerManager
     ApplicationContext applicationContext
 
     def setup() {
@@ -31,13 +31,13 @@ class RabbitConsumerManagerSpec extends Specification {
         rabbitMessagePublisher = Mock(RabbitMessagePublisher)
         applicationContext = Mock(ApplicationContext)
 
-        rabbitConsumerManager = new RabbitConsumerManager()
-        rabbitConsumerManager.grailsApplication = grailsApplication
-        rabbitConsumerManager.persistenceInterceptor = persistenceInterceptor
-        rabbitConsumerManager.messageConverterManager = messageConverterManager
-        rabbitConsumerManager.rabbitMessagePublisher = rabbitMessagePublisher
-        rabbitConsumerManager.connectionManager = connectionManager
-        rabbitConsumerManager.applicationContext = applicationContext
+        consumerManager = new ConsumerManager()
+        consumerManager.grailsApplication = grailsApplication
+        consumerManager.persistenceInterceptor = persistenceInterceptor
+        consumerManager.messageConverterManager = messageConverterManager
+        consumerManager.rabbitMessagePublisher = rabbitMessagePublisher
+        consumerManager.connectionManager = connectionManager
+        consumerManager.applicationContext = applicationContext
     }
 
     def 'Ensure setGrailsApplication(GrailsApplication) sets the property correctly'() {
@@ -45,10 +45,10 @@ class RabbitConsumerManagerSpec extends Specification {
         GrailsApplication grailsApplication = Mock(GrailsApplication)
 
         when:
-        rabbitConsumerManager.setGrailsApplication(grailsApplication)
+        consumerManager.setGrailsApplication(grailsApplication)
 
         then:
-        rabbitConsumerManager.grailsApplication == grailsApplication
+        consumerManager.grailsApplication == grailsApplication
     }
 
     def 'Ensure setApplicationContext(ApplicationContext) sets the property correctly'() {
@@ -56,10 +56,10 @@ class RabbitConsumerManagerSpec extends Specification {
         ApplicationContext applicationContext = Mock(ApplicationContext)
 
         when:
-        rabbitConsumerManager.setApplicationContext(applicationContext)
+        consumerManager.setApplicationContext(applicationContext)
 
         then:
-        rabbitConsumerManager.applicationContext == applicationContext
+        consumerManager.applicationContext == applicationContext
     }
 
     def 'Ensure setMessageConverterManager(MessageConverterManager) sets the property correctly'() {
@@ -67,10 +67,10 @@ class RabbitConsumerManagerSpec extends Specification {
         MessageConverterManager messageConverterManager = Mock(MessageConverterManager)
 
         when:
-        rabbitConsumerManager.setMessageConverterManager(messageConverterManager)
+        consumerManager.setMessageConverterManager(messageConverterManager)
 
         then:
-        rabbitConsumerManager.messageConverterManager == messageConverterManager
+        consumerManager.messageConverterManager == messageConverterManager
     }
 
     def 'Ensure setConnectionManager(ConnectionManager) sets the property correctly'() {
@@ -78,10 +78,10 @@ class RabbitConsumerManagerSpec extends Specification {
         ConnectionManager connectionManager = Mock(ConnectionManager)
 
         when:
-        rabbitConsumerManager.setConnectionManager(connectionManager)
+        consumerManager.setConnectionManager(connectionManager)
 
         then:
-        rabbitConsumerManager.connectionManager == connectionManager
+        consumerManager.connectionManager == connectionManager
     }
 
     def 'Ensure setPersistenceInterceptor() sets the property correctly'() {
@@ -89,10 +89,10 @@ class RabbitConsumerManagerSpec extends Specification {
         def persistenceInterceptor = new Expando()
 
         when:
-        rabbitConsumerManager.setPersistenceInterceptor(persistenceInterceptor)
+        consumerManager.setPersistenceInterceptor(persistenceInterceptor)
 
         then:
-        rabbitConsumerManager.persistenceInterceptor == persistenceInterceptor
+        consumerManager.persistenceInterceptor == persistenceInterceptor
     }
 
     def 'Ensure setRabbitMessagePublisher(RabbitMessagePublisher) sets the property correctly.'() {
@@ -100,10 +100,10 @@ class RabbitConsumerManagerSpec extends Specification {
         RabbitMessagePublisher rabbitMessagePublisher = Mock(RabbitMessagePublisher)
 
         when:
-        rabbitConsumerManager.setRabbitMessagePublisher(rabbitMessagePublisher)
+        consumerManager.setRabbitMessagePublisher(rabbitMessagePublisher)
 
         then:
-        rabbitConsumerManager.rabbitMessagePublisher == rabbitMessagePublisher
+        consumerManager.rabbitMessagePublisher == rabbitMessagePublisher
     }
 
     def 'Ensure proper objects are injected into new adapters'() {
@@ -111,7 +111,7 @@ class RabbitConsumerManagerSpec extends Specification {
         Expando consumer = new Expando()
 
         when:
-        ConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(consumer)
+        ConsumerAdapter adapter = consumerManager.createConsumerAdapter(consumer)
 
         then:
         adapter.grailsApplication == grailsApplication
@@ -137,7 +137,7 @@ class RabbitConsumerManagerSpec extends Specification {
         connectionManager.getConnection(*_) >> connectionContext
 
         when:
-        rabbitConsumerManager.load()
+        consumerManager.load()
 
         then:
         2 * connectionContext.registerConsumer(_)

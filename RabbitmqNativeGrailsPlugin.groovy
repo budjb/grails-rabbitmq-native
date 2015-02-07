@@ -22,7 +22,7 @@ import com.budjb.rabbitmq.QueueBuilder
 import com.budjb.rabbitmq.NullRabbitContext
 
 import com.budjb.rabbitmq.connection.ConnectionManager
-import com.budjb.rabbitmq.consumer.RabbitConsumerManager
+import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
 
 import com.budjb.rabbitmq.MessageConverterArtefactHandler
@@ -147,7 +147,7 @@ class RabbitmqNativeGrailsPlugin {
             bean.autowire = true
         }
 
-        "rabbitConsumerManager"(RabbitConsumerManager) { bean ->
+        "consumerManager"(ConsumerManager) { bean ->
             bean.autowire = true
         }
 

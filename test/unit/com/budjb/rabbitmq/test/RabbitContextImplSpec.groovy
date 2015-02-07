@@ -9,7 +9,7 @@ import com.budjb.rabbitmq.QueueBuilder
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
-import com.budjb.rabbitmq.consumer.RabbitConsumerManager
+import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
@@ -20,7 +20,7 @@ class RabbitContextImplSpec extends Specification {
     GrailsApplication grailsApplication
     MessageConverterManager messageConverterManager
     ConnectionManager connectionManager
-    RabbitConsumerManager rabbitConsumerManager
+    ConsumerManager consumerManager
     RabbitContext rabbitContext
     QueueBuilder queueBuilder
 
@@ -28,13 +28,13 @@ class RabbitContextImplSpec extends Specification {
         grailsApplication = Mock(GrailsApplication)
         messageConverterManager = Mock(MessageConverterManager)
         connectionManager = Mock(ConnectionManager)
-        rabbitConsumerManager = Mock(RabbitConsumerManager)
+        consumerManager = Mock(ConsumerManager)
         queueBuilder = Mock(QueueBuilder)
 
         rabbitContext = new RabbitContextImpl()
         rabbitContext.setMessageConverterManager(messageConverterManager)
         rabbitContext.setConnectionManager(connectionManager)
-        rabbitContext.setRabbitConsumerManager(rabbitConsumerManager)
+        rabbitContext.setConsumerManager(consumerManager)
         rabbitContext.setQueueBuilder(queueBuilder)
     }
 
@@ -77,7 +77,7 @@ class RabbitContextImplSpec extends Specification {
         then:
         1 * connectionManager.load()
         1 * messageConverterManager.load()
-        1 * rabbitConsumerManager.load()
+        1 * consumerManager.load()
     }
 
     def 'Ensure registerConsumer(Object) is proxied to the rabbit consumer manager'() {
@@ -85,7 +85,7 @@ class RabbitContextImplSpec extends Specification {
         rabbitContext.registerConsumer(null)
 
         then:
-        1 * rabbitConsumerManager.registerConsumer(null)
+        1 * consumerManager.registerConsumer(null)
     }
 
     def 'Ensure registerMessageConverter(MessageConverter) is proxied to the rabbit consumer manager'() {
@@ -136,7 +136,7 @@ class RabbitContextImplSpec extends Specification {
         then:
         connectionManager.load()
         messageConverterManager.load()
-        rabbitConsumerManager.load()
+        consumerManager.load()
 
         then:
         1 * connectionManager.open()
@@ -185,15 +185,15 @@ class RabbitContextImplSpec extends Specification {
         rabbitContext.messageConverterManager == messageConverterManager
     }
 
-    def 'Ensure setRabbitConsumerManager(RabbitConsumerManager) sets the proeprty correctly'() {
+    def 'Ensure setConsumerManager(ConsumerManager) sets the proeprty correctly'() {
         setup:
-        RabbitConsumerManager rabbitConsumerManager = Mock(RabbitConsumerManager)
+        ConsumerManager consumerManager = Mock(ConsumerManager)
 
         when:
-        rabbitContext.setRabbitConsumerManager(rabbitConsumerManager)
+        rabbitContext.setConsumerManager(consumerManager)
 
         then:
-        rabbitContext.rabbitConsumerManager == rabbitConsumerManager
+        rabbitContext.consumerManager == consumerManager
     }
 
     def 'Ensure setQueueBuilder(QueueBuilder) sets the property correctly'() {

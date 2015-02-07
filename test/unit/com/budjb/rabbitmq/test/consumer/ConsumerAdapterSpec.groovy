@@ -11,7 +11,7 @@ import com.budjb.rabbitmq.connection.ConnectionManager
 
 import com.budjb.rabbitmq.consumer.ConsumerConfiguration
 import com.budjb.rabbitmq.consumer.ConsumerAdapter
-import com.budjb.rabbitmq.consumer.RabbitConsumerManager
+import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.*
 import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
@@ -61,14 +61,14 @@ class ConsumerAdapterSpec extends Specification {
         ConnectionManager connectionManager = Mock(ConnectionManager)
 
         // Mock the consumer adapter factory
-        RabbitConsumerManager rabbitConsumerManager = new RabbitConsumerManager()
-        rabbitConsumerManager.grailsApplication = grailsApplication
-        rabbitConsumerManager.connectionManager = connectionManager
-        rabbitConsumerManager.messageConverterManager = messageConverterManager
+        ConsumerManager consumerManager = new ConsumerManager()
+        consumerManager.grailsApplication = grailsApplication
+        consumerManager.connectionManager = connectionManager
+        consumerManager.messageConverterManager = messageConverterManager
 
         when:
         // Create the adapter
-        ConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(new LocalConfigConsumer())
+        ConsumerAdapter adapter = consumerManager.createConsumerAdapter(new LocalConfigConsumer())
 
         // Get the configuration
         ConsumerConfiguration configuration = adapter.configuration
@@ -109,14 +109,14 @@ class ConsumerAdapterSpec extends Specification {
         ConnectionManager connectionManager = Mock(ConnectionManager)
 
         // Mock the consumer adapter factory
-        RabbitConsumerManager rabbitConsumerManager = new RabbitConsumerManager()
-        rabbitConsumerManager.grailsApplication = grailsApplication
-        rabbitConsumerManager.connectionManager = connectionManager
-        rabbitConsumerManager.messageConverterManager = messageConverterManager
+        ConsumerManager consumerManager = new ConsumerManager()
+        consumerManager.grailsApplication = grailsApplication
+        consumerManager.connectionManager = connectionManager
+        consumerManager.messageConverterManager = messageConverterManager
 
         when:
         // Create the adapter
-        ConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(new CentralConfigConsumer())
+        ConsumerAdapter adapter = consumerManager.createConsumerAdapter(new CentralConfigConsumer())
 
         // Get the configuration
         ConsumerConfiguration configuration = adapter.configuration
@@ -276,14 +276,14 @@ class ConsumerAdapterSpec extends Specification {
         LocalConfigConsumer consumer = new LocalConfigConsumer()
 
         // Mock the consumer adapter factory
-        RabbitConsumerManager rabbitConsumerManager = new RabbitConsumerManager()
-        rabbitConsumerManager.grailsApplication = grailsApplication
-        rabbitConsumerManager.connectionManager = connectionManager
-        rabbitConsumerManager.messageConverterManager = messageConverterManager
+        ConsumerManager consumerManager = new ConsumerManager()
+        consumerManager.grailsApplication = grailsApplication
+        consumerManager.connectionManager = connectionManager
+        consumerManager.messageConverterManager = messageConverterManager
 
         when:
         // Create the adapter
-        ConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(consumer)
+        ConsumerAdapter adapter = consumerManager.createConsumerAdapter(consumer)
 
         // Start the adapter
         adapter.start()
@@ -318,14 +318,14 @@ class ConsumerAdapterSpec extends Specification {
         LocalConfigConsumer consumer = new LocalConfigConsumer()
 
         // Mock the consumer adapter factory
-        RabbitConsumerManager rabbitConsumerManager = new RabbitConsumerManager()
-        rabbitConsumerManager.grailsApplication = grailsApplication
-        rabbitConsumerManager.connectionManager = connectionManager
-        rabbitConsumerManager.messageConverterManager = messageConverterManager
+        ConsumerManager consumerManager = new ConsumerManager()
+        consumerManager.grailsApplication = grailsApplication
+        consumerManager.connectionManager = connectionManager
+        consumerManager.messageConverterManager = messageConverterManager
 
         when:
         // Create the adapter
-        ConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(consumer)
+        ConsumerAdapter adapter = consumerManager.createConsumerAdapter(consumer)
 
         // Start the adapter twice
         adapter.start()
@@ -362,14 +362,14 @@ class ConsumerAdapterSpec extends Specification {
         SubscriberConsumer consumer = new SubscriberConsumer()
 
         // Mock the consumer adapter factory
-        RabbitConsumerManager rabbitConsumerManager = new RabbitConsumerManager()
-        rabbitConsumerManager.grailsApplication = grailsApplication
-        rabbitConsumerManager.connectionManager = connectionManager
-        rabbitConsumerManager.messageConverterManager = messageConverterManager
+        ConsumerManager consumerManager = new ConsumerManager()
+        consumerManager.grailsApplication = grailsApplication
+        consumerManager.connectionManager = connectionManager
+        consumerManager.messageConverterManager = messageConverterManager
 
         when:
         // Create the adapter
-        ConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(consumer)
+        ConsumerAdapter adapter = consumerManager.createConsumerAdapter(consumer)
 
         // Start the adapter
         adapter.start()

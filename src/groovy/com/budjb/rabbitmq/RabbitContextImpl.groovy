@@ -18,7 +18,7 @@ package com.budjb.rabbitmq
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
-import com.budjb.rabbitmq.consumer.RabbitConsumerManager
+import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
@@ -57,7 +57,7 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
     /**
      * Rabbit consumer factory.
      */
-    protected RabbitConsumerManager rabbitConsumerManager
+    protected ConsumerManager consumerManager
 
     /**
      * Rabbit queue builder.
@@ -131,7 +131,7 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
      * @return
      */
     public void registerConsumer(Object consumer) {
-        rabbitConsumerManager.registerConsumer(consumer)
+        consumerManager.registerConsumer(consumer)
     }
 
     /**
@@ -190,7 +190,7 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
         messageConverterManager.load()
 
         // Load consumers
-        rabbitConsumerManager.load()
+        consumerManager.load()
     }
 
     /**
@@ -232,8 +232,8 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
      * Sets the rabbit consumer manager.
      */
     @Override
-    public void setRabbitConsumerManager(RabbitConsumerManager rabbitConsumerManager) {
-        this.rabbitConsumerManager = rabbitConsumerManager
+    public void setConsumerManager(ConsumerManager consumerManager) {
+        this.consumerManager = consumerManager
     }
 
     /**
