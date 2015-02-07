@@ -24,6 +24,28 @@ class RabbitQueueBuilderSpec extends Specification {
         rabbitQueueBuilder.connectionManager = connectionManager
     }
 
+    def 'Ensure setConnectionManager(ConnectiomManager) sets the property correctly'() {
+        setup:
+        ConnectionManager connectionManager = Mock(ConnectionManager)
+
+        when:
+        rabbitQueueBuilder.setConnectionManager(connectionManager)
+
+        then:
+        rabbitQueueBuilder.connectionManager == connectionManager
+    }
+
+    def 'Ensure setGrailsApplication(GrailsApplication) sets the property correctly'() {
+        setup:
+        GrailsApplication grailsApplicatio = Mock(GrailsApplication)
+
+        when:
+        rabbitQueueBuilder.setGrailsApplication(grailsApplicatio)
+
+        then:
+        rabbitQueueBuilder.grailsApplication == grailsApplicatio
+    }
+
     def 'Test queue creation on a single connection'() {
         setup:
         ConfigObject configuration = new ConfigObject()
