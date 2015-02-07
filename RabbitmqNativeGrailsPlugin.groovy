@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import grails.util.Holders
-
 import org.apache.log4j.Logger
 
 import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitContextImpl
+import com.budjb.rabbitmq.RabbitContextProxy
+import com.budjb.rabbitmq.RabbitQueueBuilder
 import com.budjb.rabbitmq.NullRabbitContext
+
+import com.budjb.rabbitmq.connection.ConnectionManager
+import com.budjb.rabbitmq.consumer.RabbitConsumerManager
+import com.budjb.rabbitmq.converter.MessageConverterManager
+
 import com.budjb.rabbitmq.MessageConverterArtefactHandler
 import com.budjb.rabbitmq.MessageConsumerArtefactHandler
-import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.GrailsMessageConverterClass
 
 import org.codehaus.groovy.grails.commons.AbstractInjectableGrailsClass
@@ -112,32 +116,44 @@ class RabbitmqNativeGrailsPlugin {
      * Spring actions.
      */
     def doWithSpring = {
-        // Create the rabbit context bean
-        Class rabbitContextClass
-        if (application.config.rabbitmq.enabled == false) {
-            // Set a null rabbitcontext object if the plugin is disabled
-            rabbitContextClass = NullRabbitContext
-            log.warn("The rabbitmq-native plugin has been disabled by the application's configuration.")
-        }
-        else {
-            rabbitContextClass = ConnectedRabbitContext
-        }
-        "rabbitContext"(rabbitContextClass) { bean ->
-            bean.scope = 'singleton'
+        // Create the null rabbit context bean
+        'nullRabbitContext'(NullRabbitContext)
+
+        // Create the live rabbit context bean
+        'rabbitContextImpl'(RabbitContextImpl) { bean ->
             bean.autowire = true
         }
 
-        // Create the built-in converter beans
-        "${StringMessageConverter.name}"(StringMessageConverter)
-        "${GStringMessageConverter.name}"(GStringMessageConverter)
-        "${IntegerMessageConverter.name}"(IntegerMessageConverter)
-        "${MapMessageConverter.name}"(MapMessageConverter)
-        "${ListMessageConverter.name}"(ListMessageConverter)
+        // Create the proxy rabbit context bean
+        'rabbitContext'(RabbitContextProxy) {
+            if (application.config.rabbitmq.enabled == false) {
+                log.warn("The rabbitmq-native plugin has been disabled by the application's configuration.")
+                target = ref('nullRabbitContext')
+            }
+            else {
+                target = ref('rabbitContextImpl')
+            }
+        }
+
+        "connectionManager"(ConnectionManager) { bean ->
+            bean.autowire = true
+        }
+
+        "rabbitQueueBuilder"(RabbitQueueBuilder) { bean ->
+            bean.autowire = true
+        }
+
+        "messageConverterManager"(MessageConverterManager) { bean ->
+            bean.autowire = true
+        }
+
+        "rabbitConsumerManager"(RabbitConsumerManager) { bean ->
+            bean.autowire = true
+        }
 
         // Create application-provided converter beans
         application.messageConverterClasses.each { GrailsClass clazz ->
             "${clazz.fullName}"(clazz.clazz) { bean ->
-                bean.scope = 'singleton'
                 bean.autowire = true
             }
         }
@@ -145,7 +161,6 @@ class RabbitmqNativeGrailsPlugin {
         // Create consumer beans
         application.messageConsumerClasses.each { GrailsClass clazz ->
             "${clazz.fullName}"(clazz.clazz) { bean ->
-                bean.scope = 'singleton'
                 bean.autowire = true
             }
         }
@@ -186,7 +201,6 @@ class RabbitmqNativeGrailsPlugin {
             GrailsMessageConverterClass converterClass = application.addArtefact(MessageConverterArtefactHandler.TYPE, event.source)
             beans {
                 "${converterClass.propertyName}"(converterClass.clazz) { bean ->
-                    bean.scope = 'singleton'
                     bean.autowire = true
                 }
             }.registerBeans(event.ctx)
@@ -203,7 +217,6 @@ class RabbitmqNativeGrailsPlugin {
             GrailsMessageConverterClass consumerClass = application.addArtefact(MessageConsumerArtefactHandler.TYPE, event.source)
             beans {
                 "${consumerClass.propertyName}"(consumerClass.clazz) { bean ->
-                    bean.scope = 'singleton'
                     bean.autowire = true
                 }
             }.registerBeans(event.ctx)

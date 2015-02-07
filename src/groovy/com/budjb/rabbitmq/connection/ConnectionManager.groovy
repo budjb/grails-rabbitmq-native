@@ -221,4 +221,13 @@ class ConnectionManager {
 
         return connection.createChannel()
     }
+
+    /**
+     * Sets the grails application bean.
+     *
+     * @param grailsApplication
+     */
+    public void setGrailsApplication(GrailsApplication grailsApplication) {
+        this.grailsApplication = grailsApplication
+    }
 }
