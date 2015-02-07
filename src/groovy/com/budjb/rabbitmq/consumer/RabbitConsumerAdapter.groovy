@@ -41,7 +41,7 @@ class RabbitConsumerAdapter {
         /**
          * Connection context associated with the consumer.
          */
-        ConnectionContext connectionContext
+        public ConnectionContext connectionContext
 
         /**
          * Constructs an instance of a consumer.

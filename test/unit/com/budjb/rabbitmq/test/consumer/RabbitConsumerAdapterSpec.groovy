@@ -37,6 +37,17 @@ class RabbitConsumerAdapterSpec extends Specification {
         messageConverterManager.registerMessageConverter(new StringMessageConverter())
     }
 
+    def 'Validate retrieving the consumer name'() {
+        setup:
+        LocalConfigConsumer consumer = new LocalConfigConsumer()
+
+        when:
+        RabbitConsumerAdapter adapter = new RabbitConsumerAdapter(consumer, null, null, null, null, null)
+
+        then:
+        adapter.getConsumerName() == 'LocalConfigConsumer'
+    }
+
     /**
      * Test that the adapter accurately handles configurations defined locally inside a consumer.
      */

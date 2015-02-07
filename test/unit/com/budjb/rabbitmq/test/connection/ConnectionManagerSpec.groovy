@@ -19,6 +19,17 @@ class ConnectionManagerSpec extends Specification {
         connectionManager.grailsApplication = grailsApplication
     }
 
+    def 'Ensure setGrailsApplication(GrailsApplication) sets the property correctly'() {
+        setup:
+        GrailsApplication grailsApplication = Mock(GrailsApplication)
+
+        when:
+        connectionManager.setGrailsApplication(grailsApplication)
+
+        then:
+        connectionManager.grailsApplication == grailsApplication
+    }
+
     def 'If no connection configuration is missing, a MissingConfigurationException should be thrown'() {
         setup:
         grailsApplication.getConfig() >> new ConfigObject()
@@ -163,6 +174,7 @@ class ConnectionManagerSpec extends Specification {
         then:
         1 * connection1.openConnection()
         1 * connection2.openConnection()
+        connectionManager.connections.size() == 2
 
         when:
         connectionManager.start()
@@ -175,9 +187,7 @@ class ConnectionManagerSpec extends Specification {
         connectionManager.reset()
 
         then:
-        1 * connection1.stopConsumers()
         1 * connection1.closeConnection()
-        1 * connection2.stopConsumers()
         1 * connection2.closeConnection()
         connectionManager.connections.size() == 0
     }

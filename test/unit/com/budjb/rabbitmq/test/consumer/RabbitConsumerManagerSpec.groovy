@@ -40,6 +40,72 @@ class RabbitConsumerManagerSpec extends Specification {
         rabbitConsumerManager.applicationContext = applicationContext
     }
 
+    def 'Ensure setGrailsApplication(GrailsApplication) sets the property correctly'() {
+        setup:
+        GrailsApplication grailsApplication = Mock(GrailsApplication)
+
+        when:
+        rabbitConsumerManager.setGrailsApplication(grailsApplication)
+
+        then:
+        rabbitConsumerManager.grailsApplication == grailsApplication
+    }
+
+    def 'Ensure setApplicationContext(ApplicationContext) sets the property correctly'() {
+        setup:
+        ApplicationContext applicationContext = Mock(ApplicationContext)
+
+        when:
+        rabbitConsumerManager.setApplicationContext(applicationContext)
+
+        then:
+        rabbitConsumerManager.applicationContext == applicationContext
+    }
+
+    def 'Ensure setMessageConverterManager(MessageConverterManager) sets the property correctly'() {
+        setup:
+        MessageConverterManager messageConverterManager = Mock(MessageConverterManager)
+
+        when:
+        rabbitConsumerManager.setMessageConverterManager(messageConverterManager)
+
+        then:
+        rabbitConsumerManager.messageConverterManager == messageConverterManager
+    }
+
+    def 'Ensure setConnectionManager(ConnectionManager) sets the property correctly'() {
+        setup:
+        ConnectionManager connectionManager = Mock(ConnectionManager)
+
+        when:
+        rabbitConsumerManager.setConnectionManager(connectionManager)
+
+        then:
+        rabbitConsumerManager.connectionManager == connectionManager
+    }
+
+    def 'Ensure setPersistenceInterceptor() sets the property correctly'() {
+        setup:
+        def persistenceInterceptor = new Expando()
+
+        when:
+        rabbitConsumerManager.setPersistenceInterceptor(persistenceInterceptor)
+
+        then:
+        rabbitConsumerManager.persistenceInterceptor == persistenceInterceptor
+    }
+
+    def 'Ensure setRabbitMessagePublisher(RabbitMessagePublisher) sets the property correctly.'() {
+        setup:
+        RabbitMessagePublisher rabbitMessagePublisher = Mock(RabbitMessagePublisher)
+
+        when:
+        rabbitConsumerManager.setRabbitMessagePublisher(rabbitMessagePublisher)
+
+        then:
+        rabbitConsumerManager.rabbitMessagePublisher == rabbitMessagePublisher
+    }
+
     def 'Ensure proper objects are injected into new adapters'() {
         setup:
         Expando consumer = new Expando()

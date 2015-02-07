@@ -68,6 +68,11 @@ class ConnectionConfiguration {
     private int port = ConnectionFactory.DEFAULT_AMQP_PORT
 
     /**
+     * Basic constructor.
+     */
+    public ConnectionConfiguration() { }
+
+    /**
      * Constructor.
      *
      * @param configuration

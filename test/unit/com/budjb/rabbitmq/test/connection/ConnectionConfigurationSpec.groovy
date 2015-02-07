@@ -71,4 +71,35 @@ class ConnectionConfigurationSpec extends Specification {
         connectionConfiguration.getThreads() == 10
         connectionConfiguration.getVirtualHost() == 'test-virtual-host'
     }
+
+    def 'Test that setters work correctly'() {
+        setup:
+        ConnectionConfiguration configuration = new ConnectionConfiguration()
+
+        when:
+        configuration.setHost('test-host')
+        configuration.setUsername('test-user')
+        configuration.setPassword('test-password')
+        configuration.setAutomaticReconnect(false)
+        configuration.setIsDefault(true)
+        configuration.setName('test-connection-name')
+        configuration.setPort(10000)
+        configuration.setRequestedHeartbeat(1000)
+        configuration.setSsl(true)
+        configuration.setThreads(10)
+        configuration.setVirtualHost('test-virtual-host')
+
+        then:
+        configuration.getHost() == 'test-host'
+        configuration.getUsername() == 'test-user'
+        configuration.getPassword() == 'test-password'
+        configuration.getAutomaticReconnect() == false
+        configuration.getIsDefault() == true
+        configuration.getName() == 'test-connection-name'
+        configuration.getPort() == 10000
+        configuration.getRequestedHeartbeat() == 1000
+        configuration.getSsl() == true
+        configuration.getThreads() == 10
+        configuration.getVirtualHost() == 'test-virtual-host'
+    }
 }

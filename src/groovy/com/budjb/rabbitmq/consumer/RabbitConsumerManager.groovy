@@ -17,39 +17,39 @@ class RabbitConsumerManager implements ApplicationContextAware {
     /**
      * Grails application bean.
      */
-    GrailsApplication grailsApplication
+    protected GrailsApplication grailsApplication
 
     /**
      * Hibernate object used to bind a session to the current thread.
      *
      * This will be null if Hibernate is not present.
      */
-    Object persistenceInterceptor
+    protected Object persistenceInterceptor
 
     /**
      * Message converter manager.
      */
-    MessageConverterManager messageConverterManager
+    protected MessageConverterManager messageConverterManager
 
     /**
      * Rabbit message publisher.
      */
-    RabbitMessagePublisher rabbitMessagePublisher
+    protected RabbitMessagePublisher rabbitMessagePublisher
 
     /**
      * Connection manager.
      */
-    ConnectionManager connectionManager
+    protected ConnectionManager connectionManager
 
     /**
      * Application context.
      */
-    ApplicationContext applicationContext
+    protected ApplicationContext applicationContext
 
     /**
      * Logger.
      */
-    Logger log = Logger.getLogger(RabbitConsumerManager)
+    protected Logger log = Logger.getLogger(RabbitConsumerManager)
 
     /**
      * Creates a new RabbitConsumerAdapter.
@@ -106,5 +106,40 @@ class RabbitConsumerManager implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext
+    }
+
+    /**
+     * Sets the grails application bean.
+     */
+    public void setGrailsApplication(GrailsApplication grailsApplication) {
+        this.grailsApplication = grailsApplication
+    }
+
+    /**
+     * Sets the connection manager.
+     */
+    public void setConnectionManager(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager
+    }
+
+    /**
+     * Sets the message converter manager.
+     */
+    public void setMessageConverterManager(MessageConverterManager messageConverterManager) {
+        this.messageConverterManager = messageConverterManager
+    }
+
+    /**
+     * Sets the persistence intercepter, if available.
+     */
+    public void setPersistenceInterceptor(def persistenceInterceptor) {
+        this.persistenceInterceptor = persistenceInterceptor
+    }
+
+    /**
+     * Sets the rabbit message builder.
+     */
+    public void setRabbitMessagePublisher(RabbitMessagePublisher rabbitMessagePublisher) {
+        this.rabbitMessagePublisher = rabbitMessagePublisher
     }
 }

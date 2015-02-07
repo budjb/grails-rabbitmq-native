@@ -120,7 +120,6 @@ class ConnectionManager {
      * Stops all consumers, closes all connections, and removes all connection contexts.
      */
     public void reset() {
-        connections*.stopConsumers()
         connections*.closeConnection()
         connections = []
     }
@@ -197,7 +196,13 @@ class ConnectionManager {
      * @return
      */
     public Channel createChannel() {
-        return createChannel(null)
+        ConnectionContext connection = getConnection()
+
+        if (!connection) {
+            throw new Exception('no default connection found')
+        }
+
+        return connection.createChannel()
     }
 
     /**
@@ -211,12 +216,7 @@ class ConnectionManager {
         ConnectionContext connection = getConnection(connectionName)
 
         if (!connection) {
-            if (!connectionName) {
-                throw new Exception("no default connection found")
-            }
-            else {
-                throw new Exception("no connection with name '${connectionName}' found")
-            }
+            throw new Exception("no connection with name '${connectionName}' found")
         }
 
         return connection.createChannel()

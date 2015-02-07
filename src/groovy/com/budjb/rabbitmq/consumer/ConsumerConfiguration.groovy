@@ -22,17 +22,17 @@ class ConsumerConfiguration {
     /**
      * Queue to listen on.
      */
-    protected String queue = null
+    protected String queue
 
     /**
      * Exchange to subscribe to.
      */
-    protected String exchange = null
+    protected String exchange
 
     /**
      * Consumer binding.
      */
-    protected Object binding = null
+    protected Object binding
 
     /**
      * Headers consume binding requirement.
@@ -73,7 +73,12 @@ class ConsumerConfiguration {
     /**
      * Name of the connection that should be used to consume from.
      */
-    protected String connection = null
+    protected String connection
+
+    /**
+     * Basic constructor.
+     */
+    public ConsumerConfiguration() { }
 
     /**
      * Constructor that parses the options defined in the service consumer.
@@ -131,6 +136,10 @@ class ConsumerConfiguration {
      */
     public void setAutoAck(AutoAck autoAck) {
         this.autoAck = autoAck
+
+        if (!autoAck != AutoAck.POST) {
+            transacted = false
+        }
     }
 
     /**
@@ -257,7 +266,7 @@ class ConsumerConfiguration {
     /**
      * Sets whether to retry the message on failure.
      */
-    public void setRetry(int retry) {
+    public void setRetry(boolean retry) {
         this.retry = retry
     }
 
@@ -273,5 +282,9 @@ class ConsumerConfiguration {
      */
     public void setTransacted(boolean transacted) {
         this.transacted = transacted
+
+        if (transacted == true) {
+            autoAck = AutoAck.POST
+        }
     }
 }
