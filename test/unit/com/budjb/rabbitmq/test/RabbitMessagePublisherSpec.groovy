@@ -5,89 +5,24 @@ import java.util.concurrent.TimeoutException
 
 import spock.lang.Specification
 
-import com.budjb.rabbitmq.connection.ConnectionManager
-
 import com.budjb.rabbitmq.*
+import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.*
+import com.budjb.rabbitmq.exception.MessageConvertException
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk
 
-import grails.test.mixin.*
-
-class RabbitMessagePublisherRpcSpec extends Specification {
-    /**
-     * Message to publish in the basic RPC tests.
-     */
+class RabbitMessagePublisherSpec extends Specification {
     private static final String BASIC_PUBLISH_MESSAGE = 'Knock knock...'
-
-    /**
-     * Message to respond with in the basic RPC test.
-     */
     private static final String BASIC_RESPONSE_MESSAGE = 'Who\'s there?'
-
-    /**
-     * Exchange to send with basic send tests.
-     */
     private static final String BASIC_PUBLISH_EXCHANGE = 'test-exchange'
-
-    /**
-     * Routing key to send with basic send tests.
-     */
     private static final String BASIC_PUBLISH_ROUTING_KEY = 'test-routing-key'
 
-    /**
-     * Mocked connection manager.
-     */
     ConnectionManager connectionManager
-
-    /**
-     * Live message publisher instance.
-     */
     RabbitMessagePublisher rabbitMessagePublisher
-
-    /**
-     * Message converter manager.
-     */
     MessageConverterManager messageConverterManager
-
-    /**
-     * Mocked channel.
-     */
     Channel channel
 
-    /**
-     * Set up the environment for each test.
-     */
-    def setup() {
-        // Mock a channel
-        channel = Mock(Channel)
-
-        // Mock the connection manager
-        connectionManager = Mock(ConnectionManager)
-        connectionManager.createChannel(null) >> channel
-
-        // Create the message converter manager
-        messageConverterManager = new MessageConverterManager()
-        messageConverterManager.registerMessageConverter(new IntegerMessageConverter())
-        messageConverterManager.registerMessageConverter(new MapMessageConverter())
-        messageConverterManager.registerMessageConverter(new ListMessageConverter())
-        messageConverterManager.registerMessageConverter(new GStringMessageConverter())
-        messageConverterManager.registerMessageConverter(new StringMessageConverter())
-
-        // Create the message publisher
-        rabbitMessagePublisher = new RabbitMessagePublisher()
-        rabbitMessagePublisher.connectionManager = connectionManager
-        rabbitMessagePublisher.messageConverterManager = messageConverterManager
-    }
-
-    /**
-     * Additional mocking for most of the RPC calls.
-     *
-     * This isn't rolled in to the setup method because some calls need this not to be done.
-     *
-     * @param response
-     * @return
-     */
     def mockBasicRpc(byte[] response) {
         // Mock temporary queue creation
         channel.queueDeclare() >> new DeclareOk('temporary-queue', 0, 0)
@@ -114,6 +49,129 @@ class RabbitMessagePublisherRpcSpec extends Specification {
         queue.poll(*_) >> responseMessageContext
         queue.take() >> responseMessageContext
 
+    }
+
+    def setup() {
+        channel = Mock(Channel)
+
+        connectionManager = Mock(ConnectionManager)
+        connectionManager.createChannel(null) >> channel
+
+        messageConverterManager = new MessageConverterManager()
+        messageConverterManager.registerMessageConverter(new IntegerMessageConverter())
+        messageConverterManager.registerMessageConverter(new MapMessageConverter())
+        messageConverterManager.registerMessageConverter(new ListMessageConverter())
+        messageConverterManager.registerMessageConverter(new GStringMessageConverter())
+        messageConverterManager.registerMessageConverter(new StringMessageConverter())
+
+        rabbitMessagePublisher = new RabbitMessagePublisher()
+        rabbitMessagePublisher.connectionManager = connectionManager
+        rabbitMessagePublisher.messageConverterManager = messageConverterManager
+    }
+
+    def 'Ensure setMessageConverterManager(MessageConverterManager) sets the property correctly'() {
+        setup:
+        MessageConverterManager messageConverterManager = Mock(MessageConverterManager)
+
+        when:
+        rabbitMessagePublisher.setMessageConverterManager(messageConverterManager)
+
+        then:
+        rabbitMessagePublisher.messageConverterManager == messageConverterManager
+    }
+
+    def 'Ensure setConnectionManager(ConnectionManager) sets the property correctly'() {
+        setup:
+        ConnectionManager connectionManager = Mock(ConnectionManager)
+
+        when:
+        rabbitMessagePublisher.setConnectionManager(connectionManager)
+
+        then:
+        rabbitMessagePublisher.connectionManager == connectionManager
+    }
+
+    def 'Basic send() with only a routing key'() {
+        when:
+        rabbitMessagePublisher.send(BASIC_PUBLISH_ROUTING_KEY, BASIC_PUBLISH_MESSAGE)
+
+        then:
+        1 * channel.basicPublish('', BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
+    }
+
+    def 'Basic send() with an exchange and routing key'() {
+        when:
+        rabbitMessagePublisher.send(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, BASIC_PUBLISH_MESSAGE)
+
+        then:
+        1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
+    }
+
+    def 'Basic send() with a provided RabbitMessageProperties object'() {
+        when:
+        rabbitMessagePublisher.send(new RabbitMessageProperties().build {
+            exchange = BASIC_PUBLISH_EXCHANGE
+            routingKey = BASIC_PUBLISH_ROUTING_KEY
+            body = BASIC_PUBLISH_MESSAGE
+        })
+
+        then:
+        1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
+    }
+
+    def 'Basic send() configured by a closure'() {
+        when:
+        rabbitMessagePublisher.send {
+            exchange = BASIC_PUBLISH_EXCHANGE
+            routingKey = BASIC_PUBLISH_ROUTING_KEY
+            body = BASIC_PUBLISH_MESSAGE
+        }
+
+        then:
+        1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
+    }
+
+    def 'Send with no parameters provided (routing key and/or exchange are required)'() {
+        when:
+        rabbitMessagePublisher.send { }
+
+        then:
+        thrown IllegalArgumentException
+    }
+
+    def 'If a channel is provided ensure one\'s not created and it\'s not closed'() {
+        setup:
+        Channel channel = Mock(Channel)
+
+        when:
+        rabbitMessagePublisher.send {
+            routingKey = BASIC_PUBLISH_ROUTING_KEY
+            delegate.channel = channel
+        }
+
+        then:
+        0 * connectionManager.createChannel()
+        0 * channel.close()
+    }
+
+    def 'If no channel is provided, ensure one\'s created and closed'() {
+        when:
+        rabbitMessagePublisher.send {
+            routingKey = BASIC_PUBLISH_ROUTING_KEY
+            body = 'asdf'
+        }
+
+        then:
+        1 * connectionManager.createChannel(null) >> channel
+        1 * channel.close()
+    }
+
+    def 'Ensure an exception is thrown when content can\'t be marshaled'() {
+        when:
+        rabbitMessagePublisher.send(BASIC_PUBLISH_ROUTING_KEY, new DummyObject())
+
+        then:
+        thrown MessageConvertException
     }
 
     def 'RPC with only a routing key'() {
@@ -235,5 +293,12 @@ class RabbitMessagePublisherRpcSpec extends Specification {
         1 * channel.basicPublish(*_)
         1 * channel.basicConsume(*_)
         1 * channel.basicCancel(*_)
+    }
+
+    /**
+     * A dummy class used to test invalid message conversion.
+     */
+    class DummyObject {
+
     }
 }

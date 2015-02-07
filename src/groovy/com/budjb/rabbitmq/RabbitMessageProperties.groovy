@@ -14,102 +14,102 @@ class RabbitMessageProperties {
     /**
      * Routing key to send the message to.
      */
-    String routingKey = ''
+    public String routingKey = ''
 
     /**
      * Exchange to send the message to.
      */
-    String exchange = ''
+    public String exchange = ''
 
     /**
      * RPC timeout, in milliseconds.
      */
-    int timeout = DEFAULT_TIMEOUT
+    public int timeout = DEFAULT_TIMEOUT
 
     /**
      * Message body.
      */
-    Object body
+    public Object body
 
     /**
      * Message headers.
      */
-    Map headers = [:]
+    public Map headers = [:]
 
     /**
      * Content type.
      */
-    String contentType
+    public String contentType
 
     /**
      * Content encoding.
      */
-    String contentEncoding
+    public String contentEncoding
 
     /**
      * Delivery mode (1 == non-persistent, 2 == persistent)
      */
-    int deliveryMode
+    public int deliveryMode
 
     /**
      * Priority.
      */
-    int priority
+    public int priority
 
     /**
      * Correlation id.
      */
-    String correlationId
+    public String correlationId
 
     /**
      * Queue to reply to.
      */
-    String replyTo
+    public String replyTo
 
     /**
      * Message expiration.
      */
-    String expiration
+    public String expiration
 
     /**
      * Message ID.
      */
-    String messageId
+    public String messageId
 
     /**
      * Message timestamp.
      */
-    Calendar timestamp
+    public Calendar timestamp
 
     /**
      * Message type name.
      */
-    String type
+    public String type
 
     /**
      * User ID.
      */
-    String userId
+    public String userId
 
     /**
      * Application ID.
      */
-    String appId
+    public String appId
 
     /**
      * Whether to auto-convert the reply payload.
      */
-    boolean autoConvert = true
+    public boolean autoConvert = true
 
     /**
      * Connection name.
      */
-    String connection = null
+    public String connection
 
     /**
      * Channel to publish messages through.
      */
-    Channel channel
+    public Channel channel
 
     /**
      * Builds the properties class from a provided closure and returns itself.
