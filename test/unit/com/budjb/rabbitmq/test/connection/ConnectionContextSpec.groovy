@@ -2,7 +2,7 @@ package com.budjb.rabbitmq.test.connection
 
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionContext
-import com.budjb.rabbitmq.consumer.RabbitConsumerAdapter
+import com.budjb.rabbitmq.consumer.ConsumerAdapter
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
 
@@ -56,9 +56,9 @@ class ConnectionContextSpec extends Specification {
 
     def 'Validate startConsumers() functionality'() {
         setup:
-        RabbitConsumerAdapter consumer1 = Mock(RabbitConsumerAdapter)
-        RabbitConsumerAdapter consumer2 = Mock(RabbitConsumerAdapter)
-        RabbitConsumerAdapter consumer3 = Mock(RabbitConsumerAdapter)
+        ConsumerAdapter consumer1 = Mock(ConsumerAdapter)
+        ConsumerAdapter consumer2 = Mock(ConsumerAdapter)
+        ConsumerAdapter consumer3 = Mock(ConsumerAdapter)
 
         ConnectionConfiguration connectionConfiguration = new ConnectionConfiguration([
             'host': 'localhost',
@@ -88,9 +88,9 @@ class ConnectionContextSpec extends Specification {
 
     def 'Validate stopConsumers() functionality'() {
         setup:
-        RabbitConsumerAdapter consumer1 = Mock(RabbitConsumerAdapter)
-        RabbitConsumerAdapter consumer2 = Mock(RabbitConsumerAdapter)
-        RabbitConsumerAdapter consumer3 = Mock(RabbitConsumerAdapter)
+        ConsumerAdapter consumer1 = Mock(ConsumerAdapter)
+        ConsumerAdapter consumer2 = Mock(ConsumerAdapter)
+        ConsumerAdapter consumer3 = Mock(ConsumerAdapter)
 
         ConnectionConfiguration connectionConfiguration = new ConnectionConfiguration([
             'host': 'localhost',
@@ -120,9 +120,9 @@ class ConnectionContextSpec extends Specification {
 
     def 'Validate closeConnection() functionality'() {
         setup:
-        RabbitConsumerAdapter consumer1 = Mock(RabbitConsumerAdapter)
-        RabbitConsumerAdapter consumer2 = Mock(RabbitConsumerAdapter)
-        RabbitConsumerAdapter consumer3 = Mock(RabbitConsumerAdapter)
+        ConsumerAdapter consumer1 = Mock(ConsumerAdapter)
+        ConsumerAdapter consumer2 = Mock(ConsumerAdapter)
+        ConsumerAdapter consumer3 = Mock(ConsumerAdapter)
 
         ConnectionConfiguration connectionConfiguration = new ConnectionConfiguration([
             'host': 'localhost',
@@ -156,7 +156,7 @@ class ConnectionContextSpec extends Specification {
         connectionContext.adapters.size() == 0
 
         when:
-        connectionContext.registerConsumer(Mock(RabbitConsumerAdapter))
+        connectionContext.registerConsumer(Mock(ConsumerAdapter))
 
         then:
         connectionContext.adapters.size() == 1

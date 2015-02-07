@@ -10,7 +10,7 @@ import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 
 import com.budjb.rabbitmq.consumer.ConsumerConfiguration
-import com.budjb.rabbitmq.consumer.RabbitConsumerAdapter
+import com.budjb.rabbitmq.consumer.ConsumerAdapter
 import com.budjb.rabbitmq.consumer.RabbitConsumerManager
 import com.budjb.rabbitmq.converter.*
 import com.rabbitmq.client.BasicProperties
@@ -19,7 +19,7 @@ import com.rabbitmq.client.Envelope
 import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk
 
 
-class RabbitConsumerAdapterSpec extends Specification {
+class ConsumerAdapterSpec extends Specification {
     /**
      * Message converter manager.
      */
@@ -42,7 +42,7 @@ class RabbitConsumerAdapterSpec extends Specification {
         LocalConfigConsumer consumer = new LocalConfigConsumer()
 
         when:
-        RabbitConsumerAdapter adapter = new RabbitConsumerAdapter(consumer, null, null, null, null, null)
+        ConsumerAdapter adapter = new ConsumerAdapter(consumer, null, null, null, null, null)
 
         then:
         adapter.getConsumerName() == 'LocalConfigConsumer'
@@ -68,7 +68,7 @@ class RabbitConsumerAdapterSpec extends Specification {
 
         when:
         // Create the adapter
-        RabbitConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(new LocalConfigConsumer())
+        ConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(new LocalConfigConsumer())
 
         // Get the configuration
         ConsumerConfiguration configuration = adapter.configuration
@@ -116,7 +116,7 @@ class RabbitConsumerAdapterSpec extends Specification {
 
         when:
         // Create the adapter
-        RabbitConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(new CentralConfigConsumer())
+        ConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(new CentralConfigConsumer())
 
         // Get the configuration
         ConsumerConfiguration configuration = adapter.configuration
@@ -161,7 +161,7 @@ class RabbitConsumerAdapterSpec extends Specification {
         def persistenceInterceptor = Mock(PersistenceInterceptor)
 
         // Create the adapter
-        RabbitConsumerAdapter adapter = Spy(RabbitConsumerAdapter, constructorArgs: [
+        ConsumerAdapter adapter = Spy(ConsumerAdapter, constructorArgs: [
             consumer, grailsApplication, connectionManager, messageConverterManager, persistenceInterceptor, null
         ])
 
@@ -221,7 +221,7 @@ class RabbitConsumerAdapterSpec extends Specification {
         consumer.handleMessage(*_) >> { throw new RuntimeException() }
 
         // Create the adapter
-        RabbitConsumerAdapter adapter = Spy(RabbitConsumerAdapter, constructorArgs: [
+        ConsumerAdapter adapter = Spy(ConsumerAdapter, constructorArgs: [
             consumer, grailsApplication, connectionManager, messageConverterManager, null, null
         ])
 
@@ -283,7 +283,7 @@ class RabbitConsumerAdapterSpec extends Specification {
 
         when:
         // Create the adapter
-        RabbitConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(consumer)
+        ConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(consumer)
 
         // Start the adapter
         adapter.start()
@@ -325,7 +325,7 @@ class RabbitConsumerAdapterSpec extends Specification {
 
         when:
         // Create the adapter
-        RabbitConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(consumer)
+        ConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(consumer)
 
         // Start the adapter twice
         adapter.start()
@@ -369,7 +369,7 @@ class RabbitConsumerAdapterSpec extends Specification {
 
         when:
         // Create the adapter
-        RabbitConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(consumer)
+        ConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(consumer)
 
         // Start the adapter
         adapter.start()

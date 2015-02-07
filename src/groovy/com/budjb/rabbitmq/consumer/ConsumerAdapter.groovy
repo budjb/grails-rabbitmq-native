@@ -28,7 +28,7 @@ import com.rabbitmq.client.Envelope
 import com.rabbitmq.client.impl.recovery.AutorecoveringChannel
 
 @SuppressWarnings("unchecked")
-class RabbitConsumerAdapter {
+class ConsumerAdapter {
     /**
      * Consumer object used to receive messages from the RabbitMQ library.
      */
@@ -36,7 +36,7 @@ class RabbitConsumerAdapter {
         /**
          * Consumer adapter containing the context for this consumer.
          */
-        public RabbitConsumerAdapter adapter
+        public ConsumerAdapter adapter
 
         /**
          * Connection context associated with the consumer.
@@ -49,7 +49,7 @@ class RabbitConsumerAdapter {
          * @param channel
          * @param adapter
          */
-        private RabbitConsumer(Channel channel, RabbitConsumerAdapter adapter, ConnectionContext connectionContext) {
+        private RabbitConsumer(Channel channel, ConsumerAdapter adapter, ConnectionContext connectionContext) {
             // Run the parent
             super(channel)
 
@@ -80,7 +80,7 @@ class RabbitConsumerAdapter {
             )
 
             // Hand off the message to the adapter.
-            RabbitConsumerAdapter.this.deliverMessage(context)
+            ConsumerAdapter.this.deliverMessage(context)
         }
     }
 
@@ -117,7 +117,7 @@ class RabbitConsumerAdapter {
     /**
      * Logger.
      */
-    Logger log = Logger.getLogger(RabbitConsumerAdapter)
+    Logger log = Logger.getLogger(ConsumerAdapter)
 
     /**
      * Grails application bean.
@@ -165,7 +165,7 @@ class RabbitConsumerAdapter {
      * @param clazz
      * @param grailsApplication
      */
-    public RabbitConsumerAdapter(
+    public ConsumerAdapter(
         Object consumer,
         GrailsApplication grailsApplication,
         ConnectionManager connectionManager,

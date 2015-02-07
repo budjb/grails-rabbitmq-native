@@ -52,10 +52,10 @@ class RabbitConsumerManager implements ApplicationContextAware {
     protected Logger log = Logger.getLogger(RabbitConsumerManager)
 
     /**
-     * Creates a new RabbitConsumerAdapter.
+     * Creates a new ConsumerAdapter.
      */
-    public RabbitConsumerAdapter createConsumerAdapter(Object consumer) {
-        return new RabbitConsumerAdapter(
+    public ConsumerAdapter createConsumerAdapter(Object consumer) {
+        return new ConsumerAdapter(
             consumer,
             grailsApplication,
             connectionManager,
@@ -85,7 +85,7 @@ class RabbitConsumerManager implements ApplicationContextAware {
         }
 
         // Create the adapter
-        RabbitConsumerAdapter adapter = createConsumerAdapter(consumer)
+        ConsumerAdapter adapter = createConsumerAdapter(consumer)
 
         // Find the appropriate connection context
         ConnectionContext context = connectionManager.getConnection(adapter.getConfiguration().getConnection())

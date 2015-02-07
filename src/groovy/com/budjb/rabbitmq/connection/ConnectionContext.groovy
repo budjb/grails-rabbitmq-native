@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq.connection
 
-import com.budjb.rabbitmq.consumer.RabbitConsumerAdapter
+import com.budjb.rabbitmq.consumer.ConsumerAdapter
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
@@ -32,7 +32,7 @@ class ConnectionContext {
     /**
      * List of message consumers for this connection.
      */
-    protected List<RabbitConsumerAdapter> adapters = []
+    protected List<ConsumerAdapter> adapters = []
 
     /**
      * Connection configuration.
@@ -163,7 +163,7 @@ class ConnectionContext {
      *
      * @param clazz
      */
-    public void registerConsumer(RabbitConsumerAdapter adapter) {
+    public void registerConsumer(ConsumerAdapter adapter) {
         adapters << adapter
     }
 

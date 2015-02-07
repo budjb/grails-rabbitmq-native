@@ -8,7 +8,7 @@ import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitMessagePublisher
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
-import com.budjb.rabbitmq.consumer.RabbitConsumerAdapter
+import com.budjb.rabbitmq.consumer.ConsumerAdapter
 import com.budjb.rabbitmq.consumer.RabbitConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
 
@@ -111,7 +111,7 @@ class RabbitConsumerManagerSpec extends Specification {
         Expando consumer = new Expando()
 
         when:
-        RabbitConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(consumer)
+        ConsumerAdapter adapter = rabbitConsumerManager.createConsumerAdapter(consumer)
 
         then:
         adapter.grailsApplication == grailsApplication
