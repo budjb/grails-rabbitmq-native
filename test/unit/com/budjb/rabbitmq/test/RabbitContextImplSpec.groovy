@@ -5,7 +5,7 @@ import org.springframework.context.ApplicationContext
 
 import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitContextImpl
-import com.budjb.rabbitmq.RabbitQueueBuilder
+import com.budjb.rabbitmq.QueueBuilder
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
@@ -22,20 +22,20 @@ class RabbitContextImplSpec extends Specification {
     ConnectionManager connectionManager
     RabbitConsumerManager rabbitConsumerManager
     RabbitContext rabbitContext
-    RabbitQueueBuilder rabbitQueueBuilder
+    QueueBuilder queueBuilder
 
     def setup() {
         grailsApplication = Mock(GrailsApplication)
         messageConverterManager = Mock(MessageConverterManager)
         connectionManager = Mock(ConnectionManager)
         rabbitConsumerManager = Mock(RabbitConsumerManager)
-        rabbitQueueBuilder = Mock(RabbitQueueBuilder)
+        queueBuilder = Mock(QueueBuilder)
 
         rabbitContext = new RabbitContextImpl()
         rabbitContext.setMessageConverterManager(messageConverterManager)
         rabbitContext.setConnectionManager(connectionManager)
         rabbitContext.setRabbitConsumerManager(rabbitConsumerManager)
-        rabbitContext.setRabbitQueueBuilder(rabbitQueueBuilder)
+        rabbitContext.setQueueBuilder(queueBuilder)
     }
 
     def 'Ensure createChannel() is proxied through to the connectionManager'() {
@@ -111,7 +111,7 @@ class RabbitContextImplSpec extends Specification {
 
         then:
         1 * connectionManager.open()
-        1 * rabbitQueueBuilder.configureQueues()
+        1 * queueBuilder.configureQueues()
         1 * connectionManager.start()
     }
 
@@ -121,7 +121,7 @@ class RabbitContextImplSpec extends Specification {
 
         then:
         1 * connectionManager.open()
-        1 * rabbitQueueBuilder.configureQueues()
+        1 * queueBuilder.configureQueues()
         0 * connectionManager.start()
     }
 
@@ -140,7 +140,7 @@ class RabbitContextImplSpec extends Specification {
 
         then:
         1 * connectionManager.open()
-        1 * rabbitQueueBuilder.configureQueues()
+        1 * queueBuilder.configureQueues()
         1 * connectionManager.start()
     }
 
@@ -196,14 +196,14 @@ class RabbitContextImplSpec extends Specification {
         rabbitContext.rabbitConsumerManager == rabbitConsumerManager
     }
 
-    def 'Ensure setRabbitQueueBuilder(RabbitQueueBuilder) sets the property correctly'() {
+    def 'Ensure setQueueBuilder(QueueBuilder) sets the property correctly'() {
         setup:
-        RabbitQueueBuilder rabbitQueueBuilder = Mock(RabbitQueueBuilder)
+        QueueBuilder queueBuilder = Mock(QueueBuilder)
 
         when:
-        rabbitContext.setRabbitQueueBuilder(rabbitQueueBuilder)
+        rabbitContext.setQueueBuilder(queueBuilder)
 
         then:
-        rabbitContext.rabbitQueueBuilder == rabbitQueueBuilder
+        rabbitContext.queueBuilder == queueBuilder
     }
 }

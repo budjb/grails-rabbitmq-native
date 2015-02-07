@@ -141,12 +141,12 @@ class RabbitContextProxySpec extends Specification {
         1 * targetRabbitContext.setRabbitConsumerManager(null)
     }
 
-    def 'Ensure setRabbitQueueBuilder(RabbitQueueBuilder) is proxied'() {
+    def 'Ensure setQueueBuilder(QueueBuilder) is proxied'() {
         when:
-        rabbitContext.setRabbitQueueBuilder(null)
+        rabbitContext.setQueueBuilder(null)
 
         then:
-        1 * targetRabbitContext.setRabbitQueueBuilder(null)
+        1 * targetRabbitContext.setQueueBuilder(null)
     }
 
     def 'Ensure start() is proxied'() {

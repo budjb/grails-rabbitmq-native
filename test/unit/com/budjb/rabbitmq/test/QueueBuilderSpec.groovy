@@ -2,15 +2,15 @@ package com.budjb.rabbitmq.test
 
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
-import com.budjb.rabbitmq.RabbitQueueBuilder
+import com.budjb.rabbitmq.QueueBuilder
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.rabbitmq.client.Channel
 
 import spock.lang.Specification
 
-class RabbitQueueBuilderSpec extends Specification {
-    RabbitQueueBuilder rabbitQueueBuilder
+class QueueBuilderSpec extends Specification {
+    QueueBuilder queueBuilder
     GrailsApplication grailsApplication
     ConnectionManager connectionManager
 
@@ -19,9 +19,9 @@ class RabbitQueueBuilderSpec extends Specification {
 
         connectionManager = Mock(ConnectionManager)
 
-        rabbitQueueBuilder = new RabbitQueueBuilder()
-        rabbitQueueBuilder.grailsApplication = grailsApplication
-        rabbitQueueBuilder.connectionManager = connectionManager
+        queueBuilder = new QueueBuilder()
+        queueBuilder.grailsApplication = grailsApplication
+        queueBuilder.connectionManager = connectionManager
     }
 
     def 'Ensure setConnectionManager(ConnectiomManager) sets the property correctly'() {
@@ -29,21 +29,21 @@ class RabbitQueueBuilderSpec extends Specification {
         ConnectionManager connectionManager = Mock(ConnectionManager)
 
         when:
-        rabbitQueueBuilder.setConnectionManager(connectionManager)
+        queueBuilder.setConnectionManager(connectionManager)
 
         then:
-        rabbitQueueBuilder.connectionManager == connectionManager
+        queueBuilder.connectionManager == connectionManager
     }
 
     def 'Ensure setGrailsApplication(GrailsApplication) sets the property correctly'() {
         setup:
-        GrailsApplication grailsApplicatio = Mock(GrailsApplication)
+        GrailsApplication grailsApplication = Mock(GrailsApplication)
 
         when:
-        rabbitQueueBuilder.setGrailsApplication(grailsApplicatio)
+        queueBuilder.setGrailsApplication(grailsApplication)
 
         then:
-        rabbitQueueBuilder.grailsApplication == grailsApplicatio
+        queueBuilder.grailsApplication == grailsApplication
     }
 
     def 'Test queue creation on a single connection'() {
@@ -67,7 +67,7 @@ class RabbitQueueBuilderSpec extends Specification {
         connectionManager.getConnection(_) >> connectionContext
 
         when:
-        rabbitQueueBuilder.configureQueues()
+        queueBuilder.configureQueues()
 
         then:
         3 * connectionContext.createChannel() >> channel
@@ -105,7 +105,7 @@ class RabbitQueueBuilderSpec extends Specification {
         connectionManager.getConnection('secondaryConnection') >> connectionContext2
 
         when:
-        rabbitQueueBuilder.configureQueues()
+        queueBuilder.configureQueues()
 
         then:
         2 * connectionContext2.createChannel() >> channel2
@@ -145,7 +145,7 @@ class RabbitQueueBuilderSpec extends Specification {
         connectionManager.getConnection('test-connection') >> connectionContext
 
         when:
-        rabbitQueueBuilder.configureQueues()
+        queueBuilder.configureQueues()
 
         then:
         1 * connectionContext.createChannel() >> channel
@@ -182,7 +182,7 @@ class RabbitQueueBuilderSpec extends Specification {
         connectionManager.getConnection('test-connection') >> connectionContext
 
         when:
-        rabbitQueueBuilder.configureQueues()
+        queueBuilder.configureQueues()
 
         then:
         1 * connectionContext.createChannel() >> channel
@@ -216,7 +216,7 @@ class RabbitQueueBuilderSpec extends Specification {
         connectionManager.getConnection('test-connection') >> connectionContext
 
         when:
-        rabbitQueueBuilder.configureQueues()
+        queueBuilder.configureQueues()
 
         then:
         1 * connectionContext.createChannel() >> channel

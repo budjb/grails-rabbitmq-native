@@ -120,7 +120,7 @@ class RabbitContextProxy implements RabbitContext, InitializingBean {
     }
 
     @Override
-    public void setRabbitQueueBuilder(RabbitQueueBuilder rabbitQueueBuilder) {
-        target.setRabbitQueueBuilder(rabbitQueueBuilder)
+    public void setQueueBuilder(QueueBuilder queueBuilder) {
+        target.setQueueBuilder(queueBuilder)
     }
 }

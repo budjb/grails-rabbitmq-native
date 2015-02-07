@@ -97,7 +97,7 @@ class NullRabbitContext implements RabbitContext {
     }
 
     @Override
-    public void setRabbitQueueBuilder(RabbitQueueBuilder rabbitQueueBuilder) {
+    public void setQueueBuilder(QueueBuilder queueBuilder) {
 
     }
 }

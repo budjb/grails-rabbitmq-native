@@ -114,5 +114,5 @@ public interface RabbitContext {
     /**
      * Sets the rabbit queue builder.
      */
-    public void setRabbitQueueBuilder(RabbitQueueBuilder rabbitQueueBuilder)
+    public void setQueueBuilder(QueueBuilder queueBuilder)
 }

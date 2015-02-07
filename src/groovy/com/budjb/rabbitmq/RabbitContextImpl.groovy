@@ -62,7 +62,7 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
     /**
      * Rabbit queue builder.
      */
-    protected RabbitQueueBuilder rabbitQueueBuilder
+    protected QueueBuilder queueBuilder
 
     /**
      * Creates the exchanges and queues that are defined in the Grails configuration.
@@ -89,7 +89,7 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
         connectionManager.open()
 
         // Set up any configured queues/exchanges
-        rabbitQueueBuilder.configureQueues()
+        queueBuilder.configureQueues()
 
         // Start consumers if requested
         if (!skipConsumers) {
@@ -240,7 +240,7 @@ class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
      * Sets the rabbit queue builder
      */
     @Override
-    public void setRabbitQueueBuilder(RabbitQueueBuilder rabbitQueueBuilder) {
-        this.rabbitQueueBuilder = rabbitQueueBuilder
+    public void setQueueBuilder(QueueBuilder queueBuilder) {
+        this.queueBuilder = queueBuilder
     }
 }

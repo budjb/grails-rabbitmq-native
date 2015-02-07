@@ -27,7 +27,7 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 /**
  * This class is based off of the queue builder present in the official Grails RabbitMQ plugin.
  */
-class RabbitQueueBuilder {
+class QueueBuilder {
     /**
      * Connection manager.
      */
@@ -51,11 +51,11 @@ class RabbitQueueBuilder {
         Closure config = grailsApplication.config.rabbitmq.queues
 
         // Create the queue builder
-        QueueBuilder queueBuilder = new QueueBuilder()
+        QueueBuilderDelegate queueBuilderDelegate = new QueueBuilderDelegate()
 
         // Run the config
         config = config.clone()
-        config.delegate = queueBuilder
+        config.delegate = queueBuilderDelegate
         config.resolveStrategy = Closure.DELEGATE_FIRST
         config()
     }
@@ -63,11 +63,11 @@ class RabbitQueueBuilder {
     /**
      * Class that does the work of building exchanges and queues.
      */
-    private class QueueBuilder {
+    private class QueueBuilderDelegate {
         /**
          * Logger
          */
-        private static Logger log = Logger.getLogger(RabbitQueueBuilder)
+        private static Logger log = Logger.getLogger(QueueBuilder)
 
         /**
          * Current exchange marker
@@ -330,7 +330,7 @@ class RabbitQueueBuilder {
         }
 
         private ConnectionContext getConnection(String name) {
-            return RabbitQueueBuilder.this.connectionManager.getConnection(name)
+            return QueueBuilder.this.connectionManager.getConnection(name)
         }
     }
 }
