@@ -47,119 +47,109 @@ class RabbitMessageBuilder {
     public static final int DEFAULT_TIMEOUT = 5000
 
     /**
-     * Logger
-     */
-    protected static Logger log = Logger.getLogger(RabbitMessageBuilder)
-
-    /**
      * Rabbit message publisher.
      */
     protected RabbitMessagePublisher rabbitMessagePublisher
 
     /**
-     * Rabbit context.
-     */
-    RabbitContext rabbitContext
-
-    /**
      * Channel to publish messages through.
      */
-    Channel channel
+    public Channel channel
 
     /**
      * Routing key to send the message to.
      */
-    String routingKey = ''
+    public String routingKey = ''
 
     /**
      * Exchange to send the message to.
      */
-    String exchange = ''
+    public String exchange = ''
 
     /**
      * RPC timeout, in milliseconds.
      */
-    int timeout = DEFAULT_TIMEOUT
+    public int timeout = DEFAULT_TIMEOUT
 
     /**
      * Message body.
      */
-    Object body
+    public Object body
 
     /**
      * Message headers.
      */
-    Map headers = [:]
+    public Map headers = [:]
 
     /**
      * Content type.
      */
-    String contentType
+    public String contentType
 
     /**
      * Content encoding.
      */
-    String contentEncoding
+    public String contentEncoding
 
     /**
      * Delivery mode (1 == non-persistent, 2 == persistent)
      */
-    int deliveryMode
+    public int deliveryMode
 
     /**
      * Priority.
      */
-    int priority
+    public int priority
 
     /**
      * Correlation id.
      */
-    String correlationId
+    public String correlationId
 
     /**
      * Queue to reply to.
      */
-    String replyTo
+    public String replyTo
 
     /**
      * Message expiration.
      */
-    String expiration
+    public String expiration
 
     /**
      * Message ID.
      */
-    String messageId
+    public String messageId
 
     /**
      * Message timestamp.
      */
-    Calendar timestamp
+    public Calendar timestamp
 
     /**
      * Message type name.
      */
-    String type
+    public String type
 
     /**
      * User ID.
      */
-    String userId
+    public String userId
 
     /**
      * Application ID.
      */
-    String appId
+    public String appId
 
     /**
      * Whether to auto-convert the reply payload.
      */
-    boolean autoConvert = true
+    public boolean autoConvert = true
 
     /**
      * Connection name.
      */
-    String connection = null
+    public String connection = null
 
     /**
      * Constructor
@@ -167,10 +157,6 @@ class RabbitMessageBuilder {
      * Loads the rabbit template bean registered from the grails plugin.
      */
     public RabbitMessageBuilder(Channel channel = null) {
-        // Load the rabbit context bean
-        rabbitContext = Holders.applicationContext.getBean('rabbitContext')
-
-        // Store the channel
         this.channel = channel
     }
 
@@ -179,7 +165,7 @@ class RabbitMessageBuilder {
      *
      * @return
      */
-    protected RabbitMessageProperties buildMessageProperties() {
+    public RabbitMessageProperties buildMessageProperties() {
         RabbitMessageProperties properties = new RabbitMessageProperties()
 
         properties.appId = appId
@@ -232,18 +218,9 @@ class RabbitMessageBuilder {
      *
      * @throws IllegalArgumentException
      */
-    protected void doSend() throws IllegalArgumentException {
-        getRabbitMessagePublisher().send(buildMessageProperties())
-    }
-
-    /**
-     * Sends a message to the rabbit service.
-     *
-     * @throws IllegalArgumentException
-     */
     @Deprecated
     public void send() throws IllegalArgumentException {
-        doSend()
+        getRabbitMessagePublisher().send(buildMessageProperties())
     }
 
     /**
@@ -258,7 +235,7 @@ class RabbitMessageBuilder {
         run closure
 
         // Send the message
-        doSend()
+        getRabbitMessagePublisher().send(buildMessageProperties())
     }
 
     /**
@@ -275,7 +252,7 @@ class RabbitMessageBuilder {
         this.body = body
 
         // Send the message
-        doSend()
+        getRabbitMessagePublisher().send(buildMessageProperties())
     }
 
     /**
@@ -294,25 +271,7 @@ class RabbitMessageBuilder {
         this.body = body
 
         // Send the message
-        doSend()
-    }
-
-    /**
-     * Sends a message to the bus and waits for a reply, up to the "timeout" property.
-     *
-     * This method returns a Message object if autoConvert is set to false, or some
-     * other object type (string, list, map) if autoConvert is true.
-     *
-     * The logic for the handler is based on the RPC handler found in spring's RabbitTemplate.
-     *
-     * @throws TimeoutException
-     * @throws ShutdownSignalException
-     * @throws IOException
-     * @throws IllegalArgumentException
-     * @return
-     */
-    protected Object doRpc() throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
-        return getRabbitMessagePublisher().rpc(buildMessageProperties())
+        getRabbitMessagePublisher().send(buildMessageProperties())
     }
 
     /**
@@ -326,7 +285,7 @@ class RabbitMessageBuilder {
      */
     @Deprecated
     public Object rpc() throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
-        return doRpc()
+        return getRabbitMessagePublisher().rpc(buildMessageProperties())
     }
 
     /**
@@ -348,7 +307,7 @@ class RabbitMessageBuilder {
         run closure
 
         // Send the message
-        return doRpc()
+        return getRabbitMessagePublisher().rpc(buildMessageProperties())
     }
 
     /**
@@ -372,7 +331,7 @@ class RabbitMessageBuilder {
         this.body = body
 
         // Send the message
-        return doRpc()
+        return getRabbitMessagePublisher().rpc(buildMessageProperties())
     }
 
     /**
@@ -398,138 +357,7 @@ class RabbitMessageBuilder {
         this.body = body
 
         // Send the message
-        doRpc()
-    }
-
-    /**
-     * Creates the message properties.
-     *
-     */
-    protected AMQP.BasicProperties buildProperties() {
-        // Create message properties
-        AMQP.BasicProperties.Builder builder = new AMQP.BasicProperties.Builder()
-
-        // Set any headers
-        builder.headers(headers)
-
-        // Content type
-        if (contentType) {
-            builder.contentType(contentType)
-        }
-
-        // Content encoding
-        if (contentEncoding) {
-            builder.contentEncoding(contentEncoding)
-        }
-
-        // Delivery mode
-        if (deliveryMode in [1, 2]) {
-            builder.deliveryMode(deliveryMode)
-        }
-
-        // Set priority
-        if (priority) {
-            builder.priority(priority)
-        }
-
-        // Set correlation id
-        if (correlationId) {
-            builder.correlationId(correlationId)
-        }
-
-        // Reply-to
-        if (replyTo) {
-            builder.replyTo(replyTo)
-        }
-
-        // Expiration
-        if (expiration) {
-            builder.expiration(expiration)
-        }
-
-        // Message ID
-        if (messageId) {
-            builder.messageId(messageId)
-        }
-
-        // Timestamp
-        if (timestamp) {
-            builder.timestamp(timestamp.getTime())
-        }
-
-        // Type
-        if (type) {
-            builder.type(type)
-        }
-
-        // User ID
-        if (userId) {
-            builder.userId(userId)
-        }
-
-        // Application ID
-        if (appId) {
-            builder.appId(appId)
-        }
-
-        return builder.build()
-    }
-
-    /**
-     * Attempts to convert an object to a byte array.
-     *
-     * @param Source object that needs conversion.
-     * @return
-     */
-    protected byte[] convertMessageToBytes(Object source) {
-        if (source instanceof byte[]) {
-            return null
-        }
-        for (MessageConverter converter in rabbitContext.messageConverters) {
-            if (!converter.type.isAssignableFrom(source.getClass()) || !converter.canConvertFrom()) {
-                continue
-            }
-
-            try {
-                byte[] converted = converter.convertFrom(source)
-                if (converted != null) {
-                    return converted
-                }
-            }
-            catch (Exception e) {
-                log.error("unhandled exception caught from message converter ${converter.class.simpleName}", e)
-            }
-        }
-
-        // TODO: make a custom exception
-        throw new Exception("unable to find a converter for type ${source.getClass().name}")
-    }
-
-    /**
-     * Attempts to convert the given byte array to another type via the message converters.
-     *
-     * @param input Byte array to convert.
-     * @return An object converted from a byte array, or the byte array if no conversion could be done.
-     */
-    protected Object convertMessageFromBytes(byte[] input) {
-        for (MessageConverter converter in rabbitContext.messageConverters) {
-            // Skip if the converter doesn't support converting from bytes
-            if (!converter.canConvertTo()) {
-                continue
-            }
-
-            try {
-                Object converted = converter.convertTo(input)
-                if (converted != null) {
-                    return converted
-                }
-            }
-            catch (Exception e) {
-                log.error("unhandled exception caught from message converter ${converter.class.simpleName}", e)
-            }
-        }
-
-        return input
+        return getRabbitMessagePublisher().rpc(buildMessageProperties())
     }
 
     /**
