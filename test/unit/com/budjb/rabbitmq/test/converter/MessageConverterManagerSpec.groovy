@@ -108,7 +108,7 @@ class MessageConverterManagerSpec extends Specification {
         setup:
         ExpandoMockConverter customConverter = new ExpandoMockConverter()
         GrailsClass grailsClass = Mock(GrailsClass)
-        grailsClass.getFullName() >> "ExpandoMockConverter"
+        grailsClass.getPropertyName() >> "ExpandoMockConverter"
         applicationContext.getBean("ExpandoMockConverter") >> customConverter
         grailsApplication.getArtefacts('MessageConverter') >> [grailsClass]
 

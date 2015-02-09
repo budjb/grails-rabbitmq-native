@@ -125,9 +125,9 @@ class ConsumerManagerSpec extends Specification {
     def 'Test load/registering of consumer artefacts'() {
         setup:
         GrailsClass artefact1 = Mock(GrailsClass)
-        artefact1.getFullName() >> 'consumer1'
+        artefact1.getPropertyName() >> 'consumer1'
         GrailsClass artefact2 = Mock(GrailsClass)
-        artefact2.getFullName() >> 'consumer2'
+        artefact2.getPropertyName() >> 'consumer2'
         Consumer1 consumer1 = new Consumer1()
         Consumer2 consumer2 = new Consumer2()
         applicationContext.getBean('consumer1') >> consumer1

@@ -175,7 +175,7 @@ class MessageConverterManager implements ApplicationContextAware {
     public void load() {
         // Register application-provided converters
         grailsApplication.getArtefacts('MessageConverter').each {
-            Object consumer = applicationContext.getBean(it.fullName)
+            Object consumer = applicationContext.getBean(it.propertyName)
             registerMessageConverter(consumer)
         }
 

@@ -158,14 +158,16 @@ class RabbitmqNativeGrailsPlugin {
 
         // Create application-provided converter beans
         application.messageConverterClasses.each { GrailsClass clazz ->
-            "${clazz.fullName}"(clazz.clazz) { bean ->
+            "${clazz.propertyName}"(clazz.clazz) { bean ->
                 bean.autowire = true
             }
         }
 
         // Create consumer beans
         application.messageConsumerClasses.each { GrailsClass clazz ->
-            "${clazz.fullName}"(clazz.clazz) { bean ->
+            log.debug(clazz.shortName)
+            log.debug(clazz.propertyName)
+            "${clazz.propertyName}"(clazz.clazz) { bean ->
                 bean.autowire = true
             }
         }

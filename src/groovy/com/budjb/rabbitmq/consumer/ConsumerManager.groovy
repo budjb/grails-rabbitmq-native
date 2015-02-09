@@ -81,7 +81,7 @@ class ConsumerManager implements ApplicationContextAware {
     public void registerConsumer(Object consumer) {
         // If the consumer is a grails artefact class, get its bean
         if (consumer instanceof GrailsClass) {
-            consumer = applicationContext.getBean(consumer.fullName)
+            consumer = applicationContext.getBean(consumer.propertyName)
         }
 
         // Create the adapter

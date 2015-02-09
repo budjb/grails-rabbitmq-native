@@ -24,7 +24,11 @@ rabbitmq {
     }
     queues = {
         connection('connection1') {
-            queue(name: 'reporting', durable: false)
+            queue(name: 'reporting', autoDelete: true)
+            exchange(name: 'topic-exchange', type: 'topic', autoDelete: true) {
+                queue(name: 'topic-queue-1', autoDelete: true, binding: 'com.budjb.#')
+                queue(name: 'topic-queue-2', autoDelete: true, binding: 'com.budjb.rabbitmq')
+            }
         }
         connection('connection2') {
 

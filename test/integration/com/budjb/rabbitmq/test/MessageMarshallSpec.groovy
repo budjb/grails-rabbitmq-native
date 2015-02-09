@@ -12,10 +12,6 @@ class MessageMarshallSpec extends IntegrationSpec {
     ReportingConsumer reportingConsumer
     GrailsApplication grailsApplication
 
-    def setup() {
-        reportingConsumer = grailsApplication.mainContext.getBean('com.budjb.rabbitmq.test.ReportingConsumer')
-    }
-
     def cleanup() {
         reportingConsumer.lastMessage = null
     }
