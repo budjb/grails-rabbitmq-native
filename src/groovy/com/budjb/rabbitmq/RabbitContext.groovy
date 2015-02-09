@@ -1,11 +1,11 @@
 /*
- * Copyright 2013-2014 Bud Byrd
+ * Copyright 2015 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,210 +15,119 @@
  */
 package com.budjb.rabbitmq
 
-import com.budjb.rabbitmq.exception.InvalidConfigurationException
-import com.budjb.rabbitmq.exception.MissingConfigurationException
-import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.commons.GrailsClass
+import org.springframework.context.ApplicationContext
+
+import com.budjb.rabbitmq.connection.ConnectionContext
+import com.budjb.rabbitmq.connection.ConnectionManager
+import com.budjb.rabbitmq.consumer.ConsumerManager
+import com.budjb.rabbitmq.converter.*
+
 import com.rabbitmq.client.Channel
-import com.rabbitmq.client.Connection
-import com.rabbitmq.client.ConnectionFactory
 
-class RabbitContext {
+public interface RabbitContext {
     /**
-     * Grails application bean
+     * Loads the configuration and registers any consumers or converters.
      */
-    GrailsApplication grailsApplication
+    public void load()
 
     /**
-     * Logger
+     * Starts the RabbitMQ system. This includes connecting to any configured
+     * RabbitMQ brokers and setting up any consumer channels.
      */
-    Logger log = Logger.getLogger(this.getClass())
+    public void start()
 
     /**
-     * List of current connection contexts.
+     * Starts the RabbitMQ system. This includes connecting to any configured
+     * RabbitMQ brokers and optionally setting up any consumer channels.
+     *
+     * @param skipConsumers Whether to skip connecting consumer channels.
      */
-    protected List<ConnectionContext> connections = new ArrayList<ConnectionContext>()
+    public void start(boolean skipConsumers)
 
     /**
-     * A list of registered message converters.
+     * Disconnects all consumer channels and closes any open RabbitMQ broker connections.
      */
-    public List<MessageConverter> messageConverters = new ArrayList<MessageConverter>()
+    public void stop()
 
     /**
-     * Loads and initializes the configuration.
+     * Stops the RabbitMQ service, reloads configuration, and starts services again.
      */
-    public void loadConfiguration() {
-        // Check for the configuration
-        if (!grailsApplication.config.rabbitmq?.connection) {
-            if (grailsApplication.config.rabbitmq?.connectionFactory) {
-                log.warn("An unsupported legacy config was found. Please refer to the documentation for proper configuration (http://budjb.github.io/grails-rabbitmq-native/doc/manual/)")
-            }
-            throw new MissingConfigurationException("unable to start application because the RabbitMQ connection configuration was not found")
-        }
-
-        // Load the configuration
-        connections = ConnectionBuilder.loadConnections(grailsApplication.config.rabbitmq.connection)
-
-        // Ensure we have at least one connection
-        if (connections.size() == 0) {
-            throw new InvalidConfigurationException("no RabbitMQ connections were configured")
-        }
-
-        // Ensure we don't have more than one default connection
-        if (connections.findAll { it.isDefault == true }.size() > 1) {
-            throw new InvalidConfigurationException("more than one default RabbitMQ server connections were configured as default")
-        }
-    }
+    public void restart()
 
     /**
-     * Connects to each configured RabbitMQ broker.
-     */
-    public void start() {
-        connections*.openConnection()
-    }
-
-    /**
-     * Starts the individual consumers.
-     */
-    public void startConsumers() {
-        connections*.startConsumers()
-    }
-
-    /**
-     * Reloads message consumers, but leaves the connections intact.
-     */
-    public void restartConsumers() {
-        // Close the existing channels
-        stopConsumers()
-
-        // Start the channels again
-        startConsumers()
-    }
-
-    /**
-     * Closes any active channels and the connection to the RabbitMQ server.
-     */
-    public void stopConsumers() {
-        connections*.stopConsumers()
-    }
-
-    /**
-     * Closes all active channels and disconnects from the RabbitMQ server.
-     */
-    public void stop() {
-        // Stop consumers
-        stopConsumers()
-
-        // Disconnect
-        connections*.closeConnection()
-        connections.clear()
-
-        // Clear message converters
-        messageConverters.clear()
-    }
-
-    /**
-     * Disconnects and completely restarts the connection to the RabbitMQ server.
-     */
-    public void restart() {
-        stop()
-        loadConfiguration()
-        start()
-        startConsumers()
-    }
-
-    /**
-     * Creates the connection to the RabbitMQ server.
-     */
-    protected void connect() {
-        connections*.openConnection()
-    }
-
-    /**
-     * Registers a message converter against the rabbit context.
+     * Registers a message converter.
      *
      * @param converter
      */
-    public void registerMessageConverter(MessageConverter converter) {
-        log.debug("registering message converter '${converter.class.simpleName}' for type '${converter.type}'")
-        messageConverters << converter
-    }
+    public void registerMessageConverter(MessageConverter converter)
 
     /**
-     * Attempts to register a grails class as a consumer.
+     * Registers a consumer.
      *
      * @param candidate
-     * @return
      */
-    public boolean registerConsumer(DefaultGrailsMessageConsumerClass candidate) {
-        // Validate the consumer configuration
-        if (!RabbitConsumer.isConsumer(candidate)) {
-            log.warn("not starting '${candidate.shortName}' as a RabbitMQ message consumer because it is not properly configured")
-            return false
-        }
-
-        // Get the proper connection
-        ConnectionContext connection = getConnection(RabbitConsumer.getConnectionName(candidate))
-
-        // If the connection wasn't found, bail out
-        if (!connection) {
-            return false
-        }
-
-        // Add the consumer to the connection
-        connection.registerConsumer(candidate)
-
-        return true
-    }
+    public void registerConsumer(Object candidate)
 
     /**
-     * Creates a new untracked channel.
-     *
-     * The caller must make sure to clean this up (channel.close()).
-     *
-     * @return
+     * Starts the consumers separately from the rest of the RabbitMQ service.
+     * This is useful for delaying the start of the RabbitMQ services.
      */
-    public Channel createChannel(String connectionName = null) {
-        // Get the requested connection
-        ConnectionContext connection = getConnection(connectionName)
-
-        if (!connection) {
-            if (!connectionName) {
-                throw new Exception("no default connection found")
-            }
-            else {
-                throw new Exception("no connection with name '${connectionName}' found")
-            }
-        }
-
-        return connection.createChannel()
-    }
+    public void startConsumers()
 
     /**
-     * Returns a connection by its name, or the default if the name is null.
+     * Creates a channel with the default connection.
      *
      * @return
      */
-    public ConnectionContext getConnection(String name = null) {
-        ConnectionContext context
+    public Channel createChannel()
 
-        if (!name) {
-            context = connections.find { it.isDefault == true }
+    /**
+     * Creates a channel with the specified connection.
+     *
+     * @return
+     */
+    public Channel createChannel(String connectionName)
 
-            if (!context) {
-                log.error("no default connection found")
-                return null
-            }
-        }
-        else {
-            context = connections.find { it.name == name }
+    /**
+     * Returns the ConnectionContext associated with the default connection.
+     *
+     * @return
+     */
+    public ConnectionContext getConnection()
 
-            if (!context) {
-                log.error("no connection with name '${name}' found")
-            }
-        }
+    /**
+     * Returns the ConnectionContext with the specified connection name.
+     *
+     * @param name
+     * @return
+     */
+    public ConnectionContext getConnection(String name)
 
-        return context
-    }
+    /**
+     * Sets the message converter manager.
+     *
+     * @param messageConverterManager
+     */
+    public void setMessageConverterManager(MessageConverterManager messageConverterManager)
+
+    /**
+     * Sets the application context.
+     */
+    public void setApplicationContext(ApplicationContext applicationContext)
+
+    /**
+     * Sets the connection manager.
+     */
+    public void setConnectionManager(ConnectionManager connectionManager)
+
+    /**
+     * Sets the rabbit consumer manager.
+     */
+    public void setConsumerManager(ConsumerManager consumerManager)
+
+    /**
+     * Sets the rabbit queue builder.
+     */
+    public void setQueueBuilder(QueueBuilder queueBuilder)
 }

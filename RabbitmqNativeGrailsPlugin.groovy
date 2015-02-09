@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 Bud Byrd
+ * Copyright 2013-2015 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import grails.util.Holders
-
 import org.apache.log4j.Logger
 
 import com.budjb.rabbitmq.RabbitContext
-import com.budjb.rabbitmq.RabbitConsumer
+import com.budjb.rabbitmq.RabbitContextImpl
+import com.budjb.rabbitmq.RabbitContextProxy
+import com.budjb.rabbitmq.RabbitMessagePublisher
+import com.budjb.rabbitmq.QueueBuilder
+import com.budjb.rabbitmq.NullRabbitContext
+
+import com.budjb.rabbitmq.connection.ConnectionManager
+import com.budjb.rabbitmq.consumer.ConsumerManager
+import com.budjb.rabbitmq.converter.MessageConverterManager
+
 import com.budjb.rabbitmq.MessageConverterArtefactHandler
 import com.budjb.rabbitmq.MessageConsumerArtefactHandler
-import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.GrailsMessageConverterClass
-import com.budjb.rabbitmq.RabbitQueueBuilder
 
 import org.codehaus.groovy.grails.commons.AbstractInjectableGrailsClass
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -33,7 +38,7 @@ class RabbitmqNativeGrailsPlugin {
     /**
      * Version of the plugin.
      */
-    def version = "2.0.11"
+    def version = "3.0.0"
 
     /**
      * The version or versions of Grails the plugin is designed for.
@@ -86,6 +91,16 @@ class RabbitmqNativeGrailsPlugin {
     def loadAfter = ['controllers', 'services', 'domains', 'hibernate', 'spring-security-core']
 
     /**
+     * Excluded files.
+     */
+    def pluginExcludes = [
+        'test/**',
+        'grails-app/rabbit-consumers/**',
+        'src/groovy/com/budjb/rabbitmq/test/**',
+        'src/docs/**'
+    ]
+
+    /**
      * Resources this plugin should monitor changes for.
      */
     def watchedResources = [
@@ -112,37 +127,55 @@ class RabbitmqNativeGrailsPlugin {
      * Spring actions.
      */
     def doWithSpring = {
-        // Do nothing if the plugin's disabled.
-        if (application.config.rabbitmq.enabled == false) {
-            log.warn("The rabbitmq-native plugin has been disabled by the application's configuration.")
-            return
-        }
+        // Create the null rabbit context bean
+        'nullRabbitContext'(NullRabbitContext)
 
-        // Setup the rabbit context
-        "rabbitContext"(RabbitContext) { bean ->
-            bean.scope = 'singleton'
+        // Create the live rabbit context bean
+        'rabbitContextImpl'(RabbitContextImpl) { bean ->
             bean.autowire = true
         }
 
-        // Configure built-in converters
-        "${StringMessageConverter.name}"(StringMessageConverter)
-        "${GStringMessageConverter.name}"(GStringMessageConverter)
-        "${IntegerMessageConverter.name}"(IntegerMessageConverter)
-        "${MapMessageConverter.name}"(MapMessageConverter)
-        "${ListMessageConverter.name}"(ListMessageConverter)
+        // Create the proxy rabbit context bean
+        'rabbitContext'(RabbitContextProxy) {
+            if (application.config.rabbitmq.enabled == false) {
+                log.warn("The rabbitmq-native plugin has been disabled by the application's configuration.")
+                target = ref('nullRabbitContext')
+            }
+            else {
+                target = ref('rabbitContextImpl')
+            }
+        }
 
-        // Configure application-provided converters
+        "connectionManager"(ConnectionManager) { bean ->
+            bean.autowire = true
+        }
+
+        "queueBuilder"(QueueBuilder) { bean ->
+            bean.autowire = true
+        }
+
+        "messageConverterManager"(MessageConverterManager) { bean ->
+            bean.autowire = true
+        }
+
+        "consumerManager"(ConsumerManager) { bean ->
+            bean.autowire = true
+        }
+
+        "rabbitMessagePublisher"(RabbitMessagePublisher) { bean ->
+            bean.autowire = true
+        }
+
+        // Create application-provided converter beans
         application.messageConverterClasses.each { GrailsClass clazz ->
-            "${clazz.fullName}"(clazz.clazz) { bean ->
-                bean.scope = 'singleton'
+            "${clazz.propertyName}"(clazz.clazz) { bean ->
                 bean.autowire = true
             }
         }
 
-        // Configure consumers
+        // Create consumer beans
         application.messageConsumerClasses.each { GrailsClass clazz ->
-            "${clazz.fullName}"(clazz.clazz) { bean ->
-                bean.scope = 'singleton'
+            "${clazz.propertyName}"(clazz.clazz) { bean ->
                 bean.autowire = true
             }
         }
@@ -157,7 +190,10 @@ class RabbitmqNativeGrailsPlugin {
             return
         }
 
-        restartRabbitContext(application, applicationContext.getBean('rabbitContext'))
+        // Load and start the rabbit service, without starting consumers.
+        RabbitContext rabbitContext = applicationContext.getBean('rabbitContext')
+        rabbitContext.load()
+        rabbitContext.start(true)
     }
 
     /**
@@ -180,15 +216,13 @@ class RabbitmqNativeGrailsPlugin {
             GrailsMessageConverterClass converterClass = application.addArtefact(MessageConverterArtefactHandler.TYPE, event.source)
             beans {
                 "${converterClass.propertyName}"(converterClass.clazz) { bean ->
-                    bean.scope = 'singleton'
                     bean.autowire = true
                 }
             }.registerBeans(event.ctx)
 
             // Restart the rabbit context
             RabbitContext context = event.ctx.getBean('rabbitContext')
-            restartRabbitContext(application, context)
-            context.startConsumers()
+            context.restart()
             return
         }
 
@@ -198,13 +232,13 @@ class RabbitmqNativeGrailsPlugin {
             GrailsMessageConverterClass consumerClass = application.addArtefact(MessageConsumerArtefactHandler.TYPE, event.source)
             beans {
                 "${consumerClass.propertyName}"(consumerClass.clazz) { bean ->
-                    bean.scope = 'singleton'
                     bean.autowire = true
                 }
             }.registerBeans(event.ctx)
 
             // Restart the consumers
-            restartConsumers(application, event.ctx.getBean('rabbitContext'))
+            RabbitContext context = event.ctx.getBean('rabbitContext')
+            context.restart()
             return
         }
     }
@@ -219,103 +253,6 @@ class RabbitmqNativeGrailsPlugin {
         }
 
         RabbitContext context = event.ctx.getBean('rabbitContext')
-        restartRabbitContext(application, context)
-        context.startConsumers()
-    }
-
-    /**
-     * Restarts the rabbit context.
-     *
-     * @param context
-     */
-    void restartRabbitContext(GrailsApplication application, RabbitContext context) {
-        // Stop the rabbit context
-        context.stop()
-
-        // Load the configuration
-        context.loadConfiguration()
-
-        // Register message converters
-        registerConverters(application, context)
-
-        // Register consumers
-        registerConsumers(application, context)
-
-        // Start the rabbit context
-        context.start()
-
-        // Configure up exchanges and queues
-        configureQueues(application, context)
-    }
-
-    /**
-     * Configure queues based on the application's configuration.
-     *
-     * @param application
-     */
-    void configureQueues(GrailsApplication application, RabbitContext context) {
-        // Skip if the config isn't defined
-        if (!(application.config.rabbitmq?.queues instanceof Closure)) {
-            return
-        }
-
-        // Grab the config closure
-        Closure config = application.config.rabbitmq.queues
-
-        // Create the queue builder
-        RabbitQueueBuilder queueBuilder = new RabbitQueueBuilder(context)
-
-        // Run the config
-        config = config.clone()
-        config.delegate = queueBuilder
-        config.resolveStrategy = Closure.DELEGATE_FIRST
-        config()
-    }
-
-    /**
-     * Restarts the rabbit consumers.
-     *
-     * @param context
-     */
-    void restartConsumers(GrailsApplication application, RabbitContext context) {
-        // Stop the consumers
-        context.stopConsumers()
-
-        // Register consumers again
-        registerConsumers(application, context)
-
-        // Start the consumers
-        context.startConsumers()
-    }
-
-    /**
-     * Registers consumers against the rabbit context.
-     *
-     * @param context
-     */
-    void registerConsumers(GrailsApplication application, RabbitContext context) {
-        application.messageConsumerClasses.each { GrailsClass clazz ->
-            context.registerConsumer(clazz)
-        }
-    }
-
-    /**
-     * Registers message converters against the rabbit context.
-     *
-     * @param context
-     */
-    void registerConverters(GrailsApplication application, RabbitContext context) {
-        // Register application-provided converters
-        application.messageConverterClasses.each { GrailsClass clazz ->
-            context.registerMessageConverter(application.mainContext.getBean(clazz.fullName))
-        }
-
-        // Register built-in message converters
-        // Note: the order matters, we want string to be the last one
-        context.registerMessageConverter(application.mainContext.getBean("${IntegerMessageConverter.name}"))
-        context.registerMessageConverter(application.mainContext.getBean("${MapMessageConverter.name}"))
-        context.registerMessageConverter(application.mainContext.getBean("${ListMessageConverter.name}"))
-        context.registerMessageConverter(application.mainContext.getBean("${GStringMessageConverter.name}"))
-        context.registerMessageConverter(application.mainContext.getBean("${StringMessageConverter.name}"))
+        context.restart()
     }
 }

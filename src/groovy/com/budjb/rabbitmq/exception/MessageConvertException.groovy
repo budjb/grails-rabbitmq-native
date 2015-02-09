@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 Bud Byrd
+ * Copyright 2013-2015 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,11 @@
 package com.budjb.rabbitmq.exception
 
 class MessageConvertException extends Exception {
-    public MessageConvertException(Class clazz) {
-        super("unable to convert class ${clazz} to a byte array")
+    public MessageConvertException(String message) {
+        super(message)
+    }
+
+    public MessageConvertException(String message, Throwable cause) {
+        super(message, cause)
     }
 }

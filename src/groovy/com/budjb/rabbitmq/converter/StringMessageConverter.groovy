@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 Bud Byrd
+ * Copyright 2013-2015 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 package com.budjb.rabbitmq.converter
-
-import com.budjb.rabbitmq.MessageConverter
 
 class StringMessageConverter extends MessageConverter<String> {
     @Override

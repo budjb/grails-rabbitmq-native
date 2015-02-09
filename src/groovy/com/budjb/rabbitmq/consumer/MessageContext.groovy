@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 Bud Byrd
+ * Copyright 2013-2015 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.budjb.rabbitmq
+package com.budjb.rabbitmq.consumer
 
-import com.rabbitmq.client.AMQP
+import com.budjb.rabbitmq.connection.ConnectionContext
+import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope
 
@@ -38,7 +39,7 @@ class MessageContext {
     /**
      * Message properties
      */
-    AMQP.BasicProperties properties
+    BasicProperties properties
 
     /**
      * Raw message body
