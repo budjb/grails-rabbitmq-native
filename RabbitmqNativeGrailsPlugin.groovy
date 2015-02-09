@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 Bud Byrd
+ * Copyright 2013-2015 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ class RabbitmqNativeGrailsPlugin {
     /**
      * Version of the plugin.
      */
-    def version = "2.0.11"
+    def version = "3.0.0"
 
     /**
      * The version or versions of Grails the plugin is designed for.
@@ -89,6 +89,16 @@ class RabbitmqNativeGrailsPlugin {
      * Load order.
      */
     def loadAfter = ['controllers', 'services', 'domains', 'hibernate', 'spring-security-core']
+
+    /**
+     * Excluded files.
+     */
+    def pluginExcludes = [
+        'test/**',
+        'grails-app/rabbit-consumers/**',
+        'src/groovy/com/budjb/rabbitmq/test/**',
+        'src/docs/**'
+    ]
 
     /**
      * Resources this plugin should monitor changes for.
@@ -165,8 +175,6 @@ class RabbitmqNativeGrailsPlugin {
 
         // Create consumer beans
         application.messageConsumerClasses.each { GrailsClass clazz ->
-            log.debug(clazz.shortName)
-            log.debug(clazz.propertyName)
             "${clazz.propertyName}"(clazz.clazz) { bean ->
                 bean.autowire = true
             }

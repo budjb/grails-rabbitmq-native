@@ -6,6 +6,77 @@ import com.rabbitmq.client.ConnectionFactory
 import spock.lang.Specification
 
 class ConnectionConfigurationSpec extends Specification {
+    def 'Test default values when bad values are provided'() {
+        setup:
+        Map properties = [
+            'host': 'test-host',
+            'username': 'test-user',
+            'password': 'test-password',
+            'port': 'foobar'
+        ]
+
+        when:
+        ConnectionConfiguration configuration = new ConnectionConfiguration(properties)
+
+        then:
+        configuration.getPort() == 5672
+    }
+
+    def 'Test individual assertions for missing required values'() {
+        setup:
+        ConnectionConfiguration configuration = new ConnectionConfiguration()
+        configuration.setPort(0)
+        configuration.setVirtualHost('')
+        configuration.setThreads(-1)
+
+        when:
+        configuration.validateConfiguration()
+
+        then:
+        thrown AssertionError
+
+        when:
+        configuration.setHost('test-host')
+        configuration.validateConfiguration()
+
+        then:
+        thrown AssertionError
+
+        when:
+        configuration.setUsername('test-username')
+        configuration.validateConfiguration()
+
+        then:
+        thrown AssertionError
+
+        when:
+        configuration.setPassword('test-password')
+        configuration.validateConfiguration()
+
+        then:
+        thrown AssertionError
+
+        when:
+        configuration.setVirtualHost('test-virtualHost')
+        configuration.validateConfiguration()
+
+        then:
+        thrown AssertionError
+
+        when:
+        configuration.setPort(5672)
+        configuration.validateConfiguration()
+
+        then:
+        thrown AssertionError
+
+        when:
+        configuration.setThreads(5)
+
+        then:
+        configuration.validateConfiguration()
+    }
+
     def 'Test default configuration options'() {
         setup:
         Map properties = [

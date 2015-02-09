@@ -118,7 +118,7 @@ class ConnectionConfiguration {
     /**
      * Validates that we have the minimum of information needed to connect to RabbitMQ.
      */
-    private void validateConfiguration() {
+    public void validateConfiguration() {
         assert host != null, "RabbitMQ connection host configuration is missing"
         assert username != null, "RabbitMQ connection username is missing"
         assert password != null, "RabbitMQ connection password is missing"

@@ -34,7 +34,9 @@ class ConnectionContextSpec extends Specification {
         ConnectionConfiguration connectionConfiguration = new ConnectionConfiguration([
             'host': 'localhost',
             'username': 'guest',
-            'password': 'guest'
+            'password': 'guest',
+            'ssl': true,
+            'threads': 5
         ])
         ConnectionFactory connectionFactory = Mock(ConnectionFactory)
         ConnectionContext connectionContext = new ConnectionContext(connectionConfiguration)
@@ -146,6 +148,12 @@ class ConnectionContextSpec extends Specification {
 
         then:
         1 * connection.close()
+
+        when:
+        connectionContext.closeConnection()
+
+        then:
+        0 * connection.close()
     }
 
     def 'Validate registerConsumer() behavior'() {

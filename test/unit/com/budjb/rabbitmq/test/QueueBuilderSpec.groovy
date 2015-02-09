@@ -24,7 +24,83 @@ class QueueBuilderSpec extends Specification {
         queueBuilder.connectionManager = connectionManager
     }
 
-    def 'Ensure setConnectionManager(ConnectiomManager) sets the property correctly'() {
+    def 'Ensure no further interactions if the configuration is not a closure'() {
+        setup:
+        grailsApplication.getConfig() >> new ConfigObject()
+
+        when:
+        queueBuilder.configureQueues()
+
+        then:
+        1 * grailsApplication.getConfig() >> new ConfigObject()
+        0 * _
+    }
+
+    def 'If a queue is missing a name, an exception is thrown'() {
+        setup:
+        ConfigObject configuration = new ConfigObject()
+        configuration.putAll([
+            'rabbitmq': [
+                'queues': {
+                    queue(durable: true)
+                }
+            ]
+        ])
+        grailsApplication.getConfig() >> configuration
+        Channel channel = Mock(Channel)
+        channel.isOpen() >> true
+        ConnectionContext connectionContext = Mock(ConnectionContext)
+        connectionContext.createChannel() >> channel
+        connectionManager.getConnection(_) >> connectionContext
+
+        when:
+        queueBuilder.configureQueues()
+
+        then:
+        thrown RuntimeException
+    }
+
+    def 'If a queue\'s connection is not found, an exception is thrown'() {
+        setup:
+        ConfigObject configuration = new ConfigObject()
+        configuration.putAll([
+            'rabbitmq': [
+                'queues': {
+                    queue(name: 'test-queue', connection: 'test-connection', durable: true)
+                }
+            ]
+        ])
+        grailsApplication.getConfig() >> configuration
+        connectionManager.getConnection(_) >> null
+
+        when:
+        queueBuilder.configureQueues()
+
+        then:
+        thrown RuntimeException
+    }
+
+    def 'If the default connection is not found, an exception is thrown'() {
+        setup:
+        ConfigObject configuration = new ConfigObject()
+        configuration.putAll([
+            'rabbitmq': [
+                'queues': {
+                    queue(name: 'test-queue', durable: true)
+                }
+            ]
+        ])
+        grailsApplication.getConfig() >> configuration
+        connectionManager.getConnection(_) >> null
+
+        when:
+        queueBuilder.configureQueues()
+
+        then:
+        thrown RuntimeException
+    }
+
+    def 'Ensure setConnectionManager(ConnectionManager) sets the property correctly'() {
         setup:
         ConnectionManager connectionManager = Mock(ConnectionManager)
 

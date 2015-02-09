@@ -2,10 +2,10 @@ package com.budjb.rabbitmq.test
 
 import com.budjb.rabbitmq.consumer.MessageContext
 
-class ReportingConsumer {
+class SpecificTopicConsumer {
     static rabbitConfig = [
         connection: 'connection1',
-        queue: 'reporting'
+        queue: 'topic-queue-specific'
     ]
 
     public Map lastMessage

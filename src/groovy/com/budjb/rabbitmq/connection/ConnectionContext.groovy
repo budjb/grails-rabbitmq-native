@@ -84,12 +84,7 @@ class ConnectionContext {
      */
     public void openConnection() {
         // Log it
-        if (configuration.getVirtualHost()) {
-            log.info("connecting to RabbitMQ server '${configuration.getName()}' at '${configuration.getHost()}:${configuration.getPort()}' on virtual host '${configuration.getVirtualHost()}'")
-        }
-        else {
-            log.info("connecting to RabbitMQ server '${configuration.getName()}' at '${configuration.getHost()}:${configuration.getPort()}'")
-        }
+        log.info("connecting to RabbitMQ server '${configuration.getName()}' at '${configuration.getHost()}:${configuration.getPort()}' on virtual host '${configuration.getVirtualHost()}'")
 
         // Create the connection factory
         ConnectionFactory factory = getConnectionFactory()

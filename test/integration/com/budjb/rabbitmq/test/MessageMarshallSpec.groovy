@@ -1,29 +1,14 @@
 package com.budjb.rabbitmq.test
 
-import grails.plugin.spock.IntegrationSpec
-
 import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.junit.Test
 
 import com.budjb.rabbitmq.RabbitMessagePublisher
 
-class MessageMarshallSpec extends IntegrationSpec {
-    RabbitMessagePublisher rabbitMessagePublisher
+class MessageMarshallSpec extends MessageConsumerIntegrationTest {
     ReportingConsumer reportingConsumer
-    GrailsApplication grailsApplication
 
-    def cleanup() {
+    def setup() {
         reportingConsumer.lastMessage = null
-    }
-
-    def waitUntilMessageReceived(int timeout) {
-        long start = System.currentTimeMillis()
-        while (System.currentTimeMillis() < start + timeout) {
-            if (reportingConsumer.lastMessage != null) {
-                break
-            }
-            sleep(1000)
-        }
     }
 
     def 'If a String is sent to the consumer, ensure the correct handler is called'() {
@@ -32,13 +17,13 @@ class MessageMarshallSpec extends IntegrationSpec {
             routingKey = 'reporting'
             body = "foobar"
         }
-        waitUntilMessageReceived(30000)
+        Map received = waitUntilMessageReceived(30000) { reportingConsumer.lastMessage }
 
         then:
-        reportingConsumer.lastMessage != null
-        reportingConsumer.lastMessage.type == 'String'
-        reportingConsumer.lastMessage.body.getClass() == String
-        reportingConsumer.lastMessage.body == 'foobar'
+        received != null
+        received.type == 'String'
+        received.body.getClass() == String
+        received.body == 'foobar'
     }
 
     def 'If an Integer is sent to the consumer, ensure the correct handler is called'() {
@@ -47,13 +32,13 @@ class MessageMarshallSpec extends IntegrationSpec {
             routingKey = 'reporting'
             body = 1234
         }
-        waitUntilMessageReceived(30000)
+        Map received = waitUntilMessageReceived(30000) { reportingConsumer.lastMessage }
 
         then:
-        reportingConsumer.lastMessage != null
-        reportingConsumer.lastMessage.type == 'Integer'
-        reportingConsumer.lastMessage.body.getClass() == Integer
-        reportingConsumer.lastMessage.body == 1234
+        received != null
+        received.type == 'Integer'
+        received.body.getClass() == Integer
+        received.body == 1234
     }
 
     def 'If a List is sent to the consumer, ensure the correct handler is called'() {
@@ -62,13 +47,13 @@ class MessageMarshallSpec extends IntegrationSpec {
             routingKey = 'reporting'
             body = ["foo", "bar"]
         }
-        waitUntilMessageReceived(30000)
+        Map received = waitUntilMessageReceived(30000) { reportingConsumer.lastMessage }
 
         then:
-        reportingConsumer.lastMessage != null
-        reportingConsumer.lastMessage.type == 'List'
-        reportingConsumer.lastMessage.body instanceof List
-        reportingConsumer.lastMessage.body == ["foo", "bar"]
+        received != null
+        received.type == 'List'
+        received.body instanceof List
+        received.body == ["foo", "bar"]
     }
 
     def 'If a Map is sent to the consumer, ensure the correct handler is called'() {
@@ -77,12 +62,56 @@ class MessageMarshallSpec extends IntegrationSpec {
             routingKey = 'reporting'
             body = ["foo": "bar"]
         }
-        waitUntilMessageReceived(30000)
+        Map received = waitUntilMessageReceived(30000) { reportingConsumer.lastMessage }
 
         then:
-        reportingConsumer.lastMessage != null
-        reportingConsumer.lastMessage.type == 'Map'
-        reportingConsumer.lastMessage.body instanceof Map
-        reportingConsumer.lastMessage.body == ["foo": "bar"]
+        received != null
+        received.type == 'Map'
+        received.body instanceof Map
+        received.body == ["foo": "bar"]
+    }
+
+    def 'Ensure RPC calls marshall Strings correctly'() {
+        when:
+        String response = rabbitMessagePublisher.rpc {
+            routingKey = 'reporting'
+            body = 'foobar'
+        }
+
+        then:
+        response == 'foobar'
+    }
+
+    def 'Ensure RPC calls marshall Integers correctly'() {
+        when:
+        Integer response = rabbitMessagePublisher.rpc {
+            routingKey = 'reporting'
+            body = 1234
+        }
+
+        then:
+        response == 1234
+    }
+
+    def 'Ensure RPC calls marshall Lists correctly'() {
+        when:
+        List response = rabbitMessagePublisher.rpc {
+            routingKey = 'reporting'
+            body = ["foo", "bar"]
+        }
+
+        then:
+        response == ["foo", "bar"]
+    }
+
+    def 'Ensure RPC calls marshall Maps correctly'() {
+        when:
+        Map response = rabbitMessagePublisher.rpc {
+            routingKey = 'reporting'
+            body = ["foo": "bar"]
+        }
+
+        then:
+        response == ["foo": "bar"]
     }
 }
