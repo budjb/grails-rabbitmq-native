@@ -111,10 +111,10 @@ class QueueBuilder {
                 connection = getConnection(connectionName)
                 if (!connection) {
                     if (!connectionName) {
-                        throw new Exception("no default connection found")
+                        throw new RuntimeException("no default connection found")
                     }
                     else {
-                        throw new Exception("no connection with name '${connectionName}' found")
+                        throw new RuntimeException("no connection with name '${connectionName}' found")
                     }
                 }
             }
@@ -202,10 +202,10 @@ class QueueBuilder {
                 connection = getConnection(connectionName)
                 if (!connection) {
                     if (!connectionName) {
-                        throw new Exception("no default connection found")
+                        throw new RuntimeException("no default connection found")
                     }
                     else {
-                        throw new Exception("no connection with name '${connectionName}' found")
+                        throw new RuntimeException("no connection with name '${connectionName}' found")
                     }
                 }
             }
@@ -248,19 +248,14 @@ class QueueBuilder {
          */
         void connection(String name, Closure closure) {
             // Sanity check
-            if (currentConnection) {
+            if (currentConnection != null) {
                 throw new RuntimeException("unexpected connection in the queue configuration; there is a current connection already open")
             }
 
             // Find the connection
             ConnectionContext context = getConnection(name)
             if (!context) {
-                if (!name) {
-                    throw new Exception("no default connection found")
-                }
-                else {
-                    throw new Exception("no connection with name '${name}' found")
-                }
+                throw new RuntimeException("no connection with name '${name}' found")
             }
 
             // Store the context
