@@ -5,12 +5,29 @@ log4j = {
 }
 
 rabbitmq {
-    enabled = false
-
     connection = {
-        connection(host: 'localhost', username: 'guest', password: 'guest')
+        connection(
+            host: 'localhost',
+            username: 'guest',
+            password: 'guest',
+            virtualHost: 'test1.rabbitmq.budjb.com',
+            isDefault: true,
+            name: 'connection1'
+        )
+        connection(
+            host: 'localhost',
+            username: 'guest',
+            password: 'guest',
+            virtualHost: 'test2.rabbitmq.budjb.com',
+            name: 'connection2'
+        )
     }
     queues = {
-        queue(name: 'test-queue', durable: false)
+        connection('connection1') {
+            queue(name: 'reporting', durable: false)
+        }
+        connection('connection2') {
+
+        }
     }
 }

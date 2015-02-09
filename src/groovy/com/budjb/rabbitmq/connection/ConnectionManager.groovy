@@ -213,6 +213,10 @@ class ConnectionManager {
      * @return
      */
     public Channel createChannel(String connectionName) {
+        if (connectionName == null) {
+            return createChannel()
+        }
+
         ConnectionContext connection = getConnection(connectionName)
 
         if (!connection) {

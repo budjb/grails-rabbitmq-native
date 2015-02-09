@@ -21,7 +21,8 @@ class RabbitmqNativeBootStrap {
     GrailsApplication grailsApplication
 
     def init = { servletContext ->
-        if (grailsApplication.config.rabbitmq.autoStartup == true) {
+        def autoStartup = grailsApplication.config.rabbitmq.autoStart
+        if (!(autoStartup instanceof Boolean) || autoStartup == true) {
             rabbitContext.startConsumers()
         }
     }

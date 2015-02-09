@@ -18,6 +18,7 @@ import org.apache.log4j.Logger
 import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitContextImpl
 import com.budjb.rabbitmq.RabbitContextProxy
+import com.budjb.rabbitmq.RabbitMessagePublisher
 import com.budjb.rabbitmq.QueueBuilder
 import com.budjb.rabbitmq.NullRabbitContext
 
@@ -148,6 +149,10 @@ class RabbitmqNativeGrailsPlugin {
         }
 
         "consumerManager"(ConsumerManager) { bean ->
+            bean.autowire = true
+        }
+
+        "rabbitMessagePublisher"(RabbitMessagePublisher) { bean ->
             bean.autowire = true
         }
 
