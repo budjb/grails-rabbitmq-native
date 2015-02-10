@@ -15,13 +15,11 @@
  */
 package com.budjb.rabbitmq.test
 
-import org.codehaus.groovy.grails.commons.GrailsApplication
-
 import com.budjb.rabbitmq.QueueBuilder
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.rabbitmq.client.Channel
-
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import spock.lang.Specification
 
 class QueueBuilderSpec extends Specification {

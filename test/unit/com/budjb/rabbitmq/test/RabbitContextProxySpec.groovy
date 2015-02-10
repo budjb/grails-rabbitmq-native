@@ -15,11 +15,9 @@
  */
 package com.budjb.rabbitmq.test
 
-import org.apache.commons.lang.NullArgumentException
-
 import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitContextProxy
-
+import org.apache.commons.lang.NullArgumentException
 import spock.lang.Specification
 
 class RabbitContextProxySpec extends Specification {

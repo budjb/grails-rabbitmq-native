@@ -15,16 +15,13 @@
  */
 package com.budjb.rabbitmq.test.converter
 
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.commons.GrailsClass
-
 import com.budjb.rabbitmq.converter.IntegerMessageConverter
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.converter.StringMessageConverter
-
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.codehaus.groovy.grails.commons.GrailsClass
 import org.springframework.context.ApplicationContext
-
 import spock.lang.Specification
 
 class MessageConverterManagerSpec extends Specification {

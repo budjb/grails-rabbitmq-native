@@ -15,10 +15,6 @@
  */
 package com.budjb.rabbitmq.test
 
-import org.codehaus.groovy.grails.commons.GrailsApplication
-
-import com.budjb.rabbitmq.RabbitMessagePublisher
-
 class MessageMarshallSpec extends MessageConsumerIntegrationTest {
     ReportingConsumer reportingConsumer
 

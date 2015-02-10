@@ -15,9 +15,8 @@
  */
 package com.budjb.rabbitmq.connection
 
-import org.apache.log4j.Logger
-
 import com.rabbitmq.client.ConnectionFactory
+import org.apache.log4j.Logger
 
 class ConnectionConfiguration {
     /**

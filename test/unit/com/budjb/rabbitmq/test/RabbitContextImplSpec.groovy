@@ -15,20 +15,14 @@
  */
 package com.budjb.rabbitmq.test
 
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.springframework.context.ApplicationContext
-
+import com.budjb.rabbitmq.QueueBuilder
 import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitContextImpl
-import com.budjb.rabbitmq.QueueBuilder
-import com.budjb.rabbitmq.connection.ConnectionConfiguration
-import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
-import com.budjb.rabbitmq.exception.InvalidConfigurationException
-import com.budjb.rabbitmq.exception.MissingConfigurationException
-
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 class RabbitContextImplSpec extends Specification {

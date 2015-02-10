@@ -16,7 +16,6 @@
 package com.budjb.rabbitmq.test.converter
 
 import com.budjb.rabbitmq.converter.GStringMessageConverter
-
 import spock.lang.Specification
 
 class GStringMessageConverterSpec extends Specification {

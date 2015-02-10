@@ -15,16 +15,11 @@
  */
 package com.budjb.rabbitmq.test.consumer
 
-import org.codehaus.groovy.grails.commons.GrailsApplication
-
-import spock.lang.Specification
-
-import com.budjb.rabbitmq.*
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
-import com.budjb.rabbitmq.consumer.ConsumerConfiguration
 import com.budjb.rabbitmq.consumer.ConsumerAdapter
+import com.budjb.rabbitmq.consumer.ConsumerConfiguration
 import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.consumer.MessageContext
 import com.budjb.rabbitmq.converter.*
@@ -32,7 +27,8 @@ import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope
 import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk
-
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import spock.lang.Specification
 
 class ConsumerAdapterSpec extends Specification {
     /**

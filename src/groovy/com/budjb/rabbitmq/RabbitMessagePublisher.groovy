@@ -15,24 +15,20 @@
  */
 package com.budjb.rabbitmq
 
-import groovy.lang.Closure
-
-import java.io.IOException
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
-
-import org.apache.log4j.Logger
-
-import com.budjb.rabbitmq.exception.MessageConvertException
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.MessageContext
-import com.budjb.rabbitmq.converter.*
+import com.budjb.rabbitmq.converter.MessageConverterManager
+import com.budjb.rabbitmq.exception.MessageConvertException
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
 import com.rabbitmq.client.ShutdownSignalException
+import org.apache.log4j.Logger
+
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 class RabbitMessagePublisher {
     /**

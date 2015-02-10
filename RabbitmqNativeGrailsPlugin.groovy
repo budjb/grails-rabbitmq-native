@@ -13,25 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import org.apache.log4j.Logger
 
-import com.budjb.rabbitmq.RabbitContext
-import com.budjb.rabbitmq.RabbitContextImpl
-import com.budjb.rabbitmq.RabbitContextProxy
-import com.budjb.rabbitmq.RabbitMessagePublisher
-import com.budjb.rabbitmq.QueueBuilder
-import com.budjb.rabbitmq.NullRabbitContext
-
+import com.budjb.rabbitmq.*
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
-
-import com.budjb.rabbitmq.MessageConverterArtefactHandler
-import com.budjb.rabbitmq.MessageConsumerArtefactHandler
-import com.budjb.rabbitmq.GrailsMessageConverterClass
-
-import org.codehaus.groovy.grails.commons.AbstractInjectableGrailsClass
-import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsClass
 
 class RabbitmqNativeGrailsPlugin {

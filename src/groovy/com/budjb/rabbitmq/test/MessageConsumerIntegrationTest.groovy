@@ -15,11 +15,10 @@
  */
 package com.budjb.rabbitmq.test
 
-import java.util.concurrent.TimeoutException
-
 import com.budjb.rabbitmq.RabbitMessagePublisher
-
 import grails.plugin.spock.IntegrationSpec
+
+import java.util.concurrent.TimeoutException
 
 class MessageConsumerIntegrationTest extends IntegrationSpec {
     /**

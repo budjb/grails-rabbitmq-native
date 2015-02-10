@@ -16,7 +16,6 @@
 package com.budjb.rabbitmq.test.converter
 
 import com.budjb.rabbitmq.converter.StringMessageConverter
-
 import spock.lang.Specification
 
 class StringMessageConverterSpec extends Specification {

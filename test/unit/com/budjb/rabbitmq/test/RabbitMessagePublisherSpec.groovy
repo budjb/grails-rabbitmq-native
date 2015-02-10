@@ -15,18 +15,18 @@
  */
 package com.budjb.rabbitmq.test
 
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.TimeoutException
-
-import spock.lang.Specification
-
-import com.budjb.rabbitmq.*
+import com.budjb.rabbitmq.RabbitMessageProperties
+import com.budjb.rabbitmq.RabbitMessagePublisher
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.MessageContext
 import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.exception.MessageConvertException
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk
+import spock.lang.Specification
+
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.TimeoutException
 
 class RabbitMessagePublisherSpec extends Specification {
     private static final String BASIC_PUBLISH_MESSAGE = 'Knock knock...'

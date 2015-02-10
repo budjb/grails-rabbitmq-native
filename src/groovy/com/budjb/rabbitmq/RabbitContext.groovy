@@ -15,15 +15,13 @@
  */
 package com.budjb.rabbitmq
 
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.springframework.context.ApplicationContext
-
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
-import com.budjb.rabbitmq.converter.*
-
+import com.budjb.rabbitmq.converter.MessageConverter
+import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.rabbitmq.client.Channel
+import org.springframework.context.ApplicationContext
 
 public interface RabbitContext {
     /**

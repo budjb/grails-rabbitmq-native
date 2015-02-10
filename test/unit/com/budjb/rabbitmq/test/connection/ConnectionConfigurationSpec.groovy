@@ -17,7 +17,6 @@ package com.budjb.rabbitmq.test.connection
 
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.rabbitmq.client.ConnectionFactory
-
 import spock.lang.Specification
 
 class ConnectionConfigurationSpec extends Specification {

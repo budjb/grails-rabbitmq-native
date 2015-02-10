@@ -19,13 +19,10 @@ import com.budjb.rabbitmq.consumer.ConsumerAdapter
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
-
-import groovy.util.ConfigObject
+import org.apache.log4j.Logger
 
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-
-import org.apache.log4j.Logger
 
 @SuppressWarnings("unchecked")
 class ConnectionContext {

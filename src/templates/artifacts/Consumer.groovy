@@ -1,5 +1,8 @@
 @artifact.package@import com.budjb.rabbitmq.MessageContext
 
+@
+import java.lang.Object
+
 class @artifact.name@ {
     /**
      * Consumer configuration.

@@ -19,7 +19,6 @@ import com.budjb.rabbitmq.RabbitMessageBuilder
 import com.budjb.rabbitmq.RabbitMessageProperties
 import com.budjb.rabbitmq.RabbitMessagePublisher
 import com.rabbitmq.client.Channel
-
 import spock.lang.Specification
 
 class RabbitMessageBuilderSpec extends Specification {

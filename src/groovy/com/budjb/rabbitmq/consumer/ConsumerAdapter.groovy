@@ -15,19 +15,7 @@
  */
 package com.budjb.rabbitmq.consumer
 
-import java.lang.reflect.Field
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
-import java.util.List
-import java.util.Map
-
-import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.commons.GrailsClass
-import org.springframework.context.ApplicationContext
-
 import com.budjb.rabbitmq.AutoAck
-import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitMessageBuilder
 import com.budjb.rabbitmq.RabbitMessagePublisher
 import com.budjb.rabbitmq.connection.ConnectionContext
@@ -39,7 +27,12 @@ import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
-import com.rabbitmq.client.impl.recovery.AutorecoveringChannel
+import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.commons.GrailsApplication
+
+import java.lang.reflect.Field
+import java.lang.reflect.Method
+import java.lang.reflect.Modifier
 
 @SuppressWarnings("unchecked")
 class ConsumerAdapter {

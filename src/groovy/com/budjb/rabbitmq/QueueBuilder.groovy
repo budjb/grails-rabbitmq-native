@@ -18,9 +18,6 @@ package com.budjb.rabbitmq
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.rabbitmq.client.Channel
-
-import grails.util.Holders
-
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 

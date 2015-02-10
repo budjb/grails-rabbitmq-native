@@ -20,7 +20,6 @@ import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.consumer.ConsumerAdapter
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
-
 import spock.lang.Specification
 
 class ConnectionContextSpec extends Specification {

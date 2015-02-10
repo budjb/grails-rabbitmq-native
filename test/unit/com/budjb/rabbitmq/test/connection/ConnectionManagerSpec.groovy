@@ -15,13 +15,11 @@
  */
 package com.budjb.rabbitmq.test.connection
 
-import org.codehaus.groovy.grails.commons.GrailsApplication
-
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
-
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import spock.lang.Specification
 
 class ConnectionManagerSpec extends Specification {

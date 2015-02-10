@@ -15,18 +15,15 @@
  */
 package com.budjb.rabbitmq.test.consumer
 
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.commons.GrailsClass
-import org.springframework.context.ApplicationContext
-
-import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitMessagePublisher
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerAdapter
 import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
-
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.codehaus.groovy.grails.commons.GrailsClass
+import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 class ConsumerManagerSpec extends Specification {

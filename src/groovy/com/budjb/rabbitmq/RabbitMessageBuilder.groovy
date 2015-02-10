@@ -15,29 +15,11 @@
  */
 package com.budjb.rabbitmq
 
-import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
-import com.rabbitmq.client.DefaultConsumer
-import com.rabbitmq.client.Envelope
-import com.rabbitmq.client.MessageProperties
-import com.rabbitmq.client.RpcClient
 import com.rabbitmq.client.ShutdownSignalException
-import com.rabbitmq.client.impl.recovery.AutorecoveringChannel
-
-import grails.converters.JSON
 import grails.util.Holders
-import groovy.json.JsonBuilder
-import groovy.json.JsonSlurper
 
-import org.apache.log4j.Logger
-
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
-
-import com.budjb.rabbitmq.exception.MessageConvertException
-import com.budjb.rabbitmq.consumer.MessageContext
-import com.budjb.rabbitmq.converter.*
 
 @Deprecated
 class RabbitMessageBuilder {

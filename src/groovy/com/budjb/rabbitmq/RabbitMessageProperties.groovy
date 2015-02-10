@@ -18,8 +18,6 @@ package com.budjb.rabbitmq
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.Channel
 
-import groovy.lang.Closure
-
 class RabbitMessageProperties {
     /**
      * Default timeout for RPC calls (5 seconds).

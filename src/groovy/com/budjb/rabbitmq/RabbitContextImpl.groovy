@@ -15,23 +15,15 @@
  */
 package com.budjb.rabbitmq
 
-import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
-import com.budjb.rabbitmq.converter.*
-import com.budjb.rabbitmq.exception.InvalidConfigurationException
-import com.budjb.rabbitmq.exception.MissingConfigurationException
-
+import com.budjb.rabbitmq.converter.MessageConverter
+import com.budjb.rabbitmq.converter.MessageConverterManager
+import com.rabbitmq.client.Channel
 import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.commons.GrailsClass
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
-
-import com.rabbitmq.client.Channel
-import com.rabbitmq.client.Connection
-import com.rabbitmq.client.ConnectionFactory
 
 class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
     /**

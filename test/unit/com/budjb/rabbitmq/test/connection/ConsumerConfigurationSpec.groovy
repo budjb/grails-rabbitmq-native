@@ -15,11 +15,9 @@
  */
 package com.budjb.rabbitmq.test.connection
 
-import com.budjb.rabbitmq.*
+import com.budjb.rabbitmq.AutoAck
 import com.budjb.rabbitmq.consumer.ConsumerConfiguration
 import com.budjb.rabbitmq.converter.MessageConvertMethod
-
-import groovy.util.ConfigObject
 import spock.lang.Specification
 
 class ConsumerConfigurationSpec extends Specification {

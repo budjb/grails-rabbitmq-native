@@ -16,7 +16,6 @@
 package com.budjb.rabbitmq.test
 
 import com.budjb.rabbitmq.NullRabbitContext
-
 import spock.lang.Specification
 
 class NullRabbitContextSpec extends Specification {

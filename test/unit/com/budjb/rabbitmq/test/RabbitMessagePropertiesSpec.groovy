@@ -15,11 +15,10 @@
  */
 package com.budjb.rabbitmq.test
 
-import spock.lang.Specification
-
 import com.budjb.rabbitmq.RabbitMessageProperties
 import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
+import spock.lang.Specification
 
 class RabbitMessagePropertiesSpec extends Specification {
     RabbitMessageProperties rabbitMessageProperties

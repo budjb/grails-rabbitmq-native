@@ -15,16 +15,15 @@
  */
 package com.budjb.rabbitmq
 
-import org.apache.commons.lang.NullArgumentException
-import org.springframework.beans.factory.InitializingBean
-import org.springframework.context.ApplicationContext
-
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.rabbitmq.client.Channel
+import org.apache.commons.lang.NullArgumentException
+import org.springframework.beans.factory.InitializingBean
+import org.springframework.context.ApplicationContext
 
 class RabbitContextProxy implements RabbitContext, InitializingBean {
     /**

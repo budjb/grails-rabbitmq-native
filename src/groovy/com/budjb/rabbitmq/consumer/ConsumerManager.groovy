@@ -15,18 +15,15 @@
  */
 package com.budjb.rabbitmq.consumer
 
-import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.commons.GrailsClass
-import org.springframework.beans.BeansException
-import org.springframework.context.ApplicationContext
-import org.springframework.context.ApplicationContextAware
-
-import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitMessagePublisher
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
+import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.codehaus.groovy.grails.commons.GrailsClass
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
 
 class ConsumerManager implements ApplicationContextAware {
     /**

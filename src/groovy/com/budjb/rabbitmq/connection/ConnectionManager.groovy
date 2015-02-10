@@ -15,14 +15,11 @@
  */
 package com.budjb.rabbitmq.connection
 
-import groovy.lang.Closure
-
-import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.commons.GrailsApplication
-
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
 import com.rabbitmq.client.Channel
+import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 class ConnectionManager {
     /**

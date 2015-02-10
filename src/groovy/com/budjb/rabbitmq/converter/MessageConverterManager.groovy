@@ -15,13 +15,12 @@
  */
 package com.budjb.rabbitmq.converter
 
+import com.budjb.rabbitmq.exception.MessageConvertException
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.beans.BeansException
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
-
-import com.budjb.rabbitmq.exception.MessageConvertException
 
 class MessageConverterManager implements ApplicationContextAware {
     /**
