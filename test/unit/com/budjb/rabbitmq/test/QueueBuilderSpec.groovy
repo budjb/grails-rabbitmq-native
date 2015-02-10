@@ -585,7 +585,7 @@ class QueueBuilderSpec extends Specification {
         configuration.putAll([
             'rabbitmq': [
                 'queues': {
-                    connection('test-connection') { }
+                    connection('test-connection') {}
                 }
             ]
         ])

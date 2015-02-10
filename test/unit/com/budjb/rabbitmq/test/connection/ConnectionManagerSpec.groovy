@@ -76,7 +76,7 @@ class ConnectionManagerSpec extends Specification {
         ConfigObject config = new ConfigObject()
         config.putAll([
             'rabbitmq': [
-                'connection': { }
+                'connection': {}
             ]
         ])
         grailsApplication.getConfig() >> config

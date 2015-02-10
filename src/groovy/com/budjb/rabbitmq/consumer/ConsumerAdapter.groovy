@@ -400,6 +400,7 @@ class ConsumerAdapter {
         consumers*.getChannel()*.close()
         consumers.clear()
     }
+
     /**
      * Processes and delivers an incoming message to the consumer.
      *
@@ -579,6 +580,7 @@ class ConsumerAdapter {
         // No converters worked, so fall back to the byte array
         return context.body
     }
+
     /**
      * Determines if there is a message handler defined that will accommodate
      * a specific body class type.

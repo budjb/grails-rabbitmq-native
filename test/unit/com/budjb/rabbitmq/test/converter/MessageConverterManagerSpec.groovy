@@ -78,11 +78,11 @@ class MessageConverterManagerSpec extends Specification {
         messageConverterManager.convertFromBytes(a) == b
 
         where:
-        a                                                                       || b
-        [102, 111, 111, 98, 97, 114] as byte[]                                  || "foobar"
-        [49, 50, 51, 52] as byte[]                                              || 1234
-        [91, 34, 102, 111, 111, 34, 44, 34, 98, 97, 114, 34, 93] as byte[]      || ["foo", "bar"]
-        [123, 34, 102, 111, 111, 34, 58, 34, 98, 97, 114, 34, 125] as byte[]    || ["foo": "bar"]
+        a || b
+        [102, 111, 111, 98, 97, 114] as byte[]                               || "foobar"
+        [49, 50, 51, 52] as byte[]                                           || 1234
+        [91, 34, 102, 111, 111, 34, 44, 34, 98, 97, 114, 34, 93] as byte[]   || ["foo", "bar"]
+        [123, 34, 102, 111, 111, 34, 58, 34, 98, 97, 114, 34, 125] as byte[] || ["foo": "bar"]
     }
 
     def 'Validate that all built-in converters can convert to bytes through the manager'() {
@@ -96,12 +96,12 @@ class MessageConverterManagerSpec extends Specification {
         messageConverterManager.convertToBytes(a) == b
 
         where:
-        a               || b
-        "foobar"        || [102, 111, 111, 98, 97, 114] as byte[]
-        1234            || [49, 50, 51, 52] as byte[]
-        ["foo", "bar"]  || [91, 34, 102, 111, 111, 34, 44, 34, 98, 97, 114, 34, 93] as byte[]
-        ["foo": "bar"]  || [123, 34, 102, 111, 111, 34, 58, 34, 98, 97, 114, 34, 125] as byte[]
-        "${'foobar'}"   || [102, 111, 111, 98, 97, 114] as byte[]
+        a || b
+        "foobar"       || [102, 111, 111, 98, 97, 114] as byte[]
+        1234           || [49, 50, 51, 52] as byte[]
+        ["foo", "bar"] || [91, 34, 102, 111, 111, 34, 44, 34, 98, 97, 114, 34, 93] as byte[]
+        ["foo": "bar"] || [123, 34, 102, 111, 111, 34, 58, 34, 98, 97, 114, 34, 125] as byte[]
+        "${'foobar'}"  || [102, 111, 111, 98, 97, 114] as byte[]
     }
 
     def 'Ensure message converters are freed up with reset() is called'() {

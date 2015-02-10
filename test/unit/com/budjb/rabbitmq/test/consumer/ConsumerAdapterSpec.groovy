@@ -454,8 +454,10 @@ class ConsumerAdapterSpec extends Specification {
     }
 
     class PersistenceInterceptor {
-        void init() { }
-        void flush() { }
-        void destroy() { }
+        void init() {}
+
+        void flush() {}
+
+        void destroy() {}
     }
 }

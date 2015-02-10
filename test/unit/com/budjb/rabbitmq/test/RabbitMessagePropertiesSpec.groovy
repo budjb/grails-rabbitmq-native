@@ -57,7 +57,7 @@ class RabbitMessagePropertiesSpec extends Specification {
 
     def 'When a properties object is built with an empty closure, validate the default properties are still present'() {
         when:
-        rabbitMessageProperties.build { }
+        rabbitMessageProperties.build {}
 
         then:
         rabbitMessageProperties.appId == null

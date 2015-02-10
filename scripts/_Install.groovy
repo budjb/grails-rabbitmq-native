@@ -13,5 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-ant.mkdir(dir:"${basedir}/grails-app/rabbit-consumers")
-ant.mkdir(dir:"${basedir}/grails-app/rabbit-converters")
+ant.mkdir(dir: "${basedir}/grails-app/rabbit-consumers")
+ant.mkdir(dir: "${basedir}/grails-app/rabbit-converters")

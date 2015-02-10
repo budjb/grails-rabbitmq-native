@@ -78,7 +78,7 @@ class ConsumerConfiguration {
     /**
      * Basic constructor.
      */
-    public ConsumerConfiguration() { }
+    public ConsumerConfiguration() {}
 
     /**
      * Constructor that parses the options defined in the service consumer.
@@ -86,17 +86,17 @@ class ConsumerConfiguration {
      * @param options
      */
     public ConsumerConfiguration(Map options) {
-        queue         = parseConfigOption(String, queue, options['queue'])
-        exchange      = parseConfigOption(String, exchange, options['exchange'])
-        binding       = parseConfigOption(Object, binding, options['binding'])
-        match         = parseConfigOption(String, match, options['match'])
-        consumers     = parseConfigOption(Integer, consumers, options['consumers'])
-        transacted    = parseConfigOption(Boolean, transacted, options['transacted'])
-        autoAck       = parseConfigOption(AutoAck, autoAck, options['autoAck'])
-        convert       = parseConfigOption(MessageConvertMethod, convert, options['convert'])
-        retry         = parseConfigOption(Boolean, retry, options['retry'])
+        queue = parseConfigOption(String, queue, options['queue'])
+        exchange = parseConfigOption(String, exchange, options['exchange'])
+        binding = parseConfigOption(Object, binding, options['binding'])
+        match = parseConfigOption(String, match, options['match'])
+        consumers = parseConfigOption(Integer, consumers, options['consumers'])
+        transacted = parseConfigOption(Boolean, transacted, options['transacted'])
+        autoAck = parseConfigOption(AutoAck, autoAck, options['autoAck'])
+        convert = parseConfigOption(MessageConvertMethod, convert, options['convert'])
+        retry = parseConfigOption(Boolean, retry, options['retry'])
         prefetchCount = parseConfigOption(Integer, prefetchCount, options['prefetchCount'])
-        connection    = parseConfigOption(String, connection, options['connection'])
+        connection = parseConfigOption(String, connection, options['connection'])
 
         if (transacted) {
             autoAck = AutoAck.POST

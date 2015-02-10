@@ -149,7 +149,7 @@ class RabbitMessagePublisherSpec extends Specification {
 
     def 'Send with no parameters provided (routing key and/or exchange are required)'() {
         when:
-        rabbitMessagePublisher.send { }
+        rabbitMessagePublisher.send {}
 
         then:
         thrown IllegalArgumentException

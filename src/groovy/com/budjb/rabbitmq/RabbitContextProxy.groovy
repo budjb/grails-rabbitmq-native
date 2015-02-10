@@ -37,7 +37,7 @@ class RabbitContextProxy implements RabbitContext, InitializingBean {
      * @param target
      */
     public void setTarget(RabbitContext target) {
-        if (target ==  null) {
+        if (target == null) {
             throw new NullArgumentException("rabbit context target can not be null")
         }
         if (target instanceof RabbitContextProxy) {
@@ -50,7 +50,7 @@ class RabbitContextProxy implements RabbitContext, InitializingBean {
      * Ensures a target is set after spring initialization is complete.
      */
     public void afterPropertiesSet() {
-        assert target != null : "RabbitContext proxy target is required but not set"
+        assert target != null: "RabbitContext proxy target is required but not set"
     }
 
     @Override

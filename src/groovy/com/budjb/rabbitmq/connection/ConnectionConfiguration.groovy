@@ -84,7 +84,7 @@ class ConnectionConfiguration {
     /**
      * Basic constructor.
      */
-    public ConnectionConfiguration() { }
+    public ConnectionConfiguration() {}
 
     /**
      * Constructor.
@@ -93,17 +93,17 @@ class ConnectionConfiguration {
      */
     public ConnectionConfiguration(Map configuration) {
         // Assign values
-        automaticReconnect  = parseConfigOption(Boolean, automaticReconnect, configuration['automaticReconnect'])
-        host                = parseConfigOption(String, host, configuration['host'])
-        isDefault           = parseConfigOption(Boolean, isDefault, configuration['isDefault'])
-        name                = parseConfigOption(String, name, configuration['name'])
-        password            = parseConfigOption(String, password, configuration['password'])
-        port                = parseConfigOption(Integer, port, configuration['port'])
-        requestedHeartbeat  = parseConfigOption(Integer, requestedHeartbeat, configuration['requestedHeartbeat'])
-        ssl                 = parseConfigOption(Boolean, ssl, configuration['ssl'])
-        threads             = parseConfigOption(Integer, threads, configuration['threads'])
-        username            = parseConfigOption(String, username, configuration['username'])
-        virtualHost         = parseConfigOption(String, virtualHost, configuration['virtualHost'])
+        automaticReconnect = parseConfigOption(Boolean, automaticReconnect, configuration['automaticReconnect'])
+        host = parseConfigOption(String, host, configuration['host'])
+        isDefault = parseConfigOption(Boolean, isDefault, configuration['isDefault'])
+        name = parseConfigOption(String, name, configuration['name'])
+        password = parseConfigOption(String, password, configuration['password'])
+        port = parseConfigOption(Integer, port, configuration['port'])
+        requestedHeartbeat = parseConfigOption(Integer, requestedHeartbeat, configuration['requestedHeartbeat'])
+        ssl = parseConfigOption(Boolean, ssl, configuration['ssl'])
+        threads = parseConfigOption(Integer, threads, configuration['threads'])
+        username = parseConfigOption(String, username, configuration['username'])
+        virtualHost = parseConfigOption(String, virtualHost, configuration['virtualHost'])
 
         // Validate the configuration
         validateConfiguration()
