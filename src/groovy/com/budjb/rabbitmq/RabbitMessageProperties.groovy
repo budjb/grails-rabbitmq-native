@@ -142,8 +142,8 @@ class RabbitMessageProperties {
      */
     protected void run(Closure closure) {
         closure.delegate = this
-        closure.resolveStrategy = Closure.OWNER_FIRST
-        closure.run()
+        closure.resolveStrategy = Closure.DELEGATE_FIRST
+        closure()
     }
 
     /**

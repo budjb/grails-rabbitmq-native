@@ -15,7 +15,6 @@ grails.project.dependency.resolution = {
         test(
             'org.mockito:mockito-all:1.9.5',
             'com.cyrusinnovation:mockito-groovy-support:1.3',
-            //'org.spockframework:spock-core:0.7-groovy-1.8'
         ) {
             export = false
         }
