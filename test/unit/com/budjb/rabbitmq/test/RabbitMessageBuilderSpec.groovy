@@ -15,9 +15,9 @@
  */
 package com.budjb.rabbitmq.test
 
-import com.budjb.rabbitmq.RabbitMessageBuilder
-import com.budjb.rabbitmq.RabbitMessageProperties
-import com.budjb.rabbitmq.RabbitMessagePublisher
+import com.budjb.rabbitmq.publisher.RabbitMessageBuilder
+import com.budjb.rabbitmq.publisher.RabbitMessageProperties
+import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import com.rabbitmq.client.Channel
 import spock.lang.Specification
 

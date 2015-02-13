@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq.test.consumer
 
-import com.budjb.rabbitmq.AutoAck
+import com.budjb.rabbitmq.consumer.AutoAck
 import com.budjb.rabbitmq.consumer.ConsumerConfiguration
 import com.budjb.rabbitmq.converter.MessageConvertMethod
 import spock.lang.Specification

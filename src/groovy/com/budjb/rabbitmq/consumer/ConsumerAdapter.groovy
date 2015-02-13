@@ -15,9 +15,8 @@
  */
 package com.budjb.rabbitmq.consumer
 
-import com.budjb.rabbitmq.AutoAck
-import com.budjb.rabbitmq.RabbitMessageBuilder
-import com.budjb.rabbitmq.RabbitMessagePublisher
+import com.budjb.rabbitmq.publisher.RabbitMessageBuilder
+import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.MessageConvertMethod

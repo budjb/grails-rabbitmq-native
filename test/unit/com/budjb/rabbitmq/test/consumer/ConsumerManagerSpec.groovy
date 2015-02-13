@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq.test.consumer
 
-import com.budjb.rabbitmq.RabbitMessagePublisher
+import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerAdapter

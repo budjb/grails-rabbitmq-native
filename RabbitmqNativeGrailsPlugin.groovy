@@ -18,6 +18,7 @@ import com.budjb.rabbitmq.*
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
+import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsClass
 
@@ -25,7 +26,7 @@ class RabbitmqNativeGrailsPlugin {
     /**
      * Version of the plugin.
      */
-    def version = "3.0.1"
+    def version = "3.0.2"
 
     /**
      * The version or versions of Grails the plugin is designed for.
