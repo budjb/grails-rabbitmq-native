@@ -140,7 +140,7 @@ class MessageConverterManagerSpec extends Specification {
         convertedFromObject == [102, 111, 111, 98, 97, 114, 98, 97, 122] as byte[]
     }
 
-    class ExpandoMockConverter extends MessageConverter {
+    class ExpandoMockConverter extends MessageConverter<Expando> {
         public String getContentType() {
             return null
         }
@@ -153,14 +153,11 @@ class MessageConverterManagerSpec extends Specification {
             return true
         }
 
-        public byte[] convertFrom(Object source) {
-            if (source instanceof Expando) {
-                return [102, 111, 111, 98, 97, 114, 98, 97, 122]
-            }
-            return null
+        public byte[] convertFrom(Expando source) {
+            return [102, 111, 111, 98, 97, 114, 98, 97, 122]
         }
 
-        public Object convertTo(byte[] source) {
+        public Expando convertTo(byte[] source) {
             if (source == [102, 111, 111, 98, 97, 114, 98, 97, 122] as byte[]) {
                 return new Expando()
             }

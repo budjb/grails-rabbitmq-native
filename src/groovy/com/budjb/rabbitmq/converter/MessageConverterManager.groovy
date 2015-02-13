@@ -146,6 +146,10 @@ class MessageConverterManager implements ApplicationContextAware {
                 continue
             }
 
+            if (!converter.getType().isInstance(source)) {
+                continue
+            }
+
             try {
                 byte[] converted = converter.convertFrom(source)
 

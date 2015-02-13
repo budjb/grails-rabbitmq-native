@@ -18,7 +18,7 @@ import com.budjb.rabbitmq.*
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
-import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
+import com.budjb.rabbitmq.publisher.RabbitMessagePublisherImpl
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsClass
 
@@ -151,7 +151,7 @@ class RabbitmqNativeGrailsPlugin {
             bean.autowire = true
         }
 
-        "rabbitMessagePublisher"(RabbitMessagePublisher) { bean ->
+        "rabbitMessagePublisher"(RabbitMessagePublisherImpl) { bean ->
             bean.autowire = true
         }
 

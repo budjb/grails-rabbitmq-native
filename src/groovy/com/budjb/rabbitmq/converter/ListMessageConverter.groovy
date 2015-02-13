@@ -16,6 +16,7 @@
 package com.budjb.rabbitmq.converter
 
 import groovy.json.JsonBuilder
+import groovy.json.JsonException
 import groovy.json.JsonSlurper
 
 class ListMessageConverter extends MessageConverter<List> {
@@ -41,7 +42,12 @@ class ListMessageConverter extends MessageConverter<List> {
 
     @Override
     public byte[] convertFrom(List input) {
-        return new JsonBuilder(input).toString().getBytes()
+        try {
+            return new JsonBuilder(input).toString().getBytes()
+        }
+        catch (JsonException e) {
+            return null
+        }
     }
 
     @Override

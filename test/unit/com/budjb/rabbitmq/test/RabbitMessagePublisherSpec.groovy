@@ -15,12 +15,13 @@
  */
 package com.budjb.rabbitmq.test
 
-import com.budjb.rabbitmq.publisher.RabbitMessageProperties
-import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.MessageContext
 import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.exception.MessageConvertException
+import com.budjb.rabbitmq.publisher.RabbitMessageProperties
+import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
+import com.budjb.rabbitmq.publisher.RabbitMessagePublisherImpl
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk
 import spock.lang.Specification
@@ -47,7 +48,7 @@ class RabbitMessagePublisherSpec extends Specification {
         SynchronousQueue<MessageContext> queue = Mock(SynchronousQueue)
 
         // Set up the publisher as a spy (we need partial mocking for rpc calls)
-        rabbitMessagePublisher = Spy(RabbitMessagePublisher)
+        rabbitMessagePublisher = Spy(RabbitMessagePublisherImpl)
         rabbitMessagePublisher.createResponseQueue() >> queue
         rabbitMessagePublisher.connectionManager = connectionManager
         rabbitMessagePublisher.messageConverterManager = messageConverterManager
@@ -80,7 +81,7 @@ class RabbitMessagePublisherSpec extends Specification {
         messageConverterManager.registerMessageConverter(new GStringMessageConverter())
         messageConverterManager.registerMessageConverter(new StringMessageConverter())
 
-        rabbitMessagePublisher = new RabbitMessagePublisher()
+        rabbitMessagePublisher = new RabbitMessagePublisherImpl()
         rabbitMessagePublisher.connectionManager = connectionManager
         rabbitMessagePublisher.messageConverterManager = messageConverterManager
     }
@@ -250,7 +251,7 @@ class RabbitMessagePublisherSpec extends Specification {
         setup:
         channel.queueDeclare() >> new DeclareOk('temporary-queue', 0, 0)
         SynchronousQueue<MessageContext> queue = new SynchronousQueue<MessageContext>()
-        rabbitMessagePublisher = Spy(RabbitMessagePublisher)
+        rabbitMessagePublisher = Spy(RabbitMessagePublisherImpl)
         rabbitMessagePublisher.createResponseQueue() >> queue
         rabbitMessagePublisher.connectionManager = connectionManager
         rabbitMessagePublisher.messageConverterManager = messageConverterManager
