@@ -88,7 +88,7 @@ class RabbitMessagePublisher {
      * @param closure Closure to configure the message properties.
      */
     public void send(Closure closure) throws IllegalArgumentException {
-        send(new RabbitMessageProperties().build(closure))
+        send(createRabbitMessageProperties().build(closure))
     }
 
     /**
@@ -98,7 +98,7 @@ class RabbitMessagePublisher {
      * @param body
      */
     public void send(String routingKey, Object body) throws IllegalArgumentException {
-        send(new RabbitMessageProperties().build {
+        send(createRabbitMessageProperties().build {
             delegate.routingKey = routingKey
             delegate.body = body
         })
@@ -112,7 +112,7 @@ class RabbitMessagePublisher {
      * @param body
      */
     public void send(String exchange, String routingKey, Object body) throws IllegalArgumentException {
-        send(new RabbitMessageProperties().build {
+        send(createRabbitMessageProperties().build {
             delegate.exchange = exchange
             delegate.routingKey = routingKey
             delegate.body = body
@@ -272,7 +272,7 @@ class RabbitMessagePublisher {
      * @throws IllegalArgumentException
      */
     public Object rpc(Closure closure) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
-        RabbitMessageProperties properties = new RabbitMessageProperties()
+        RabbitMessageProperties properties = createRabbitMessageProperties()
         properties.build(closure)
         return rpc(properties)
     }
@@ -292,7 +292,7 @@ class RabbitMessagePublisher {
      * @throws IllegalArgumentException
      */
     public Object rpc(String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
-        return rpc(new RabbitMessageProperties().build {
+        return rpc(createRabbitMessageProperties().build {
             delegate.routingKey = routingKey
             delegate.body = body
         })
@@ -314,7 +314,7 @@ class RabbitMessagePublisher {
      * @throws IllegalArgumentException
      */
     public Object rpc(String exchange, String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
-        return rpc(new RabbitMessageProperties().build {
+        return rpc(createRabbitMessageProperties().build {
             delegate.exchange = exchange
             delegate.routingKey = routingKey
             delegate.body = body
@@ -328,5 +328,14 @@ class RabbitMessagePublisher {
      */
     SynchronousQueue<MessageContext> createResponseQueue() {
         return new SynchronousQueue<MessageContext>()
+    }
+
+    /**
+     * Creates a new rabbit message properties instance.
+     *
+     * @return
+     */
+    protected RabbitMessageProperties createRabbitMessageProperties() {
+        return new RabbitMessageProperties()
     }
 }
