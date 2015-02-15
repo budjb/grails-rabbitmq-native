@@ -1,0 +1,11 @@
+The are several beans defined by the plugin to perform its various operations.
+
+{table}
+*Bean Name* | *Purpose*
+@rabbitContext@ | A front-end class to the plugin that aggregates useful functionality for users of the plugin.
+@connectionManager@ | Handles loading connections from the configuration file, manages the list of configured connections, and provides those connections to callers when requested.
+@messageConverterManager@ | Handles loading message converters and acts as the entry point when message conversion is required.
+@consumerManager@ | Handles loading any defined consumers.
+@queueBuilder@ | Responsible for creating exchanges and queues defined in the application's configuration.
+@rabbitMessagePublisher@ | Used to send messages to a RabbitMQ broker.
+{table}

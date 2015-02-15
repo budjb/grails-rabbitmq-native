@@ -33,7 +33,8 @@ converters:
     custom: Custom Message Converters
 advanced:
     title: Advanced Usage
-    rabbitcontext: The Rabbit Context
+    beans: Spring Beans
+    rabbitcontext: Rabbit Context
     channels: Channels
     transactions: Transactions
 changelog: Changelog

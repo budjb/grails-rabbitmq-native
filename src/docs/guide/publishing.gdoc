@@ -1,4 +1,4 @@
-Publishing messages through the plugin is achieved by using the @rabbitMessagePublisher@ bean. This Sprint bean utilizes a closure-based configuration method to
+Publishing messages through the plugin is achieved by using the @rabbitMessagePublisher@ bean. This Spring bean utilizes a closure-based configuration method to
 both send messages without waiting for a response, and sending rpc-style messages. There are many options available to the @rabbitMessagePublisher@ which are
 documented in the reference, but this guide will only demonstrate basic usage.
 
