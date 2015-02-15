@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>5.2 RPC Messages 2.0.10</title>
+    <title>5.2 RPC Messages 3.0.3</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -45,7 +45,10 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0"><a href="../../guide/advanced.html"><strong>7</strong><span>Advanced Usage</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../../guide/changelog.html"><strong>8</strong><span>Changelog</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/upgrading.html"><strong>8</strong><span>Upgrading</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/changelog.html"><strong>9</strong><span>Changelog</span></a>
                     </div>
                     
                 </div>
@@ -86,7 +89,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 2.0.10</p>
+                    <p><strong>Version:</strong> 3.0.3</p>
 
                     
                 </div>
@@ -97,18 +100,21 @@ function addJsClass() {
 
 <h2 id="rpcsend">5.2 RPC Messages</h2>
 Publishing an RPC message is as easy as sending messages, except the returned message is returned from the function.<p class="paragraph"/><h4>RPC Example</h4>
-<div class="code"><pre>// Send a message
-def result = <span class="java&#45;keyword">new</span> RabbitMessageBuilder().rpc &#123;
-    exchange = <span class="java&#45;quote">"some.exchange"</span>
-    routingKey = <span class="java&#45;quote">"some.routingKey"</span>
-    body = <span class="java&#45;quote">"hi!"</span>
-    timeout = RabbitMessageBuilder.DEFAULT_TIMEOUT
+<div class="code"><pre><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.publisher.RabbitMessagePublisher<p class="paragraph"/>class ExampleService &#123;
+    RabbitMessagePublisher rabbitMessagePublisher<p class="paragraph"/>    def sendSomeMessage() &#123;
+        def result = rabbitMessagePublisher.rpc &#123;
+            exchange = <span class="java&#45;quote">"some.exchange"</span>
+            routingKey = <span class="java&#45;quote">"some.routingKey"</span>
+            body = <span class="java&#45;quote">"hi!"</span>
+            timeout = 5000
+        &#125;
+    &#125;
 &#125;</pre></div><p class="paragraph"/><blockquote class="warning">
-The <a href="../ref/Rabbit Message Builder/timeout.html" class="Rabbit Message Builder">timeout</a> option is especially important for RPC-style messages. The timeout property is the amount of time (in milliseconds)
+The <a href="../ref/Rabbit Message Publisher/timeout.html" class="Rabbit Message Publisher">timeout</a> option is especially important for RPC-style messages. The timeout property is the amount of time (in milliseconds)
 the client will wait for the server to respond. If the timeout is reached, a <code>TimeoutException</code> will be thrown. If the timeout is set to 0, the client
 will wait indefinitely for a response. The default value of the timeout, if not passed, is 5 seconds.
 </blockquote><p class="paragraph"/><blockquote class="note">
-More options for the <code>RabbitMessageBuilder</code> can be found in the <strong class="bold">Quick Reference</strong>.
+More options for the <code>RabbitMessagePublisher</code> can be found in the <strong class="bold">Quick Reference</strong>.
 </blockquote>
 
 
@@ -217,64 +223,64 @@ More options for the <code>RabbitMessageBuilder</code> can be found in the <stro
                             </div>
                     </div>
                     
-                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Builder</h1><div class="menu-sub">
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Publisher</h1><div class="menu-sub">
                         
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/appId.html">appId</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/appId.html">appId</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/autoConvert.html">autoConvert</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/autoConvert.html">autoConvert</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/body.html">body</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/body.html">body</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/connection.html">connection</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/connection.html">connection</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/contentEncoding.html">contentEncoding</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/contentEncoding.html">contentEncoding</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/contentType.html">contentType</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/contentType.html">contentType</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/correlationId.html">correlationId</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/correlationId.html">correlationId</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/deliveryMode.html">deliveryMode</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/deliveryMode.html">deliveryMode</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/exchange.html">exchange</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/exchange.html">exchange</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/expiration.html">expiration</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/expiration.html">expiration</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/header.html">header</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/header.html">header</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/messageId.html">messageId</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/messageId.html">messageId</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/priority.html">priority</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/replyTo.html">replyTo</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/routingKey.html">routingKey</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/routingKey.html">routingKey</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/timeout.html">timeout</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/timeout.html">timeout</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/timestamp.html">timestamp</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/timestamp.html">timestamp</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/type.html">type</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/type.html">type</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/userId.html">userId</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/userId.html">userId</a>
                             </div>
                             
                             </div>

@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>4.1.5 RPC-Style Messages 2.0.10</title>
+    <title>4.1.5 RPC-Style Messages 3.0.3</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -45,7 +45,10 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0"><a href="../../guide/advanced.html"><strong>7</strong><span>Advanced Usage</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../../guide/changelog.html"><strong>8</strong><span>Changelog</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/upgrading.html"><strong>8</strong><span>Upgrading</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/changelog.html"><strong>9</strong><span>Changelog</span></a>
                     </div>
                     
                 </div>
@@ -86,7 +89,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 2.0.10</p>
+                    <p><strong>Version:</strong> 3.0.3</p>
 
                     
                 </div>
@@ -97,10 +100,21 @@ function addJsClass() {
 
 <h2 id="rpc">4.1.5 RPC-Style Messages</h2>
 When a client publishes a message and waits for a return reply, this is considered an RPC-style operation. Typically, the server-side of the operation (in this case, a message consumer/handler) must
-respond to the client on a queue that the client requested manually. This plugin provides a very convenient method to respond to the client without having to manually construct a response message.<p class="paragraph"/>The client will provide a response queue to the server to reply to. This queue name is stored in the <code>MessageContext.properties.replyTo</code> variable. If a client publishes this variable, and the handler returns
-some data, the plugin will convert the data returned from the message handler and build a response message for you.<p class="paragraph"/><blockquote class="note">
+respond to the client on a queue that the client requested manually. This plugin provides a very convenient method to respond to the client without having to manually construct a response message.<p class="paragraph"/>The client will provide a response queue to the server to reply to. This queue name is stored in the <code>MessageContext.properties.replyTo</code> variable. If a client publishes
+this variable, and the handler returns some data, the plugin will convert the data returned from the message handler and build a response message for you.<p class="paragraph"/>The following example illustrates responding via a handler's returned data.<p class="paragraph"/><div class="code"><pre>class RpcExampleConsumer &#123;
+    def handleMessage(<span class="java&#45;object">String</span> message, MessageContext messageContext) &#123;
+        println <span class="java&#45;quote">"received $&#123;message&#125;"</span><p class="paragraph"/>        <span class="java&#45;keyword">return</span> <span class="java&#45;quote">"response"</span> // <span class="java&#45;keyword">this</span> message will be sent back to the consumer via its replyTo queue
+    &#125;
+&#125;</pre></div><p class="paragraph"/>Alternatively, the <code>rabbitMessagePublisher</code> can be used to respond.<p class="paragraph"/><div class="code"><pre>class RpcExampleConsumer &#123;
+    def rabbitMessagePublisher<p class="paragraph"/>    def handleMessage(<span class="java&#45;object">String</span> message, MessageContext messageContext) &#123;
+        println <span class="java&#45;quote">"received $&#123;message&#125;"</span><p class="paragraph"/>        rabbitMessagePublisher.send &#123;
+            routingKey: messageContext.properties.replyTo
+            body: <span class="java&#45;quote">"response"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/><blockquote class="note">
 Allowing the plugin to build a reply message only converts the data returned from the message handler and publishes it to the reply queue. If you need to set any of the other message properties,
-like headers, content-types, etc, you must manually build the response message, and refrain from returning data from the message handler.
+like headers, content-types, etc, you must manually build the response message using the <code>rabbitMessagePublisher</code>, and refrain from returning data from the message handler.
 </blockquote><p class="paragraph"/>
 
 
@@ -208,64 +222,64 @@ like headers, content-types, etc, you must manually build the response message, 
                             </div>
                     </div>
                     
-                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Builder</h1><div class="menu-sub">
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Publisher</h1><div class="menu-sub">
                         
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/appId.html">appId</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/appId.html">appId</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/autoConvert.html">autoConvert</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/autoConvert.html">autoConvert</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/body.html">body</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/body.html">body</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/connection.html">connection</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/connection.html">connection</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/contentEncoding.html">contentEncoding</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/contentEncoding.html">contentEncoding</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/contentType.html">contentType</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/contentType.html">contentType</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/correlationId.html">correlationId</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/correlationId.html">correlationId</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/deliveryMode.html">deliveryMode</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/deliveryMode.html">deliveryMode</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/exchange.html">exchange</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/exchange.html">exchange</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/expiration.html">expiration</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/expiration.html">expiration</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/header.html">header</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/header.html">header</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/messageId.html">messageId</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/messageId.html">messageId</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/priority.html">priority</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/replyTo.html">replyTo</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/routingKey.html">routingKey</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/routingKey.html">routingKey</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/timeout.html">timeout</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/timeout.html">timeout</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/timestamp.html">timestamp</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/timestamp.html">timestamp</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/type.html">type</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/type.html">type</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Builder/userId.html">userId</a>
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/userId.html">userId</a>
                             </div>
                             
                             </div>

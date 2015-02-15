@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>7 Advanced Usage 2.0.10</title>
+    <title>7 Advanced Usage 3.0.3</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -45,7 +45,10 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0"><a href="../guide/advanced.html"><strong>7</strong><span>Advanced Usage</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/changelog.html"><strong>8</strong><span>Changelog</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/upgrading.html"><strong>8</strong><span>Upgrading</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/changelog.html"><strong>9</strong><span>Changelog</span></a>
                     </div>
                     
                 </div>
@@ -77,7 +80,7 @@ function addJsClass() {
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
                 
-                    <div class="toc-item next-right"><a href="../guide/changelog.html"><strong>8</strong><span>Changelog</span> >></a></div>
+                    <div class="toc-item next-right"><a href="../guide/upgrading.html"><strong>8</strong><span>Upgrading</span> >></a></div>
                 
 
 
@@ -86,7 +89,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 2.0.10</p>
+                    <p><strong>Version:</strong> 3.0.3</p>
 
                     
                 </div>
@@ -95,13 +98,16 @@ function addJsClass() {
                 <div id="table-of-content">
                     <h2>Table of Contents</h2>
                     
-                    <div class="toc-item" style="margin-left:0px"><a href="#rabbitcontext"><strong>7.1</strong><span>The Rabbit Context</span></a>
+                    <div class="toc-item" style="margin-left:0px"><a href="#beans"><strong>7.1</strong><span>Spring Beans</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0px"><a href="#channels"><strong>7.2</strong><span>Channels</span></a>
+                    <div class="toc-item" style="margin-left:0px"><a href="#rabbitcontext"><strong>7.2</strong><span>Rabbit Context</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0px"><a href="#transactions"><strong>7.3</strong><span>Transactions</span></a>
+                    <div class="toc-item" style="margin-left:0px"><a href="#channels"><strong>7.3</strong><span>Channels</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#transactions"><strong>7.4</strong><span>Transactions</span></a>
                     </div>
                     
                 </div>
@@ -114,35 +120,36 @@ While the plugin effectively wraps the functionality of the RabbitMQ library, th
 
 
 
-<h2 id="rabbitcontext">7.1 The Rabbit Context</h2>
-The bean responsible for connecting to the RabbitMQ server and keeping track of the connection and channel objects is the <code>RabbitContext</code>. While you may never need to use this bean, it can be useful.<p class="paragraph"/>The <code>RabbitContext</code> bean can be injected as follows:
-<div class="code"><pre>class TestService &#123;
-    def rabbitContext
-&#125;</pre></div><p class="paragraph"/>The bean can also be retrieved from the <code>ApplicationContext</code>, as follows:
-<div class="code"><pre><span class="java&#45;keyword">import</span> grails.util.Holders<p class="paragraph"/>class TestObject &#123;
-    def testMethod() &#123;
-        RabbitContext context = Holders.applicationContext.getBean('rabbitContext')
-    &#125;
-&#125;</pre></div><p class="paragraph"/>Of particular importance is the <code>getConnection()</code> method of the <code>RabbitContext</code> bean.  This method returns a <code>ConnectionContext</code> object, which
-exposes the RabbitMQ <code>Connection</code> object through its own <code>getConnection()</code> method.
+<h2 id="beans">7.1 Spring Beans</h2>
+The are several beans defined by the plugin to perform its various operations.<p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Bean Name</strong></th><th><strong class="bold">Purpose</strong></th></tr><tr class="table-odd"><td><code>rabbitContext</code></td><td>A front-end class to the plugin that aggregates useful functionality for users of the plugin.</td></tr><tr class="table-even"><td><code>connectionManager</code></td><td>Handles loading connections from the configuration file, manages the list of configured connections, and provides those connections to callers when requested.</td></tr><tr class="table-odd"><td><code>messageConverterManager</code></td><td>Handles loading message converters and acts as the entry point when message conversion is required.</td></tr><tr class="table-even"><td><code>consumerManager</code></td><td>Handles loading any defined consumers.</td></tr><tr class="table-odd"><td><code>queueBuilder</code></td><td>Responsible for creating exchanges and queues defined in the application's configuration.</td></tr><tr class="table-even"><td><code>rabbitMessagePublisher</code></td><td>Used to send messages to a RabbitMQ broker.</td></tr></table>
 
 
 
-<h2 id="channels">7.2 Channels</h2>
+<h2 id="rabbitcontext">7.2 Rabbit Context</h2>
+Besides the <code>rabbitMessagePublisher</code>, the <code>rabbitContext</code> is the bean users will most likely interact with.  While you may never need to use this bean, it can be useful.
+As with any Spring bean, the <code>rabbitContext</code> can be injected into any Spring managed bean, such as services, controllers, and rabbit consumers.<p class="paragraph"/>Below are some use cases which may be helpful for users wanting to use the plugin outside of its conventions.
+<ul class="star">
+<li>The <code>rabbitContext.getConnection()</code> method returns a <code>ConnectionContext</code> object, which exposes the RabbitMQ <code>Connection</code> object through its own <code>getConnection()</code> method.</li>
+<li>The <code>rabbitContext.getChannel()</code> method returns a RabbitMQ <code>Channel</code> object, which can be used to manually send messages, consume messages, and much more.</li>
+<li>The <code>rabbitContext.startConsumers()</code> method is useful when a user of the plugin wants to control when to start consumer messages during the application startup.</li>
+</ul><p class="paragraph"/>
+
+
+<h2 id="channels">7.3 Channels</h2>
 <code>RabbitContext</code> contains a method <code>createChannel</code>, which simply calls the same function within the <code>Connection</code> instance. This method returns a new <code>Channel</code> that can be used
 to publish messages or even consume messages, if you prefer to set up your own consumers.<p class="paragraph"/><blockquote class="warning">
 If the <code>createChannel</code> method is used, the author <strong class="bold">must</strong> ensure that the channel is closed when it is no longer needed. The <code>RabbitContext</code> does not track these <code>Channel</code> instances
 as it does with those channels it automatically creates for consumers, and it can be easy to create channel "leaks". Simply call <code>Channel.close()</code> to terminate a channel when it
 is no longer needed.
 </blockquote><p class="paragraph"/><h4>Channel Efficiency</h4>
-Creating channels takes time. If a <code>RabbitMessageBuilder</code> instance is not passed a <code>Channel</code> instance when it is constructed, the builder will create a temporary channel to publish
+Creating channels takes time. If the <code>rabbitMessagePublisher</code> is not passed a <code>Channel</code> instance when a message is sent, the publisher will create a temporary channel to publish
 the message. While this is convenient, it also slows down publishing messages considerably (for example, 65ms per message published). When a bulk publish job is required, the job
-can be sped up by creating a channel before building the <code>RabbitMessageBuilder</code> and passing that channel into its constructor. In tests, this has brought down the publish time
+can be sped up by creating a single channel to be used when sending multiple messages. In tests, this has brought down the publish time
 per message from 65ms to 1ms or less per message. Be sure to close the channel when the bulk publish job is completed.
 
 
 
-<h2 id="transactions">7.3 Transactions</h2>
+<h2 id="transactions">7.4 Transactions</h2>
 The plugin provides a bit of automation around channel transactions. When a consumer is defined with the <code>transacted</code> property set to <code>true</code>, a transaction is automatically started on
 the channel passed to the message handler. When the message handler completes successfully, the transaction is automatically committed. If an unhandled exception is thrown from the message
 handler, the transaction is automatically rolled back.<p class="paragraph"/>It is <strong class="bold">especially important</strong> that any messages published from a message handler use the <code>Channel</code> instance passed in the <code>MessageContext</code> for this functionality to work.<p class="paragraph"/>Since the <code>Channel</code> is passed in the <code>MessageContext</code>, the author has full control over committing and rolling back transactions.
@@ -153,7 +160,7 @@ handler, the transaction is automatically rolled back.<p class="paragraph"/>It i
                 
                     <div class="toc-item prev-left"><a href="../guide/converters.html">&lt;&lt; <strong>6</strong><span>Message Converters</span></a></div>
                 
-                    <div class="toc-item next-right"><a href="../guide/changelog.html"><strong>8</strong><span>Changelog</span> >></a></div>
+                    <div class="toc-item next-right"><a href="../guide/upgrading.html"><strong>8</strong><span>Upgrading</span> >></a></div>
                 
                 <div style="clear:both"></div>
             </div>
@@ -253,64 +260,64 @@ handler, the transaction is automatically rolled back.<p class="paragraph"/>It i
                             </div>
                     </div>
                     
-                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Builder</h1><div class="menu-sub">
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Publisher</h1><div class="menu-sub">
                         
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/appId.html">appId</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/appId.html">appId</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/autoConvert.html">autoConvert</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/autoConvert.html">autoConvert</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/body.html">body</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/body.html">body</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/connection.html">connection</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/connection.html">connection</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/contentEncoding.html">contentEncoding</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/contentEncoding.html">contentEncoding</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/contentType.html">contentType</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/contentType.html">contentType</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/correlationId.html">correlationId</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/correlationId.html">correlationId</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/deliveryMode.html">deliveryMode</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/deliveryMode.html">deliveryMode</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/exchange.html">exchange</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/exchange.html">exchange</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/expiration.html">expiration</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/expiration.html">expiration</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/header.html">header</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/header.html">header</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/messageId.html">messageId</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/messageId.html">messageId</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/priority.html">priority</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/replyTo.html">replyTo</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/routingKey.html">routingKey</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/routingKey.html">routingKey</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/timeout.html">timeout</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/timeout.html">timeout</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/timestamp.html">timestamp</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/timestamp.html">timestamp</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/type.html">type</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/type.html">type</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/userId.html">userId</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/userId.html">userId</a>
                             </div>
                             
                             </div>
