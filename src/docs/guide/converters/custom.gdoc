@@ -12,13 +12,8 @@ associated with it, but this is useful to give the plugin hints if the conversio
 Below is an example converter for the String object type. Custom converters should follow the same format.
 
 {code}
-package com.budjb.rabbitmq.converter
+import com.budjb.rabbitmq.converter.MessageConverter
 
-import com.budjb.rabbitmq.MessageConverter
-
-/**
- * Provides a message converter for java.lang.String objects.
- */
 class StringMessageConverter extends MessageConverter<String> {
     /**
      * Returns whether the message converter can convert a value from a String to a byte array.
@@ -71,5 +66,6 @@ class StringMessageConverter extends MessageConverter<String> {
     public String getContentType() {
         return 'text/plain'
     }
+
 }
 {code}

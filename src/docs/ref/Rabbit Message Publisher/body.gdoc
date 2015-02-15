@@ -7,7 +7,7 @@ Body of the message to send to the RabbitMQ server.
 h2. Examples
 
 {code}
-new RabbitMessageBuilder().send {
+rabbitMessagePublisher.send {
     routingKey = "example.queue"
     body = "test message"
 }

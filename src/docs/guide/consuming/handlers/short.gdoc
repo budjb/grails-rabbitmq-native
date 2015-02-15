@@ -9,6 +9,8 @@ The short-form handlers are shown below:
 {code}
 package com.example
 
+import com.budjb.rabbitmq.consumer.MessageContext
+
 class ExampleConsumer {
     // ...
 

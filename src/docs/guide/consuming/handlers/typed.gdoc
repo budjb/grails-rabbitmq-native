@@ -16,6 +16,8 @@ The following handlers would accept the converted Map:
 {code}
 package com.example
 
+import com.budjb.rabbitmq.consumer.MessageContext
+
 class ExampleConsumer {
     // ...
 

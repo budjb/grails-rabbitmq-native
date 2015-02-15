@@ -7,7 +7,7 @@ The routing key is used in conjunction with an exchange to publish a message.
 h2. Examples
 
 {code}
-new RabbitMessageBuilder().send {
+rabbitMessagePublisher.send {
     exchange = "example.exchange"
     routingKey = "example.topic"
     body = "message"

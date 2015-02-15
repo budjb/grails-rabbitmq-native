@@ -6,6 +6,8 @@ This is the most generic form of a message handler:
 {code}
 package com.example
 
+import com.budjb.rabbitmq.consumer.MessageContext
+
 class ExampleConsumer {
     // ...
 

@@ -2,21 +2,32 @@ Publishing an RPC message is as easy as sending messages, except the returned me
 
 h4. RPC Example
 {code}
-// Send a message
-def result = new RabbitMessageBuilder().rpc {
-    exchange = "some.exchange"
-    routingKey = "some.routingKey"
-    body = "hi!"
-    timeout = RabbitMessageBuilder.DEFAULT_TIMEOUT
+import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
+
+class ExampleService {
+    RabbitMessagePublisher rabbitMessagePublisher
+
+    def sendSomeMessage() {
+        def result = rabbitMessagePublisher.rpc {
+            exchange = "some.exchange"
+            routingKey = "some.routingKey"
+            body = "hi!"
+            timeout = 5000
+        }
+    }
 }
 {code}
 
+{code}
+// Send a message
+{code}
+
 {warning}
-The [timeout|Rabbit Message Builder] option is especially important for RPC-style messages. The timeout property is the amount of time (in milliseconds)
+The [timeout|Rabbit Message Publisher] option is especially important for RPC-style messages. The timeout property is the amount of time (in milliseconds)
 the client will wait for the server to respond. If the timeout is reached, a @TimeoutException@ will be thrown. If the timeout is set to 0, the client
 will wait indefinitely for a response. The default value of the timeout, if not passed, is 5 seconds.
 {warning}
 
 {note}
-More options for the @RabbitMessageBuilder@ can be found in the *Quick Reference*.
+More options for the @RabbitMessagePublisher@ can be found in the *Quick Reference*.
 {note}

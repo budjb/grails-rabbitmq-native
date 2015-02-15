@@ -1,7 +1,4 @@
-@artifact.package@import com.budjb.rabbitmq.MessageContext
-
-@
-import java.lang.Object
+@artifact.package@import com.budjb.rabbitmq.consumer.MessageContext
 
 class @artifact.name@ {
     /**

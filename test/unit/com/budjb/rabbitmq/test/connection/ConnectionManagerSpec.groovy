@@ -204,4 +204,36 @@ class ConnectionManagerSpec extends Specification {
         1 * connection2.closeConnection()
         connectionManager.connections.size() == 0
     }
+
+    def 'If a null connection name is passed to getConnection(String), the default connection should be returned'() {
+        setup:
+        ConfigObject config = new ConfigObject()
+        config.putAll([
+            'rabbitmq': [
+                'connection': {
+                    connection(
+                        'name': 'primaryConnection',
+                        'isDefault': true,
+                        'host': 'test.budjb.com',
+                        'username': 'test-user',
+                        'password': 'test-password'
+                    )
+                    connection(
+                        'name': 'secondaryConnection',
+                        'host': 'foo.budjb.com',
+                        'username': 'test-user',
+                        'password': 'test-password'
+                    )
+                }
+            ]
+        ])
+        grailsApplication.getConfig() >> config
+        connectionManager.load()
+
+        when:
+        ConnectionContext connection = connectionManager.getConnection(null)
+
+        then:
+        connection != null
+    }
 }

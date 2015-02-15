@@ -8,7 +8,7 @@ is no longer needed.
 {warning}
 
 h4. Channel Efficiency
-Creating channels takes time. If a @RabbitMessageBuilder@ instance is not passed a @Channel@ instance when it is constructed, the builder will create a temporary channel to publish
+Creating channels takes time. If the @rabbitMessagePublisher@ is not passed a @Channel@ instance when a message is sent, the publisher will create a temporary channel to publish
 the message. While this is convenient, it also slows down publishing messages considerably (for example, 65ms per message published). When a bulk publish job is required, the job
-can be sped up by creating a channel before building the @RabbitMessageBuilder@ and passing that channel into its constructor. In tests, this has brought down the publish time
+can be sped up by creating a single channel to be used when sending multiple messages. In tests, this has brought down the publish time
 per message from 65ms to 1ms or less per message. Be sure to close the channel when the bulk publish job is completed.

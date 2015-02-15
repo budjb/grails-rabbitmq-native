@@ -1,19 +1,19 @@
-h1. type
+h1. priority
 
 h2. Purpose
 
-Sets the type property of the message.
+Sets the priority of the message.
 
 h2. Examples
 
 {code}
-new RabbitMessageBuilder().send {
+rabbitMessagePublisher.send {
     routingKey = "example.queue"
-    type = "type"
+    priority = 5
     body = "test message"
 }
 {code}
 
 h2. Description
 
-Message type name.
+Message priority, 0 to 9.

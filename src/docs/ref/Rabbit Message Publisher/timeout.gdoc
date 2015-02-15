@@ -7,7 +7,7 @@ Sets the amount of time, in milliseconds, an RPC message will wait before giving
 h2. Examples
 
 {code}
-new RabbitMessageBuilder().send {
+rabbitMessagePublisher.send {
     routingKey = "example.queue"
     timeout = 20 * 60 * 1000 // 20 seconds
     body = "message"

@@ -7,7 +7,7 @@ Sets the expiration property of the message.
 h2. Examples
 
 {code}
-new RabbitMessageBuilder().send {
+rabbitMessagePublisher.send {
     routingKey = "example.queue"
     expiration = "Tuesday, October 22nd 2013"
     body = "test message"

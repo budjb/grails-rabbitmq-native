@@ -1,4 +1,7 @@
-h3. Version 2.0.11 - TODO
+h3. Version 3.0.3 - TODO
+* Introduced the @rabbitMessagePublisher@ bean to replace the @RabbitMessageBiulder@.
+* Deprecated the @RabbitMessageBuilder@.
+* Massive refactor of the internals of the plugin.  See the upgrading page for more detailed information about what has changed.
 * Added the ability to configure consumers centrally in the application's configuration file (thanks Erwan Arzur!).
 * Updated RabbitMQ library version to 3.4.3.
 

@@ -23,6 +23,7 @@ consuming:
         direct: Direct Exchanges
         headers: Headers Exchanges
     consmulti: Multi-Server
+    centralconf: Central Configuration
 publishing:
     title: Publishing Messages
     send: Sending Messages

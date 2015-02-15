@@ -158,6 +158,10 @@ class ConnectionManager {
      * @return
      */
     public ConnectionContext getConnection(String name) {
+        if (!name) {
+            return getConnection()
+        }
+
         ConnectionContext context = connections.find { it.getConfiguration().getName() == name }
 
         if (!context) {

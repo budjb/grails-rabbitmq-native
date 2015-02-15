@@ -7,7 +7,7 @@ Sets which connection should be used to send the message to.
 h2. Examples
 
 {code}
-new RabbitMessageBuilder().send {
+rabbitMessagePublisher.send {
     exchange = "example.exchange"
     routingKey = "example.topic"
     body = "message"
