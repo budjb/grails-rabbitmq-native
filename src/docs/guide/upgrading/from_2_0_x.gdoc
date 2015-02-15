@@ -1,0 +1,23 @@
+The upgrade from any version in the 2.0.X range to 3.0.X includes a massive refactoring of the internals of the plugin.  If users did not extend or override
+the @RabbitContext@, @RabbitMessageBuilder@, or any of the other helper classes, the amount of impact is limited to a couple package name changes.
+
+Below are the changes that were made, at a high level:
+
+* @RabbitMessageBuilder@ is deprecated.  The class still exists and its interface is the same, however, the code in the class has been ripped out and now proxies requests to the @rabbitMessagePublisher@ bean.  The builder will be removed at some point in the near future.
+* @RabbitContext@ used to contain a significant amount of code related to management of message converters, consumers, and connections.  That functionality has been broken out into their own respective classes.  The @RabbitContext@ now serves only as a class to aggregate functionality useful to users of the plugin, and should still be used to simplify interfacing with the plugin rather than using the underlying beans directly.
+* Introduced the @rabbitMessagePublisher@ as a replacement for the @RabbitMessageBuilder@.  This bean can be injected into other spring managed beans, such as services, controllers, and rabbit consumers.  Its functionality follows the builder closely, and users may send messages based on configurations made through closures or through the new @RabbitMessageProperties@ object.  The short-hand convenience methods are still available as well.
+* Introduced the @messageConverterManager@ bean to handle all operations pertaining to message converters.
+* Introduced the @consumerManager@ bean to handle all operations pertaining to message consumers.
+* Introduced the @connectionManager@ bean to handle all operations pertaining to RabbitMQ connections and channels.
+* Introduced the @queueBuilder@ bean to handle creating configured exchanges and queues.
+* The @MessageContext@ class has been moved into a new package: @com.budjb.rabbitmq.consumer@.
+* The @AutoAck@ enum has been moved into a new package: @com.budjb.rabbitmq.consumer@.
+* The @ConsumerConfiguration@ class has been moved into a new package: @com.budjb.rabbitmq.consumer@.
+* The @MessageConvertMethod@ class has been moved into a new package: @com.budjb.rabbitmq.consumer@.
+* The @ConnectionContext@ class has been moved into a new package: @com.budjb.rabbitmq.connection@.
+* The @ConnectionConfiguration@ class has been moved into a new package: @com.budjb.rabbitmq.connection@.
+* The @MessageConverter@ abstract class has been moved into a new package: @com.budjb.rabbitmq.converter@.
+* All of the bundles message converters have been moved into a new package: @com.budjb.rabbitmq.converter@.
+* The @RabbitMessageBuilder@ class has been moved into a new package: @com.budjb.rabbitmq.publisher@.
+* A large amount of unit tests and some integration tests have been added to the project.  These tests rely on the Spock mocking framework, but the test files and dependencies are not exported with the plugin so that a new plugin dependency on Spock is not created.
+* The closures used for publishing messages have had their resolving strategy changed from @OWNER_FIRST@ to @DELEGATE_FIRST@. This should not have much of an impact, but in some cases closures may need to explicity qualify some properties in the closures with @delegate@.

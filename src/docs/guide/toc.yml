@@ -37,4 +37,7 @@ advanced:
     rabbitcontext: Rabbit Context
     channels: Channels
     transactions: Transactions
+upgrading:
+    title: Upgrading
+    from_2_0_x: From 2.0.X
 changelog: Changelog

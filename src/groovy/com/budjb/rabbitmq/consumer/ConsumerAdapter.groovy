@@ -19,7 +19,6 @@ import com.budjb.rabbitmq.publisher.RabbitMessageBuilder
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
-import com.budjb.rabbitmq.converter.MessageConvertMethod
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.MessageConvertException
 import com.rabbitmq.client.AMQP

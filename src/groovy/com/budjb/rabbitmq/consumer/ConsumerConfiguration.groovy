@@ -15,8 +15,6 @@
  */
 package com.budjb.rabbitmq.consumer
 
-import com.budjb.rabbitmq.converter.MessageConvertMethod
-
 class ConsumerConfiguration {
     /**
      * Queue to listen on.
