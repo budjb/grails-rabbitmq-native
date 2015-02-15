@@ -5,6 +5,15 @@ h3. Version 3.0.3 - TODO
 * Added the ability to configure consumers centrally in the application's configuration file (thanks Erwan Arzur).
 * Updated RabbitMQ library version to 3.4.3.
 
+h3. Version 3.0.2
+* Internal release, see 3.0.3.
+
+h3. Version 3.0.1
+* Internal release, see 3.0.3.
+
+h3. Version 3.0.0
+* Internal Release, see 3.0.3.
+
 h3. Version 2.0.10 - 9/11/2014
 * Fix bug with converters that prevented converters later in the processing list from executing if another convert is unable to marshall data from bytes.
 * Add @enabled@ flag to the configuration. If false, completely disables the plugin from starting.
