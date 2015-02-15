@@ -23,6 +23,7 @@ consuming:
         direct: Direct Exchanges
         headers: Headers Exchanges
     consmulti: Multi-Server
+    centralconf: Central Configuration
 publishing:
     title: Publishing Messages
     send: Sending Messages
@@ -32,7 +33,11 @@ converters:
     custom: Custom Message Converters
 advanced:
     title: Advanced Usage
-    rabbitcontext: The Rabbit Context
+    beans: Spring Beans
+    rabbitcontext: Rabbit Context
     channels: Channels
     transactions: Transactions
+upgrading:
+    title: Upgrading
+    from_2_0_x: From 2.0.X
 changelog: Changelog

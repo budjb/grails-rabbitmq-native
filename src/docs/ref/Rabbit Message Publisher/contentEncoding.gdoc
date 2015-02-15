@@ -1,0 +1,19 @@
+h1. contentEncoding
+
+h2. Purpose
+
+Sets the content encoding property of the message.
+
+h2. Examples
+
+{code}
+rabbitMessagePublisher.send {
+    routingKey = "example.queue"
+    contentEncoding = "base64"
+    body = "test message"
+}
+{code}
+
+h2. Description
+
+MIME content encoding.

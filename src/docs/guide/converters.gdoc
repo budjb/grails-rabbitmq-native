@@ -3,6 +3,7 @@ Message converters are classes that are responsible for converting objects to an
 * @Integer@
 * @Map@
 * @List@
+* @GString@
 * @String@
 
-These converters allow message handlers to consume and return data without having to convert that data themselves. They are also used with the @RabbitMessageBuilder@ class.
+These converters allow message handlers to consume and return data without having to convert that data themselves. They are also used with the @RabbitMessagePublisher@ class.

@@ -49,7 +49,7 @@ Update the consumer to reflect the following:
 {code}
 package com.example
 
-import com.budjb.rabbitmq.MessageContext
+import com.budjb.rabbitmq.consumer.MessageContext
 
 class TestConsumer {
     /**
@@ -83,11 +83,13 @@ Update the controller to reflect the following:
 {code}
 package com.example
 
-import com.budjb.rabbitmq.RabbitMessageBuilder
+import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 
 class TestController {
+    RabbitMessagePublisher rabbitMessagePublisher
+
     def index() {
-        render new RabbitMessageBuilder().rpc {
+        render rabbitMessagePublisher.rpc {
             routingKey = "testqueue"
             body = "Hello!"
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 Bud Byrd
+ * Copyright 2013-2015 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 package com.budjb.rabbitmq.converter
 
-import com.budjb.rabbitmq.MessageConverter
 import groovy.json.JsonBuilder
+import groovy.json.JsonException
 import groovy.json.JsonSlurper
 
 class ListMessageConverter extends MessageConverter<List> {
@@ -42,7 +42,12 @@ class ListMessageConverter extends MessageConverter<List> {
 
     @Override
     public byte[] convertFrom(List input) {
-        return new JsonBuilder(input).toString().getBytes()
+        try {
+            return new JsonBuilder(input).toString().getBytes()
+        }
+        catch (JsonException e) {
+            return null
+        }
     }
 
     @Override

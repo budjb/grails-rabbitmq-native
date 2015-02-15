@@ -56,6 +56,6 @@ class MessageConsumerArtefactHandler extends ArtefactHandlerAdapter {
      * @return
      */
     public static boolean isConsumer(@SuppressWarnings("rawtypes") Class clazz) {
-        return clazz.getName().endsWith(SUFFIX) && RabbitConsumer.isConsumer(clazz);
+        return clazz.getName().endsWith(SUFFIX);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 Bud Byrd
+ * Copyright 2013-2015 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,5 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-ant.mkdir(dir:"${basedir}/grails-app/rabbit-consumers")
-ant.mkdir(dir:"${basedir}/grails-app/rabbit-converters")
+ant.mkdir(dir: "${basedir}/grails-app/rabbit-consumers")
+ant.mkdir(dir: "${basedir}/grails-app/rabbit-converters")

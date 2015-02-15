@@ -1,22 +1,8 @@
-The bean responsible for connecting to the RabbitMQ server and keeping track of the connection and channel objects is the @RabbitContext@. While you may never need to use this bean, it can be useful.
+Besides the @rabbitMessagePublisher@, the @rabbitContext@ is the bean users will most likely interact with.  While you may never need to use this bean, it can be useful.
+As with any Spring bean, the @rabbitContext@ can be injected into any Spring managed bean, such as services, controllers, and rabbit consumers.
 
-The @RabbitContext@ bean can be injected as follows:
-{code}
-class TestService {
-    def rabbitContext
-}
-{code}
+Below are some use cases which may be helpful for users wanting to use the plugin outside of its conventions.
 
-The bean can also be retrieved from the @ApplicationContext@, as follows:
-{code}
-import grails.util.Holders
-
-class TestObject {
-    def testMethod() {
-        RabbitContext context = Holders.applicationContext.getBean('rabbitContext')
-    }
-}
-{code}
-
-Of particular importance is the @getConnection()@ method of the @RabbitContext@ bean.  This method returns a @ConnectionContext@ object, which
-exposes the RabbitMQ @Connection@ object through its own @getConnection()@ method.
+* The @rabbitContext.getConnection()@ method returns a @ConnectionContext@ object, which exposes the RabbitMQ @Connection@ object through its own @getConnection()@ method.
+* The @rabbitContext.getChannel()@ method returns a RabbitMQ @Channel@ object, which can be used to manually send messages, consume messages, and much more.
+* The @rabbitContext.startConsumers()@ method is useful when a user of the plugin wants to control when to start consumer messages during the application startup.

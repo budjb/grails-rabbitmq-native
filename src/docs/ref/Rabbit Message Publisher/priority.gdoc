@@ -1,0 +1,19 @@
+h1. priority
+
+h2. Purpose
+
+Sets the priority of the message.
+
+h2. Examples
+
+{code}
+rabbitMessagePublisher.send {
+    routingKey = "example.queue"
+    priority = 5
+    body = "test message"
+}
+{code}
+
+h2. Description
+
+Message priority, 0 to 9.

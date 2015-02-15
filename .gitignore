@@ -17,3 +17,5 @@ stacktrace.log
 *.bak
 .classpath
 .project
+*.iml
+.idea

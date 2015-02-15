@@ -1,13 +1,20 @@
-Sending a message means publishing a message to an exchange or queue and not waiting for a response (fire and forget). The only required parameters to the builder
+Sending a message means publishing a message to an exchange or queue and not waiting for a response (fire and forget). The only required parameters to the publisher 
 are a queue or exchange to publish the message to, and the body of the message.
 
 h4. Send Example
 {code}
-// Send a message
-new RabbitMessageBuilder().send {
-    exchange = "some.exchange"
-    routingKey = "some.routingKey"
-    body = "hi!"
+import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
+
+class ExampleService {
+    RabbitMessagePublisher rabbitMessagePublisher
+
+    def sendSomeMessage() {
+        rabbitMessagePublisher.send {
+            exchange = "some.exchange"
+            routingKey = "some.routingKey"
+            body = "hi!"
+        }
+    }
 }
 {code}
 

@@ -1,0 +1,19 @@
+h1. type
+
+h2. Purpose
+
+Sets the type property of the message.
+
+h2. Examples
+
+{code}
+rabbitMessagePublisher.send {
+    routingKey = "example.queue"
+    type = "type"
+    body = "test message"
+}
+{code}
+
+h2. Description
+
+Message type name.

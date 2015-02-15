@@ -1,0 +1,19 @@
+h1. body
+
+h2. Purpose
+
+Body of the message to send to the RabbitMQ server.
+
+h2. Examples
+
+{code}
+rabbitMessagePublisher.send {
+    routingKey = "example.queue"
+    body = "test message"
+}
+{code}
+
+h2. Description
+
+The body is a required part of the message to transmit. The RabbitMQ server expects the message to be in a byte array format, but the plugin attempts to handle the conversion of objects for you via the
+[MessageConverter|guide:converters] objects. You may assign any type of object to this property as long as there is a message converter available to convert the object to a byte array.

@@ -1,11 +1,40 @@
 When a client publishes a message and waits for a return reply, this is considered an RPC-style operation. Typically, the server-side of the operation (in this case, a message consumer/handler) must
 respond to the client on a queue that the client requested manually. This plugin provides a very convenient method to respond to the client without having to manually construct a response message.
 
-The client will provide a response queue to the server to reply to. This queue name is stored in the @MessageContext.properties.replyTo@ variable. If a client publishes this variable, and the handler returns
-some data, the plugin will convert the data returned from the message handler and build a response message for you.
+The client will provide a response queue to the server to reply to. This queue name is stored in the @MessageContext.properties.replyTo@ variable. If a client publishes
+this variable, and the handler returns some data, the plugin will convert the data returned from the message handler and build a response message for you.
+
+The following example illustrates responding via a handler's returned data.
+
+{code}
+class RpcExampleConsumer {
+    def handleMessage(String message, MessageContext messageContext) {
+        println "received ${message}"
+
+        return "response" // this message will be sent back to the consumer via its replyTo queue
+    }
+}
+{code}
+
+Alternatively, the @rabbitMessagePublisher@ can be used to respond.
+
+{code}
+class RpcExampleConsumer {
+    def rabbitMessagePublisher
+
+    def handleMessage(String message, MessageContext messageContext) {
+        println "received ${message}"
+
+        rabbitMessagePublisher.send {
+            routingKey: messageContext.properties.replyTo
+            body: "response"
+        }
+    }
+}
+{code}
 
 {note}
 Allowing the plugin to build a reply message only converts the data returned from the message handler and publishes it to the reply queue. If you need to set any of the other message properties,
-like headers, content-types, etc, you must manually build the response message, and refrain from returning data from the message handler.
+like headers, content-types, etc, you must manually build the response message using the @rabbitMessagePublisher@, and refrain from returning data from the message handler.
 {note}
 

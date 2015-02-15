@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>4 Consuming Messages 2.0.10</title>
+    <title>4 Consuming Messages 3.0.3</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -45,7 +45,10 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0"><a href="../guide/advanced.html"><strong>7</strong><span>Advanced Usage</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/changelog.html"><strong>8</strong><span>Changelog</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/upgrading.html"><strong>8</strong><span>Upgrading</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/changelog.html"><strong>9</strong><span>Changelog</span></a>
                     </div>
                     
                 </div>
@@ -86,7 +89,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 2.0.10</p>
+                    <p><strong>Version:</strong> 3.0.3</p>
 
                     
                 </div>
@@ -134,6 +137,9 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0px"><a href="#consmulti"><strong>4.4</strong><span>Multi-Server</span></a>
                     </div>
                     
+                    <div class="toc-item" style="margin-left:0px"><a href="#centralconf"><strong>4.5</strong><span>Central Configuration</span></a>
+                    </div>
+                    
                 </div>
                 
 
@@ -158,7 +164,7 @@ in the consumer class. The message handler is the mechanism by which messages ar
 In its most basic form, a message handler method takes in the body of the received message, and a <code>MessageContext</code>
 object that contains the message parameters received from the RabbitMQ server, along with the consumer's channel
 that the handler should publish messages through.<p class="paragraph"/>This is the most generic form of a message handler:
-<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.consumer.MessageContext<p class="paragraph"/>class ExampleConsumer &#123;
     // ...<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
         // Do work
     &#125;
@@ -174,7 +180,7 @@ and if the conversion was successful, determine if an appropriate handler has be
 <div class="code"><pre>&#123;<span class="java&#45;quote">"foo"</span>:<span class="java&#45;quote">"bar"</span>,<span class="java&#45;quote">"hi"</span>:<span class="java&#45;quote">"there"</span>&#125;</pre></div><p class="paragraph"/>If the above message is received, the converter for the Map class type will convert the byte array to a Map
 of the JSON data. If a valid handler for the Map type is defined, the handler will receive the converted JSON
 so that the handler does not need to handle the conversion.<p class="paragraph"/>The following handlers would accept the converted Map:
-<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.consumer.MessageContext<p class="paragraph"/>class ExampleConsumer &#123;
     // ...<p class="paragraph"/>    def handleMessage(Map body, MessageContext context) &#123;
         // Do work
     &#125;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
@@ -189,7 +195,7 @@ byte array received from the RabbitMQ server.
 <blockquote class="warning">
 If no handler is defined that can handle the received message (including the raw byte array), an error will
 be logged and the message will be rejected.
-</blockquote><p class="paragraph"/>The plugin has built-in <a href="../guide/single.html#converters" class="guide">converters</a> for <code>Integer</code>, <code>Map</code>, <code>List</code>, and <code>String</code> types. The plugin allows users
+</blockquote><p class="paragraph"/>The plugin has built-in <a href="../guide/single.html#converters" class="guide">converters</a> for <code>Integer</code>, <code>Map</code>, <code>List</code>, <code>GString</code>, and <code>String</code> types. The plugin allows users
 to define their own converters to convert other object types, which will be discussed later in this guide.
 
 
@@ -202,7 +208,7 @@ takes the <code>MessageContext</code> object. The order of preference when multi
 <li>Short form (body)</li>
 <li><code>MessageContext</code> form</li>
 </ol><p class="paragraph"/>The short-form handlers are shown below:
-<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.consumer.MessageContext<p class="paragraph"/>class ExampleConsumer &#123;
     // ...<p class="paragraph"/>    def handleMessage(<span class="java&#45;object">String</span> message) &#123;
         // Do work
     &#125;<p class="paragraph"/>    def handleMessage(MessageContext context) &#123;
@@ -223,18 +229,32 @@ is a list of properties of the class.
 
 <h2 id="rpc">4.1.5 RPC-Style Messages</h2>
 When a client publishes a message and waits for a return reply, this is considered an RPC-style operation. Typically, the server-side of the operation (in this case, a message consumer/handler) must
-respond to the client on a queue that the client requested manually. This plugin provides a very convenient method to respond to the client without having to manually construct a response message.<p class="paragraph"/>The client will provide a response queue to the server to reply to. This queue name is stored in the <code>MessageContext.properties.replyTo</code> variable. If a client publishes this variable, and the handler returns
-some data, the plugin will convert the data returned from the message handler and build a response message for you.<p class="paragraph"/><blockquote class="note">
+respond to the client on a queue that the client requested manually. This plugin provides a very convenient method to respond to the client without having to manually construct a response message.<p class="paragraph"/>The client will provide a response queue to the server to reply to. This queue name is stored in the <code>MessageContext.properties.replyTo</code> variable. If a client publishes
+this variable, and the handler returns some data, the plugin will convert the data returned from the message handler and build a response message for you.<p class="paragraph"/>The following example illustrates responding via a handler's returned data.<p class="paragraph"/><div class="code"><pre>class RpcExampleConsumer &#123;
+    def handleMessage(<span class="java&#45;object">String</span> message, MessageContext messageContext) &#123;
+        println <span class="java&#45;quote">"received $&#123;message&#125;"</span><p class="paragraph"/>        <span class="java&#45;keyword">return</span> <span class="java&#45;quote">"response"</span> // <span class="java&#45;keyword">this</span> message will be sent back to the consumer via its replyTo queue
+    &#125;
+&#125;</pre></div><p class="paragraph"/>Alternatively, the <code>rabbitMessagePublisher</code> can be used to respond.<p class="paragraph"/><div class="code"><pre>class RpcExampleConsumer &#123;
+    def rabbitMessagePublisher<p class="paragraph"/>    def handleMessage(<span class="java&#45;object">String</span> message, MessageContext messageContext) &#123;
+        println <span class="java&#45;quote">"received $&#123;message&#125;"</span><p class="paragraph"/>        rabbitMessagePublisher.send &#123;
+            routingKey: messageContext.properties.replyTo
+            body: <span class="java&#45;quote">"response"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/><blockquote class="note">
 Allowing the plugin to build a reply message only converts the data returned from the message handler and publishes it to the reply queue. If you need to set any of the other message properties,
-like headers, content-types, etc, you must manually build the response message, and refrain from returning data from the message handler.
+like headers, content-types, etc, you must manually build the response message using the <code>rabbitMessagePublisher</code>, and refrain from returning data from the message handler.
 </blockquote><p class="paragraph"/>
 
 
 <h2 id="queues">4.2 Subscribing To Queues</h2>
 Message consumers can subscribe to either queues or exchanges. When a consumer is registered to a queue, the consumer will receive messages from the queue as
-the RabbitMQ server determines that it's the consumer's turn to receive a message, since there may be multiple listeners on the same queue.<p class="paragraph"/>Each message consumer class must have a configuration defined.  The configuration should be a Map, assigned to a static variable named <code>rabbitConfig</code>. To
-subscribe to queues, the only required configuration option is the <code>queue</code> variable, which is the name of the queue to subscribe to.<p class="paragraph"/>Here is a simple example of a consumer subscribing to a queue.
-<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+the RabbitMQ server determines that it's the consumer's turn to receive a message, since there may be multiple listeners on the same queue.<p class="paragraph"/>Each message consumer class must have a configuration defined. There are 2 methods to specify the configuration:
+<ul class="star">
+<li>The consumer class can have a <code>Map</code> assigned to a static variable named <code>rabbitConfig</code>. To subscribe to queues, the only required configuration option is the <code>queue</code> variable, which is the name of the queue to subscribe to.</li>
+<li>The application's configuration file can contain the configuration with the path <code>rabbitmq.consumers.&#60;ClassName&#62;</code>.  See the section below for more details.</li>
+</ul><p class="paragraph"/>Here is a simple example of a consumer subscribing to a queue.
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.consumer.MessageContext<p class="paragraph"/>class ExampleConsumer &#123;
     <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
         <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"test.queue"</span>
     &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
@@ -247,7 +267,11 @@ subscribe to queues, the only required configuration option is the <code>queue</
 <h2 id="exchanges">4.3 Subscribing To Exchanges</h2>
 Subscribing to a exchanges is different from subscribing to queues, as there are different types of exchanges with different behavior.
 RabbitMQ's libraries do not provide a direct way to subscribe to an exchange, however the plugin provides a way to subscribe to exchanges directly by creating
-a temporary queue that is bound to an exchange. The binding requirements differ between the different types of exchanges.
+a temporary queue that is bound to an exchange. The binding requirements differ between the different types of exchanges.<p class="paragraph"/><blockquote class="warning">
+Using the functionality to subscribe to an exchange works by creating a temporary queue at runtime that is bound to the exchange and consumed from by
+the message consumer.  It is important to note that these queues are randomly named and are exclusive and auto delete, so this feature is not
+suitable if messages that are left on this queue should persist if the application shuts down.
+</blockquote>
 
 
 
@@ -324,6 +348,20 @@ to specify which server the consumer should be bound to.  If the <code>connectio
     &#125;
 &#125;</pre></div>
 
+
+
+<h2 id="centralconf">4.5 Central Configuration</h2>
+It is also possible to define the consumer's configuration outside of the consumer in the Grails <code>Config.groovy</code> file.  All of the configuration
+options described above are valid for this type of configuration.  This functionality is valuable when a consumer's configuration needs to
+be determined at runtime, instead of being hardcoded in the consumer class itself.<p class="paragraph"/>To configuration a consumer in the Grails application's configuration file, an entry matching the consumer's class name should be present
+under the <code>rabbitmq.consumers</code> key, as follows:<p class="paragraph"/><div class="code"><pre>// &#8230;
+rabbitmq &#123;
+    consumers &#123;
+        ExampleConsumer &#123;
+            queue = <span class="java&#45;quote">"test.queue"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/>
 
 
                 <div style="clear:both;margin-top:15px;"></div>
@@ -430,64 +468,64 @@ to specify which server the consumer should be bound to.  If the <code>connectio
                             </div>
                     </div>
                     
-                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Builder</h1><div class="menu-sub">
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Publisher</h1><div class="menu-sub">
                         
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/appId.html">appId</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/appId.html">appId</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/autoConvert.html">autoConvert</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/autoConvert.html">autoConvert</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/body.html">body</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/body.html">body</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/connection.html">connection</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/connection.html">connection</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/contentEncoding.html">contentEncoding</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/contentEncoding.html">contentEncoding</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/contentType.html">contentType</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/contentType.html">contentType</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/correlationId.html">correlationId</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/correlationId.html">correlationId</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/deliveryMode.html">deliveryMode</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/deliveryMode.html">deliveryMode</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/exchange.html">exchange</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/exchange.html">exchange</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/expiration.html">expiration</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/expiration.html">expiration</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/header.html">header</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/header.html">header</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/messageId.html">messageId</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/messageId.html">messageId</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/priority.html">priority</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/replyTo.html">replyTo</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/routingKey.html">routingKey</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/routingKey.html">routingKey</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/timeout.html">timeout</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/timeout.html">timeout</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/timestamp.html">timestamp</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/timestamp.html">timestamp</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/type.html">type</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/type.html">type</a>
                             </div>
                             
-                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/userId.html">userId</a>
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/userId.html">userId</a>
                             </div>
                             
                             </div>
