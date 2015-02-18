@@ -99,6 +99,12 @@ class ConsumerManager implements ApplicationContextAware {
         // Create the adapter
         ConsumerAdapter adapter = createConsumerAdapter(consumer)
 
+        // If the adapter is not valid, do not register it
+        if (!adapter.isConsumerValid()) {
+            log.warn("not registering consumer '${consumer.class.simpleName}' because it is not valid")
+            return
+        }
+
         // Find the appropriate connection context
         ConnectionContext context = connectionManager.getConnection(adapter.getConfiguration().getConnection())
 

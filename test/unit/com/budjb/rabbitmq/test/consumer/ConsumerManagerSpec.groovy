@@ -134,6 +134,24 @@ class ConsumerManagerSpec extends Specification {
         adapter.connectionManager == connectionManager
     }
 
+    def 'If a consumer has no configuration, it should not be registered'() {
+        setup:
+        grailsApplication.getConfig() >> new ConfigObject()
+        GrailsClass artefact = Mock(GrailsClass)
+        artefact.getPropertyName() >> 'consumer'
+        MissingConfigurationConsumer consumer = new MissingConfigurationConsumer()
+        applicationContext.getBean('consumer') >> consumer
+        grailsApplication.getArtefacts('MessageConsumer') >> [artefact]
+        ConnectionContext connectionContext = Mock(ConnectionContext)
+        connectionManager.getConnection(*_) >> connectionContext
+
+        when:
+        consumerManager.load()
+
+        then:
+        0 * connectionContext.registerConsumer(_)
+    }
+
     def 'Test load/registering of consumer artefacts'() {
         setup:
         GrailsClass artefact1 = Mock(GrailsClass)
@@ -170,6 +188,12 @@ class ConsumerManagerSpec extends Specification {
             'queue': 'test-queue-2'
         ]
 
+        def handleMessage(def body, def messageContext) {
+
+        }
+    }
+
+    class MissingConfigurationConsumer {
         def handleMessage(def body, def messageContext) {
 
         }

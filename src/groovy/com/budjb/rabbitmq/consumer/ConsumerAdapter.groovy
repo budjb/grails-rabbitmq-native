@@ -256,7 +256,14 @@ class ConsumerAdapter {
      */
     public boolean isConsumerValid() {
         // Get the configuration
-        ConsumerConfiguration configuration = getConfiguration()
+        ConsumerConfiguration configuration
+        try {
+            configuration = getConfiguration()
+        }
+        catch (Exception e) {
+            log.error("unable to retrieve configuration for consumer '${getConsumerName()}")
+            return false
+        }
 
         // Check if there is either a local or central configuration
         if (!configuration) {

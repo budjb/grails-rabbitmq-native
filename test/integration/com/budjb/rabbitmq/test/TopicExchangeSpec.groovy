@@ -108,5 +108,4 @@ class TopicExchangeSpec extends MessageConsumerIntegrationTest {
         then:
         specificTopicConsumer.lastMessage != null
     }
-
 }
