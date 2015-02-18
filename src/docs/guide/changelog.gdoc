@@ -1,3 +1,8 @@
+h3. Version 3.0.4 - 2/18/2015
+* Fix a null pointer exception when a consumer has no configuration.
+* Add a unit test to test behavior when a consumer has no configuration.
+* Add an integration test to test behavior when sending a message directly to a queue.
+
 h3. Version 3.0.3 - 2/15/2015
 * Introduced the @rabbitMessagePublisher@ bean to replace the @RabbitMessageBuilder@.
 * Deprecated the @RabbitMessageBuilder@.
