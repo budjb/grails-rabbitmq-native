@@ -7,7 +7,7 @@ Sets whether incoming messages should be automatically acknowledged.
 h2. Examples
 
 {code}
-def rabbitConfig = [
+static rabbitConfig = [
     queue: "example.queue",
     autoAck: AutoAck.POST
 ]

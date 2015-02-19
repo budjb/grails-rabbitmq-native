@@ -7,7 +7,7 @@ Sets whether automatic transactions should be enabled on the consumer.
 h2. Examples
 
 {code}
-def rabbitConfig = [
+static rabbitConfig = [
     queue: "example.queue",
     transacted: true
 ]

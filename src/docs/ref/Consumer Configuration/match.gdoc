@@ -7,7 +7,7 @@ Set the match criteria to use when subscribing to a headers exchange.
 h2. Examples
 
 {code}
-def rabbitConfig = [
+static rabbitConfig = [
     exchange: "example.exchange",
     binding: ["foo": "bar"],
     match: "any"

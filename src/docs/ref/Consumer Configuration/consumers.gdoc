@@ -7,7 +7,7 @@ Set the number of concurrent consumers the message consumer should start.
 h2. Examples
 
 {code}
-def rabbitConfig = [
+static rabbitConfig = [
     queue: "example.queue",
     consumers: 10
 ]
