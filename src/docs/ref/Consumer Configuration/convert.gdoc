@@ -7,7 +7,7 @@ Sets the automatic message body conversion mode.
 h2. Examples
 
 {code}
-def rabbitConfig = [
+static rabbitConfig = [
     queue: "example.queue",
     convert: MessageConvertMethod.ALWAYS
 ]

@@ -7,7 +7,7 @@ Sets number of messages the consumer will prefetch.
 h2. Examples
 
 {code}
-def rabbitConfig = [
+static rabbitConfig = [
     queue: "example.queue",
     prefetchCount: 1
 ]
