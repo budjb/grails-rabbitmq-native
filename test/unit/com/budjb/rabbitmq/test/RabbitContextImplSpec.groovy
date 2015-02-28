@@ -19,7 +19,7 @@ import com.budjb.rabbitmq.QueueBuilder
 import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitContextImpl
 import com.budjb.rabbitmq.connection.ConnectionManager
-import com.budjb.rabbitmq.consumer.ConsumerManager
+import com.budjb.rabbitmq.consumer.ConsumerManagerImpl
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.context.ApplicationContext
@@ -29,7 +29,7 @@ class RabbitContextImplSpec extends Specification {
     GrailsApplication grailsApplication
     MessageConverterManager messageConverterManager
     ConnectionManager connectionManager
-    ConsumerManager consumerManager
+    ConsumerManagerImpl consumerManager
     RabbitContext rabbitContext
     QueueBuilder queueBuilder
 
@@ -37,7 +37,7 @@ class RabbitContextImplSpec extends Specification {
         grailsApplication = Mock(GrailsApplication)
         messageConverterManager = Mock(MessageConverterManager)
         connectionManager = Mock(ConnectionManager)
-        consumerManager = Mock(ConsumerManager)
+        consumerManager = Mock(ConsumerManagerImpl)
         queueBuilder = Mock(QueueBuilder)
 
         rabbitContext = new RabbitContextImpl()
@@ -196,7 +196,7 @@ class RabbitContextImplSpec extends Specification {
 
     def 'Ensure setConsumerManager(ConsumerManager) sets the proeprty correctly'() {
         setup:
-        ConsumerManager consumerManager = Mock(ConsumerManager)
+        ConsumerManagerImpl consumerManager = Mock(ConsumerManagerImpl)
 
         when:
         rabbitContext.setConsumerManager(consumerManager)

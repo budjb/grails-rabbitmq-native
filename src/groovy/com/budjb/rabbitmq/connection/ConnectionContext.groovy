@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 Bud Byrd
+ * Copyright 2015 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,167 +15,43 @@
  */
 package com.budjb.rabbitmq.connection
 
-import com.budjb.rabbitmq.consumer.ConsumerAdapter
+import com.budjb.rabbitmq.RabbitManagedContext
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
-import com.rabbitmq.client.ConnectionFactory
-import org.apache.log4j.Logger
 
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-
-@SuppressWarnings("unchecked")
-class ConnectionContext {
+interface ConnectionContext extends RabbitManagedContext {
     /**
-     * List of message consumers for this connection.
-     */
-    protected List<ConsumerAdapter> adapters = []
-
-    /**
-     * Connection configuration.
-     */
-    ConnectionConfiguration configuration
-
-    /**
-     * Lazy-loaded connection to RabbitMQ.
-     */
-    protected Connection connection
-
-    /**
-     * Connection factory to use to create a connection.
-     *
-     * This is here for injection during testing.
-     */
-    protected ConnectionFactory connectionFactory
-
-    /**
-     * Logger.
-     */
-    protected Logger log = Logger.getLogger(ConnectionContext)
-
-    /**
-     * Constructor.
-     *
-     * @param parameters
-     */
-    public ConnectionContext(ConnectionConfiguration configuration) {
-        this.configuration = configuration
-    }
-
-    /**
-     * Returns a connection instance based on this context's configuration properties.
+     * Returns the RabbitMQ connection.
      *
      * @return
      */
-    public Connection getConnection() {
-        // Connect if we are not already connected
-        if (!this.connection) {
-            openConnection()
-        }
-
-        return this.connection
-    }
+    Connection getConnection() throws IllegalStateException
 
     /**
-     * Starts the connection to the RabbitMQ broker.
-     */
-    public void openConnection() {
-        // Log it
-        log.info("connecting to RabbitMQ server '${configuration.getName()}' at '${configuration.getHost()}:${configuration.getPort()}' on virtual host '${configuration.getVirtualHost()}'")
-
-        // Create the connection factory
-        ConnectionFactory factory = getConnectionFactory()
-
-        // Configure it
-        factory.setUsername(configuration.getUsername())
-        factory.setPassword(configuration.getPassword())
-        factory.setPort(configuration.getPort())
-        factory.setHost(configuration.getHost())
-        factory.setVirtualHost(configuration.getVirtualHost())
-        factory.setAutomaticRecoveryEnabled(configuration.getAutomaticReconnect())
-        factory.setRequestedHeartbeat(configuration.getRequestedHeartbeat())
-
-        // Optionally enable SSL
-        if (configuration.getSsl()) {
-            factory.useSslProtocol()
-        }
-
-        // Create the thread pool service
-        ExecutorService executorService
-        if (configuration.getThreads() > 0) {
-            executorService = Executors.newFixedThreadPool(configuration.getThreads())
-        }
-        else {
-            executorService = Executors.newCachedThreadPool()
-        }
-
-        this.connection = factory.newConnection(executorService)
-    }
-
-    /**
-     * Closes the connection to the RabbitMQ broker, if it's open.
-     */
-    public void closeConnection() {
-        if (!connection?.isOpen()) {
-            return
-        }
-
-        stopConsumers()
-
-        log.debug("closing connection to the RabbitMQ server")
-        connection.close()
-        connection = null
-    }
-
-    /**
-     * Starts all consumers associated with this connection.
-     */
-    public void startConsumers() {
-        adapters*.start()
-    }
-
-    /**
-     * Stops all consumers associated with this connection.
-     */
-    public void stopConsumers() {
-        adapters*.stop()
-    }
-
-    /**
-     * Creates an un-tracked channel.
+     * Returns the context's configuration.
      *
      * @return
      */
-    public Channel createChannel() {
-        return connection.createChannel()
-    }
+    ConnectionConfiguration getConfiguration()
 
     /**
-     * Adds a consumer to the connection.
+     * Returns whether the context is the default connection.
      *
-     * @param clazz
-     */
-    public void registerConsumer(ConsumerAdapter adapter) {
-        adapters << adapter
-    }
-
-    /**
-     * Sets the connection factory to create a connection with.
-     *
-     * @param connectionFactory
-     */
-    public void setConnectionFactory(ConnectionFactory connectionFactory) {
-        this.connectionFactory = connectionFactory
-    }
-
-    /**
-     * Returns the connection factory to create a connection with.
      * @return
      */
-    protected ConnectionFactory getConnectionFactory() {
-        if (!connectionFactory) {
-            this.connectionFactory = new ConnectionFactory()
-        }
-        return connectionFactory
-    }
+    boolean getIsDefault()
+
+    /**
+     * Sets whether the context is the default connection.
+     *
+     * @param isDefault
+     */
+    void setIsDefault(boolean isDefault)
+
+    /**
+     * Creates a channel.
+     *
+     * @return
+     */
+    Channel createChannel() throws IllegalStateException
 }

@@ -15,12 +15,12 @@
  */
 package com.budjb.rabbitmq.consumer
 
-import com.budjb.rabbitmq.publisher.RabbitMessageBuilder
-import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
+import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.MessageConvertException
+import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.DefaultConsumer
@@ -32,8 +32,7 @@ import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
-@SuppressWarnings("unchecked")
-class ConsumerAdapter {
+class ConsumerContextImpl implements ConsumerContext {
     /**
      * Consumer object used to receive messages from the RabbitMQ library.
      */
@@ -41,7 +40,7 @@ class ConsumerAdapter {
         /**
          * Consumer adapter containing the context for this consumer.
          */
-        public ConsumerAdapter adapter
+        public ConsumerContextImpl adapter
 
         /**
          * Connection context associated with the consumer.
@@ -54,7 +53,7 @@ class ConsumerAdapter {
          * @param channel
          * @param adapter
          */
-        private RabbitConsumer(Channel channel, ConsumerAdapter adapter, ConnectionContext connectionContext) {
+        private RabbitConsumer(Channel channel, ConsumerContextImpl adapter, ConnectionContext connectionContext) {
             // Run the parent
             super(channel)
 
@@ -73,6 +72,7 @@ class ConsumerAdapter {
          * @param properties
          * @param body
          */
+        @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
             // Wrap up the parameters into a context
             MessageContext context = new MessageContext(
@@ -85,7 +85,7 @@ class ConsumerAdapter {
             )
 
             // Hand off the message to the adapter.
-            ConsumerAdapter.this.deliverMessage(context)
+            ConsumerContextImpl.this.deliverMessage(context)
         }
     }
 
@@ -122,7 +122,7 @@ class ConsumerAdapter {
     /**
      * Logger.
      */
-    Logger log = Logger.getLogger(ConsumerAdapter)
+    Logger log = Logger.getLogger(ConsumerContextImpl)
 
     /**
      * Grails application bean.
@@ -150,7 +150,7 @@ class ConsumerAdapter {
     List<RabbitConsumer> consumers = []
 
     /**
-     * Persistence intercepter for Hibernate session handling.
+     * Persistence interceptor for Hibernate session handling.
      */
     Object persistenceInterceptor
 
@@ -170,7 +170,7 @@ class ConsumerAdapter {
      * @param clazz
      * @param grailsApplication
      */
-    public ConsumerAdapter(
+    public ConsumerContextImpl(
         Object consumer,
         GrailsApplication grailsApplication,
         ConnectionManager connectionManager,
@@ -187,10 +187,11 @@ class ConsumerAdapter {
     }
 
     /**
-     * Retrieve the name of the connection the consumer belongs to.
+     * Return the name of the connection the consumer belongs to.
      *
      * @return
      */
+    @Override
     public String getConnectionName() {
         return getConfiguration().getConnection()
     }
@@ -202,7 +203,7 @@ class ConsumerAdapter {
      */
     protected Map getCentralConfiguration() {
         // Attempt to find a configuration path that matches the class name
-        def configuration = grailsApplication.config.rabbitmq.consumers."${getConsumerName()}"
+        def configuration = grailsApplication.config.rabbitmq.consumers."${getId()}"
 
         // Ensure it exists and is a map
         if (!configuration || !Map.class.isAssignableFrom(configuration.getClass())) {
@@ -238,10 +239,11 @@ class ConsumerAdapter {
     }
 
     /**
-     * Finds and returns the consumer's configuration, or null if one is not defined.
+     * Returns the consumer's configuration, or null if one is not defined.
      *
      * @return
      */
+    @Override
     public ConsumerConfiguration getConfiguration() {
         if (!configuration) {
             configuration = new ConsumerConfiguration(getLocalConfiguration() ?: getCentralConfiguration())
@@ -254,14 +256,15 @@ class ConsumerAdapter {
      *
      * @return
      */
-    public boolean isConsumerValid() {
+    @Override
+    public boolean isValid() {
         // Get the configuration
         ConsumerConfiguration configuration
         try {
             configuration = getConfiguration()
         }
         catch (Exception e) {
-            log.error("unable to retrieve configuration for consumer '${getConsumerName()}")
+            log.error("unable to retrieve configuration for consumer '${getId()}")
             return false
         }
 
@@ -277,13 +280,13 @@ class ConsumerAdapter {
 
         // Make sure a queue or an exchange was specified
         if (!configuration.getQueue() && !configuration.getExchange()) {
-            log.warn("RabbitMQ configuration for consumer '${getConsumerName()}' is missing a queue or an exchange")
+            log.warn("RabbitMQ configuration for consumer '${getId()}' is missing a queue or an exchange")
             return false
         }
 
         // Make sure that only a queue or an exchange was specified
         if (configuration.getQueue() && configuration.getExchange()) {
-            log.warn("RabbitMQ configuration for consumer '${getConsumerName()}' can not have both a queue and an exchange")
+            log.warn("RabbitMQ configuration for consumer '${getId()}' can not have both a queue and an exchange")
             return false
         }
 
@@ -295,7 +298,8 @@ class ConsumerAdapter {
      *
      * @return
      */
-    public String getConsumerName() {
+    @Override
+    public String getId() {
         return consumer.getClass().getSimpleName()
     }
 
@@ -306,10 +310,11 @@ class ConsumerAdapter {
      * @param handler Handler object to wrap a RabbitMQ consumer around.
      * @return A list of channels that were created for the consumer.
      */
+    @Override
     public void start() {
         // Ensure the object is a consumer
-        if (!isConsumerValid()) {
-            log.warn("not registering '${getConsumerName()}' as a RabbitMQ message consumer because it is not properly configured")
+        if (!isValid()) {
+            log.warn("not registering '${getId()}' as a RabbitMQ message consumer because it is not properly configured")
             return
         }
 
@@ -322,18 +327,19 @@ class ConsumerAdapter {
         ConsumerConfiguration configuration = getConfiguration()
 
         // Get the connection context
-        ConnectionContext connectionContext = connectionManager.getConnection(configuration.getConnection())
-
-        // Ensure we have a connection
-        if (!connectionContext) {
-            log.warn("not registering '${getConsumerName()}' as a RabbitMQ message consumer because a suitable connection could not be found")
+        ConnectionContext connectionContext
+        try {
+            connectionContext = connectionManager.getConnection(configuration.getConnection())
+        }
+        catch (ContextNotFoundException e) {
+            log.warn("not registering '${getId()}' as a RabbitMQ message consumer because a suitable connection could not be found")
             return
         }
 
         // Start the consumers
         if (configuration.queue) {
             // Log our intentions
-            log.debug("registering consumer '${getConsumerName()}' as a RabbitMQ consumer on connection '${connectionContext.getConfiguration().getName()}' with ${configuration.getConsumers()} consumer(s)")
+            log.debug("registering consumer '${getId()}' as a RabbitMQ consumer on connection '${connectionContext.getConfiguration().getName()}' with ${configuration.getConsumers()} consumer(s)")
 
             // Create all requested consumer instances
             configuration.getConsumers().times {
@@ -362,7 +368,7 @@ class ConsumerAdapter {
         }
         else {
             // Log our intentions
-            log.debug("registering consumer '${getConsumerName()}' on connection '${connectionContext.getConfiguration().getName()}' as a RabbitMQ subscriber")
+            log.debug("registering consumer '${getId()}' on connection '${connectionContext.getConfiguration().getName()}' as a RabbitMQ subscriber")
 
             // Create the channel
             Channel channel = connectionContext.createChannel()
@@ -374,7 +380,7 @@ class ConsumerAdapter {
             }
             else if (configuration.getBinding() instanceof Map) {
                 if (!(configuration.getMatch() in ['any', 'all'])) {
-                    log.warn("not starting consumer '${getConsumerName()}' since the match property was not set or not one of (\"any\", \"all\")")
+                    log.warn("not starting consumer '${getId()}' since the match property was not set or not one of (\"any\", \"all\")")
                     return
                 }
                 channel.queueBind(queue, configuration.getExchange(), '', configuration.getBinding() + ['x-match': configuration.getMatch()])
@@ -417,9 +423,9 @@ class ConsumerAdapter {
             Object response = processMessage(context)
 
             // If a response was given and a replyTo is set, send the message back
-            // TODO: change to rabbitMessagePublisher!
             if (context.properties.replyTo && response) {
-                new RabbitMessageBuilder(context.channel).send {
+                rabbitMessagePublisher.send {
+                    channel = context.channel
                     routingKey = context.properties.replyTo
                     correlationId = context.properties.correlationId
                     delegate.body = response
@@ -427,7 +433,7 @@ class ConsumerAdapter {
             }
         }
         catch (Exception e) {
-            log.error("unexpected exception ${e.getClass()} encountered in the rabbit consumer associated with handler ${getConsumerName()}", e)
+            log.error("unexpected exception ${e.getClass()} encountered in the rabbit consumer associated with handler ${getId()}", e)
         }
     }
 
@@ -464,7 +470,7 @@ class ConsumerAdapter {
             if (configuration.getAutoAck() == AutoAck.POST) {
                 context.channel.basicReject(context.envelope.deliveryTag, configuration.getRetry())
             }
-            log.error("${getConsumerName()} does not have a message handler defined to handle class type ${converted.getClass()}")
+            log.error("${getId()} does not have a message handler defined to handle class type ${converted.getClass()}")
             return
         }
 
@@ -521,10 +527,10 @@ class ConsumerAdapter {
 
             // Log the error
             if (configuration.getTransacted()) {
-                log.error("transaction rolled back due to unhandled exception ${e.getClass().name} caught in RabbitMQ message handler for consumer ${getConsumerName()}", e)
+                log.error("transaction rolled back due to unhandled exception ${e.getClass().name} caught in RabbitMQ message handler for consumer ${getId()}", e)
             }
             else {
-                log.error("unhandled exception ${e.getClass().name} caught in RabbitMQ message handler for consumer ${getConsumerName()}", e)
+                log.error("unhandled exception ${e.getClass().name} caught in RabbitMQ message handler for consumer ${getId()}", e)
             }
 
             // Call the failure callback

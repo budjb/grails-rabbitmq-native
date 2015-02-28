@@ -18,8 +18,8 @@ package com.budjb.rabbitmq.test.consumer
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
-import com.budjb.rabbitmq.consumer.ConsumerAdapter
-import com.budjb.rabbitmq.consumer.ConsumerManager
+import com.budjb.rabbitmq.consumer.ConsumerContextImpl
+import com.budjb.rabbitmq.consumer.ConsumerManagerImpl
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsClass
@@ -32,7 +32,7 @@ class ConsumerManagerSpec extends Specification {
     MessageConverterManager messageConverterManager
     RabbitMessagePublisher rabbitMessagePublisher
     ConnectionManager connectionManager
-    ConsumerManager consumerManager
+    ConsumerManagerImpl consumerManager
     ApplicationContext applicationContext
 
     def setup() {
@@ -43,7 +43,7 @@ class ConsumerManagerSpec extends Specification {
         rabbitMessagePublisher = Mock(RabbitMessagePublisher)
         applicationContext = Mock(ApplicationContext)
 
-        consumerManager = new ConsumerManager()
+        consumerManager = new ConsumerManagerImpl()
         consumerManager.grailsApplication = grailsApplication
         consumerManager.persistenceInterceptor = persistenceInterceptor
         consumerManager.messageConverterManager = messageConverterManager
@@ -123,7 +123,7 @@ class ConsumerManagerSpec extends Specification {
         Expando consumer = new Expando()
 
         when:
-        ConsumerAdapter adapter = consumerManager.createConsumerAdapter(consumer)
+        ConsumerContextImpl adapter = consumerManager.createConsumerAdapter(consumer)
 
         then:
         adapter.grailsApplication == grailsApplication

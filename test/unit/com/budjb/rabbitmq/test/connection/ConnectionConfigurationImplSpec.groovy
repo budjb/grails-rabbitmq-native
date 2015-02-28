@@ -16,79 +16,47 @@
 package com.budjb.rabbitmq.test.connection
 
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
+import com.budjb.rabbitmq.connection.ConnectionConfigurationImpl
 import com.rabbitmq.client.ConnectionFactory
+import org.apache.log4j.Logger
 import spock.lang.Specification
 
-class ConnectionConfigurationSpec extends Specification {
+class ConnectionConfigurationImplSpec extends Specification {
     def 'Test default values when bad values are provided'() {
         setup:
         Map properties = [
             'host': 'test-host',
             'username': 'test-user',
             'password': 'test-password',
-            'port': 'foobar'
+            'port': 'foobar' // this is an integer field and the value should not be assigned
         ]
 
         when:
-        ConnectionConfiguration configuration = new ConnectionConfiguration(properties)
+        ConnectionConfiguration configuration = new ConnectionConfigurationImpl(properties)
 
         then:
         configuration.getPort() == 5672
     }
 
-    def 'Test individual assertions for missing required values'() {
+    def 'Test log output for missing required values'() {
         setup:
-        ConnectionConfiguration configuration = new ConnectionConfiguration()
+        Logger log = Mock(Logger)
+        ConnectionConfiguration configuration = new ConnectionConfigurationImpl()
+        configuration.log = log
         configuration.setPort(0)
         configuration.setVirtualHost('')
         configuration.setThreads(-1)
 
         when:
-        configuration.validateConfiguration()
+        configuration.isValid()
 
         then:
-        thrown AssertionError
-
-        when:
-        configuration.setHost('test-host')
-        configuration.validateConfiguration()
-
-        then:
-        thrown AssertionError
-
-        when:
-        configuration.setUsername('test-username')
-        configuration.validateConfiguration()
-
-        then:
-        thrown AssertionError
-
-        when:
-        configuration.setPassword('test-password')
-        configuration.validateConfiguration()
-
-        then:
-        thrown AssertionError
-
-        when:
-        configuration.setVirtualHost('test-virtualHost')
-        configuration.validateConfiguration()
-
-        then:
-        thrown AssertionError
-
-        when:
-        configuration.setPort(5672)
-        configuration.validateConfiguration()
-
-        then:
-        thrown AssertionError
-
-        when:
-        configuration.setThreads(5)
-
-        then:
-        configuration.validateConfiguration()
+        1 * log.warn("RabbitMQ connection host configuration is missing")
+        1 * log.warn("RabbitMQ connection username is missing")
+        1 * log.warn("RabbitMQ connection password is missing")
+        1 * log.warn("RabbitMQ connection virtualHost is missing")
+        1 * log.warn("RabbitMQ connection port is missing")
+        1 * log.warn("RabbitMQ connection threads must be greater than or equal to 0")
     }
 
     def 'Test default configuration options'() {
@@ -100,7 +68,7 @@ class ConnectionConfigurationSpec extends Specification {
         ]
 
         when:
-        ConnectionConfiguration connectionConfiguration = new ConnectionConfiguration(properties)
+        ConnectionConfiguration connectionConfiguration = new ConnectionConfigurationImpl(properties)
 
         then:
         connectionConfiguration.getHost() == 'test-host'
@@ -117,11 +85,21 @@ class ConnectionConfigurationSpec extends Specification {
     }
 
     def 'Missing required properties should throw an exception'() {
+        setup:
+        Logger log = Mock(Logger)
+        ConnectionConfiguration configuration = new ConnectionConfigurationImpl([:])
+        configuration.log = log
+
         when:
-        new ConnectionConfiguration([:])
+        boolean valid = configuration.isValid()
 
         then:
-        thrown AssertionError
+        valid == false
+
+        1 * log.warn("RabbitMQ connection host configuration is missing")
+        1 * log.warn("RabbitMQ connection username is missing")
+        1 * log.warn("RabbitMQ connection password is missing")
+        0 * log._
     }
 
     def 'Test non-default configuration options'() {
@@ -141,7 +119,7 @@ class ConnectionConfigurationSpec extends Specification {
         ]
 
         when:
-        ConnectionConfiguration connectionConfiguration = new ConnectionConfiguration(properties)
+        ConnectionConfigurationImpl connectionConfiguration = new ConnectionConfigurationImpl(properties)
 
         then:
         connectionConfiguration.getHost() == 'test-host'
@@ -159,7 +137,7 @@ class ConnectionConfigurationSpec extends Specification {
 
     def 'Test that setters work correctly'() {
         setup:
-        ConnectionConfiguration configuration = new ConnectionConfiguration()
+        ConnectionConfigurationImpl configuration = new ConnectionConfigurationImpl()
 
         when:
         configuration.setHost('test-host')

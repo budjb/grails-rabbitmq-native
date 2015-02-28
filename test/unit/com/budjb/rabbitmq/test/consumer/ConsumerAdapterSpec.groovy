@@ -15,12 +15,12 @@
  */
 package com.budjb.rabbitmq.test.consumer
 
-import com.budjb.rabbitmq.connection.ConnectionConfiguration
+import com.budjb.rabbitmq.connection.ConnectionConfigurationImpl
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
-import com.budjb.rabbitmq.consumer.ConsumerAdapter
+import com.budjb.rabbitmq.consumer.ConsumerContextImpl
 import com.budjb.rabbitmq.consumer.ConsumerConfiguration
-import com.budjb.rabbitmq.consumer.ConsumerManager
+import com.budjb.rabbitmq.consumer.ConsumerManagerImpl
 import com.budjb.rabbitmq.consumer.MessageContext
 import com.budjb.rabbitmq.converter.*
 import com.rabbitmq.client.BasicProperties
@@ -53,10 +53,10 @@ class ConsumerAdapterSpec extends Specification {
         LocalConfigConsumer consumer = new LocalConfigConsumer()
 
         when:
-        ConsumerAdapter adapter = new ConsumerAdapter(consumer, null, null, null, null, null)
+        ConsumerContextImpl adapter = new ConsumerContextImpl(consumer, null, null, null, null, null)
 
         then:
-        adapter.getConsumerName() == 'LocalConfigConsumer'
+        adapter.getId() == 'LocalConfigConsumer'
     }
 
     /**
@@ -72,21 +72,21 @@ class ConsumerAdapterSpec extends Specification {
         ConnectionManager connectionManager = Mock(ConnectionManager)
 
         // Mock the consumer adapter factory
-        ConsumerManager consumerManager = new ConsumerManager()
+        ConsumerManagerImpl consumerManager = new ConsumerManagerImpl()
         consumerManager.grailsApplication = grailsApplication
         consumerManager.connectionManager = connectionManager
         consumerManager.messageConverterManager = messageConverterManager
 
         when:
         // Create the adapter
-        ConsumerAdapter adapter = consumerManager.createConsumerAdapter(new LocalConfigConsumer())
+        ConsumerContextImpl adapter = consumerManager.createConsumerAdapter(new LocalConfigConsumer())
 
         // Get the configuration
         ConsumerConfiguration configuration = adapter.configuration
 
         then:
         // Validate the consumer
-        adapter.getConsumerName() == 'LocalConfigConsumer'
+        adapter.getId() == 'LocalConfigConsumer'
 
         // Validate the configuration options
         configuration.queue == 'local-config-queue'
@@ -94,7 +94,7 @@ class ConsumerAdapterSpec extends Specification {
         configuration.retry == false
 
         // Validate that the consumer is valid
-        adapter.isConsumerValid() == true
+        adapter.isValid() == true
     }
 
     /**
@@ -120,21 +120,21 @@ class ConsumerAdapterSpec extends Specification {
         ConnectionManager connectionManager = Mock(ConnectionManager)
 
         // Mock the consumer adapter factory
-        ConsumerManager consumerManager = new ConsumerManager()
+        ConsumerManagerImpl consumerManager = new ConsumerManagerImpl()
         consumerManager.grailsApplication = grailsApplication
         consumerManager.connectionManager = connectionManager
         consumerManager.messageConverterManager = messageConverterManager
 
         when:
         // Create the adapter
-        ConsumerAdapter adapter = consumerManager.createConsumerAdapter(new CentralConfigConsumer())
+        ConsumerContextImpl adapter = consumerManager.createConsumerAdapter(new CentralConfigConsumer())
 
         // Get the configuration
         ConsumerConfiguration configuration = adapter.configuration
 
         then:
         // Validate the consumer name
-        adapter.getConsumerName() == 'CentralConfigConsumer'
+        adapter.getId() == 'CentralConfigConsumer'
 
         // Validate the configuration options
         configuration.queue == 'central-config-queue'
@@ -142,7 +142,7 @@ class ConsumerAdapterSpec extends Specification {
         configuration.retry == true
 
         // Validate that the consumer is valid
-        adapter.isConsumerValid() == true
+        adapter.isValid() == true
     }
 
     /**
@@ -172,12 +172,12 @@ class ConsumerAdapterSpec extends Specification {
         def persistenceInterceptor = Mock(PersistenceInterceptor)
 
         // Create the adapter
-        ConsumerAdapter adapter = Spy(ConsumerAdapter, constructorArgs: [
+        ConsumerContextImpl adapter = Spy(ConsumerContextImpl, constructorArgs: [
             consumer, grailsApplication, connectionManager, messageConverterManager, persistenceInterceptor, null
         ])
 
         // Mock the consumer name (sigh)
-        adapter.getConsumerName() >> 'CallbackConsumer'
+        adapter.getId() >> 'CallbackConsumer'
 
         // Mock a message context
         MessageContext context = new MessageContext(
@@ -232,12 +232,12 @@ class ConsumerAdapterSpec extends Specification {
         consumer.handleMessage(*_) >> { throw new RuntimeException() }
 
         // Create the adapter
-        ConsumerAdapter adapter = Spy(ConsumerAdapter, constructorArgs: [
+        ConsumerContextImpl adapter = Spy(ConsumerContextImpl, constructorArgs: [
             consumer, grailsApplication, connectionManager, messageConverterManager, null, null
         ])
 
         // Mock the consumer name (sigh)
-        adapter.getConsumerName() >> 'CallbackConsumer'
+        adapter.getId() >> 'CallbackConsumer'
 
         // Mock a message context
         MessageContext context = new MessageContext(
@@ -268,7 +268,7 @@ class ConsumerAdapterSpec extends Specification {
         grailsApplication.getConfig() >> new ConfigObject()
 
         // Mock a connection configuration
-        ConnectionConfiguration connectionConfiguration = Mock(ConnectionConfiguration)
+        ConnectionConfigurationImpl connectionConfiguration = Mock(ConnectionConfigurationImpl)
         connectionConfiguration.getName() >> 'default'
 
         // Mock a connection context
@@ -287,14 +287,14 @@ class ConsumerAdapterSpec extends Specification {
         LocalConfigConsumer consumer = new LocalConfigConsumer()
 
         // Mock the consumer adapter factory
-        ConsumerManager consumerManager = new ConsumerManager()
+        ConsumerManagerImpl consumerManager = new ConsumerManagerImpl()
         consumerManager.grailsApplication = grailsApplication
         consumerManager.connectionManager = connectionManager
         consumerManager.messageConverterManager = messageConverterManager
 
         when:
         // Create the adapter
-        ConsumerAdapter adapter = consumerManager.createConsumerAdapter(consumer)
+        ConsumerContextImpl adapter = consumerManager.createConsumerAdapter(consumer)
 
         // Start the adapter
         adapter.start()
@@ -310,7 +310,7 @@ class ConsumerAdapterSpec extends Specification {
         grailsApplication.getConfig() >> new ConfigObject()
 
         // Mock a connection configuration
-        ConnectionConfiguration connectionConfiguration = Mock(ConnectionConfiguration)
+        ConnectionConfigurationImpl connectionConfiguration = Mock(ConnectionConfigurationImpl)
         connectionConfiguration.getName() >> 'default'
 
         // Mock a connection context
@@ -329,14 +329,14 @@ class ConsumerAdapterSpec extends Specification {
         LocalConfigConsumer consumer = new LocalConfigConsumer()
 
         // Mock the consumer adapter factory
-        ConsumerManager consumerManager = new ConsumerManager()
+        ConsumerManagerImpl consumerManager = new ConsumerManagerImpl()
         consumerManager.grailsApplication = grailsApplication
         consumerManager.connectionManager = connectionManager
         consumerManager.messageConverterManager = messageConverterManager
 
         when:
         // Create the adapter
-        ConsumerAdapter adapter = consumerManager.createConsumerAdapter(consumer)
+        ConsumerContextImpl adapter = consumerManager.createConsumerAdapter(consumer)
 
         // Start the adapter twice
         adapter.start()
@@ -357,7 +357,7 @@ class ConsumerAdapterSpec extends Specification {
         channel.queueDeclare(*_) >> { new DeclareOk('temp-queue', 0, 0) }
 
         // Mock a connection configuration
-        ConnectionConfiguration connectionConfiguration = Mock(ConnectionConfiguration)
+        ConnectionConfigurationImpl connectionConfiguration = Mock(ConnectionConfigurationImpl)
         connectionConfiguration.getName() >> 'default'
 
         // Mock a connection context
@@ -373,14 +373,14 @@ class ConsumerAdapterSpec extends Specification {
         SubscriberConsumer consumer = new SubscriberConsumer()
 
         // Mock the consumer adapter factory
-        ConsumerManager consumerManager = new ConsumerManager()
+        ConsumerManagerImpl consumerManager = new ConsumerManagerImpl()
         consumerManager.grailsApplication = grailsApplication
         consumerManager.connectionManager = connectionManager
         consumerManager.messageConverterManager = messageConverterManager
 
         when:
         // Create the adapter
-        ConsumerAdapter adapter = consumerManager.createConsumerAdapter(consumer)
+        ConsumerContextImpl adapter = consumerManager.createConsumerAdapter(consumer)
 
         // Start the adapter
         adapter.start()

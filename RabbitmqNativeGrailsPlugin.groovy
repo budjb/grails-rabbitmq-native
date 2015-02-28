@@ -15,8 +15,9 @@
  */
 
 import com.budjb.rabbitmq.*
-import com.budjb.rabbitmq.connection.ConnectionManager
-import com.budjb.rabbitmq.consumer.ConsumerManager
+import com.budjb.rabbitmq.connection.ConnectionBuilderImpl
+import com.budjb.rabbitmq.connection.ConnectionManagerImpl
+import com.budjb.rabbitmq.consumer.ConsumerManagerImpl
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisherImpl
 import org.apache.log4j.Logger
@@ -135,7 +136,11 @@ class RabbitmqNativeGrailsPlugin {
             }
         }
 
-        "connectionManager"(ConnectionManager) { bean ->
+        "connectionManager"(ConnectionManagerImpl) { bean ->
+            bean.autowire = true
+        }
+
+        "connectionBuilder"(ConnectionBuilderImpl) { bean ->
             bean.autowire = true
         }
 
@@ -147,7 +152,7 @@ class RabbitmqNativeGrailsPlugin {
             bean.autowire = true
         }
 
-        "consumerManager"(ConsumerManager) { bean ->
+        "consumerManager"(ConsumerManagerImpl) { bean ->
             bean.autowire = true
         }
 

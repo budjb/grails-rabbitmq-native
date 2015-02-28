@@ -15,7 +15,9 @@
  */
 package com.budjb.rabbitmq.consumer
 
-class ConsumerConfiguration {
+import com.budjb.rabbitmq.RabbitManagedContextConfiguration
+
+class ConsumerConfiguration implements RabbitManagedContextConfiguration {
     /**
      * Queue to listen on.
      */
@@ -283,5 +285,10 @@ class ConsumerConfiguration {
         if (transacted == true) {
             autoAck = AutoAck.POST
         }
+    }
+
+    @Override
+    boolean isValid() {
+        return false
     }
 }
