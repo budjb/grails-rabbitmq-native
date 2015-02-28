@@ -15,6 +15,8 @@
  */
 package com.budjb.rabbitmq.test
 
+import com.budjb.rabbitmq.test.helper.MessageConsumerIntegrationTest
+
 import java.util.concurrent.TimeoutException
 
 class TopicExchangeSpec extends MessageConsumerIntegrationTest {

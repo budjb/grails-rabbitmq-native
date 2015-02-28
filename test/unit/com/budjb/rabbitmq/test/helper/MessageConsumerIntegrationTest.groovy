@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.budjb.rabbitmq.test
+package com.budjb.rabbitmq.test.helper
 
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import grails.plugin.spock.IntegrationSpec
