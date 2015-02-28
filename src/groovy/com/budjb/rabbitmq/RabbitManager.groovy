@@ -9,14 +9,6 @@ import com.budjb.rabbitmq.exception.ContextNotFoundException
  */
 interface RabbitManager<C extends RabbitManagedContext, I extends RabbitManagedContextConfiguration> {
     /**
-     * Creates a new managed context.
-     *
-     * @param configuration
-     * @return
-     */
-    C createContext(I configuration)
-
-    /**
      * Load the manager from the Grails application.
      */
     void load()

@@ -18,6 +18,7 @@ package com.budjb.rabbitmq.consumer
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.ContextNotFoundException
+import com.budjb.rabbitmq.exception.MissingConfigurationException
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -25,69 +26,70 @@ import org.codehaus.groovy.grails.commons.GrailsClass
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 
+import java.lang.reflect.Field
+import java.lang.reflect.Modifier
+
 class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
+    /**
+     * Name of the configuration variable a consumer is expected to define.
+     */
+    static final String RABBIT_CONFIG_NAME = 'rabbitConfig'
+
     /**
      * Grails application bean.
      */
-    protected GrailsApplication grailsApplication
+    GrailsApplication grailsApplication
 
     /**
      * Hibernate object used to bind a session to the current thread.
      *
      * This will be null if Hibernate is not present.
      */
-    protected Object persistenceInterceptor
+    Object persistenceInterceptor
 
     /**
      * Message converter manager.
      */
-    protected MessageConverterManager messageConverterManager
+    MessageConverterManager messageConverterManager
 
     /**
      * Rabbit message publisher.
      */
-    protected RabbitMessagePublisher rabbitMessagePublisher
+    RabbitMessagePublisher rabbitMessagePublisher
 
     /**
      * Connection manager.
      */
-    protected ConnectionManager connectionManager
+    ConnectionManager connectionManager
 
     /**
      * Application context.
      */
-    protected ApplicationContext applicationContext
+    ApplicationContext applicationContext
 
     /**
      * Logger.
      */
-    protected Logger log = Logger.getLogger(ConsumerManagerImpl)
+    private Logger log = Logger.getLogger(ConsumerManagerImpl)
 
     /**
      * Registered consumers.
      */
-    protected List<ConsumerContextImpl> consumers
-
-    /**
-     * Creates a new ConsumerAdapter.
-     */
-    public ConsumerContextImpl createConsumerAdapter(Object consumer) {
-        return new ConsumerContextImpl(
-            consumer,
-            grailsApplication,
-            connectionManager,
-            messageConverterManager,
-            persistenceInterceptor,
-            rabbitMessagePublisher
-        )
-    }
+    protected List<ConsumerContext> consumers = []
 
     /**
      * Loads any message consumer artefacts.
      */
     @Override
     public void load() {
-        grailsApplication.getArtefacts('MessageConsumer').each { register(it) }
+        grailsApplication.getArtefacts('MessageConsumer').each {
+            try {
+                register(createContext(it))
+            }
+            catch (MissingConfigurationException e) {
+                log.warn("not loading consumer '${it.shortName}' because its configuration is missing")
+            }
+        }
     }
 
     /**
@@ -104,7 +106,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      * @param context
      */
     @Override
-    void start(ConsumerContextImpl context) {
+    void start(ConsumerContext context) {
         context.start()
     }
 
@@ -133,7 +135,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      * @param context
      */
     @Override
-    void stop(ConsumerContextImpl context) {
+    void stop(ConsumerContext context) {
         context.stop()
     }
 
@@ -157,41 +159,16 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
     }
 
     /**
-     * Registers a consumer based on its Grails artefact.
-     *
-     * @param artefact
-     */
-    @Override
-    void register(GrailsClass artefact) {
-        register(applicationContext.getBean(artefact.propertyName))
-    }
-
-    /**
-     * Registers a new consumer with the provided consumer instance.
-     *
-     * @param consumer
-     */
-    @Override
-    void register(Object consumer) {
-        register(createConsumerAdapter(consumer))
-    }
-
-    /**
      * Registers a consumer.
      *
      * @param context
      */
     @Override
-    void register(ConsumerContextImpl context) {
-        if (!context.isValid()) {
-            log.warn("not registering consumer '${context.id}' because it is not valid")
-            return
-        }
-
+    void register(ConsumerContext context) {
         try {
             unregister(getContext(context.id))
         }
-        catch (ContextNotFoundException e) {
+        catch (ContextNotFoundException) {
             // Continue...
         }
 
@@ -204,26 +181,9 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      * @param context
      */
     @Override
-    void unregister(ConsumerContextImpl context) {
+    void unregister(ConsumerContext context) {
         stop(context)
-        consumers.remove(context)
-    }
-
-    /**
-     * Un-registers the given consumer instance.
-     *
-     * @param consumer
-     * @throws ContextNotFoundException
-     */
-    @Override
-    void unregister(Object consumer) throws ContextNotFoundException {
-        ConsumerContextImpl adapter = consumers.find { it.consumer == consumer }
-
-        if (!adapter) {
-            throw new ContextNotFoundException("provided consumer is not registered")
-        }
-
-        unregister(adapter)
+        consumers -= context
     }
 
     /**
@@ -234,8 +194,8 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      * @throws ContextNotFoundException
      */
     @Override
-    ConsumerContextImpl getContext(String name) throws ContextNotFoundException {
-        ConsumerContextImpl adapter = consumers.find { it.id == name }
+    ConsumerContext getContext(String name) throws ContextNotFoundException {
+        ConsumerContext adapter = consumers.find { it.id == name }
 
         if (!adapter) {
             throw new ContextNotFoundException("consumer '${name}' is not registered")
@@ -245,96 +205,84 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
     }
 
     /**
-     * Sets the application context.
-     */
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext
-    }
-
-    /**
-     * Sets the grails application bean.
-     */
-    public void setGrailsApplication(GrailsApplication grailsApplication) {
-        this.grailsApplication = grailsApplication
-    }
-
-    /**
-     * Sets the connection manager.
-     */
-    public void setConnectionManager(ConnectionManager connectionManager) {
-        this.connectionManager = connectionManager
-    }
-
-    /**
-     * Sets the message converter manager.
-     */
-    public void setMessageConverterManager(MessageConverterManager messageConverterManager) {
-        this.messageConverterManager = messageConverterManager
-    }
-
-    /**
-     * Sets the persistence interceptor, if available.
-     */
-    public void setPersistenceInterceptor(def persistenceInterceptor) {
-        this.persistenceInterceptor = persistenceInterceptor
-    }
-
-    /**
-     * Sets the rabbit message builder.
-     */
-    public void setRabbitMessagePublisher(RabbitMessagePublisher rabbitMessagePublisher) {
-        this.rabbitMessagePublisher = rabbitMessagePublisher
-    }
-
-    /**
-     * Creates a new managed context.
+     * Create a consumer context with the given consumer object instance.
      *
-     * @param configuration
+     * @param consumer
      * @return
      */
     @Override
-    ConsumerContext createContext(ConsumerConfiguration configuration) {
-        return null
+    ConsumerContext createContext(Object consumer) throws MissingConfigurationException {
+        return new ConsumerContextImpl(
+            loadConsumerConfiguration(consumer),
+            consumer,
+            connectionManager,
+            messageConverterManager,
+            persistenceInterceptor,
+            rabbitMessagePublisher
+        )
     }
 
     /**
-     * Starts a specified context.
+     * Create a consumer context withe consumer represented by the given Grails artefact.
      *
-     * @param context
+     * @param artefact
+     * @return
      */
     @Override
-    void start(ConsumerContext context) {
-
+    ConsumerContext createContext(GrailsClass artefact) {
+        return createContext(applicationContext.getBean(artefact.propertyName))
     }
 
     /**
-     * Stops a specified context.
+     * Attempts to load a consumer's configuration.
      *
-     * @param context
+     * @param consumer
+     * @return A ConsumerConfiguration instance, or null if a configuration is not found.
      */
-    @Override
-    void stop(ConsumerContext context) {
+    protected ConsumerConfiguration loadConsumerConfiguration(Object consumer) throws MissingConfigurationException {
+        Map configuration = loadConsumerLocalConfiguration(consumer) ?: loadConsumerApplicationConfiguration(consumer)
+        if (!configuration) {
+            throw new MissingConfigurationException("consumer has no configuration defined either within either its class or the application configuration")
+        }
 
+        return new ConsumerConfigurationImpl(configuration)
     }
 
     /**
-     * Registers a new managed context.
+     * Finds and returns a consumer's central configuration, or null if it isn't defined.
      *
-     * @param context
+     * @return
      */
-    @Override
-    void register(ConsumerContext context) {
+    protected Map loadConsumerApplicationConfiguration(Object consumer) {
+        def configuration = grailsApplication.config.rabbitmq.consumers."${consumer.getClass().simpleName}"
 
+        if (!configuration || !Map.class.isAssignableFrom(configuration.getClass())) {
+            return null
+        }
+
+        return configuration
     }
 
     /**
-     * Un-registers a managed context.
+     * Finds and returns a consumer's local configuration, or null if it doesn't exist.
      *
-     * @param context
+     * @return
      */
-    @Override
-    void unregister(ConsumerContext context) {
+    protected Map loadConsumerLocalConfiguration(Object consumer) {
+        try {
+            Field field = consumer.class.getDeclaredField(RABBIT_CONFIG_NAME)
+            if (!Modifier.isStatic(field.modifiers)) {
+                return null
+            }
+        }
+        catch (NoSuchFieldException) {
+            return null
+        }
 
+        if (!Map.class.isAssignableFrom(consumer."${RABBIT_CONFIG_NAME}".getClass())) {
+            return null
+        }
+
+        return consumer."${RABBIT_CONFIG_NAME}"
     }
 }

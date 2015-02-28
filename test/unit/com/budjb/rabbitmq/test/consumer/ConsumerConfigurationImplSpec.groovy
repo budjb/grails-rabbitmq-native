@@ -16,14 +16,14 @@
 package com.budjb.rabbitmq.test.consumer
 
 import com.budjb.rabbitmq.consumer.AutoAck
-import com.budjb.rabbitmq.consumer.ConsumerConfiguration
+import com.budjb.rabbitmq.consumer.ConsumerConfigurationImpl
 import com.budjb.rabbitmq.consumer.MessageConvertMethod
 import spock.lang.Specification
 
-class ConsumerConfigurationSpec extends Specification {
+class ConsumerConfigurationImplSpec extends Specification {
     def 'Validate default values with a basic constructor'() {
         when:
-        ConsumerConfiguration configuration = new ConsumerConfiguration()
+        ConsumerConfigurationImpl configuration = new ConsumerConfigurationImpl()
 
         then:
         configuration.getAutoAck() == AutoAck.POST
@@ -41,7 +41,7 @@ class ConsumerConfigurationSpec extends Specification {
 
     def 'Validate default values with an empty map constructor'() {
         when:
-        ConsumerConfiguration configuration = new ConsumerConfiguration([:])
+        ConsumerConfigurationImpl configuration = new ConsumerConfigurationImpl([:])
 
         then:
         configuration.getAutoAck() == AutoAck.POST
@@ -74,7 +74,7 @@ class ConsumerConfigurationSpec extends Specification {
         ]
 
         when:
-        ConsumerConfiguration configuration = new ConsumerConfiguration(properties)
+        ConsumerConfigurationImpl configuration = new ConsumerConfigurationImpl(properties)
 
         then:
         configuration.getAutoAck() == AutoAck.POST
@@ -92,7 +92,7 @@ class ConsumerConfigurationSpec extends Specification {
 
     def 'Validate getter/setters'() {
         setup:
-        ConsumerConfiguration configuration = new ConsumerConfiguration(properties)
+        ConsumerConfigurationImpl configuration = new ConsumerConfigurationImpl(properties)
 
         when:
         configuration.setAutoAck(AutoAck.MANUAL)
@@ -123,7 +123,7 @@ class ConsumerConfigurationSpec extends Specification {
 
     def 'Validate transacted/autoAck behavior'() {
         setup:
-        ConsumerConfiguration configuration = new ConsumerConfiguration()
+        ConsumerConfigurationImpl configuration = new ConsumerConfigurationImpl()
 
         when:
         configuration.setTransacted(true)

@@ -26,46 +26,48 @@ import com.rabbitmq.client.Channel
 import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
 import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.commons.GrailsApplication
 
-import java.lang.reflect.Field
 import java.lang.reflect.Method
-import java.lang.reflect.Modifier
 
 class ConsumerContextImpl implements ConsumerContext {
     /**
      * Consumer object used to receive messages from the RabbitMQ library.
      */
-    protected class RabbitConsumer extends DefaultConsumer {
+    private class RabbitConsumer extends DefaultConsumer {
         /**
-         * Consumer adapter containing the context for this consumer.
+         * Consumer context containing the context for this consumer.
          */
-        public ConsumerContextImpl adapter
+        ConsumerContextImpl context
 
         /**
          * Connection context associated with the consumer.
          */
-        public ConnectionContext connectionContext
+        ConnectionContext connectionContext
+
+        /**
+         * Consumer tag.
+         */
+        String consumerTag
 
         /**
          * Constructs an instance of a consumer.
          *
          * @param channel
-         * @param adapter
+         * @param context
          */
-        private RabbitConsumer(Channel channel, ConsumerContextImpl adapter, ConnectionContext connectionContext) {
+        private RabbitConsumer(Channel channel, ConsumerContextImpl context, ConnectionContext connectionContext) {
             // Run the parent
             super(channel)
 
-            // Store the adapter
-            this.adapter = adapter
+            // Store the context
+            this.context = context
 
             // Store the connection context
             this.connectionContext = connectionContext
         }
 
         /**
-         * Passes delivery of a message back to the adapter for processing.
+         * Passes delivery of a message back to the context for processing.
          *
          * @param consumerTag
          * @param envelope
@@ -73,7 +75,7 @@ class ConsumerContextImpl implements ConsumerContext {
          * @param body
          */
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
+        void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
             // Wrap up the parameters into a context
             MessageContext context = new MessageContext(
                 channel: channel,
@@ -84,7 +86,7 @@ class ConsumerContextImpl implements ConsumerContext {
                 connectionContext: connectionContext
             )
 
-            // Hand off the message to the adapter.
+            // Hand off the message to the context.
             ConsumerContextImpl.this.deliverMessage(context)
         }
     }
@@ -93,11 +95,6 @@ class ConsumerContextImpl implements ConsumerContext {
      * Name of the handler method a consumer is expected to define.
      */
     static final String RABBIT_HANDLER_NAME = 'handleMessage'
-
-    /**
-     * Name of the configuration variable a consumer is expected to define.
-     */
-    static final String RABBIT_CONFIG_NAME = 'rabbitConfig'
 
     /**
      * Name of the method that will be called when a message is received, but before it is processed.
@@ -122,12 +119,7 @@ class ConsumerContextImpl implements ConsumerContext {
     /**
      * Logger.
      */
-    Logger log = Logger.getLogger(ConsumerContextImpl)
-
-    /**
-     * Grails application bean.
-     */
-    GrailsApplication grailsApplication
+    private Logger log = Logger.getLogger(ConsumerContextImpl)
 
     /**
      * Consumer bean.
@@ -145,11 +137,6 @@ class ConsumerContextImpl implements ConsumerContext {
     ConnectionManager connectionManager
 
     /**
-     * List of active rabbit consumers.
-     */
-    List<RabbitConsumer> consumers = []
-
-    /**
      * Persistence interceptor for Hibernate session handling.
      */
     Object persistenceInterceptor
@@ -165,21 +152,26 @@ class ConsumerContextImpl implements ConsumerContext {
     RabbitMessagePublisher rabbitMessagePublisher
 
     /**
+     * List of active rabbit consumers.
+     */
+    protected List<RabbitConsumer> consumers = []
+
+    /**
      * Constructor.
      *
      * @param clazz
      * @param grailsApplication
      */
-    public ConsumerContextImpl(
+    ConsumerContextImpl(
+        ConsumerConfiguration configuration,
         Object consumer,
-        GrailsApplication grailsApplication,
         ConnectionManager connectionManager,
         MessageConverterManager messageConverterManager,
         Object persistenceInterceptor,
         RabbitMessagePublisher rabbitMessagePublisher) {
 
         this.consumer = consumer
-        this.grailsApplication = grailsApplication
+        this.configuration = configuration
         this.connectionManager = connectionManager
         this.messageConverterManager = messageConverterManager
         this.persistenceInterceptor = persistenceInterceptor
@@ -192,63 +184,8 @@ class ConsumerContextImpl implements ConsumerContext {
      * @return
      */
     @Override
-    public String getConnectionName() {
+    String getConnectionName() {
         return getConfiguration().getConnection()
-    }
-
-    /**
-     * Finds and returns a consumer's central configuration, or null if it isn't defined.
-     *
-     * @return
-     */
-    protected Map getCentralConfiguration() {
-        // Attempt to find a configuration path that matches the class name
-        def configuration = grailsApplication.config.rabbitmq.consumers."${getId()}"
-
-        // Ensure it exists and is a map
-        if (!configuration || !Map.class.isAssignableFrom(configuration.getClass())) {
-            return null
-        }
-
-        return configuration
-    }
-
-    /**
-     * Finds and returns a consumer's local configuration, or null if it doesn't exist.
-     *
-     * @return
-     */
-    protected Map getLocalConfiguration() {
-        // Ensure the config field is set and is static
-        try {
-            Field field = consumer.class.getDeclaredField(RABBIT_CONFIG_NAME)
-            if (!Modifier.isStatic(field.modifiers)) {
-                return null
-            }
-        }
-        catch (NoSuchFieldException e) {
-            return null
-        }
-
-        // Ensure the config field is a map
-        if (!Map.class.isAssignableFrom(consumer."${RABBIT_CONFIG_NAME}".getClass())) {
-            return null
-        }
-
-        return consumer."${RABBIT_CONFIG_NAME}"
-    }
-
-    /**
-     * Returns the consumer's configuration, or null if one is not defined.
-     *
-     * @return
-     */
-    @Override
-    public ConsumerConfiguration getConfiguration() {
-        if (!configuration) {
-            configuration = new ConsumerConfiguration(getLocalConfiguration() ?: getCentralConfiguration())
-        }
-        return configuration
     }
 
     /**
@@ -257,13 +194,13 @@ class ConsumerContextImpl implements ConsumerContext {
      * @return
      */
     @Override
-    public boolean isValid() {
+    boolean isValid() {
         // Get the configuration
         ConsumerConfiguration configuration
         try {
             configuration = getConfiguration()
         }
-        catch (Exception e) {
+        catch (Exception) {
             log.error("unable to retrieve configuration for consumer '${getId()}")
             return false
         }
@@ -273,20 +210,13 @@ class ConsumerContextImpl implements ConsumerContext {
             return false
         }
 
+        // Check if the configuration is invalid
+        if (!configuration.isValid()) {
+            return false
+        }
+
         // Check if we find any handler defined
-        if (!consumer.class.getDeclaredMethods().any { it.name == RABBIT_HANDLER_NAME }) {
-            return false
-        }
-
-        // Make sure a queue or an exchange was specified
-        if (!configuration.getQueue() && !configuration.getExchange()) {
-            log.warn("RabbitMQ configuration for consumer '${getId()}' is missing a queue or an exchange")
-            return false
-        }
-
-        // Make sure that only a queue or an exchange was specified
-        if (configuration.getQueue() && configuration.getExchange()) {
-            log.warn("RabbitMQ configuration for consumer '${getId()}' can not have both a queue and an exchange")
+        if (!consumer.getClass().getDeclaredMethods().any { it.name == RABBIT_HANDLER_NAME }) {
             return false
         }
 
@@ -299,68 +229,70 @@ class ConsumerContextImpl implements ConsumerContext {
      * @return
      */
     @Override
-    public String getId() {
+    String getId() {
         return consumer.getClass().getSimpleName()
     }
 
     /**
-     * Starts a consumer against a handler.
-     *
-     * @param connection Connection to the RabbitMQ server.
-     * @param handler Handler object to wrap a RabbitMQ consumer around.
-     * @return A list of channels that were created for the consumer.
+     * Starts a consumer.
      */
     @Override
-    public void start() {
+    void start() {
         // Ensure the object is a consumer
         if (!isValid()) {
-            log.warn("not registering '${getId()}' as a RabbitMQ message consumer because it is not properly configured")
+            log.warn("not starting consumer '${getId()}' because it is not valid")
             return
         }
 
         // Ensure there are no active consumers
         if (consumers.size()) {
-            throw new IllegalStateException("attempted to start consumers but active consumers already exist")
+            throw new IllegalStateException("attempted to start consumer '${getId()}' but it is already started")
         }
 
         // Get the configuration
         ConsumerConfiguration configuration = getConfiguration()
 
-        // Get the connection context
+        // Get the connection name
+        String connectionName = configuration.connection
+
+        // Get the proper connection
         ConnectionContext connectionContext
         try {
-            connectionContext = connectionManager.getConnection(configuration.getConnection())
+            connectionContext = connectionManager.getContext(connectionName)
         }
         catch (ContextNotFoundException e) {
-            log.warn("not registering '${getId()}' as a RabbitMQ message consumer because a suitable connection could not be found")
+            log.warn("not starting consumer '${getId()}' because a suitable connection could not be found")
             return
         }
 
         // Start the consumers
         if (configuration.queue) {
             // Log our intentions
-            log.debug("registering consumer '${getId()}' as a RabbitMQ consumer on connection '${connectionContext.getConfiguration().getName()}' with ${configuration.getConsumers()} consumer(s)")
+            log.debug("starting consumer '${getId()}' on connection '${connectionContext.id}' with ${configuration.consumers} consumer(s)")
 
             // Create all requested consumer instances
-            configuration.getConsumers().times {
+            configuration.consumers.times {
                 // Create the channel
                 Channel channel = connectionContext.createChannel()
 
                 // Determine the queue
-                String queue = configuration.getQueue()
+                String queue = configuration.queue
 
                 // Set the QOS
-                channel.basicQos(configuration.getPrefetchCount())
+                channel.basicQos(configuration.prefetchCount)
 
                 // Create the rabbit consumer object
                 RabbitConsumer consumer = new RabbitConsumer(channel, this, connectionContext)
 
                 // Set up the consumer
-                channel.basicConsume(
+                String consumerTag = channel.basicConsume(
                     queue,
-                    configuration.getAutoAck() == AutoAck.ALWAYS,
+                    configuration.autoAck == AutoAck.ALWAYS,
                     consumer
                 )
+
+                // Store the consumer tag
+                consumer.consumerTag = consumerTag
 
                 // Store the consumer
                 consumers << consumer
@@ -368,36 +300,35 @@ class ConsumerContextImpl implements ConsumerContext {
         }
         else {
             // Log our intentions
-            log.debug("registering consumer '${getId()}' on connection '${connectionContext.getConfiguration().getName()}' as a RabbitMQ subscriber")
+            log.debug("starting consumer '${getId()}' on connection '${connectionContext.id}'")
 
             // Create the channel
             Channel channel = connectionContext.createChannel()
 
             // Create a queue
             String queue = channel.queueDeclare().queue
-            if (!configuration.getBinding() || configuration.getBinding() instanceof String) {
-                channel.queueBind(queue, configuration.getExchange(), configuration.getBinding() ?: '')
+            if (!configuration.binding || configuration.binding instanceof String) {
+                channel.queueBind(queue, configuration.exchange, configuration.binding ?: '')
             }
-            else if (configuration.getBinding() instanceof Map) {
-                if (!(configuration.getMatch() in ['any', 'all'])) {
-                    log.warn("not starting consumer '${getId()}' since the match property was not set or not one of (\"any\", \"all\")")
-                    return
-                }
-                channel.queueBind(queue, configuration.getExchange(), '', configuration.getBinding() + ['x-match': configuration.getMatch()])
+            else if (configuration.binding instanceof Map) {
+                channel.queueBind(queue, configuration.exchange, '', configuration.binding + ['x-match': configuration.match])
             }
 
             // Set the QOS
-            channel.basicQos(configuration.getPrefetchCount())
+            channel.basicQos(configuration.prefetchCount)
 
             // Create the rabbit consumer object
             RabbitConsumer consumer = new RabbitConsumer(channel, this, connectionContext)
 
             // Set up the consumer
-            channel.basicConsume(
+            String consumerTag = channel.basicConsume(
                 queue,
                 configuration.autoAck == AutoAck.ALWAYS,
                 consumer
             )
+
+            // Store the consumer tag
+            consumer.consumerTag = consumerTag
 
             // Store the consumer
             consumers << consumer
@@ -407,8 +338,14 @@ class ConsumerContextImpl implements ConsumerContext {
     /**
      * Closes all channels and clears all consumers.
      */
+    @Override
     public void stop() {
-        consumers*.getChannel()*.close()
+        consumers.each {
+            if (it.channel.isOpen()) {
+                it.channel.basicCancel(it.consumerTag)
+                it.channel.close()
+            }
+        }
         consumers.clear()
     }
 

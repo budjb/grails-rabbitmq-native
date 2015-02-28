@@ -14,6 +14,9 @@ grails.project.dependency.resolution = {
 
     dependencies {
         compile 'com.rabbitmq:amqp-client:3.4.3'
+        test('org.objenesis:objenesis:2.1') {
+            export = false
+        }
     }
 
     plugins {

@@ -16,29 +16,22 @@
 package com.budjb.rabbitmq.consumer
 
 import com.budjb.rabbitmq.RabbitManager
-import com.budjb.rabbitmq.exception.ContextNotFoundException
 import org.codehaus.groovy.grails.commons.GrailsClass
 
 interface ConsumerManager extends RabbitManager<ConsumerContext, ConsumerConfiguration> {
     /**
-     * Registers a consumer based on its Grails artefact.
+     * Create a consumer context with the given consumer object instance.
+     *
+     * @param consumer
+     * @return
+     */
+    ConsumerContext createContext(Object consumer)
+
+    /**
+     * Create a consumer context withe consumer represented by the given Grails artefact.
      *
      * @param artefact
+     * @return
      */
-    void register(GrailsClass artefact)
-
-    /**
-     * Registers a new consumer with the provided consumer instance.
-     *
-     * @param consumer
-     */
-    void register(Object consumer)
-
-    /**
-     * Un-registers the given consumer instance.
-     *
-     * @param consumer
-     * @throws ContextNotFoundException
-     */
-    void unregister(Object consumer) throws ContextNotFoundException
+    ConsumerContext createContext(GrailsClass artefact)
 }

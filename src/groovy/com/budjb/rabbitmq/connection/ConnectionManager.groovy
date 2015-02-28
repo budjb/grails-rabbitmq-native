@@ -65,4 +65,12 @@ interface ConnectionManager extends RabbitManager<ConnectionContext, ConnectionC
      * @return
      */
     ConnectionContext createContext(Map configuration)
+
+    /**
+     * Create a new connection context with the given configuration.
+     *
+     * @param configuration
+     * @return
+     */
+    ConnectionContext createContext(ConnectionConfiguration configuration)
 }
