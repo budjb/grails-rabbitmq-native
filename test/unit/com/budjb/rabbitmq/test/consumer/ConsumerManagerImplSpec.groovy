@@ -15,6 +15,7 @@
  */
 package com.budjb.rabbitmq.test.consumer
 
+import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerConfiguration
 import com.budjb.rabbitmq.consumer.ConsumerContext
@@ -24,8 +25,8 @@ import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
-import com.budjb.rabbitmq.test.helper.MissingConfigurationConsumer
-import com.budjb.rabbitmq.test.helper.UnitTestConsumer
+import com.budjb.rabbitmq.test.MissingConfigurationConsumer
+import com.budjb.rabbitmq.test.UnitTestConsumer
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsClass
@@ -324,6 +325,100 @@ class ConsumerManagerImplSpec extends Specification {
         then:
         1 * log.warn("not loading consumer 'MissingConfigurationConsumer' because its configuration is missing")
         consumerManager.consumers.size() == 1
+    }
+
+    def 'If all consumers are started while some of those consumers are already started, the IllegalStateException should be swallowed'() {
+        setup:
+        ConsumerContext consumer1 = Mock(ConsumerContext)
+        ConsumerContext consumer2 = Mock(ConsumerContext)
+
+        consumerManager.consumers = [consumer1, consumer2]
+
+        when:
+        consumerManager.start(consumer1)
+
+        then:
+        1 * consumer1.start()
+        0 * consumer2.start()
+
+        when:
+        consumerManager.start()
+
+        then:
+        1 * consumer1.start() >> { throw new IllegalStateException('already started bro') }
+        1 * consumer2.start()
+        notThrown IllegalStateException
+    }
+
+    def 'When starting consumers based on their connection context link, only the correct consumers are started'() {
+        setup:
+        ConsumerContext consumer1 = Mock(ConsumerContext)
+        ConsumerContext consumer2 = Mock(ConsumerContext)
+
+        consumer1.getConnectionName() >> 'connection1'
+        consumer2.getConnectionName() >> 'connection2'
+
+        ConnectionContext connectionContext = Mock(ConnectionContext)
+        connectionContext.getId() >> 'connection2'
+
+        consumerManager.consumers = [consumer1, consumer2]
+
+        when:
+        consumerManager.start(connectionContext)
+
+        then:
+        0 * consumer1.start()
+        1 * consumer2.start()
+    }
+
+    def 'IllegalStateException should be swallowed when starting consumers based on their connection context link and some are already started'() {
+        setup:
+        ConsumerContext consumer1 = Mock(ConsumerContext)
+        ConsumerContext consumer2 = Mock(ConsumerContext)
+
+        consumer1.getConnectionName() >> 'connection1'
+        consumer2.getConnectionName() >> 'connection2'
+
+        ConnectionContext connectionContext = Mock(ConnectionContext)
+        connectionContext.getId() >> 'connection2'
+
+        consumerManager.consumers = [consumer1, consumer2]
+
+        when:
+        consumerManager.start(connectionContext)
+
+        then:
+        0 * consumer1.start()
+        1 * consumer2.start()
+
+        when:
+        consumerManager.start(connectionContext)
+
+        then:
+        0 * consumer1.start()
+        1 * consumer2.start() >> { throw new IllegalStateException('already started bro') }
+        notThrown IllegalStateException
+    }
+
+    def 'When stopping consumers based on their connection context link, only the correct consumers are stopped'() {
+        setup:
+        ConsumerContext consumer1 = Mock(ConsumerContext)
+        ConsumerContext consumer2 = Mock(ConsumerContext)
+
+        consumer1.getConnectionName() >> 'connection1'
+        consumer2.getConnectionName() >> 'connection2'
+
+        ConnectionContext connectionContext = Mock(ConnectionContext)
+        connectionContext.getId() >> 'connection2'
+
+        consumerManager.consumers = [consumer1, consumer2]
+
+        when:
+        consumerManager.stop(connectionContext)
+
+        then:
+        0 * consumer1.stop()
+        1 * consumer2.stop()
     }
 
     class Consumer1 {

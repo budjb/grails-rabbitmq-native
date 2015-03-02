@@ -15,224 +15,274 @@
  */
 package com.budjb.rabbitmq
 
-import com.budjb.rabbitmq.connection.ConnectionContext
+import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.rabbitmq.client.Channel
-import org.apache.log4j.Logger
-import org.springframework.context.ApplicationContext
-import org.springframework.context.ApplicationContextAware
+import com.rabbitmq.client.Connection
 
-class RabbitContextImpl implements RabbitContext, ApplicationContextAware {
+class RabbitContextImpl implements RabbitContext {
     /**
-     * Spring application context
+     * Message converter manager.
      */
-    protected ApplicationContext applicationContext
+    MessageConverterManager messageConverterManager
 
     /**
-     * Logger
+     * Connection manager.
      */
-    protected Logger log = Logger.getLogger(RabbitContextImpl)
+    ConnectionManager connectionManager
 
     /**
-     * The message converter manager.
+     * Consumer manager.
      */
-    protected MessageConverterManager messageConverterManager
+    ConsumerManager consumerManager
 
     /**
-     * The connection context manager.
+     * Queue builder.
      */
-    protected ConnectionManager connectionManager
+    QueueBuilder queueBuilder
 
     /**
-     * Rabbit consumer factory.
+     * Loads the configuration and registers any consumers or converters.
      */
-    protected ConsumerManager consumerManager
+    @Override
+    void load() {
+        messageConverterManager.load()
+        connectionManager.load()
+        consumerManager.load()
+    }
 
     /**
-     * Rabbit queue builder.
+     * Starts all connections, creates exchanges and queues, and starts all consumers.
      */
-    protected QueueBuilder queueBuilder
+    @Override
+    void start() {
+        startConnections()
+        createExchangesAndQueues()
+        startConsumers()
+    }
 
     /**
-     * Creates the exchanges and queues that are defined in the Grails configuration.
+     * Starts all connections and creates exchanges and queues.  Optionally starts
+     * consumers.
      *
-     * TODO move this into its own bean
-     */
-    protected void configureQueues() {
-    }
-
-    /**
-     * Stars the RabbitMQ system.
+     * This method is useful in situation where the system needs to be started up
+     * but other work needs to be done before messages can start consuming.
+     *
+     * @param deferConsumers
      */
     @Override
-    public void start() {
-        start(false)
-    }
-
-    /**
-     * Starts the RabbitMQ system.
-     */
-    @Override
-    public void start(boolean skipConsumers) {
-        // Start the connections
-        connectionManager.open()
-
-        // Set up any configured queues/exchanges
-        queueBuilder.configureQueues()
-
-        // Start consumers if requested
-        if (!skipConsumers) {
-            connectionManager.start()
+    void start(boolean deferConsumers) {
+        startConnections()
+        createExchangesAndQueues()
+        if (!deferConsumers) {
+            startConsumers()
         }
     }
 
     /**
-     * Starts the individual consumers.
+     * Stops all consumers and connections.
      */
-    public void startConsumers() {
-        connectionManager.start()
+    @Override
+    void stop() {
+        stopConnections() // this will also stop consumers
     }
 
     /**
-     * Closes all active channels and disconnects from the RabbitMQ server.
+     * Stops all consumers and connections, reloads the application configurations,
+     * and finally starts all connections and consumers.
+     *
+     * Calling this method will retain any manually registered consumers and connections
+     * unless they are overridden by the configuration.
      */
-    public void stop() {
-        // Reset the connection manager
-        connectionManager.reset()
-
-        // Clear message converters
-        messageConverterManager.reset()
-    }
-
-    /**
-     * Disconnects and completely restarts the connection to the RabbitMQ server.
-     */
-    public void restart() {
+    @Override
+    void reload() {
         stop()
         load()
         start()
     }
 
     /**
-     * Registers a new message consumer.
-     *
-     * @param consumer
-     * @return
-     */
-    public void registerConsumer(Object consumer) {
-        consumerManager.registerConsumer(consumer)
-    }
-
-    /**
-     * Creates a new channel with the default connection.
-     *
-     * Note that this channel must be manually closed.
-     *
-     * @return
+     * Stops all consumers and connections, and removes any registered contexts.
      */
     @Override
-    public Channel createChannel() {
-        return connectionManager.createChannel()
+    void reset() {
+        stop()
+        messageConverterManager.reset()
+        consumerManager.reset()
+        connectionManager.reset()
     }
 
     /**
-     * Creates a new channel with the specified connection.
-     *
-     * Note that this channel must be manually closed.
-     *
-     * @return
+     * Starts all consumers.
      */
     @Override
-    public Channel createChannel(String connectionName) {
-        return connectionManager.createChannel(connectionName)
+    void startConsumers() {
+        consumerManager.start()
     }
 
     /**
-     * Returns the ConnectionContext associated with the default connection.
+     * Starts all consumers associated with the given connection name.
+     */
+    @Override
+    void startConsumers(String connectionName) {
+        consumerManager.start(connectionManager.getContext(connectionName))
+    }
+
+    /**
+     * Starts a consumer based on its name.
+     */
+    @Override
+    void startConsumer(String name) {
+        consumerManager.start(name)
+    }
+
+    /**
+     * Stops all consumers.
+     */
+    @Override
+    void stopConsumers() {
+        consumerManager.stop()
+    }
+
+    /**
+     * Stops all consumers associated with the given connection name.
+     */
+    @Override
+    void stopConsumers(String connectionName) {
+        consumerManager.stop(connectionManager.getContext(connectionName))
+    }
+
+    /**
+     * Stops a consumer based on its name.
      *
-     * @return
+     * @param name
      */
     @Override
-    public ConnectionContext getConnection() {
-        return connectionManager.getConnection()
+    void stopConsumer(String name) {
+        consumerManager.stop(name)
     }
 
     /**
-     * Returns the ConnectionContext associated with the default connection.
+     * Registers a consumer.
      *
-     * @return
+     * @param candidate
      */
     @Override
-    public ConnectionContext getConnection(String name) {
-        return connectionManager.getConnection(name)
+    void registerConsumer(Object consumer) {
+        consumerManager.register(consumerManager.createContext(consumer))
     }
 
     /**
-     * Loads the configuration and registers any consumers and converters.
-     */
-    @Override
-    public void load() {
-        // Load the configuration
-        connectionManager.load()
-
-        // Load message converters
-        messageConverterManager.load()
-
-        // Load consumers
-        consumerManager.load()
-    }
-
-    /**
-     * Registers a message converter with the message converter manager.
+     * Registers a message converter.
      *
      * @param converter
      */
     @Override
-    public void registerMessageConverter(MessageConverter converter) {
+    void registerMessageConverter(MessageConverter converter) {
         messageConverterManager.registerMessageConverter(converter)
-
     }
 
     /**
-     * Sets the message converter manager.
+     * Starts all connections.
      */
     @Override
-    public void setMessageConverterManager(MessageConverterManager messageConverterManager) {
-        this.messageConverterManager = messageConverterManager
+    void startConnections() {
+        connectionManager.start()
     }
 
     /**
-     * Sets the application context bean.
+     * Starts the connection with the given name.
+     *
+     * @param name
      */
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext
+    void startConnection(String name) {
+        connectionManager.start(name)
     }
 
     /**
-     * Sets the connection manager.
+     * Stops all connections.
+     *
+     * This will also stop all consumers.
      */
     @Override
-    public void setConnectionManager(ConnectionManager connectionManager) {
-        this.connectionManager = connectionManager
+    void stopConnections() {
+        stopConsumers()
+        connectionManager.stop()
     }
 
     /**
-     * Sets the rabbit consumer manager.
+     * Stops the connection with the given name.
+     *
+     * This will also stop all consumers using the connection.
+     *
+     * @param name
      */
     @Override
-    public void setConsumerManager(ConsumerManager consumerManager) {
-        this.consumerManager = consumerManager
+    void stopConnection(String name) {
+        stopConsumers(name)
+        connectionManager.stop(name)
     }
 
     /**
-     * Sets the rabbit queue builder
+     * Registers a new connection.
+     *
+     * @param configuration
      */
     @Override
-    public void setQueueBuilder(QueueBuilder queueBuilder) {
-        this.queueBuilder = queueBuilder
+    void registerConnection(ConnectionConfiguration configuration) {
+        connectionManager.register(connectionManager.createContext(configuration))
+    }
+
+    /**
+     * Creates a RabbitMQ Channel with the default connection.
+     *
+     * @return
+     */
+    @Override
+    Channel createChannel() {
+        return connectionManager.createChannel()
+    }
+
+    /**
+     * Creates a RabbitMQ Channel with the specified connection.
+     *
+     * @return
+     */
+    @Override
+    Channel createChannel(String connectionName) {
+        return connectionManager.createChannel(connectionName)
+    }
+
+    /**
+     * Returns the RabbitMQ Connection associated with the default connection.
+     *
+     * @return
+     */
+    @Override
+    Connection getConnection() {
+        return connectionManager.getConnection()
+    }
+
+    /**
+     * Returns the RabbitMQ Connection with the specified connection name.
+     *
+     * @param name
+     * @return
+     */
+    @Override
+    Connection getConnection(String name) {
+        return connectionManager.getConnection(name)
+    }
+
+    /**
+     * Creates any configured exchanges and queues.
+     */
+    @Override
+    void createExchangesAndQueues() {
+        queueBuilder.configureQueues()
     }
 }

@@ -15,8 +15,6 @@
  */
 package com.budjb.rabbitmq.test
 
-import com.budjb.rabbitmq.test.helper.MessageConsumerIntegrationTest
-
 class MessageMarshallSpec extends MessageConsumerIntegrationTest {
     ReportingConsumer reportingConsumer
 

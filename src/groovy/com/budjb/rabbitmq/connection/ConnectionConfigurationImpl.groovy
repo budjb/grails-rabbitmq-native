@@ -121,7 +121,7 @@ class ConnectionConfigurationImpl implements ConnectionConfiguration {
         try {
             return value.asType(clazz)
         }
-        catch (Exception) {
+        catch (Exception e) {
             return defaultValue
         }
     }

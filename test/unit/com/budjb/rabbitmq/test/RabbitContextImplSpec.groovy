@@ -16,28 +16,30 @@
 package com.budjb.rabbitmq.test
 
 import com.budjb.rabbitmq.QueueBuilder
-import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitContextImpl
+import com.budjb.rabbitmq.connection.ConnectionConfiguration
+import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
-import com.budjb.rabbitmq.consumer.ConsumerManagerImpl
+import com.budjb.rabbitmq.consumer.ConsumerContext
+import com.budjb.rabbitmq.consumer.ConsumerManager
+import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 class RabbitContextImplSpec extends Specification {
     GrailsApplication grailsApplication
     MessageConverterManager messageConverterManager
     ConnectionManager connectionManager
-    ConsumerManagerImpl consumerManager
-    RabbitContext rabbitContext
+    ConsumerManager consumerManager
+    RabbitContextImpl rabbitContext
     QueueBuilder queueBuilder
 
     def setup() {
         grailsApplication = Mock(GrailsApplication)
         messageConverterManager = Mock(MessageConverterManager)
         connectionManager = Mock(ConnectionManager)
-        consumerManager = Mock(ConsumerManagerImpl)
+        consumerManager = Mock(ConsumerManager)
         queueBuilder = Mock(QueueBuilder)
 
         rabbitContext = new RabbitContextImpl()
@@ -90,28 +92,37 @@ class RabbitContextImplSpec extends Specification {
     }
 
     def 'Ensure registerConsumer(Object) is proxied to the rabbit consumer manager'() {
+        setup:
+        Object consumer = Mock(Object)
+        ConsumerContext context = Mock(ConsumerContext)
+
+        consumerManager.createContext(consumer) >> context
+
         when:
-        rabbitContext.registerConsumer(null)
+        rabbitContext.registerConsumer(consumer)
 
         then:
-        1 * consumerManager.registerConsumer(null)
+        1 * consumerManager.register(context)
     }
 
     def 'Ensure registerMessageConverter(MessageConverter) is proxied to the rabbit consumer manager'() {
+        setup:
+        MessageConverter<?> converter = Mock(MessageConverter)
+
         when:
-        rabbitContext.registerMessageConverter(null)
+        rabbitContext.registerMessageConverter(converter)
 
         then:
-        1 * messageConverterManager.registerMessageConverter(null)
+        1 * messageConverterManager.registerMessageConverter(converter)
     }
 
-    def 'When stop() is called, the connection and message converter managers should be reset'() {
+    def 'When stop() is called, the connection and message converter managers should be stopped'() {
         when:
         rabbitContext.stop()
 
         then:
-        1 * connectionManager.reset()
-        1 * messageConverterManager.reset()
+        1 * connectionManager.stop()
+        1 * consumerManager.stop()
     }
 
     def 'When start() is called, connections should be opened, queues should be configured, and consumers should be started'() {
@@ -119,9 +130,9 @@ class RabbitContextImplSpec extends Specification {
         rabbitContext.start()
 
         then:
-        1 * connectionManager.open()
-        1 * queueBuilder.configureQueues()
         1 * connectionManager.start()
+        1 * queueBuilder.configureQueues()
+        1 * consumerManager.start()
     }
 
     def 'When start(true) is called, connections should be opened, queues should be configured, and consumers should not be started'() {
@@ -129,90 +140,137 @@ class RabbitContextImplSpec extends Specification {
         rabbitContext.start(true)
 
         then:
-        1 * connectionManager.open()
-        1 * queueBuilder.configureQueues()
-        0 * connectionManager.start()
-    }
-
-    def 'Ensure the proper interactions for restart (stop/load/start)'() {
-        when:
-        rabbitContext.restart()
-
-        then:
-        connectionManager.reset()
-        messageConverterManager.reset()
-
-        then:
-        connectionManager.load()
-        messageConverterManager.load()
-        consumerManager.load()
-
-        then:
-        1 * connectionManager.open()
-        1 * queueBuilder.configureQueues()
         1 * connectionManager.start()
+        1 * queueBuilder.configureQueues()
+        0 * consumerManager.start()
     }
 
-    def 'Ensure startConsumers() is proxied to the connection manager'() {
+    def 'Ensure the proper interactions for reload (stop/load/start)'() {
+        when:
+        rabbitContext.reload()
+
+        then:
+        1 * connectionManager.stop()
+        1 * consumerManager.stop()
+
+        then:
+        1 * connectionManager.load()
+        1 * messageConverterManager.load()
+        1 * consumerManager.load()
+
+        then:
+        1 * connectionManager.start()
+        1 * queueBuilder.configureQueues()
+        1 * consumerManager.start()
+    }
+
+    def 'Ensure startConsumers() is proxied to the consumer manager'() {
         when:
         rabbitContext.startConsumers()
 
         then:
+        1 * consumerManager.start()
+    }
+
+    def 'Ensure stopConsumers() is proxied to the consumer manager'() {
+        when:
+        rabbitContext.stopConsumers()
+
+        then:
+        1 * consumerManager.stop()
+    }
+
+    def 'Ensure startConsumers(String) is proxied to the consumer manager with the correct connection context'() {
+        setup:
+        ConnectionContext connectionContext = Mock(ConnectionContext)
+        connectionManager.getContext('connection') >> connectionContext
+
+        when:
+        rabbitContext.startConsumers('connection')
+
+        then:
+        1 * consumerManager.start(connectionContext)
+    }
+
+    def 'Ensure stopConsumers(String) is proxied to the consumer manager with the correct connection context'() {
+        setup:
+        ConnectionContext connectionContext = Mock(ConnectionContext)
+        connectionManager.getContext('connection') >> connectionContext
+
+        when:
+        rabbitContext.stopConsumers('connection')
+
+        then:
+        1 * consumerManager.stop(connectionContext)
+    }
+
+    def 'Ensure startConsumer(String) is proxied to the consumer manager'() {
+        when:
+        rabbitContext.startConsumer('consumer')
+
+        then:
+        1 * consumerManager.start('consumer')
+    }
+
+    def 'Ensure stopConsumer(String) is proxied to the consumer manager'() {
+        when:
+        rabbitContext.stopConsumer('consumer')
+
+        then:
+        1 * consumerManager.stop('consumer')
+    }
+
+    def 'Ensure startConnections() is proxied to the connection manager'() {
+        when:
+        rabbitContext.startConnections()
+
+        then:
         1 * connectionManager.start()
     }
 
-    def 'Ensure setApplicationContext(ApplicationContext) sets the property correctly'() {
-        setup:
-        ApplicationContext applicationContext = Mock(ApplicationContext)
-
+    def 'Ensure startConnection(String) is proxied to the connection manager'() {
         when:
-        rabbitContext.setApplicationContext(applicationContext)
+        rabbitContext.startConnection('connection')
 
         then:
-        rabbitContext.applicationContext == applicationContext
+        1 * connectionManager.start('connection')
     }
 
-    def 'Ensure setConnectionManager(ConnectionManager) sets the property correctly'() {
-        setup:
-        ConnectionManager connectionManager = Mock(ConnectionManager)
-
+    def 'Ensure stopConnections() is proxied to the connection manager'() {
         when:
-        rabbitContext.setConnectionManager(connectionManager)
+        rabbitContext.stopConnections()
 
         then:
-        rabbitContext.connectionManager == connectionManager
+        1 * connectionManager.stop()
     }
 
-    def 'Ensure setMessageConverterManager(MessageConverterManager) sets the property correctly'() {
-        setup:
-        MessageConverterManager messageConverterManager = Mock(MessageConverterManager)
-
+    def 'Ensure stopConnection(String) is proxied to the connection manager'() {
         when:
-        rabbitContext.setMessageConverterManager(messageConverterManager)
+        rabbitContext.stopConnection('connection')
 
         then:
-        rabbitContext.messageConverterManager == messageConverterManager
+        1 * connectionManager.stop('connection')
     }
 
-    def 'Ensure setConsumerManager(ConsumerManager) sets the proeprty correctly'() {
+    def 'Ensure registerConnection(ConnectionConfiguration) is proxied to the connection manager'() {
         setup:
-        ConsumerManagerImpl consumerManager = Mock(ConsumerManagerImpl)
+        ConnectionConfiguration configuration = Mock(ConnectionConfiguration)
+        ConnectionContext context = Mock(ConnectionContext)
+
+        connectionManager.createContext(configuration) >> context
 
         when:
-        rabbitContext.setConsumerManager(consumerManager)
+        rabbitContext.registerConnection(configuration)
 
         then:
-        rabbitContext.consumerManager == consumerManager
+        1 * connectionManager.register(context)
     }
 
-    def 'Ensure setQueueBuilder(QueueBuilder) sets the property correctly'() {
-        setup:
-        QueueBuilder queueBuilder = Mock(QueueBuilder)
-
+    def 'Ensure createExchangesAndQueues is proxied to the queue builder'() {
         when:
-        rabbitContext.setQueueBuilder(queueBuilder)
+        rabbitContext.createExchangesAndQueues()
 
         then:
-        rabbitContext.queueBuilder == queueBuilder
+        1 * queueBuilder.configureQueues()
     }
 }

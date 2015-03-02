@@ -41,7 +41,7 @@ class ConnectionContextImplSpec extends Specification {
         context.start()
 
         then:
-        1 * log.error("unable to start the connection to RabbitMQ server 'test-connection' because its configuration is invalid")
+        1 * log.error("unable to start connection 'test-connection' because its configuration is invalid")
         0 * factory._
     }
 

@@ -60,22 +60,24 @@ class ConnectionContextImpl implements ConnectionContext {
 
     /**
      * Opens the connection to the RabbitMQ broker.
+     *
+     * @throws IllegalStateException
      */
     @Override
-    void start() {
-        // Bail if the configuration is not valid.
+    void start() throws IllegalStateException {
+        if (this.connection != null) {
+            throw new IllegalStateException("attempted to start connection '${getId()}' but it is already started")
+        }
+
         if (!configuration.isValid()) {
-            log.error("unable to start the connection to RabbitMQ server '${getId()}' because its configuration is invalid")
+            log.error("unable to start connection '${getId()}' because its configuration is invalid")
             return
         }
 
-        // Log it
         log.info("connecting to RabbitMQ server '${getId()}' at '${configuration.getHost()}:${configuration.getPort()}' on virtual host '${configuration.getVirtualHost()}'")
 
-        // Create the connection factory
         ConnectionFactory factory = getConnectionFactory()
 
-        // Configure it
         factory.setUsername(configuration.getUsername())
         factory.setPassword(configuration.getPassword())
         factory.setPort(configuration.getPort())
@@ -84,12 +86,10 @@ class ConnectionContextImpl implements ConnectionContext {
         factory.setAutomaticRecoveryEnabled(configuration.getAutomaticReconnect())
         factory.setRequestedHeartbeat(configuration.getRequestedHeartbeat())
 
-        // Optionally enable SSL
         if (configuration.getSsl()) {
             factory.useSslProtocol()
         }
 
-        // Create the thread pool service
         ExecutorService executorService
         if (configuration.getThreads() > 0) {
             executorService = Executors.newFixedThreadPool(configuration.getThreads())
@@ -138,6 +138,7 @@ class ConnectionContextImpl implements ConnectionContext {
 
     /**
      * Returns the connection factory to create a connection with.
+     *
      * @return
      */
     protected ConnectionFactory getConnectionFactory() {
@@ -160,7 +161,7 @@ class ConnectionContextImpl implements ConnectionContext {
     @Override
     Connection getConnection() throws IllegalStateException {
         if (!connection) {
-            throw new IllegalStateException("connection has is not active")
+            throw new IllegalStateException("connection '${getId()}' is not active")
         }
         return connection
     }

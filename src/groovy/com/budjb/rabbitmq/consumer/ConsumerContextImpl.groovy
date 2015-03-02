@@ -200,7 +200,7 @@ class ConsumerContextImpl implements ConsumerContext {
         try {
             configuration = getConfiguration()
         }
-        catch (Exception) {
+        catch (Exception e) {
             log.error("unable to retrieve configuration for consumer '${getId()}")
             return false
         }
@@ -235,18 +235,19 @@ class ConsumerContextImpl implements ConsumerContext {
 
     /**
      * Starts a consumer.
+     *
+     * @throws IllegalStateException
      */
     @Override
-    void start() {
-        // Ensure the object is a consumer
+    void start() throws IllegalStateException {
+        if (consumers.size()) {
+            throw new IllegalStateException("attempted to start consumer '${getId()}' but it is already started")
+        }
+
+        // Ensure the configuration is valid
         if (!isValid()) {
             log.warn("not starting consumer '${getId()}' because it is not valid")
             return
-        }
-
-        // Ensure there are no active consumers
-        if (consumers.size()) {
-            throw new IllegalStateException("attempted to start consumer '${getId()}' but it is already started")
         }
 
         // Get the configuration

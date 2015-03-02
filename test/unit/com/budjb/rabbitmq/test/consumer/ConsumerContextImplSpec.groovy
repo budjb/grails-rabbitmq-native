@@ -23,8 +23,8 @@ import com.budjb.rabbitmq.consumer.ConsumerContextImpl
 import com.budjb.rabbitmq.consumer.MessageContext
 import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
-import com.budjb.rabbitmq.test.helper.PersistenceInterceptor
-import com.budjb.rabbitmq.test.helper.UnitTestConsumer
+import com.budjb.rabbitmq.test.PersistenceInterceptor
+import com.budjb.rabbitmq.test.UnitTestConsumer
 import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope

@@ -3,8 +3,10 @@ package com.budjb.rabbitmq
 interface RabbitManagedContext {
     /**
      * Starts the context.
+     *
+     * @throws IllegalStateException
      */
-    void start()
+    void start() throws IllegalStateException
 
     /**
      * Stops the context.

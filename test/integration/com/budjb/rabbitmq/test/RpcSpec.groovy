@@ -1,7 +1,5 @@
 package com.budjb.rabbitmq.test
 
-import com.budjb.rabbitmq.test.helper.MessageConsumerIntegrationTest
-
 class RpcSpec extends MessageConsumerIntegrationTest {
     SpecificTopicConsumer specificTopicConsumer
 

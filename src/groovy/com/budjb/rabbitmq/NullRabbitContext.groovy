@@ -15,13 +15,13 @@
  */
 package com.budjb.rabbitmq
 
-import com.budjb.rabbitmq.connection.ConnectionContext
+import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.rabbitmq.client.Channel
-import org.springframework.context.ApplicationContext
+import com.rabbitmq.client.Connection
 
 /**
  * A null object implementation of the RabbitContext.
@@ -29,89 +29,143 @@ import org.springframework.context.ApplicationContext
  * This is created when the plugin is disabled.
  */
 class NullRabbitContext implements RabbitContext {
-
     @Override
-    public void load() {
+    void load() {
 
     }
 
     @Override
-    public void start() {
+    void start() {
 
     }
 
     @Override
-    public void start(boolean skipConsumers) {
+    void stop() {
 
     }
 
     @Override
-    public void stop() {
+    void registerMessageConverter(MessageConverter converter) {
 
     }
 
     @Override
-    public void restart() {
+    void registerConsumer(Object consumer) {
 
     }
 
     @Override
-    public void registerMessageConverter(MessageConverter converter) {
+    void startConsumers() {
 
     }
 
     @Override
-    public void registerConsumer(Object candidate) {
-
-    }
-
-    @Override
-    public void startConsumers() {
-
-    }
-
-    @Override
-    public Channel createChannel() {
+    Channel createChannel() {
         throw new UnsupportedOperationException('unable to create a new channel with a disabled rabbit context')
     }
 
     @Override
-    public Channel createChannel(String connectionName) {
+    Channel createChannel(String connectionName) {
         throw new UnsupportedOperationException('unable to create a new channel with a disabled rabbit context')
     }
 
     @Override
-    public ConnectionContext getConnection() {
+    Connection getConnection() {
         throw new UnsupportedOperationException('no connections are available with a disabled rabbit context')
     }
 
     @Override
-    public ConnectionContext getConnection(String name) {
+    Connection getConnection(String name) {
         throw new UnsupportedOperationException('no connections are available with a disabled rabbit context')
     }
 
     @Override
-    public void setMessageConverterManager(MessageConverterManager messageConverterManager) {
+    void setMessageConverterManager(MessageConverterManager messageConverterManager) {
 
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) {
+    void setConnectionManager(ConnectionManager connectionManager) {
 
     }
 
     @Override
-    public void setConnectionManager(ConnectionManager connectionManager) {
+    void setConsumerManager(ConsumerManager consumerManager) {
 
     }
 
     @Override
-    public void setConsumerManager(ConsumerManager consumerManager) {
+    void setQueueBuilder(QueueBuilder queueBuilder) {
 
     }
 
     @Override
-    public void setQueueBuilder(QueueBuilder queueBuilder) {
+    void reload() {
+
+    }
+
+    @Override
+    void reset() {
+
+    }
+
+    @Override
+    void startConsumers(String connectionName) {
+
+    }
+
+    @Override
+    void startConsumer(String name) {
+
+    }
+
+    @Override
+    void stopConsumers() {
+
+    }
+
+    @Override
+    void stopConsumers(String connectionName) {
+
+    }
+
+    @Override
+    void stopConsumer(String name) {
+
+    }
+
+    @Override
+    void startConnections() {
+
+    }
+
+    @Override
+    void startConnection(String name) {
+
+    }
+
+    @Override
+    void stopConnections() {
+
+    }
+
+    @Override
+    void stopConnection(String name) {
+
+    }
+
+    @Override
+    void registerConnection(ConnectionConfiguration configuration) {
+
+    }
+
+    @Override
+    void start(boolean deferConsumers) {
+
+    }
+
+    @Override
+    void createExchangesAndQueues() {
 
     }
 }

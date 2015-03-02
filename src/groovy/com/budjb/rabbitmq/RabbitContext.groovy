@@ -15,117 +15,192 @@
  */
 package com.budjb.rabbitmq
 
-import com.budjb.rabbitmq.connection.ConnectionContext
+import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.rabbitmq.client.Channel
-import org.springframework.context.ApplicationContext
+import com.rabbitmq.client.Connection
 
 public interface RabbitContext {
     /**
      * Loads the configuration and registers any consumers or converters.
      */
-    public void load()
+    void load()
 
     /**
-     * Starts the RabbitMQ system. This includes connecting to any configured
-     * RabbitMQ brokers and setting up any consumer channels.
+     * Starts all connections, creates exchanges and queues, and starts all consumers.
      */
-    public void start()
+    void start()
 
     /**
-     * Starts the RabbitMQ system. This includes connecting to any configured
-     * RabbitMQ brokers and optionally setting up any consumer channels.
+     * Starts all connections and creates exchanges and queues.  Optionally starts
+     * consumers.
      *
-     * @param skipConsumers Whether to skip connecting consumer channels.
+     * This method is useful in situation where the system needs to be started up
+     * but other work needs to be done before messages can start consuming.
+     *
+     * @param deferConsumers
      */
-    public void start(boolean skipConsumers)
+    void start(boolean deferConsumers)
 
     /**
-     * Disconnects all consumer channels and closes any open RabbitMQ broker connections.
+     * Starts all connections
      */
-    public void stop()
+    /**
+     * Stops all consumers and connections.
+     */
+    void stop()
 
     /**
-     * Stops the RabbitMQ service, reloads configuration, and starts services again.
+     * Stops all consumers and connections, reloads the application configurations,
+     * and finally starts all connections and consumers.
+     *
+     * Calling this method will retain any manually registered consumers and connections
+     * unless they are overridden by the configuration.
      */
-    public void restart()
+    void reload()
+
+    /**
+     * Stops all consumers and connections, and removes any registered contexts.
+     */
+    void reset()
+
+    /**
+     * Starts all consumers.
+     */
+    void startConsumers()
+
+    /**
+     * Starts all consumers associated with the given connection name.
+     */
+    void startConsumers(String connectionName)
+
+    /**
+     * Starts a consumer based on its name.
+     */
+    void startConsumer(String name)
+
+    /**
+     * Stops all consumers.
+     */
+    void stopConsumers()
+
+    /**
+     * Stops all consumers associated with the given connection name.
+     */
+    void stopConsumers(String connectionName)
+
+    /**
+     * Stops a consumer based on its name.
+     *
+     * @param name
+     */
+    void stopConsumer(String name)
+
+    /**
+     * Registers a consumer.
+     *
+     * @param consumer
+     */
+    void registerConsumer(Object consumer)
 
     /**
      * Registers a message converter.
      *
      * @param converter
      */
-    public void registerMessageConverter(MessageConverter converter)
+    void registerMessageConverter(MessageConverter converter)
 
     /**
-     * Registers a consumer.
+     * Starts all connections.
+     */
+    void startConnections()
+
+    /**
+     * Starts the connection with the given name.
      *
-     * @param candidate
+     * @param name
      */
-    public void registerConsumer(Object candidate)
+    void startConnection(String name)
 
     /**
-     * Starts the consumers separately from the rest of the RabbitMQ service.
-     * This is useful for delaying the start of the RabbitMQ services.
+     * Stops all connections.
+     *
+     * This will also stop all consumers.
      */
-    public void startConsumers()
+    void stopConnections()
 
     /**
-     * Creates a channel with the default connection.
+     * Stops the connection with the given name.
+     *
+     * This will also stop all consumers using the connection.
+     *
+     * @param name
+     */
+    void stopConnection(String name)
+
+    /**
+     * Registers a new connection.
+     *
+     * @param configuration
+     */
+    void registerConnection(ConnectionConfiguration configuration)
+
+    /**
+     * Creates a RabbitMQ Channel with the default connection.
      *
      * @return
      */
-    public Channel createChannel()
+    Channel createChannel()
 
     /**
-     * Creates a channel with the specified connection.
+     * Creates a RabbitMQ Channel with the specified connection.
      *
      * @return
      */
-    public Channel createChannel(String connectionName)
+    Channel createChannel(String connectionName)
 
     /**
-     * Returns the ConnectionContext associated with the default connection.
+     * Returns the RabbitMQ Connection associated with the default connection.
      *
      * @return
      */
-    public ConnectionContext getConnection()
+    Connection getConnection()
 
     /**
-     * Returns the ConnectionContext with the specified connection name.
+     * Returns the RabbitMQ Connection with the specified connection name.
      *
      * @param name
      * @return
      */
-    public ConnectionContext getConnection(String name)
+    Connection getConnection(String name)
 
     /**
      * Sets the message converter manager.
      *
      * @param messageConverterManager
      */
-    public void setMessageConverterManager(MessageConverterManager messageConverterManager)
-
-    /**
-     * Sets the application context.
-     */
-    public void setApplicationContext(ApplicationContext applicationContext)
+    void setMessageConverterManager(MessageConverterManager messageConverterManager)
 
     /**
      * Sets the connection manager.
      */
-    public void setConnectionManager(ConnectionManager connectionManager)
+    void setConnectionManager(ConnectionManager connectionManager)
 
     /**
      * Sets the rabbit consumer manager.
      */
-    public void setConsumerManager(ConsumerManager consumerManager)
+    void setConsumerManager(ConsumerManager consumerManager)
 
     /**
      * Sets the rabbit queue builder.
      */
-    public void setQueueBuilder(QueueBuilder queueBuilder)
+    void setQueueBuilder(QueueBuilder queueBuilder)
+
+    /**
+     * Creates any configured exchanges and queues.
+     */
+    void createExchangesAndQueues()
 }

@@ -15,7 +15,6 @@
  */
 package com.budjb.rabbitmq.publisher
 
-import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.MessageContext
 import com.budjb.rabbitmq.converter.MessageConverterManager

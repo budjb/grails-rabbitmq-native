@@ -1,4 +1,4 @@
-package com.budjb.rabbitmq.test.helper
+package com.budjb.rabbitmq.test
 
 class UnitTestConsumer {
     static rabbitConfig = [

@@ -171,7 +171,14 @@ class ConnectionManagerImpl implements ConnectionManager {
             connections[0].isDefault = true
         }
 
-        connections.each { start(it) }
+        connections.each {
+            try {
+                start(it)
+            }
+            catch (IllegalStateException e) {
+                // Continue...
+            }
+        }
     }
 
     /**

@@ -156,7 +156,7 @@ class QueueBuilderSpec extends Specification {
         channel.isOpen() >> true
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getConnection(_) >> connectionContext
+        connectionManager.getContext(_) >> connectionContext
 
         when:
         queueBuilder.configureQueues()
@@ -193,8 +193,8 @@ class QueueBuilderSpec extends Specification {
         connectionContext1.createChannel() >> channel1
         ConnectionContext connectionContext2 = Mock(ConnectionContext)
         connectionContext2.createChannel() >> channel2
-        connectionManager.getConnection(null) >> connectionContext1
-        connectionManager.getConnection('secondaryConnection') >> connectionContext2
+        connectionManager.getContext(null) >> connectionContext1
+        connectionManager.getContext('secondaryConnection') >> connectionContext2
 
         when:
         queueBuilder.configureQueues()
@@ -234,7 +234,7 @@ class QueueBuilderSpec extends Specification {
         channel.isOpen() >> true
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getConnection('test-connection') >> connectionContext
+        connectionManager.getContext('test-connection') >> connectionContext
 
         when:
         queueBuilder.configureQueues()
@@ -268,7 +268,7 @@ class QueueBuilderSpec extends Specification {
         channel.isOpen() >> true
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getConnection('test-connection') >> connectionContext
+        connectionManager.getContext('test-connection') >> connectionContext
 
         when:
         queueBuilder.configureQueues()
@@ -302,7 +302,7 @@ class QueueBuilderSpec extends Specification {
         channel.isOpen() >> true
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getConnection('test-connection') >> connectionContext
+        connectionManager.getContext('test-connection') >> connectionContext
 
         when:
         queueBuilder.configureQueues()
@@ -334,7 +334,7 @@ class QueueBuilderSpec extends Specification {
         channel.isOpen() >> true
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getConnection(_) >> connectionContext
+        connectionManager.getContext(_) >> connectionContext
 
         when:
         queueBuilder.configureQueues()
@@ -365,7 +365,7 @@ class QueueBuilderSpec extends Specification {
         channel.isOpen() >> true
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getConnection('test-connection') >> connectionContext
+        connectionManager.getContext('test-connection') >> connectionContext
 
         when:
         queueBuilder.configureQueues()
@@ -395,7 +395,7 @@ class QueueBuilderSpec extends Specification {
         channel.queueDeclare(*_) >> { throw new IOException() }
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getConnection(_) >> connectionContext
+        connectionManager.getContext(_) >> connectionContext
 
         when:
         queueBuilder.configureQueues()
@@ -422,7 +422,7 @@ class QueueBuilderSpec extends Specification {
         channel.isOpen() >> true
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getConnection(_) >> connectionContext
+        connectionManager.getContext(_) >> connectionContext
 
         when:
         queueBuilder.configureQueues()
@@ -447,7 +447,7 @@ class QueueBuilderSpec extends Specification {
         channel.isOpen() >> true
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getConnection(_) >> connectionContext
+        connectionManager.getContext(_) >> connectionContext
 
         when:
         queueBuilder.configureQueues()
@@ -472,7 +472,7 @@ class QueueBuilderSpec extends Specification {
         channel.isOpen() >> true
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getConnection(_) >> connectionContext
+        connectionManager.getContext(_) >> connectionContext
 
         when:
         queueBuilder.configureQueues()
@@ -493,7 +493,7 @@ class QueueBuilderSpec extends Specification {
             ]
         ])
         grailsApplication.getConfig() >> configuration
-        connectionManager.getConnection(_) >> null
+        connectionManager.getContext(_) >> null
 
         when:
         queueBuilder.configureQueues()
@@ -514,7 +514,7 @@ class QueueBuilderSpec extends Specification {
             ]
         ])
         grailsApplication.getConfig() >> configuration
-        connectionManager.getConnection(_) >> null
+        connectionManager.getContext(_) >> null
 
         when:
         queueBuilder.configureQueues()
@@ -540,7 +540,7 @@ class QueueBuilderSpec extends Specification {
         channel.exchangeDeclare(*_) >> { throw new IOException() }
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getConnection(_) >> connectionContext
+        connectionManager.getContext(_) >> connectionContext
 
         when:
         queueBuilder.configureQueues()
@@ -569,7 +569,7 @@ class QueueBuilderSpec extends Specification {
         channel.isOpen() >> true
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getConnection(_) >> connectionContext
+        connectionManager.getContext(_) >> connectionContext
 
         when:
         queueBuilder.configureQueues()
@@ -590,7 +590,7 @@ class QueueBuilderSpec extends Specification {
             ]
         ])
         grailsApplication.getConfig() >> configuration
-        connectionManager.getConnection(_) >> null
+        connectionManager.getContext(_) >> null
 
         when:
         queueBuilder.configureQueues()
@@ -619,7 +619,7 @@ class QueueBuilderSpec extends Specification {
         channel.isOpen() >> true
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getConnection(_) >> connectionContext
+        connectionManager.getContext(_) >> connectionContext
 
         when:
         queueBuilder.configureQueues()

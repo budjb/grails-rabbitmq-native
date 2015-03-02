@@ -15,15 +15,15 @@
  */
 package com.budjb.rabbitmq
 
-import com.budjb.rabbitmq.connection.ConnectionContext
+import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.rabbitmq.client.Channel
+import com.rabbitmq.client.Connection
 import org.apache.commons.lang.NullArgumentException
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.context.ApplicationContext
 
 class RabbitContextProxy implements RabbitContext, InitializingBean {
     /**
@@ -36,7 +36,7 @@ class RabbitContextProxy implements RabbitContext, InitializingBean {
      *
      * @param target
      */
-    public void setTarget(RabbitContext target) {
+    void setTarget(RabbitContext target) {
         if (target == null) {
             throw new NullArgumentException("rabbit context target can not be null")
         }
@@ -49,92 +49,147 @@ class RabbitContextProxy implements RabbitContext, InitializingBean {
     /**
      * Ensures a target is set after spring initialization is complete.
      */
-    public void afterPropertiesSet() {
+    void afterPropertiesSet() {
         assert target != null: "RabbitContext proxy target is required but not set"
     }
 
     @Override
-    public void load() {
+    void load() {
         target.load()
     }
 
     @Override
-    public void start() {
+    void start() {
         target.start()
     }
 
     @Override
-    public void start(boolean skipConsumers) {
-        target.start(skipConsumers)
-    }
-
-    @Override
-    public void stop() {
+    void stop() {
         target.stop()
     }
 
     @Override
-    public void restart() {
-        target.restart()
-    }
-
-    @Override
-    public void registerMessageConverter(MessageConverter converter) {
+    void registerMessageConverter(MessageConverter converter) {
         target.registerMessageConverter(converter)
     }
 
     @Override
-    public void registerConsumer(Object candidate) {
-        target.registerConsumer(candidate)
+    void registerConsumer(Object consumer) {
+        target.registerConsumer(consumer)
     }
 
     @Override
-    public void startConsumers() {
+    void startConsumers() {
         target.startConsumers()
     }
 
     @Override
-    public Channel createChannel() {
+    Channel createChannel() {
         return target.createChannel()
     }
 
     @Override
-    public Channel createChannel(String connectionName) {
+    Channel createChannel(String connectionName) {
         return target.createChannel(connectionName)
     }
 
     @Override
-    public ConnectionContext getConnection() {
+    Connection getConnection() {
         return target.getConnection()
     }
 
     @Override
-    public ConnectionContext getConnection(String name) {
+    Connection getConnection(String name) {
         return target.getConnection(name)
     }
 
     @Override
-    public void setMessageConverterManager(MessageConverterManager messageConverterManager) {
+    void setMessageConverterManager(MessageConverterManager messageConverterManager) {
         target.setMessageConverterManager(messageConverterManager)
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) {
-        target.setApplicationContext(applicationContext)
-    }
-
-    @Override
-    public void setConnectionManager(ConnectionManager connectionManager) {
+    void setConnectionManager(ConnectionManager connectionManager) {
         target.setConnectionManager(connectionManager)
     }
 
     @Override
-    public void setConsumerManager(ConsumerManager consumerManager) {
+    void setConsumerManager(ConsumerManager consumerManager) {
         target.setConsumerManager(consumerManager)
     }
 
     @Override
-    public void setQueueBuilder(QueueBuilder queueBuilder) {
+    void setQueueBuilder(QueueBuilder queueBuilder) {
         target.setQueueBuilder(queueBuilder)
+    }
+
+    @Override
+    void reload() {
+        target.reload()
+    }
+
+    @Override
+    void reset() {
+        target.reset()
+    }
+
+    @Override
+    void startConsumers(String connectionName) {
+        target.startConsumers(connectionName)
+    }
+
+    @Override
+    void startConsumer(String name) {
+        target.startConsumer(name)
+    }
+
+    @Override
+    void stopConsumers() {
+        target.stopConsumers()
+    }
+
+    @Override
+    void stopConsumers(String connectionName) {
+        target.stopConsumers(connectionName)
+    }
+
+    @Override
+    void stopConsumer(String name) {
+        target.stopConsumer(name)
+    }
+
+    @Override
+    void startConnections() {
+        target.startConnections()
+    }
+
+    @Override
+    void startConnection(String name) {
+        target.startConnection(name)
+    }
+
+    @Override
+    void stopConnections() {
+        target.stopConnections()
+    }
+
+    @Override
+    void stopConnection(String name) {
+        target.stopConnection(name)
+    }
+
+    @Override
+    void registerConnection(ConnectionConfiguration configuration) {
+        target.registerConnection(configuration)
+    }
+
+    @Override
+    void start(boolean deferConsumers) {
+        target.start(deferConsumers)
+    }
+
+    @Override
+    void createExchangesAndQueues() {
+        target.createExchangesAndQueues()
     }
 }

@@ -15,6 +15,7 @@
  */
 package com.budjb.rabbitmq.consumer
 
+import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.ContextNotFoundException
@@ -97,7 +98,14 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      */
     @Override
     void start() {
-        consumers.each { start(it) }
+        consumers.each {
+            try {
+                start(it)
+            }
+            catch (IllegalStateException e) {
+                // Continue...
+            }
+        }
     }
 
     /**
@@ -168,7 +176,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
         try {
             unregister(getContext(context.id))
         }
-        catch (ContextNotFoundException) {
+        catch (ContextNotFoundException e) {
             // Continue...
         }
 
@@ -275,7 +283,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
                 return null
             }
         }
-        catch (NoSuchFieldException) {
+        catch (NoSuchFieldException e) {
             return null
         }
 
@@ -284,5 +292,43 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
         }
 
         return consumer."${RABBIT_CONFIG_NAME}"
+    }
+
+    /**
+     * Starts all consumers associated with the given connection context.
+     *
+     * @param connectionContext
+     */
+    @Override
+    void start(ConnectionContext connectionContext) {
+        getContexts(connectionContext).each {
+            try {
+                it.start()
+            }
+            catch (IllegalStateException e) {
+                // Continue...
+            }
+        }
+    }
+
+    /**
+     * Stops all consumers associated with the given connection context.
+     *
+     * @param connectionContext
+     */
+    @Override
+    void stop(ConnectionContext connectionContext) {
+        getContexts(connectionContext).each { stop(it) }
+    }
+
+    /**
+     * Retrieves all consumer contexts associated with the given connection context.
+     *
+     * @param connectionContext
+     * @return
+     */
+    @Override
+    List<ConsumerContext> getContexts(ConnectionContext connectionContext) {
+        return consumers.findAll { it.connectionName == connectionContext.id }
     }
 }

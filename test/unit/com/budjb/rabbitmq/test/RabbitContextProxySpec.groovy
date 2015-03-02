@@ -17,8 +17,12 @@ package com.budjb.rabbitmq.test
 
 import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitContextProxy
+import com.budjb.rabbitmq.connection.ConnectionConfiguration
+import com.budjb.rabbitmq.converter.MessageConverter
 import org.apache.commons.lang.NullArgumentException
 import spock.lang.Specification
+
+import java.sql.Connection
 
 class RabbitContextProxySpec extends Specification {
     RabbitContextProxy rabbitContext
@@ -99,35 +103,33 @@ class RabbitContextProxySpec extends Specification {
     }
 
     def 'Ensure registerConsumer(Object) is proxied'() {
+        setup:
+        Object consumer = new Object()
+
         when:
-        rabbitContext.registerConsumer(null)
+        rabbitContext.registerConsumer(consumer)
 
         then:
-        1 * targetRabbitContext.registerConsumer(null)
+        1 * targetRabbitContext.registerConsumer(consumer)
     }
 
     def 'Ensure registerMessageConverter(MessageConverter) is proxied'() {
+        setup:
+        MessageConverter<?> messageConverter = Mock(MessageConverter)
+
         when:
-        rabbitContext.registerMessageConverter(null)
+        rabbitContext.registerMessageConverter(messageConverter)
 
         then:
-        1 * targetRabbitContext.registerMessageConverter(null)
+        1 * targetRabbitContext.registerMessageConverter(messageConverter)
     }
 
-    def 'Ensure restart() is proxied'() {
+    def 'Ensure reset() is proxied'() {
         when:
-        rabbitContext.restart()
+        rabbitContext.reset()
 
         then:
-        1 * targetRabbitContext.restart()
-    }
-
-    def 'Ensure setApplicationContext(ApplicationContext) is proxied'() {
-        when:
-        rabbitContext.setApplicationContext(null)
-
-        then:
-        1 * targetRabbitContext.setApplicationContext(null)
+        1 * targetRabbitContext.reset()
     }
 
     def 'Ensure setConnectionManager(ConnectionManager) is proxied'() {
@@ -186,11 +188,110 @@ class RabbitContextProxySpec extends Specification {
         1 * targetRabbitContext.startConsumers()
     }
 
+    def 'Ensure stopConsumers() is proxied'() {
+        when:
+        rabbitContext.stopConsumers()
+
+        then:
+        1 * targetRabbitContext.stopConsumers()
+    }
+
     def 'Ensure stop() is proxied'() {
         when:
         rabbitContext.stop()
 
         then:
         1 * targetRabbitContext.stop()
+    }
+
+    def 'Ensure reload() is proxied'() {
+        when:
+        rabbitContext.reload()
+
+        then:
+        1 * targetRabbitContext.reload()
+    }
+
+    def 'Ensure startConsumers(String) is proxied'() {
+        when:
+        rabbitContext.startConsumers('connection')
+
+        then:
+        1 * targetRabbitContext.startConsumers('connection')
+    }
+
+    def 'Ensure startConsumer(String) is proxied'() {
+        when:
+        rabbitContext.startConsumer('consumer')
+
+        then:
+        1 * targetRabbitContext.startConsumer('consumer')
+    }
+
+    def 'Ensure stopConsumers(String) is proxied'() {
+        when:
+        rabbitContext.stopConsumers('connection')
+
+        then:
+        1 * targetRabbitContext.stopConsumers('connection')
+    }
+
+    def 'Ensure stopConsumer(String) is proxied'() {
+        when:
+        rabbitContext.stopConsumer('consumer')
+
+        then:
+        1 * targetRabbitContext.stopConsumer('consumer')
+    }
+
+    def 'Ensure startConnections() is proxied'() {
+        when:
+        rabbitContext.startConnections()
+
+        then:
+        1 * targetRabbitContext.startConnections()
+    }
+
+    def 'Ensure startConnection(String) is proxied'() {
+        when:
+        rabbitContext.startConnection('connection')
+
+        then:
+        1 * targetRabbitContext.startConnection('connection')
+    }
+
+    def 'Ensure stopConnections() is proxied'() {
+        when:
+        rabbitContext.stopConnections()
+
+        then:
+        1 * targetRabbitContext.stopConnections()
+    }
+
+    def 'Ensure stopConnection(String) is proxied'() {
+        when:
+        rabbitContext.stopConnection('connection')
+
+        then:
+        1 * targetRabbitContext.stopConnection('connection')
+    }
+
+    def 'Ensure registerConnection(ConnectionConfiguration) is proxied'() {
+        setup:
+        ConnectionConfiguration configuration = Mock(ConnectionConfiguration)
+
+        when:
+        rabbitContext.registerConnection(configuration)
+
+        then:
+        1 * targetRabbitContext.registerConnection(configuration)
+    }
+
+    def 'Ensure createExchangesAndQueues() is proxied'() {
+        when:
+        rabbitContext.createExchangesAndQueues()
+
+        then:
+        1 * targetRabbitContext.createExchangesAndQueues()
     }
 }

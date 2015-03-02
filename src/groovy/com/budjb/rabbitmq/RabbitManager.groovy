@@ -5,7 +5,7 @@ import com.budjb.rabbitmq.exception.ContextNotFoundException
 /**
  * Manager interface that all rabbit managers should implement.
  *
- * @param < C > Managed context type the manager manages.
+ * @param < C >  Managed context type the manager manages.
  */
 interface RabbitManager<C extends RabbitManagedContext, I extends RabbitManagedContextConfiguration> {
     /**

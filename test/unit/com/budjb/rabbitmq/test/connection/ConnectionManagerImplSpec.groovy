@@ -365,4 +365,27 @@ class ConnectionManagerImplSpec extends Specification {
         then:
         thrown ContextNotFoundException
     }
+
+    def 'If all connections are started while some of those connections are already started, the IllegalStateException should be swallowed'() {
+        setup:
+        ConnectionContext connection1 = Mock(ConnectionContext)
+        ConnectionContext connection2 = Mock(ConnectionContext)
+
+        connectionManager.connections = [connection1, connection2]
+
+        when:
+        connectionManager.start(connection1)
+
+        then:
+        1 * connection1.start()
+        0 * connection2.start()
+
+        when:
+        connectionManager.start()
+
+        then:
+        notThrown IllegalStateException
+        1 * connection1.start() >> { throw new IllegalStateException('already started bro') }
+        1 * connection2.start()
+    }
 }

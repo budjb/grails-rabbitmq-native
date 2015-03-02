@@ -16,6 +16,7 @@
 package com.budjb.rabbitmq.consumer
 
 import com.budjb.rabbitmq.RabbitManager
+import com.budjb.rabbitmq.connection.ConnectionContext
 import org.codehaus.groovy.grails.commons.GrailsClass
 
 interface ConsumerManager extends RabbitManager<ConsumerContext, ConsumerConfiguration> {
@@ -34,4 +35,26 @@ interface ConsumerManager extends RabbitManager<ConsumerContext, ConsumerConfigu
      * @return
      */
     ConsumerContext createContext(GrailsClass artefact)
+
+    /**
+     * Starts all consumers associated with the given connection context.
+     *
+     * @param connectionContext
+     */
+    void start(ConnectionContext connectionContext)
+
+    /**
+     * Stops all consumers associated with the given connection context.
+     *
+     * @param connectionContext
+     */
+    void stop(ConnectionContext connectionContext)
+
+    /**
+     * Retrieves all consumer contexts associated with the given connection context.
+     *
+     * @param connectionContext
+     * @return
+     */
+    List<ConsumerContext> getContexts(ConnectionContext connectionContext)
 }

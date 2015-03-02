@@ -38,7 +38,7 @@ class QueueBuilder {
     /**
      * Configure any defined exchanges and queues.
      */
-    public void configureQueues() {
+    void configureQueues() {
         // Skip if the config isn't defined
         if (!(grailsApplication.config.rabbitmq?.queues instanceof Closure)) {
             return
@@ -322,7 +322,7 @@ class QueueBuilder {
         }
 
         private ConnectionContext getConnection(String name) {
-            return QueueBuilder.this.connectionManager.getConnection(name)
+            return QueueBuilder.this.connectionManager.getContext(name)
         }
     }
 }

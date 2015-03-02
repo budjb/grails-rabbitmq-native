@@ -1,4 +1,4 @@
-package com.budjb.rabbitmq.test.helper
+package com.budjb.rabbitmq.test
 
 interface PersistenceInterceptor {
     void init()
