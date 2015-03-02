@@ -143,7 +143,7 @@ class RabbitmqNativeGrailsPlugin {
             bean.autowire = true
         }
 
-        "queueBuilder"(QueueBuilder) { bean ->
+        "queueBuilder"(QueueBuilderImpl) { bean ->
             bean.autowire = true
         }
 
