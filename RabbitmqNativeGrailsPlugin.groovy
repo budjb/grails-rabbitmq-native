@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import com.budjb.rabbitmq.*
 import com.budjb.rabbitmq.connection.ConnectionBuilderImpl
 import com.budjb.rabbitmq.connection.ConnectionManagerImpl
@@ -161,14 +160,14 @@ class RabbitmqNativeGrailsPlugin {
         }
 
         // Create application-provided converter beans
-        application.messageConverterClasses.each { GrailsClass clazz ->
+        application.getArtefacts('MessageConverter').each { GrailsClass clazz ->
             "${clazz.propertyName}"(clazz.clazz) { bean ->
                 bean.autowire = true
             }
         }
 
         // Create consumer beans
-        application.messageConsumerClasses.each { GrailsClass clazz ->
+        application.getArtefacts('MessageConsumer').each { GrailsClass clazz ->
             "${clazz.propertyName}"(clazz.clazz) { bean ->
                 bean.autowire = true
             }
@@ -216,7 +215,8 @@ class RabbitmqNativeGrailsPlugin {
 
             // Restart the rabbit context
             RabbitContext context = event.ctx.getBean('rabbitContext')
-            context.restart()
+            // TODO: change the reload to just re-register the message converter
+            context.reload()
             return
         }
 
@@ -232,7 +232,8 @@ class RabbitmqNativeGrailsPlugin {
 
             // Restart the consumers
             RabbitContext context = event.ctx.getBean('rabbitContext')
-            context.restart()
+            // TODO: change the reload to just re-register the message consumer
+            context.reload()
             return
         }
     }
@@ -247,6 +248,6 @@ class RabbitmqNativeGrailsPlugin {
         }
 
         RabbitContext context = event.ctx.getBean('rabbitContext')
-        context.restart()
+        context.reload()
     }
 }
