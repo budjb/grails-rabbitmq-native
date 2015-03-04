@@ -21,17 +21,17 @@ import groovy.json.JsonSlurper
 
 class ListMessageConverter extends MessageConverter<List> {
     @Override
-    public boolean canConvertFrom() {
+    boolean canConvertFrom() {
         return true
     }
 
     @Override
-    public boolean canConvertTo() {
+    boolean canConvertTo() {
         return true
     }
 
     @Override
-    public List convertTo(byte[] input) {
+    List convertTo(byte[] input) {
         try {
             return new JsonSlurper().parseText(new String(input))
         }
@@ -41,7 +41,7 @@ class ListMessageConverter extends MessageConverter<List> {
     }
 
     @Override
-    public byte[] convertFrom(List input) {
+    byte[] convertFrom(List input) {
         try {
             return new JsonBuilder(input).toString().getBytes()
         }
@@ -51,7 +51,7 @@ class ListMessageConverter extends MessageConverter<List> {
     }
 
     @Override
-    public String getContentType() {
+    String getContentType() {
         return 'application/json'
     }
 

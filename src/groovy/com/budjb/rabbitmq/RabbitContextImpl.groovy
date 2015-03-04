@@ -182,7 +182,7 @@ class RabbitContextImpl implements RabbitContext {
      */
     @Override
     void registerMessageConverter(MessageConverter converter) {
-        messageConverterManager.registerMessageConverter(converter)
+        messageConverterManager.register(converter)
     }
 
     /**

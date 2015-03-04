@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq.consumer
 
-public enum MessageConvertMethod {
+enum MessageConvertMethod {
     DISABLED,
     HEADER,
     ALWAYS

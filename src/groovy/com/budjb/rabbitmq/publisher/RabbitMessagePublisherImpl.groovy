@@ -34,12 +34,12 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
     /**
      * Connection manager.
      */
-    protected ConnectionManager connectionManager
+    ConnectionManager connectionManager
 
     /**
      * Message converter manager.
      */
-    protected MessageConverterManager messageConverterManager
+    MessageConverterManager messageConverterManager
 
     /**
      * Logger
@@ -47,32 +47,12 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
     Logger log = Logger.getLogger(RabbitMessagePublisherImpl)
 
     /**
-     * Sets the connection manager.
-     *
-     * @param connectionManager
-     */
-    @Override
-    void setConnectionManager(ConnectionManager connectionManager) {
-        this.connectionManager = connectionManager
-    }
-
-    /**
-     * Sets the message converter manager.
-     *
-     * @param messageConverterManager
-     */
-    @Override
-    void setMessageConverterManager(MessageConverterManager messageConverterManager) {
-        this.messageConverterManager = messageConverterManager
-    }
-
-    /**
      * Sends a Rabbit message with a given set of message properties.
      *
      * @param properties
      * @throws IllegalArgumentException
      */
-    public void send(RabbitMessageProperties properties) throws IllegalArgumentException {
+    void send(RabbitMessageProperties properties) throws IllegalArgumentException {
         // Make sure an exchange or a routing key were provided
         if (!properties.exchange && !properties.routingKey) {
             throw new IllegalArgumentException("exchange and/or routing key required")
@@ -109,7 +89,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @param closure Closure to configure the message properties.
      * @throws IllegalArgumentException
      */
-    public void send(Closure closure) throws IllegalArgumentException {
+    void send(Closure closure) throws IllegalArgumentException {
         send(createRabbitMessageProperties().build(closure))
     }
 
@@ -120,7 +100,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @param body
      * @throws IllegalArgumentException
      */
-    public void send(String routingKey, Object body) throws IllegalArgumentException {
+    void send(String routingKey, Object body) throws IllegalArgumentException {
         send(createRabbitMessageProperties().build {
             delegate.routingKey = routingKey
             delegate.body = body
@@ -135,7 +115,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @param body
      * @throws IllegalArgumentException
      */
-    public void send(String exchange, String routingKey, Object body) throws IllegalArgumentException {
+    void send(String exchange, String routingKey, Object body) throws IllegalArgumentException {
         send(createRabbitMessageProperties().build {
             delegate.exchange = exchange
             delegate.routingKey = routingKey
@@ -182,7 +162,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @throws IllegalArgumentException
      * @return
      */
-    public Object rpc(RabbitMessageProperties properties) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+    Object rpc(RabbitMessageProperties properties) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         // Make sure an exchange or a routing key were provided
         if (!properties.exchange && !properties.routingKey) {
             throw new IllegalArgumentException("exchange and/or routing key required")
@@ -226,7 +206,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
             // Define the response consumer handler
             DefaultConsumer consumer = new DefaultConsumer(channel) {
                 @Override
-                public void handleDelivery(String replyConsumerTag, Envelope replyEnvelope, BasicProperties replyProperties, byte[] replyBody) throws IOException {
+                void handleDelivery(String replyConsumerTag, Envelope replyEnvelope, BasicProperties replyProperties, byte[] replyBody) throws IOException {
                     MessageContext context = new MessageContext(
                         channel: null,
                         consumerTag: replyConsumerTag,
@@ -295,7 +275,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public Object rpc(Closure closure) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+    Object rpc(Closure closure) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         RabbitMessageProperties properties = createRabbitMessageProperties()
         properties.build(closure)
         return rpc(properties)
@@ -315,7 +295,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public Object rpc(String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+    Object rpc(String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         return rpc(createRabbitMessageProperties().build {
             delegate.routingKey = routingKey
             delegate.body = body
@@ -337,7 +317,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public Object rpc(String exchange, String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+    Object rpc(String exchange, String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         return rpc(createRabbitMessageProperties().build {
             delegate.exchange = exchange
             delegate.routingKey = routingKey
@@ -351,7 +331,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @return
      */
     @Override
-    public SynchronousQueue<MessageContext> createResponseQueue() {
+    SynchronousQueue<MessageContext> createResponseQueue() {
         return new SynchronousQueue<MessageContext>()
     }
 
@@ -360,7 +340,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      *
      * @return
      */
-    protected RabbitMessageProperties createRabbitMessageProperties() {
+    RabbitMessageProperties createRabbitMessageProperties() {
         return new RabbitMessageProperties()
     }
 }

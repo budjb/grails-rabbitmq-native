@@ -32,7 +32,7 @@ rabbitmq {
             }
         }
         connection('connection2') {
-
+            queue(name: 'connection2-queue', autoDelete: true)
         }
     }
 }

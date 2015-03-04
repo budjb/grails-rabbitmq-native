@@ -17,7 +17,7 @@ import com.budjb.rabbitmq.*
 import com.budjb.rabbitmq.connection.ConnectionBuilderImpl
 import com.budjb.rabbitmq.connection.ConnectionManagerImpl
 import com.budjb.rabbitmq.consumer.ConsumerManagerImpl
-import com.budjb.rabbitmq.converter.MessageConverterManager
+import com.budjb.rabbitmq.converter.MessageConverterManagerImpl
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisherImpl
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsClass
@@ -147,7 +147,7 @@ class RabbitmqNativeGrailsPlugin {
             bean.autowire = true
         }
 
-        "messageConverterManager"(MessageConverterManager) { bean ->
+        "messageConverterManager"(MessageConverterManagerImpl) { bean ->
             bean.autowire = true
         }
 

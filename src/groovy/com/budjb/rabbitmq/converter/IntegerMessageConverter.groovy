@@ -17,17 +17,17 @@ package com.budjb.rabbitmq.converter
 
 class IntegerMessageConverter extends MessageConverter<Integer> {
     @Override
-    public boolean canConvertFrom() {
+    boolean canConvertFrom() {
         return true
     }
 
     @Override
-    public boolean canConvertTo() {
+    boolean canConvertTo() {
         return true
     }
 
     @Override
-    public Integer convertTo(byte[] input) {
+    Integer convertTo(byte[] input) {
         String string = new String(input)
         if (!string.isInteger()) {
             return null
@@ -36,12 +36,12 @@ class IntegerMessageConverter extends MessageConverter<Integer> {
     }
 
     @Override
-    public byte[] convertFrom(Integer input) {
+    byte[] convertFrom(Integer input) {
         return input.toString().getBytes()
     }
 
     @Override
-    public String getContentType() {
+    String getContentType() {
         return null
     }
 

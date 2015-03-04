@@ -340,7 +340,10 @@ class ConsumerContextImpl implements ConsumerContext {
      * Closes all channels and clears all consumers.
      */
     @Override
-    public void stop() {
+    void stop() {
+        if (!consumers.size()) {
+            return
+        }
         consumers.each {
             if (it.channel.isOpen()) {
                 it.channel.basicCancel(it.consumerTag)
@@ -348,6 +351,8 @@ class ConsumerContextImpl implements ConsumerContext {
             }
         }
         consumers.clear()
+        log.debug("stopped consumer '${getId()}' on connection '${getConnectionName()}'")
+
     }
 
     /**

@@ -82,7 +82,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      * Loads any message consumer artefacts.
      */
     @Override
-    public void load() {
+    void load() {
         grailsApplication.getArtefacts('MessageConsumer').each {
             try {
                 register(createContext(it))

@@ -23,7 +23,7 @@ import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 
-public interface RabbitContext {
+interface RabbitContext {
     /**
      * Loads the configuration and registers any consumers or converters.
      */

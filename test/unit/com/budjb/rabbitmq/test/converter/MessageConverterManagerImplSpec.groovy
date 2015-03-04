@@ -17,15 +17,15 @@ package com.budjb.rabbitmq.test.converter
 
 import com.budjb.rabbitmq.converter.IntegerMessageConverter
 import com.budjb.rabbitmq.converter.MessageConverter
-import com.budjb.rabbitmq.converter.MessageConverterManager
+import com.budjb.rabbitmq.converter.MessageConverterManagerImpl
 import com.budjb.rabbitmq.converter.StringMessageConverter
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsClass
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
-class MessageConverterManagerSpec extends Specification {
-    MessageConverterManager messageConverterManager
+class MessageConverterManagerImplSpec extends Specification {
+    MessageConverterManagerImpl messageConverterManager
     GrailsApplication grailsApplication
     ApplicationContext applicationContext
 
@@ -33,7 +33,7 @@ class MessageConverterManagerSpec extends Specification {
         grailsApplication = Mock(GrailsApplication)
         applicationContext = Mock(ApplicationContext)
 
-        messageConverterManager = new MessageConverterManager()
+        messageConverterManager = new MessageConverterManagerImpl()
         messageConverterManager.grailsApplication = grailsApplication
         messageConverterManager.applicationContext = applicationContext
     }
@@ -55,8 +55,8 @@ class MessageConverterManagerSpec extends Specification {
         IntegerMessageConverter integerMessageConverter = Mock(IntegerMessageConverter)
 
         when:
-        messageConverterManager.registerMessageConverter(integerMessageConverter)
-        messageConverterManager.registerMessageConverter(stringMessageConverter)
+        messageConverterManager.register(integerMessageConverter)
+        messageConverterManager.register(stringMessageConverter)
 
         then:
         messageConverterManager.messageConverters.size() == 2

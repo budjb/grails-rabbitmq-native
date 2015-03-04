@@ -16,193 +16,65 @@
 package com.budjb.rabbitmq.converter
 
 import com.budjb.rabbitmq.exception.MessageConvertException
-import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.springframework.beans.BeansException
-import org.springframework.context.ApplicationContext
-import org.springframework.context.ApplicationContextAware
+import org.codehaus.groovy.grails.commons.GrailsClass
 
-class MessageConverterManager implements ApplicationContextAware {
+interface MessageConverterManager {
     /**
-     * Logger.
-     */
-    Logger log = Logger.getLogger(MessageConverterManager)
-
-    /**
-     * Registered message converters.
-     */
-    protected List<MessageConverter> messageConverters = []
-
-    /**
-     * Grails application bean.
-     */
-    protected GrailsApplication grailsApplication
-
-    /**
-     * Application context.
-     */
-    protected ApplicationContext applicationContext
-
-    /**
-     * Returns the list of registered message converters.
-     *
-     * @return
-     */
-    public List<MessageConverter> getMessageConverters() {
-        return messageConverters
-    }
-
-    /**
-     * Registers a message converter.
-     *
-     * @param messageConverter
-     */
-    public void registerMessageConverter(MessageConverter messageConverter) {
-        messageConverters << messageConverter
-    }
-
-    /**
-     * Converts a byte array to some other type.
-     *
-     * @param source Byte array to convert.
-     * @return
-     * @throws MessageConvertException if there is no converter for the source.
-     */
-    public Object convertFromBytes(byte[] source) throws MessageConvertException {
-        for (MessageConverter converter in messageConverters) {
-            if (!converter.canConvertTo()) {
-                continue
-            }
-
-            try {
-                Object converted = converter.convertTo(source)
-
-                if (converted != null) {
-                    return converted
-                }
-            }
-            catch (Exception e) {
-                log.error("unhandled exception caught from message converter ${converter.class.simpleName}", e)
-            }
-        }
-
-        throw new MessageConvertException('no message converter found to convert from a byte array')
-    }
-
-    /**
-     * Converts a byte array to some other type based on the given content type.
-     *
-     * @param source Byte array to convert.
-     * @param contentType
-     * @return
-     * @throws MessageConvertException if there is no converter for the source.
-     */
-    public Object convertFromBytes(byte[] source, String contentType) throws MessageConvertException {
-        // Find all converters that can handle the content type
-        List<MessageConverter> converters = messageConverters.findAll { it.contentType == contentType }
-
-        // If converters are found and it can convert to its type, allow it to do so
-        for (MessageConverter converter in converters) {
-            if (!converter.canConvertTo()) {
-                continue
-            }
-
-            try {
-                Object converted = converter.convertTo(source)
-
-                if (converted != null) {
-                    return converted
-                }
-            }
-            catch (Exception e) {
-                log.error("unhandled exception caught from message converter ${converter.class.simpleName}", e)
-            }
-        }
-
-        throw new MessageConvertException('no message converter found to convert from a byte array')
-    }
-
-    /**
-     * Converts a given object to a byte array using the message converters.
+     * Attempt to marshall a byte array to some other object type.
      *
      * @param source
      * @return
-     * @throws MessageConvertException
+     * @throws MessageConvertException when conversion can not be completed.
      */
-    public byte[] convertToBytes(Object source) throws MessageConvertException {
-        // If the source is null, there's nothing to do
-        if (source == null) {
-            return null
-        }
-
-        // Just return the source if it's already a byte array
-        if (source instanceof byte[]) {
-            return source
-        }
-
-        // Try to find a converter that works
-        for (MessageConverter converter in messageConverters) {
-            if (!converter.canConvertFrom()) {
-                continue
-            }
-
-            if (!converter.getType().isInstance(source)) {
-                continue
-            }
-
-            try {
-                byte[] converted = converter.convertFrom(source)
-
-                if (converted != null) {
-                    return converted
-                }
-            }
-            catch (Exception e) {
-                log.error("unhandled exception caught from message converter ${converter.class.simpleName}", e)
-            }
-        }
-
-        throw new MessageConvertException('no message converter found to convert class ${source.getClass().name} to a byte array')
-    }
+    Object convertFromBytes(byte[] source) throws MessageConvertException
 
     /**
-     * Resets the message converter manager.
+     * Attempt to marshall a byte array to some other object type with a content type hint.
+     *
+     * @param source
+     * @param contentType
+     * @return
+     * @throws MessageConvertException when conversion can not be completed.
      */
-    public void reset() {
-        messageConverters = []
-    }
+    Object convertFromBytes(byte[] source, String contentType) throws MessageConvertException
 
     /**
-     * Sets the Grails application bean.
+     * Attempt to marshall an object to a byte array.
+     *
+     * @param source
+     * @return
+     * @throws MessageConvertException when conversion can not be completed.
      */
-    public void setGrailsApplication(GrailsApplication grailsApplication) {
-        this.grailsApplication = grailsApplication
-    }
+    byte[] convertToBytes(Object source) throws MessageConvertException
 
     /**
-     * Sets the application context.
+     * Retrieves the list of registered message converters.
+     *
+     * @return
      */
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext
-    }
+    List<MessageConverter<?>> getMessageConverters()
 
     /**
-     * Loads message converters.
+     * Registers a new message converter.
+     *
+     * @param messageConverter
      */
-    public void load() {
-        // Register application-provided converters
-        grailsApplication.getArtefacts('MessageConverter').each {
-            Object consumer = applicationContext.getBean(it.propertyName)
-            registerMessageConverter(consumer)
-        }
+    void register(MessageConverter<?> messageConverter)
 
-        // Register built-in message converters
-        // Note: the order matters, we want string to be the last one
-        registerMessageConverter(new IntegerMessageConverter())
-        registerMessageConverter(new MapMessageConverter())
-        registerMessageConverter(new ListMessageConverter())
-        registerMessageConverter(new GStringMessageConverter())
-        registerMessageConverter(new StringMessageConverter())
-    }
+    /**
+     * Registers a new message converter from its Grails artefact.
+     *
+     * @param artefact
+     */
+    void register(GrailsClass artefact)
+
+    /**
+     * Load any message converter artefacts.
+     */
+    void load()
+
+    /**
+     * Removes any registered message converters.
+     */
+    void reset()
 }

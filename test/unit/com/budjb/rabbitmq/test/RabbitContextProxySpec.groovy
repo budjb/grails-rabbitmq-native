@@ -22,8 +22,6 @@ import com.budjb.rabbitmq.converter.MessageConverter
 import org.apache.commons.lang.NullArgumentException
 import spock.lang.Specification
 
-import java.sql.Connection
-
 class RabbitContextProxySpec extends Specification {
     RabbitContextProxy rabbitContext
     RabbitContext targetRabbitContext

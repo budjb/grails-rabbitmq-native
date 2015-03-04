@@ -42,12 +42,12 @@ class ConsumerContextImplSpec extends Specification {
         connectionManager = Mock(ConnectionManager)
         rabbitMessagePublisher = Mock(RabbitMessagePublisher)
 
-        messageConverterManager = new MessageConverterManager()
-        messageConverterManager.registerMessageConverter(new IntegerMessageConverter())
-        messageConverterManager.registerMessageConverter(new MapMessageConverter())
-        messageConverterManager.registerMessageConverter(new ListMessageConverter())
-        messageConverterManager.registerMessageConverter(new GStringMessageConverter())
-        messageConverterManager.registerMessageConverter(new StringMessageConverter())
+        messageConverterManager = new MessageConverterManagerImpl()
+        messageConverterManager.register(new IntegerMessageConverter())
+        messageConverterManager.register(new MapMessageConverter())
+        messageConverterManager.register(new ListMessageConverter())
+        messageConverterManager.register(new GStringMessageConverter())
+        messageConverterManager.register(new StringMessageConverter())
     }
 
     def 'Validate retrieving the consumer name'() {

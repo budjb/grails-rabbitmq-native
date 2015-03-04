@@ -25,7 +25,7 @@ package com.budjb.rabbitmq.exception
  * Time: 6:52 PM
  */
 class InvalidConfigurationException extends Exception {
-    public InvalidConfigurationException(String message) {
+    InvalidConfigurationException(String message) {
         super(message)
     }
 }

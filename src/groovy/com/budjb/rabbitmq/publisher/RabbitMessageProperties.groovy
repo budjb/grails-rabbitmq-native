@@ -22,107 +22,107 @@ class RabbitMessageProperties {
     /**
      * Default timeout for RPC calls (5 seconds).
      */
-    public static final int DEFAULT_TIMEOUT = 5000
+    static final int DEFAULT_TIMEOUT = 5000
 
     /**
      * Routing key to send the message to.
      */
-    public String routingKey = ''
+    String routingKey = ''
 
     /**
      * Exchange to send the message to.
      */
-    public String exchange = ''
+    String exchange = ''
 
     /**
      * RPC timeout, in milliseconds.
      */
-    public int timeout = DEFAULT_TIMEOUT
+    int timeout = DEFAULT_TIMEOUT
 
     /**
      * Message body.
      */
-    public Object body
+    Object body
 
     /**
      * Message headers.
      */
-    public Map headers = [:]
+    Map headers = [:]
 
     /**
      * Content type.
      */
-    public String contentType
+    String contentType
 
     /**
      * Content encoding.
      */
-    public String contentEncoding
+    String contentEncoding
 
     /**
      * Delivery mode (1 == non-persistent, 2 == persistent)
      */
-    public int deliveryMode
+    int deliveryMode
 
     /**
      * Priority.
      */
-    public int priority
+    int priority
 
     /**
      * Correlation id.
      */
-    public String correlationId
+    String correlationId
 
     /**
      * Queue to reply to.
      */
-    public String replyTo
+    String replyTo
 
     /**
      * Message expiration.
      */
-    public String expiration
+    String expiration
 
     /**
      * Message ID.
      */
-    public String messageId
+    String messageId
 
     /**
      * Message timestamp.
      */
-    public Calendar timestamp
+    Calendar timestamp
 
     /**
      * Message type name.
      */
-    public String type
+    String type
 
     /**
      * User ID.
      */
-    public String userId
+    String userId
 
     /**
      * Application ID.
      */
-    public String appId
+    String appId
 
     /**
      * Whether to auto-convert the reply payload.
      */
-    public boolean autoConvert = true
+    boolean autoConvert = true
 
     /**
      * Connection name.
      */
-    public String connection
+    String connection
 
     /**
      * Channel to publish messages through.
      */
-    public Channel channel
+    Channel channel
 
     /**
      * Builds the properties class from a provided closure and returns itself.
@@ -130,7 +130,7 @@ class RabbitMessageProperties {
      * @param closure
      * @return This object.
      */
-    public RabbitMessageProperties build(Closure closure) {
+    RabbitMessageProperties build(Closure closure) {
         run(closure)
         return this
     }
@@ -151,7 +151,7 @@ class RabbitMessageProperties {
      *
      * @return
      */
-    public BasicProperties toBasicProperties() {
+    BasicProperties toBasicProperties() {
         // Create message properties
         BasicProperties.Builder builder = new BasicProperties.Builder()
 

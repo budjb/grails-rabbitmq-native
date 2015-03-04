@@ -17,27 +17,27 @@ package com.budjb.rabbitmq.converter
 
 class GStringMessageConverter extends MessageConverter<GString> {
     @Override
-    public boolean canConvertFrom() {
+    boolean canConvertFrom() {
         return true
     }
 
     @Override
-    public boolean canConvertTo() {
+    boolean canConvertTo() {
         return false
     }
 
     @Override
-    public GString convertTo(byte[] input) {
+    GString convertTo(byte[] input) {
         throw new IllegalStateException("can not convert to a GString")
     }
 
     @Override
-    public byte[] convertFrom(GString input) {
+    byte[] convertFrom(GString input) {
         return input.toString().getBytes()
     }
 
     @Override
-    public String getContentType() {
+    String getContentType() {
         return null
     }
 }

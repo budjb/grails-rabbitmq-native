@@ -25,7 +25,7 @@ package com.budjb.rabbitmq.exception
  * Time: 6:52 PM
  */
 class MissingConfigurationException extends Exception {
-    public MissingConfigurationException(String message) {
+    MissingConfigurationException(String message) {
         super(message)
     }
 }

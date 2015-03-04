@@ -23,7 +23,7 @@ abstract class MessageConverter<T> {
      *
      * @return
      */
-    public Class getType() {
+    Class getType() {
         return ((ParameterizedType)getClass().getGenericSuperclass()).actualTypeArguments[0]
     }
 
@@ -32,20 +32,20 @@ abstract class MessageConverter<T> {
      *
      * @return Content-type, or null if a content-type does not exist.
      */
-    public abstract String getContentType()
+    abstract String getContentType()
 
     /**
      * Returns whether the converter can convert the object from its source type to a byte array.
      *
      * @return
      */
-    public abstract boolean canConvertFrom()
+    abstract boolean canConvertFrom()
 
     /**
      * Returns whether the converter can convert the object from a byte array to its proper type.
      * @return
      */
-    public abstract boolean canConvertTo()
+    abstract boolean canConvertTo()
 
     /**
      * Converts a byte array to the object type this converter is responsible for.
@@ -53,7 +53,7 @@ abstract class MessageConverter<T> {
      * @param input
      * @return
      */
-    public abstract T convertTo(byte[] input)
+    abstract T convertTo(byte[] input)
 
     /**
      * Converts an object to a byte array.
@@ -61,5 +61,5 @@ abstract class MessageConverter<T> {
      * @param input
      * @return
      */
-    public abstract byte[] convertFrom(T input)
+    abstract byte[] convertFrom(T input)
 }

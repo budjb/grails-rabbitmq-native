@@ -113,7 +113,7 @@ class RabbitContextImplSpec extends Specification {
         rabbitContext.registerMessageConverter(converter)
 
         then:
-        1 * messageConverterManager.registerMessageConverter(converter)
+        1 * messageConverterManager.register(converter)
     }
 
     def 'When stop() is called, the connection and message converter managers should be stopped'() {

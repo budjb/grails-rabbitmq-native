@@ -16,11 +16,11 @@
 package com.budjb.rabbitmq.exception
 
 class MessageConvertException extends Exception {
-    public MessageConvertException(String message) {
+    MessageConvertException(String message) {
         super(message)
     }
 
-    public MessageConvertException(String message, Throwable cause) {
+    MessageConvertException(String message, Throwable cause) {
         super(message, cause)
     }
 }

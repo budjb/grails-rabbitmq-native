@@ -20,17 +20,17 @@ import groovy.json.JsonSlurper
 
 class MapMessageConverter extends MessageConverter<Map> {
     @Override
-    public boolean canConvertFrom() {
+    boolean canConvertFrom() {
         return true
     }
 
     @Override
-    public boolean canConvertTo() {
+    boolean canConvertTo() {
         return true
     }
 
     @Override
-    public Map convertTo(byte[] input) {
+    Map convertTo(byte[] input) {
         try {
             return new JsonSlurper().parseText(new String(input))
         }
@@ -40,12 +40,12 @@ class MapMessageConverter extends MessageConverter<Map> {
     }
 
     @Override
-    public byte[] convertFrom(Map input) {
+    byte[] convertFrom(Map input) {
         return new JsonBuilder(input).toString().getBytes()
     }
 
     @Override
-    public String getContentType() {
+    String getContentType() {
         return 'application/json'
     }
 

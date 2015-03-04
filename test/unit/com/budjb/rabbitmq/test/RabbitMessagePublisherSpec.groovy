@@ -20,7 +20,6 @@ import com.budjb.rabbitmq.consumer.MessageContext
 import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.exception.MessageConvertException
 import com.budjb.rabbitmq.publisher.RabbitMessageProperties
-import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisherImpl
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk
@@ -36,7 +35,7 @@ class RabbitMessagePublisherSpec extends Specification {
     private static final String BASIC_PUBLISH_ROUTING_KEY = 'test-routing-key'
 
     ConnectionManager connectionManager
-    RabbitMessagePublisher rabbitMessagePublisher
+    RabbitMessagePublisherImpl rabbitMessagePublisher
     MessageConverterManager messageConverterManager
     Channel channel
 
@@ -74,12 +73,12 @@ class RabbitMessagePublisherSpec extends Specification {
         connectionManager = Mock(ConnectionManager)
         connectionManager.createChannel(null) >> channel
 
-        messageConverterManager = new MessageConverterManager()
-        messageConverterManager.registerMessageConverter(new IntegerMessageConverter())
-        messageConverterManager.registerMessageConverter(new MapMessageConverter())
-        messageConverterManager.registerMessageConverter(new ListMessageConverter())
-        messageConverterManager.registerMessageConverter(new GStringMessageConverter())
-        messageConverterManager.registerMessageConverter(new StringMessageConverter())
+        messageConverterManager = new MessageConverterManagerImpl()
+        messageConverterManager.register(new IntegerMessageConverter())
+        messageConverterManager.register(new MapMessageConverter())
+        messageConverterManager.register(new ListMessageConverter())
+        messageConverterManager.register(new GStringMessageConverter())
+        messageConverterManager.register(new StringMessageConverter())
 
         rabbitMessagePublisher = new RabbitMessagePublisherImpl()
         rabbitMessagePublisher.connectionManager = connectionManager

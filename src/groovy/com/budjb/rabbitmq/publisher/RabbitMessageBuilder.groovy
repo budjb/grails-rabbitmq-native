@@ -26,7 +26,7 @@ class RabbitMessageBuilder {
     /**
      * Default timeout for RPC calls (5 seconds).
      */
-    public static final int DEFAULT_TIMEOUT = 5000
+    static final int DEFAULT_TIMEOUT = 5000
 
     /**
      * Rabbit message publisher.
@@ -36,109 +36,109 @@ class RabbitMessageBuilder {
     /**
      * Channel to publish messages through.
      */
-    public Channel channel
+    Channel channel
 
     /**
      * Routing key to send the message to.
      */
-    public String routingKey = ''
+    String routingKey = ''
 
     /**
      * Exchange to send the message to.
      */
-    public String exchange = ''
+    String exchange = ''
 
     /**
      * RPC timeout, in milliseconds.
      */
-    public int timeout = DEFAULT_TIMEOUT
+    int timeout = DEFAULT_TIMEOUT
 
     /**
      * Message body.
      */
-    public Object body
+    Object body
 
     /**
      * Message headers.
      */
-    public Map headers = [:]
+    Map headers = [:]
 
     /**
      * Content type.
      */
-    public String contentType
+    String contentType
 
     /**
      * Content encoding.
      */
-    public String contentEncoding
+    String contentEncoding
 
     /**
      * Delivery mode (1 == non-persistent, 2 == persistent)
      */
-    public int deliveryMode
+    int deliveryMode
 
     /**
      * Priority.
      */
-    public int priority
+    int priority
 
     /**
      * Correlation id.
      */
-    public String correlationId
+    String correlationId
 
     /**
      * Queue to reply to.
      */
-    public String replyTo
+    String replyTo
 
     /**
      * Message expiration.
      */
-    public String expiration
+    String expiration
 
     /**
      * Message ID.
      */
-    public String messageId
+    String messageId
 
     /**
      * Message timestamp.
      */
-    public Calendar timestamp
+    Calendar timestamp
 
     /**
      * Message type name.
      */
-    public String type
+    String type
 
     /**
      * User ID.
      */
-    public String userId
+    String userId
 
     /**
      * Application ID.
      */
-    public String appId
+    String appId
 
     /**
      * Whether to auto-convert the reply payload.
      */
-    public boolean autoConvert = true
+    boolean autoConvert = true
 
     /**
      * Connection name.
      */
-    public String connection = null
+    String connection = null
 
     /**
      * Constructor
      *
      * Loads the rabbit template bean registered from the grails plugin.
      */
-    public RabbitMessageBuilder(Channel channel = null) {
+    RabbitMessageBuilder(Channel channel = null) {
         this.channel = channel
     }
 
@@ -147,7 +147,7 @@ class RabbitMessageBuilder {
      *
      * @return
      */
-    public RabbitMessageProperties buildMessageProperties() {
+    RabbitMessageProperties buildMessageProperties() {
         RabbitMessageProperties properties = new RabbitMessageProperties()
 
         properties.appId = appId
@@ -191,7 +191,7 @@ class RabbitMessageBuilder {
      *
      * @param rabbitMessagePublisher
      */
-    public void setRabbitMessagePublisher(RabbitMessagePublisher rabbitMessagePublisher) {
+    void setRabbitMessagePublisher(RabbitMessagePublisher rabbitMessagePublisher) {
         this.rabbitMessagePublisher = rabbitMessagePublisher
     }
 
@@ -201,7 +201,7 @@ class RabbitMessageBuilder {
      * @throws IllegalArgumentException
      */
     @Deprecated
-    public void send() throws IllegalArgumentException {
+    void send() throws IllegalArgumentException {
         getRabbitMessagePublisher().send(buildMessageProperties())
     }
 
@@ -212,7 +212,7 @@ class RabbitMessageBuilder {
      * @throws IllegalArgumentException
      */
     @Deprecated
-    public void send(Closure closure) throws IllegalArgumentException {
+    void send(Closure closure) throws IllegalArgumentException {
         // Run the closure
         run closure
 
@@ -228,7 +228,7 @@ class RabbitMessageBuilder {
      * @throws IllegalArgumentException
      */
     @Deprecated
-    public void send(String routingKey, Object body) throws IllegalArgumentException {
+    void send(String routingKey, Object body) throws IllegalArgumentException {
         // Set the params
         this.routingKey = routingKey
         this.body = body
@@ -246,7 +246,7 @@ class RabbitMessageBuilder {
      * @throws IllegalArgumentException
      */
     @Deprecated
-    public void send(String exchange, String routingKey, Object body) throws IllegalArgumentException {
+    void send(String exchange, String routingKey, Object body) throws IllegalArgumentException {
         // Set the params
         this.exchange = exchange
         this.routingKey = routingKey
@@ -266,7 +266,7 @@ class RabbitMessageBuilder {
      * @throws IllegalArgumentException
      */
     @Deprecated
-    public Object rpc() throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+    Object rpc() throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         return getRabbitMessagePublisher().rpc(buildMessageProperties())
     }
 
@@ -284,7 +284,7 @@ class RabbitMessageBuilder {
      * @throws IllegalArgumentException
      */
     @Deprecated
-    public Object rpc(Closure closure) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+    Object rpc(Closure closure) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         // Run the closure
         run closure
 
@@ -307,7 +307,7 @@ class RabbitMessageBuilder {
      * @throws IllegalArgumentException
      */
     @Deprecated
-    public Object rpc(String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+    Object rpc(String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         // Set the params
         this.routingKey = routingKey
         this.body = body
@@ -332,7 +332,7 @@ class RabbitMessageBuilder {
      * @throws IllegalArgumentException
      */
     @Deprecated
-    public Object rpc(String exchange, String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+    Object rpc(String exchange, String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         // Set the params
         this.exchange = exchange
         this.routingKey = routingKey
