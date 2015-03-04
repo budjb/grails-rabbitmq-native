@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.budjb.rabbitmq.test
+package com.budjb.rabbitmq.test.publisher
 
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.MessageContext
@@ -28,7 +28,7 @@ import spock.lang.Specification
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.TimeoutException
 
-class RabbitMessagePublisherSpec extends Specification {
+class RabbitMessagePublisherImplSpec extends Specification {
     private static final String BASIC_PUBLISH_MESSAGE = 'Knock knock...'
     private static final String BASIC_RESPONSE_MESSAGE = 'Who\'s there?'
     private static final String BASIC_PUBLISH_EXCHANGE = 'test-exchange'
