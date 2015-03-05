@@ -257,7 +257,6 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
             // Close the channel if a temporary one was opened
             if (closeChannel) {
                 channel.close()
-                channel = null
             }
         }
     }
@@ -342,5 +341,251 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      */
     RabbitMessageProperties createRabbitMessageProperties() {
         return new RabbitMessageProperties()
+    }
+
+    /**
+     * Creates a new rabbit message publisher channel proxy.
+     *
+     * @return
+     */
+    RabbitMessagePublisherChannelProxy createRabbitMessagePublisherChannelProxy(Channel channel) {
+        return new RabbitMessagePublisherChannelProxy(this, channel)
+    }
+
+    /**
+     * Performs a series of operations with the same channel.
+     *
+     * @param Closure
+     */
+    @Override
+    void withChannel(Closure closure) {
+        Channel channel = connectionManager.createChannel()
+
+        try {
+            createRabbitMessagePublisherChannelProxy(channel).run(closure)
+        }
+        finally {
+            if (channel.isOpen()) {
+                channel.close()
+            }
+        }
+    }
+
+    /**
+     * Performs a series of operations with the same channel created from the given connection.
+     *
+     * @param connection
+     * @param closure
+     */
+    @Override
+    void withChannel(String connection, Closure closure) {
+        Channel channel = connectionManager.createChannel(connection)
+
+        try {
+            createRabbitMessagePublisherChannelProxy(channel).run(closure)
+        }
+        finally {
+            if (channel.isOpen()) {
+                channel.close()
+            }
+        }
+    }
+
+    /**
+     * Performs a series of operations with the same channel and with confirms enabled.
+     *
+     * @param closure
+     */
+    @Override
+    void withConfirms(Closure closure) {
+        Channel channel = connectionManager.createChannel()
+
+        try {
+            channel.confirmSelect()
+
+            createRabbitMessagePublisherChannelProxy(channel).run(closure)
+
+            channel.waitForConfirms()
+        }
+        finally {
+            if (channel.isOpen()) {
+                channel.close()
+            }
+        }
+    }
+
+    /**
+     * Performs a series of operations with the same channel created from the given connection
+     * and with confirms enabled.
+     *
+     * @param connection
+     * @param closure
+     */
+    @Override
+    void withConfirms(String connection, Closure closure) {
+        Channel channel = connectionManager.createChannel(connection)
+
+        try {
+            channel.confirmSelect()
+
+            createRabbitMessagePublisherChannelProxy(channel).run(closure)
+
+            channel.waitForConfirms()
+        }
+        finally {
+            if (channel.isOpen()) {
+                channel.close()
+            }
+        }
+    }
+
+    /**
+     * Performs a series of operations with the same channel and with confirms enabled.
+     *
+     * @param timeout
+     * @param closure
+     */
+    @Override
+    void withConfirms(long timeout, Closure closure) {
+        Channel channel = connectionManager.createChannel()
+
+        try {
+            channel.confirmSelect()
+
+            createRabbitMessagePublisherChannelProxy(channel).run(closure)
+
+            channel.waitForConfirms(timeout)
+        }
+        finally {
+            if (channel.isOpen()) {
+                channel.close()
+            }
+        }
+    }
+
+    /**
+     * Performs a series of operations with the same channel created from the given connection
+     * and with confirms enabled.
+     *
+     * @param connection
+     * @param timeout
+     * @param closure
+     */
+    @Override
+    void withConfirms(String connection, long timeout, Closure closure) {
+        Channel channel = connectionManager.createChannel(connection)
+
+        try {
+            channel.confirmSelect()
+
+            createRabbitMessagePublisherChannelProxy(channel).run(closure)
+
+            channel.waitForConfirms(timeout)
+        }
+        finally {
+            if (channel.isOpen()) {
+                channel.close()
+            }
+        }
+    }
+
+    /**
+     * Performs a series of operations with the same channel and with confirms enabled.
+     * This method will throw an exception if any messages are nack'd.
+     *
+     * @param closure
+     */
+    @Override
+    void withConfirmsOrDie(Closure closure) {
+        Channel channel = connectionManager.createChannel()
+
+        try {
+            channel.confirmSelect()
+
+            createRabbitMessagePublisherChannelProxy(channel).run(closure)
+
+            channel.waitForConfirmsOrDie()
+        }
+        finally {
+            if (channel.isOpen()) {
+                channel.close()
+            }
+        }
+    }
+
+    /**
+     * Performs a series of operations with the same channel created from the given connection
+     * and with confirms enabled. This method will throw an exception if any messaged are nack'd.
+     *
+     * @param connection
+     * @param closure
+     */
+    @Override
+    void withConfirmsOrDie(String connection, Closure closure) {
+        Channel channel = connectionManager.createChannel(connection)
+
+        try {
+            channel.confirmSelect()
+
+            createRabbitMessagePublisherChannelProxy(channel).run(closure)
+
+            channel.waitForConfirmsOrDie()
+        }
+        finally {
+            if (channel.isOpen()) {
+                channel.close()
+            }
+        }
+    }
+
+    /**
+     * Performs a series of operations with the same channel and with confirms enabled.
+     * This method will throw an exception if any messaged are nack'd.
+     *
+     * @param timeout
+     * @param closure
+     */
+    @Override
+    void withConfirmsOrDie(long timeout, Closure closure) {
+        Channel channel = connectionManager.createChannel()
+
+        try {
+            channel.confirmSelect()
+
+            createRabbitMessagePublisherChannelProxy(channel).run(closure)
+
+            channel.waitForConfirmsOrDie(timeout)
+        }
+        finally {
+            if (channel.isOpen()) {
+                channel.close()
+            }
+        }
+    }
+
+    /**
+     * Performs a series of operations with the same channel created from the given connection
+     * and with confirms enabled. This method will throw an exception if any messaged are nack'd.
+     *
+     * @param connection
+     * @param timeout
+     * @param closure
+     */
+    @Override
+    void withConfirmsOrDie(String connection, long timeout, Closure closure) {
+        Channel channel = connectionManager.createChannel(connection)
+
+        try {
+            channel.confirmSelect()
+
+            createRabbitMessagePublisherChannelProxy(channel).run(closure)
+
+            channel.waitForConfirmsOrDie(timeout)
+        }
+        finally {
+            if (channel.isOpen()) {
+                channel.close()
+            }
+        }
     }
 }

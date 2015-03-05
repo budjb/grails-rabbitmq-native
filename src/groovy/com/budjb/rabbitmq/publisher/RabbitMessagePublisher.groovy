@@ -127,4 +127,88 @@ interface RabbitMessagePublisher {
      * @return
      */
     SynchronousQueue<MessageContext> createResponseQueue()
+
+    /**
+     * Performs a series of operations with the same channel.
+     *
+     * @param Closure
+     */
+    void withChannel(Closure closure)
+
+    /**
+     * Performs a series of operations with the same channel created from the given connection.
+     *
+     * @param connection
+     * @param closure
+     */
+    void withChannel(String connection, Closure closure)
+
+    /**
+     * Performs a series of operations with the same channel and with confirms enabled.
+     *
+     * @param closure
+     */
+    void withConfirms(Closure closure)
+
+    /**
+     * Performs a series of operations with the same channel created from the given connection
+     * and with confirms enabled.
+     *
+     * @param connection
+     * @param closure
+     */
+    void withConfirms(String connection, Closure closure)
+
+    /**
+     * Performs a series of operations with the same channel and with confirms enabled.
+     *
+     * @param timeout
+     * @param closure
+     */
+    void withConfirms(long timeout, Closure closure)
+
+    /**
+     * Performs a series of operations with the same channel created from the given connection
+     * and with confirms enabled.
+     * @param connection
+     * @param timeout
+     * @param closure
+     */
+    void withConfirms(String connection, long timeout, Closure closure)
+
+    /**
+     * Performs a series of operations with the same channel and with confirms enabled.
+     * This method will throw an exception if any messages are n'acked.
+     *
+     * @param closure
+     */
+    void withConfirmsOrDie(Closure closure)
+
+    /**
+     * Performs a series of operations with the same channel created from the given connection
+     * and with confirms enabled. This method will throw an exception if any messaged are n'acked.
+     *
+     * @param connection
+     * @param closure
+     */
+    void withConfirmsOrDie(String connection, Closure closure)
+
+    /**
+     * Performs a series of operations with the same channel and with confirms.
+     * This method will throw an exception if any messaged are n'acked.
+     *
+     * @param timeout
+     * @param closure
+     */
+    void withConfirmsOrDie(long timeout, Closure closure)
+
+    /**
+     * Performs a series of operations with the same channel created from the given connection
+     * and with confirms enabled. This method will throw an exception if any messaged are n'acked.
+     *
+     * @param connection
+     * @param timeout
+     * @param closure
+     */
+    void withConfirmsOrDie(String connection, long timeout, Closure closure)
 }
