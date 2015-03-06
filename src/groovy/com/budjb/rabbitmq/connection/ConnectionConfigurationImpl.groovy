@@ -93,39 +93,42 @@ class ConnectionConfigurationImpl implements ConnectionConfiguration {
      */
     ConnectionConfigurationImpl(Map configuration) {
         // Assign values
-        setAutomaticReconnect(parseConfigOption(Boolean, automaticReconnect, configuration['automaticReconnect']))
-        setHost(parseConfigOption(String, host, configuration['host']))
-        setIsDefault(parseConfigOption(Boolean, isDefault, configuration['isDefault']))
-        setName(parseConfigOption(String, name, configuration['name']))
-        setPassword(parseConfigOption(String, password, configuration['password']))
-        setPort(parseConfigOption(Integer, port, configuration['port']))
-        setRequestedHeartbeat(parseConfigOption(Integer, requestedHeartbeat, configuration['requestedHeartbeat']))
-        setSsl(parseConfigOption(Boolean, ssl, configuration['ssl']))
-        setThreads(parseConfigOption(Integer, threads, configuration['threads']))
-        setUsername(parseConfigOption(String, username, configuration['username']))
-        setVirtualHost(parseConfigOption(String, virtualHost, configuration['virtualHost']))
+        setAutomaticReconnect(parseConfigOption(Boolean, configuration['automaticReconnect'], automaticReconnect))
+        setHost(parseConfigOption(String, configuration['host'], host))
+        setIsDefault(parseConfigOption(Boolean, configuration['isDefault'], isDefault))
+        setName(parseConfigOption(String, configuration['name'], name))
+        setPassword(parseConfigOption(String, configuration['password'], password))
+        setPort(parseConfigOption(Integer, configuration['port'], port))
+        setRequestedHeartbeat(parseConfigOption(Integer, configuration['requestedHeartbeat'], requestedHeartbeat))
+        setSsl(parseConfigOption(Boolean, configuration['ssl'], ssl))
+        setThreads(parseConfigOption(Integer, configuration['threads'], threads))
+        setUsername(parseConfigOption(String, configuration['username'], username))
+        setVirtualHost(parseConfigOption(String, configuration['virtualHost'], virtualHost))
     }
 
     /**
-     * Parses a configuration option given a class type, default value, and input value.
+     * Parses a configuration option given a class type and possible values.
      *
      * @param clazz
-     * @param defaultValue
-     * @param value
+     * @param values
      * @return
      */
-    private Object parseConfigOption(Class clazz, Object defaultValue, Object value) {
-        if (value == null) {
-            return defaultValue
-        }
-        try {
-            return value.asType(clazz)
-        }
-        catch (Exception e) {
-            return defaultValue
-        }
-    }
+    private Object parseConfigOption(Class clazz, Object... values) {
+        for (Object value : values) {
+            if (value == null) {
+                continue
+            }
 
+            try {
+                return value.asType(clazz)
+            }
+            catch (Exception e) {
+                // Continue...
+            }
+        }
+
+        return null
+    }
 
     /**
      * Returns whether the configuration is valid.

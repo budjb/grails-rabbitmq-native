@@ -94,40 +94,43 @@ class ConsumerConfigurationImpl implements ConsumerConfiguration {
             throw new NullPointerException("consumer configuration options must not be null")
         }
 
-        setQueue(parseConfigOption(String, queue, options['queue']))
-        setExchange(parseConfigOption(String, exchange, options['exchange']))
-        setBinding(parseConfigOption(Object, binding, options['binding']))
-        setMatch(parseConfigOption(String, match, options['match']))
-        setConsumers(parseConfigOption(Integer, consumers, options['consumers']))
-        setAutoAck(parseConfigOption(AutoAck, autoAck, options['autoAck']))
-        setConvert(parseConfigOption(MessageConvertMethod, convert, options['convert']))
-        setRetry(parseConfigOption(Boolean, retry, options['retry']))
-        setPrefetchCount(parseConfigOption(Integer, prefetchCount, options['prefetchCount']))
-        setConnection(parseConfigOption(String, connection, options['connection']))
+        setQueue(parseConfigOption(String, options['queue'], queue))
+        setExchange(parseConfigOption(String, options['exchange'], exchange))
+        setBinding(parseConfigOption(Object, options['binding'], binding))
+        setMatch(parseConfigOption(String, options['match'], match))
+        setConsumers(parseConfigOption(Integer, options['consumers'], consumers))
+        setAutoAck(parseConfigOption(AutoAck, options['autoAck'], autoAck))
+        setConvert(parseConfigOption(MessageConvertMethod, options['convert'], convert))
+        setRetry(parseConfigOption(Boolean, options['retry'], retry))
+        setPrefetchCount(parseConfigOption(Integer, options['prefetchCount'], prefetchCount))
+        setConnection(parseConfigOption(String, options['connection'], connection))
 
         // This is intentionally last
-        setTransacted(parseConfigOption(Boolean, transacted, options['transacted']))
+        setTransacted(parseConfigOption(Boolean, options['transacted'], transacted))
     }
 
     /**
-     * Assigns the option provided by the consumer's config, or returns the default
-     * value if the option was not provided or it was unable to be converted to
-     * the correct data type.
+     * Parses a configuration option given a class type and possible values.
      *
-     * @param var
-     * @param value
+     * @param clazz
+     * @param values
      * @return
      */
-    private Object parseConfigOption(Class clazz, Object defaultValue, Object value) {
-        if (value == null) {
-            return defaultValue
+    private Object parseConfigOption(Class clazz, Object... values) {
+        for (Object value : values) {
+            if (value == null) {
+                continue
+            }
+
+            try {
+                return value.asType(clazz)
+            }
+            catch (Exception e) {
+                // Continue...
+            }
         }
-        try {
-            return value.asType(clazz)
-        }
-        catch (Exception e) {
-            return defaultValue
-        }
+
+        return null
     }
 
     /**
