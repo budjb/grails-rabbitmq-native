@@ -26,4 +26,8 @@ class RabbitmqNativeBootStrap {
             rabbitContext.startConsumers()
         }
     }
+
+    def destroy = {
+        rabbitContext.stop()
+    }
 }

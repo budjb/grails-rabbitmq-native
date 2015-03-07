@@ -364,7 +364,7 @@ class ConsumerContextImpl implements ConsumerContext {
     private void deliverMessage(MessageContext context) {
         try {
             // Process the message
-            Object response = processMessage(context)
+            Object response = handoffMessage(context)
 
             // If a response was given and a replyTo is set, send the message back
             if (context.properties.replyTo && response) {
@@ -376,18 +376,18 @@ class ConsumerContextImpl implements ConsumerContext {
                 }
             }
         }
-        catch (Exception e) {
+        catch (Throwable e) {
             log.error("unexpected exception ${e.getClass()} encountered in the rabbit consumer associated with handler ${getId()}", e)
         }
     }
 
     /**
-     * Processes the message and hands it off to the handler.
+     * Hands off the message to the handler (if a valid one is found).
      *
      * @param context
      * @return Any returned value from the handler.
      */
-    private Object processMessage(MessageContext context) {
+    private Object handoffMessage(MessageContext context) {
         // Get the configuration
         ConsumerConfiguration configuration = getConfiguration()
 
@@ -458,7 +458,7 @@ class ConsumerContextImpl implements ConsumerContext {
 
             return response
         }
-        catch (Exception e) {
+        catch (Throwable e) {
             // Rollback the transaction
             if (configuration.getTransacted()) {
                 context.channel.txRollback()
