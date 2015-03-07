@@ -23,22 +23,22 @@ import com.budjb.rabbitmq.consumer.ConsumerContextImpl
 import com.budjb.rabbitmq.consumer.MessageContext
 import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
-import com.budjb.rabbitmq.test.PersistenceInterceptor
 import com.budjb.rabbitmq.test.UnitTestConsumer
 import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope
 import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk
+import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 import spock.lang.Specification
 
 class ConsumerContextImplSpec extends Specification {
     MessageConverterManager messageConverterManager
-    PersistenceInterceptor persistenceInterceptor
+    PersistenceContextInterceptor persistenceInterceptor
     ConnectionManager connectionManager
     RabbitMessagePublisher rabbitMessagePublisher
 
     def setup() {
-        persistenceInterceptor = Mock(PersistenceInterceptor)
+        persistenceInterceptor = Mock(PersistenceContextInterceptor)
         connectionManager = Mock(ConnectionManager)
         rabbitMessagePublisher = Mock(RabbitMessagePublisher)
 

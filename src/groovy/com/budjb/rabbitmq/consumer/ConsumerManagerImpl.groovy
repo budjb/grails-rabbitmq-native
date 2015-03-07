@@ -24,6 +24,7 @@ import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsClass
+import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 
@@ -46,7 +47,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      *
      * This will be null if Hibernate is not present.
      */
-    Object persistenceInterceptor
+    PersistenceContextInterceptor persistenceInterceptor
 
     /**
      * Message converter manager.

@@ -26,6 +26,7 @@ import com.rabbitmq.client.Channel
 import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
 import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 
 import java.lang.reflect.Method
 
@@ -139,7 +140,7 @@ class ConsumerContextImpl implements ConsumerContext {
     /**
      * Persistence interceptor for Hibernate session handling.
      */
-    Object persistenceInterceptor
+    PersistenceContextInterceptor persistenceInterceptor
 
     /**
      * Message converter manager.
@@ -167,7 +168,7 @@ class ConsumerContextImpl implements ConsumerContext {
         Object consumer,
         ConnectionManager connectionManager,
         MessageConverterManager messageConverterManager,
-        Object persistenceInterceptor,
+        PersistenceContextInterceptor persistenceInterceptor,
         RabbitMessagePublisher rabbitMessagePublisher) {
 
         this.consumer = consumer
@@ -643,17 +644,22 @@ class ConsumerContextImpl implements ConsumerContext {
      * Binds a Hibernate session to the current thread if Hibernate is present.
      */
     protected void openSession() {
-        persistenceInterceptor?.init()
+        if (!persistenceInterceptor) {
+            return
+        }
+
+        persistenceInterceptor.init()
     }
 
     /**
      * Closes the bound Hibernate session if Hibernate is present.
      */
     protected void closeSession() {
-        // Flush the session
-        persistenceInterceptor?.flush()
+        if (!persistenceInterceptor) {
+            return
+        }
 
-        // Close the session
-        persistenceInterceptor?.destroy()
+        persistenceInterceptor.flush()
+        persistenceInterceptor.destroy()
     }
 }
