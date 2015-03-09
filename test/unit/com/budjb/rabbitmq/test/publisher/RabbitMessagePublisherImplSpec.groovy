@@ -18,6 +18,7 @@ package com.budjb.rabbitmq.test.publisher
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.MessageContext
 import com.budjb.rabbitmq.converter.*
+import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.MessageConvertException
 import com.budjb.rabbitmq.publisher.RabbitMessageProperties
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisherImpl
@@ -184,7 +185,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
 
     def 'Ensure an exception is thrown when content can\'t be marshaled'() {
         when:
-        rabbitMessagePublisher.send(BASIC_PUBLISH_ROUTING_KEY, new DummyObject())
+        rabbitMessagePublisher.send(BASIC_PUBLISH_ROUTING_KEY, new Expando())
 
         then:
         thrown MessageConvertException
@@ -311,10 +312,232 @@ class RabbitMessagePublisherImplSpec extends Specification {
         1 * channel.basicCancel(*_)
     }
 
-    /**
-     * A dummy class used to test invalid message conversion.
-     */
-    class DummyObject {
+    def 'If batching messages with withChannel(Closure), only one channel from the default connection should be used'() {
+        setup:
+        Channel channel = Mock(Channel)
+        connectionManager.createChannel() >> channel >> { return Mock(Channel) }
 
+        when:
+        rabbitMessagePublisher.withChannel {
+            5.times {
+                send {
+                    routingKey = 'test-queue'
+                    body = 'hi'
+                }
+            }
+        }
+
+        then:
+        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+    }
+
+    def 'If batching messages with withChannel(String, Closure), only one channel from the default connection should be used'() {
+        setup:
+        Channel channel = Mock(Channel)
+
+        connectionManager.createChannel() >> { throw new ContextNotFoundException() }
+        connectionManager.createChannel('connection1') >> channel >> Mock(Channel)
+        connectionManager.createChannel(_) >> { throw new ContextNotFoundException() }
+
+        when:
+        rabbitMessagePublisher.withChannel('connection1') {
+            5.times {
+                send {
+                    routingKey = 'test-queue'
+                    body = 'hi'
+                }
+            }
+        }
+
+        then:
+        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+    }
+
+    def 'Validate interactions for withConfirms(Closure)'() {
+        setup:
+        Channel channel = Mock(Channel)
+
+        connectionManager.createChannel() >> channel >> Mock(Channel)
+        connectionManager.createChannel(_) >> { throw new ContextNotFoundException() }
+
+        when:
+        rabbitMessagePublisher.withConfirms() {
+            5.times {
+                send {
+                    routingKey = 'test-queue'
+                    body = 'hi'
+                }
+            }
+        }
+
+        then:
+        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        1 * channel.confirmSelect()
+        1 * channel.waitForConfirms()
+    }
+
+    def 'Validate interactions for withConfirms(String, Closure)'() {
+        setup:
+        Channel channel = Mock(Channel)
+
+        connectionManager.createChannel() >> { throw new ContextNotFoundException() }
+        connectionManager.createChannel('connection1') >> channel >> Mock(Channel)
+        connectionManager.createChannel(_) >> { throw new ContextNotFoundException() }
+
+        when:
+        rabbitMessagePublisher.withConfirms('connection1') {
+            5.times {
+                send {
+                    routingKey = 'test-queue'
+                    body = 'hi'
+                }
+            }
+        }
+
+        then:
+        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        1 * channel.confirmSelect()
+        1 * channel.waitForConfirms()
+    }
+
+    def 'Validate interactions for withConfirms(long, Closure)'() {
+        setup:
+        Channel channel = Mock(Channel)
+
+        connectionManager.createChannel() >> channel >> Mock(Channel)
+        connectionManager.createChannel(_) >> { throw new ContextNotFoundException() }
+
+        when:
+        rabbitMessagePublisher.withConfirms(5000) {
+            5.times {
+                send {
+                    routingKey = 'test-queue'
+                    body = 'hi'
+                }
+            }
+        }
+
+        then:
+        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        1 * channel.confirmSelect()
+        1 * channel.waitForConfirms(5000)
+    }
+
+    def 'Validate interactions for withConfirms(String, long, Closure)'() {
+        setup:
+        Channel channel = Mock(Channel)
+
+        connectionManager.createChannel() >> { throw new ContextNotFoundException() }
+        connectionManager.createChannel('connection1') >> channel >> Mock(Channel)
+        connectionManager.createChannel(_) >> { throw new ContextNotFoundException() }
+
+        when:
+        rabbitMessagePublisher.withConfirms('connection1', 5000) {
+            5.times {
+                send {
+                    routingKey = 'test-queue'
+                    body = 'hi'
+                }
+            }
+        }
+
+        then:
+        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        1 * channel.confirmSelect()
+        1 * channel.waitForConfirms(5000)
+    }
+
+    def 'Validate interactions for withConfirmsOrDie(Closure)'() {
+        setup:
+        Channel channel = Mock(Channel)
+
+        connectionManager.createChannel() >> channel >> Mock(Channel)
+        connectionManager.createChannel(_) >> { throw new ContextNotFoundException() }
+
+        when:
+        rabbitMessagePublisher.withConfirmsOrDie() {
+            5.times {
+                send {
+                    routingKey = 'test-queue'
+                    body = 'hi'
+                }
+            }
+        }
+
+        then:
+        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        1 * channel.confirmSelect()
+        1 * channel.waitForConfirmsOrDie()
+    }
+
+    def 'Validate interactions for withConfirmsOrDie(String, Closure)'() {
+        setup:
+        Channel channel = Mock(Channel)
+
+        connectionManager.createChannel() >> { throw new ContextNotFoundException() }
+        connectionManager.createChannel('connection1') >> channel >> Mock(Channel)
+        connectionManager.createChannel(_) >> { throw new ContextNotFoundException() }
+
+        when:
+        rabbitMessagePublisher.withConfirmsOrDie('connection1') {
+            5.times {
+                send {
+                    routingKey = 'test-queue'
+                    body = 'hi'
+                }
+            }
+        }
+
+        then:
+        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        1 * channel.confirmSelect()
+        1 * channel.waitForConfirmsOrDie()
+    }
+
+    def 'Validate interactions for withConfirmsOrDie(long, Closure)'() {
+        setup:
+        Channel channel = Mock(Channel)
+
+        connectionManager.createChannel() >> channel >> Mock(Channel)
+        connectionManager.createChannel(_) >> { throw new ContextNotFoundException() }
+
+        when:
+        rabbitMessagePublisher.withConfirmsOrDie(5000) {
+            5.times {
+                send {
+                    routingKey = 'test-queue'
+                    body = 'hi'
+                }
+            }
+        }
+
+        then:
+        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        1 * channel.confirmSelect()
+        1 * channel.waitForConfirmsOrDie(5000)
+    }
+
+    def 'Validate interactions for withConfirmsOrDie(String, long, Closure)'() {
+        setup:
+        Channel channel = Mock(Channel)
+
+        connectionManager.createChannel() >> { throw new ContextNotFoundException() }
+        connectionManager.createChannel('connection1') >> channel >> Mock(Channel)
+        connectionManager.createChannel(_) >> { throw new ContextNotFoundException() }
+
+        when:
+        rabbitMessagePublisher.withConfirmsOrDie('connection1', 5000) {
+            5.times {
+                send {
+                    routingKey = 'test-queue'
+                    body = 'hi'
+                }
+            }
+        }
+
+        then:
+        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        1 * channel.confirmSelect()
+        1 * channel.waitForConfirmsOrDie(5000)
     }
 }

@@ -362,22 +362,30 @@ class ConsumerContextImpl implements ConsumerContext {
      * @param context
      */
     private void deliverMessage(MessageContext context) {
+        Object response
         try {
             // Process the message
-            Object response = handoffMessage(context)
-
-            // If a response was given and a replyTo is set, send the message back
-            if (context.properties.replyTo && response) {
-                rabbitMessagePublisher.send {
-                    channel = context.channel
-                    routingKey = context.properties.replyTo
-                    correlationId = context.properties.correlationId
-                    delegate.body = response
-                }
-            }
+            response = handoffMessage(context)
         }
         catch (Throwable e) {
             log.error("unexpected exception ${e.getClass()} encountered in the rabbit consumer associated with handler ${getId()}", e)
+        }
+
+        if (context.properties.replyTo && response != null) {
+            try {
+                // If a response was given and a replyTo is set, send the message back
+                if (context.properties.replyTo && response) {
+                    rabbitMessagePublisher.send {
+                        channel = context.channel
+                        routingKey = context.properties.replyTo
+                        correlationId = context.properties.correlationId
+                        delegate.body = response
+                    }
+                }
+            }
+            catch (Throwable e) {
+                log.error("unexpected exception ${e.getClass()} encountered while responding from an RPC call with handler ${getId()}", e)
+            }
         }
     }
 

@@ -28,6 +28,7 @@ import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope
 import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk
+import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 import spock.lang.Specification
 
@@ -260,5 +261,47 @@ class ConsumerContextImplSpec extends Specification {
         1 * persistenceInterceptor.init()
         1 * persistenceInterceptor.flush()
         1 * persistenceInterceptor.destroy()
+    }
+
+
+    def 'If an object causes a StackOverflowError during an RPC reply, the exception should be handled'() {
+        setup:
+        ConsumerConfiguration configuration = new ConsumerConfigurationImpl()
+        configuration.queue = 'test-queue'
+
+        Logger log = Mock(Logger)
+
+        UnitTestConsumer consumer = new UnitTestConsumer()
+
+        BasicProperties properties = Mock(BasicProperties)
+        properties.getReplyTo() >> 'test-queue'
+        properties.getContentType() >> ''
+
+        MessageContext messageContext = new MessageContext(
+            channel: Mock(Channel),
+            envelope: Mock(Envelope),
+            properties: properties,
+            body: 'asdf'.getBytes()
+        )
+
+        ConsumerContextImpl consumerContext = new ConsumerContextImpl(
+            configuration,
+            consumer,
+            connectionManager,
+            messageConverterManager,
+            persistenceInterceptor,
+            rabbitMessagePublisher
+        )
+
+        rabbitMessagePublisher.send(*_) >> { throw new StackOverflowError() }
+
+        consumerContext.log = log
+
+        when:
+        consumerContext.deliverMessage(messageContext)
+
+        then:
+        notThrown StackOverflowError
+        1 * log.error('unexpected exception class java.lang.StackOverflowError encountered while responding from an RPC call with handler UnitTestConsumer', _)
     }
 }

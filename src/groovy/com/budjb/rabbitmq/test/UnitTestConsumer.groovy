@@ -22,7 +22,7 @@ class UnitTestConsumer {
     ]
 
     def handleMessage(def body, def context) {
-
+        return body
     }
 
     void onReceive(def context) {
