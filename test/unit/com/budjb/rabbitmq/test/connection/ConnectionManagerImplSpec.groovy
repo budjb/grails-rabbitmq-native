@@ -16,6 +16,7 @@
 package com.budjb.rabbitmq.test.connection
 
 import com.budjb.rabbitmq.connection.ConnectionBuilder
+import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManagerImpl
 import com.budjb.rabbitmq.exception.ContextNotFoundException
@@ -387,5 +388,26 @@ class ConnectionManagerImplSpec extends Specification {
         notThrown IllegalStateException
         1 * connection1.start() >> { throw new IllegalStateException('already started bro') }
         1 * connection2.start()
+    }
+
+    def 'If multiple connections have the same name, only one is registered'() {
+        setup:
+        ConnectionContext context1 = Mock(ConnectionContext)
+        ConnectionContext context2 = Mock(ConnectionContext)
+        ConnectionContext context3 = Mock(ConnectionContext)
+
+        context1.getId() >> 'foo'
+        context2.getId() >> 'bar'
+        context3.getId() >> 'bar'
+
+        connectionManager.register(context1)
+        connectionManager.register(context2)
+
+        when:
+        connectionManager.register(context3)
+
+        then:
+        connectionManager.connections.size() == 2
+        1 * context2.stop()
     }
 }
