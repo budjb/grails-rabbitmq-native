@@ -1,0 +1,17 @@
+language: java
+
+jdk:
+- oraclejdk7
+
+services:
+- rabbitmq
+
+before_script:
+- sudo rabbitmqctl add_vhost test1.rabbitmq.budjb.com
+- sudo rabbitmqctl add_vhost test2.rabbitmq.budjb.com
+- sudo rabbitmqctl set_permissions -p test1.rabbitmq.budjb.com guest ".*" ".*" ".*"
+- sudo rabbitmqctl set_permissions -p test2.rabbitmq.budjb.com guest ".*" ".*" ".*"
+
+script:
+- ./grailsw refresh-dependencies --non-interactive
+- ./grailsw test-app -Dserver.port=8099 --refresh-dependencies --non-interactive --stacktrace
