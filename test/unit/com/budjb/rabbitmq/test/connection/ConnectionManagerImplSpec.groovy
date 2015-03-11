@@ -287,7 +287,7 @@ class ConnectionManagerImplSpec extends Specification {
         1 * context2.stop()
         1 * context3.stop()
 
-        connectionManager.connections.size() == 0
+        connectionManager.getContexts().size() == 0
     }
 
     def 'If a connection is unregistered, validate that it is first stopped'() {
@@ -301,7 +301,7 @@ class ConnectionManagerImplSpec extends Specification {
 
         then:
         1 * context.stop()
-        connectionManager.connections.size() == 0
+        connectionManager.getContexts().size() == 0
     }
 
     def 'If a null connection name is passed to getConnection(String), the default connection should be returned'() {
@@ -407,7 +407,7 @@ class ConnectionManagerImplSpec extends Specification {
         connectionManager.register(context3)
 
         then:
-        connectionManager.connections.size() == 2
+        connectionManager.getContexts().size() == 2
         1 * context2.stop()
     }
 }

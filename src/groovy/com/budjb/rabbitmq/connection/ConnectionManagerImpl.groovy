@@ -303,4 +303,14 @@ class ConnectionManagerImpl implements ConnectionManager {
     ConnectionContext createContext(Map configuration) {
         return createContext(new ConnectionConfigurationImpl(configuration))
     }
+
+    /**
+     * Returns a list of all registered contexts.
+     *
+     * @return
+     */
+    @Override
+    List<ConnectionContext> getContexts() {
+        return connections
+    }
 }

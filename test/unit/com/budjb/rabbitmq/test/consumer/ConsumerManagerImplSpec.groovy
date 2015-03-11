@@ -95,7 +95,7 @@ class ConsumerManagerImplSpec extends Specification {
         consumerManager.load()
 
         then:
-        consumerManager.consumers.size() == 2
+        consumerManager.getContexts().size() == 2
     }
 
     def 'If a consumer is registered, validate it can be retrieved by its name'() {
@@ -127,7 +127,7 @@ class ConsumerManagerImplSpec extends Specification {
 
         then:
         1 * consumerContext.stop()
-        consumerManager.consumers.size() == 0
+        consumerManager.getContexts().size() == 0
     }
 
     def 'If the manager is reset, all consumers should be stopped and un-registered'() {
@@ -147,7 +147,7 @@ class ConsumerManagerImplSpec extends Specification {
         then:
         1 * consumerContext1.stop()
         1 * consumerContext2.stop()
-        consumerManager.consumers.size() == 0
+        consumerManager.getContexts().size() == 0
     }
 
     def 'If the manager is started, all consumer contexts should also be started'() {
@@ -224,7 +224,7 @@ class ConsumerManagerImplSpec extends Specification {
         then:
         1 * consumerContext1.stop()
         0 * consumerContext2.stop()
-        consumerManager.consumers.size() == 2
+        consumerManager.getContexts().size() == 2
     }
 
     def 'If a consumer is registered with the same name as another consumer, the old one is stopped and un-registered'() {
@@ -242,7 +242,7 @@ class ConsumerManagerImplSpec extends Specification {
 
         then:
         1 * consumerContext1.stop()
-        consumerManager.consumers.size() == 1
+        consumerManager.getContexts().size() == 1
 
         expect:
         consumerManager.getContext('Consumer1') == consumerContext2
@@ -324,7 +324,7 @@ class ConsumerManagerImplSpec extends Specification {
 
         then:
         1 * log.warn("not loading consumer 'MissingConfigurationConsumer' because its configuration is missing")
-        consumerManager.consumers.size() == 1
+        consumerManager.getContexts().size() == 1
     }
 
     def 'If all consumers are started while some of those consumers are already started, the IllegalStateException should be swallowed'() {

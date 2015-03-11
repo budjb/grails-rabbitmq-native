@@ -92,4 +92,11 @@ interface RabbitManager<C extends RabbitManagedContext, I extends RabbitManagedC
      * @return
      */
     C getContext(String id) throws ContextNotFoundException
+
+    /**
+     * Returns a list of all registered contexts.
+     *
+     * @return
+     */
+    List<C> getContexts()
 }
