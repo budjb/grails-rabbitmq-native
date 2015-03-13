@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
     <head>
-        <title>Rabbitmq Native Plugin 3.0.4</title>
+        <title>Rabbitmq Native Plugin 3.1.0</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8" />
         <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8" />
@@ -68,7 +68,7 @@ function addJsClass(el) {
                         <div class="project">
                             <h1>Rabbitmq Native Plugin - Reference Documentation</h1>
                             <p><strong>Authors:</strong> Bud Byrd</p>
-                            <p><strong>Version:</strong> 3.0.4</p>
+                            <p><strong>Version:</strong> 3.1.0</p>
                             
                         </div>
 
@@ -126,6 +126,10 @@ function addJsClass(el) {
                             
                             <div class="toc-item" style="margin-left:10px"><a href="#rpcsend"><strong>5.2</strong><span>RPC Messages</span></a></div>
                             
+                            <div class="toc-item" style="margin-left:10px"><a href="#bulk"><strong>5.3</strong><span>Bulk Publishing</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#confirms"><strong>5.4</strong><span>Publisher Confirms</span></a></div>
+                            
                             <div class="toc-item" style="margin-left:0px"><a href="#converters"><strong>6</strong><span>Message Converters</span></a></div>
                             
                             <div class="toc-item" style="margin-left:10px"><a href="#custom"><strong>6.1</strong><span>Custom Message Converters</span></a></div>
@@ -136,13 +140,19 @@ function addJsClass(el) {
                             
                             <div class="toc-item" style="margin-left:10px"><a href="#rabbitcontext"><strong>7.2</strong><span>Rabbit Context</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:10px"><a href="#channels"><strong>7.3</strong><span>Channels</span></a></div>
+                            <div class="toc-item" style="margin-left:20px"><a href="#native"><strong>7.2.1</strong><span>Native Objects</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:10px"><a href="#transactions"><strong>7.4</strong><span>Transactions</span></a></div>
+                            <div class="toc-item" style="margin-left:20px"><a href="#connection_lifecycle"><strong>7.2.2</strong><span>Starting and Stopping Connections</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:20px"><a href="#consumer_lifecycle"><strong>7.2.3</strong><span>Starting and Stopping Consumers</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#transactions"><strong>7.3</strong><span>Transactions</span></a></div>
                             
                             <div class="toc-item" style="margin-left:0px"><a href="#upgrading"><strong>8</strong><span>Upgrading</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:10px"><a href="#from_2_0_x"><strong>8.1</strong><span>From 2.0.X</span></a></div>
+                            <div class="toc-item" style="margin-left:10px"><a href="#from_3_0_x"><strong>8.1</strong><span>From 3.0.X</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#from_2_0_x"><strong>8.2</strong><span>From 2.0.X</span></a></div>
                             
                             <div class="toc-item" style="margin-left:0px"><a href="#changelog"><strong>9</strong><span>Changelog</span></a></div>
                             
@@ -605,6 +615,59 @@ More options for the <code>RabbitMessagePublisher</code> can be found in the <st
 
 
 
+<h2 id="bulk">5.3 Bulk Publishing</h2>
+By default, the publisher opens a new channel for each message it publishes. This is acceptable when sending
+individual messages, but when bulk publishing is required, it is much more efficient to open a single channel
+and use it for batches of messages.<p class="paragraph"/><blockquote class="note">
+As an example, during testing it took about 65 milliseconds to send one message.  If 1000 messages are sent,
+the total time to publish is about 65 seconds! Using a single channel for the same operation takes about
+1 millisecond per message, cutting the time down to 1 second for all 1000 messages.<p class="paragraph"/>These times are just an example based on testing, but they will differ based on network latency and server load.
+</blockquote><p class="paragraph"/>While a channel may be manually created by authors using the <code>rabbitContext</code>, the publisher provides an easy way
+to send many messages with a single channel.  See the example below.<p class="paragraph"/><div class="code"><pre>rabbitMessagePublisher.withChannel &#123; channel &#45;&#62;
+    1000.times &#123; i &#45;&#62;
+        send &#123;
+            routingKey = <span class="java&#45;quote">"foobar"</span>
+            body = <span class="java&#45;quote">"Bulk message $i"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/>There is also a <code>withChannel</code> method that takes in a connection name for multi-server setups.<p class="paragraph"/><div class="code"><pre>rabbitMessagePublisher.withChannel(<span class="java&#45;quote">"connection1"</span>) &#123; channel &#45;&#62;
+    1000.times &#123; i &#45;&#62;
+        send &#123;
+            routingKey = <span class="java&#45;quote">"foobar"</span>
+            body = <span class="java&#45;quote">"Bulk message $i on connection1"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/>All of the <code>send</code> and <code>rpc</code> methods available with the publisher can be used with <code>withChannel</code>.
+
+
+<h2 id="confirms">5.4 Publisher Confirms</h2>
+The publisher allows authors to enable publisher confirms for a batch of messages using a similar mechanism as
+<code>withChannel</code>.  These methods use RabbitMQ's <code>waitForConfirms</code> and <code>waitForConfirmsOrDie</code> methods.  See
+RabbitMQ's documentation for more information about how publisher confirms work.<p class="paragraph"/>The reference details all of the various methods that the publisher contains to support confirms, but
+below are a couple of basic examples.<p class="paragraph"/>The <code>withConfirms</code> methods utilize the <code>waitForConfirms</code> methods from the RabbitMQ Java library.  <code>withConfirms</code> will
+block until all messages sent in the provided closure have been acked or n'acked by the server.  If a timeout
+is specified, it will only wait for the amount of time specified before throwing a <code>TimeoutException</code>.<p class="paragraph"/><div class="code"><pre>rabbitMessagePublisher.withConfirms &#123; channel &#45;&#62;
+    send &#123;
+        routingKey = <span class="java&#45;quote">"foobar"</span>
+        body = <span class="java&#45;quote">"I am a test message"</span>
+    &#125;<p class="paragraph"/>    send &#123;
+        routingKey = <span class="java&#45;quote">"barbaz"</span>
+        body = <span class="java&#45;quote">"I am also a test message"</span>
+    &#125;
+&#125;</pre></div><p class="paragraph"/>The <code>withConfirmsOrDie</code> methods utilize the <code>waitForConfirmsOrDie</code> methods from the RabbitMQ Java library.
+<code>withConfirmsOrDie</code> will block until all messages sent in the provided closure have been acked or n'acked by the
+server.  The difference with this method is that if any n'ack is received, an exception is thrown.
+As with <code>withConfirms</code>, a timeout can be used.<p class="paragraph"/><div class="code"><pre>rabbitMessagePublisher.withConfirmsOrDie &#123; channel &#45;&#62;
+    send &#123;
+        routingKey = <span class="java&#45;quote">"foobar"</span>
+        body = <span class="java&#45;quote">"I am a test message"</span>
+    &#125;<p class="paragraph"/>    send &#123;
+        routingKey = <span class="java&#45;quote">"barbaz"</span>
+        body = <span class="java&#45;quote">"I am also a test message"</span>
+    &#125;
+&#125;</pre></div><p class="paragraph"/>There are versions of both of these types of methods that take a connection name and/or a timeout.
+
+
 <h1 id="converters">6 Message Converters</h1>
 Message converters are classes that are responsible for converting objects to and from byte arrays. The plugin provides 4 built-in converters that cover basic types:
 <ul class="star">
@@ -674,35 +737,50 @@ While the plugin effectively wraps the functionality of the RabbitMQ library, th
 
 
 <h2 id="beans">7.1 Spring Beans</h2>
-The are several beans defined by the plugin to perform its various operations.<p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Bean Name</strong></th><th><strong class="bold">Purpose</strong></th></tr><tr class="table-odd"><td><code>rabbitContext</code></td><td>A front-end class to the plugin that aggregates useful functionality for users of the plugin.</td></tr><tr class="table-even"><td><code>connectionManager</code></td><td>Handles loading connections from the configuration file, manages the list of configured connections, and provides those connections to callers when requested.</td></tr><tr class="table-odd"><td><code>messageConverterManager</code></td><td>Handles loading message converters and acts as the entry point when message conversion is required.</td></tr><tr class="table-even"><td><code>consumerManager</code></td><td>Handles loading any defined consumers.</td></tr><tr class="table-odd"><td><code>queueBuilder</code></td><td>Responsible for creating exchanges and queues defined in the application's configuration.</td></tr><tr class="table-even"><td><code>rabbitMessagePublisher</code></td><td>Used to send messages to a RabbitMQ broker.</td></tr></table>
+The are several beans defined by the plugin to perform its various operations.<p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Bean Name</strong></th><th><strong class="bold">Purpose</strong></th></tr><tr class="table-odd"><td><code>rabbitContext</code></td><td>A front-end class to the plugin that aggregates useful functionality for users of the&#10;                              plugin.  Besides the <code>rabbitMessagePublisher</code>, this is likely the only bean users will&#10;                              need to access, if at all.</td></tr><tr class="table-even"><td><code>connectionManager</code></td><td>Manages the lifecycle of connection instances, including loading, starting, stopping,&#10;                              unloading, and retrieval.</td></tr><tr class="table-odd"><td><code>messageConverterManager</code></td><td>Handles loading message converters and acts as the entry point when message conversion&#10;                              is required.</td></tr><tr class="table-even"><td><code>consumerManager</code></td><td>Manages the lifecycle of consumer instances, including loading, starting, stopping,&#10;                              unloading, and retrieval.</td></tr><tr class="table-odd"><td><code>queueBuilder</code></td><td>Responsible for creating exchanges and queues defined in the application's configuration.</td></tr><tr class="table-even"><td><code>rabbitMessagePublisher</code></td><td>Used to send messages to a RabbitMQ broker.</td></tr></table>
 
 
 
 <h2 id="rabbitcontext">7.2 Rabbit Context</h2>
-Besides the <code>rabbitMessagePublisher</code>, the <code>rabbitContext</code> is the bean users will most likely interact with.  While you may never need to use this bean, it can be useful.
-As with any Spring bean, the <code>rabbitContext</code> can be injected into any Spring managed bean, such as services, controllers, and rabbit consumers.<p class="paragraph"/>Below are some use cases which may be helpful for users wanting to use the plugin outside of its conventions.
-<ul class="star">
-<li>The <code>rabbitContext.getConnection()</code> method returns a <code>ConnectionContext</code> object, which exposes the RabbitMQ <code>Connection</code> object through its own <code>getConnection()</code> method.</li>
-<li>The <code>rabbitContext.getChannel()</code> method returns a RabbitMQ <code>Channel</code> object, which can be used to manually send messages, consume messages, and much more.</li>
-<li>The <code>rabbitContext.startConsumers()</code> method is useful when a user of the plugin wants to control when to start consumer messages during the application startup.</li>
-</ul><p class="paragraph"/>
+Besides the <code>rabbitMessagePublisher</code>, the <code>rabbitContext</code> is the bean users will most likely interact with.
+While you may never need to use this bean, it can be useful.  As with any Spring bean, the <code>rabbitContext</code> can be
+injected into any Spring managed bean, such as services, controllers, and rabbit consumers.<p class="paragraph"/>The <code>rabbitContext</code> is intended to be used as a front-end to all of the other beans defined by the plugin to hide
+some of the complexity of interacting with the system. As such, in most cases the <code>rabbitContext</code> proxies requests
+to the appropriate manager bean to accomplish the requested task.<p class="paragraph"/><blockquote class="warning">
+In some cases, interactions with multiple managers are necessary to safely carry out the action. Therefore, unless
+the <code>rabbitContext</code> does not provide the required functionality, it should be considered best-practice to use
+the <code>rabbitContext</code> instead of the other beans directly.  If you find that you are frequently resorting to using
+one of the other beans, I encourage you to post an issue on the GitHub project.
+</blockquote><p class="paragraph"/>The follow subsections describe some of the more useful functionality the <code>rabbitContext</code> provides.
 
 
-<h2 id="channels">7.3 Channels</h2>
-<code>RabbitContext</code> contains a method <code>createChannel</code>, which simply calls the same function within the <code>Connection</code> instance. This method returns a new <code>Channel</code> that can be used
-to publish messages or even consume messages, if you prefer to set up your own consumers.<p class="paragraph"/><blockquote class="warning">
-If the <code>createChannel</code> method is used, the author <strong class="bold">must</strong> ensure that the channel is closed when it is no longer needed. The <code>RabbitContext</code> does not track these <code>Channel</code> instances
-as it does with those channels it automatically creates for consumers, and it can be easy to create channel "leaks". Simply call <code>Channel.close()</code> to terminate a channel when it
-is no longer needed.
-</blockquote><p class="paragraph"/><h4>Channel Efficiency</h4>
-Creating channels takes time. If the <code>rabbitMessagePublisher</code> is not passed a <code>Channel</code> instance when a message is sent, the publisher will create a temporary channel to publish
-the message. While this is convenient, it also slows down publishing messages considerably (for example, 65ms per message published). When a bulk publish job is required, the job
-can be sped up by creating a single channel to be used when sending multiple messages. In tests, this has brought down the publish time
-per message from 65ms to 1ms or less per message. Be sure to close the channel when the bulk publish job is completed.
+<h2 id="native">7.2.1 Native Objects</h2>
+The main goal of the plugin is to effectively wrap the RabbitMQ library to hide the complexity of its usage and
+make using it more inline with the conventions of Grails applications, but also allow users to gain access to the
+underlying RabbitMQ objects if needed.  <code>rabbitContext</code> provides several methods to gain direct access to the
+RabbitMQ Java library <code>Connection</code> and <code>Channel</code> objects.<p class="paragraph"/>To create a new <code>Channel</code>, use the <code>createChannel</code> methods.<p class="paragraph"/><div class="code"><pre>// This creates a <span class="java&#45;keyword">new</span> channel with the <span class="java&#45;keyword">default</span> connection
+Channel channel = rabbitContext.createChannel()<p class="paragraph"/>// The same using a different connection based on its name
+Channel channel = rabbitContext.createChannel(<span class="java&#45;quote">"connection1"</span>)</pre></div><p class="paragraph"/><blockquote class="warning">
+If the <code>createChannel</code> methods are used, it is important that these channels are closed. The plugin handles opening
+and closing channels that it manages as part of publishing or consuming messages, but channels created with the
+<code>createChannel</code> methods are not managed by the plugin.  It is the author's responsibility to close them, or connection
+leaks may and memory leaks most likely will occur.
+</blockquote><p class="paragraph"/>Use the <code>getConnection</code> methods to gain access to the <code>Connection</code> objects.<p class="paragraph"/><div class="code"><pre>// To retrieve the Connection from the <span class="java&#45;keyword">default</span> connection
+Connection connection = rabbitContext.getConnection()<p class="paragraph"/>// To retrieve the Connection from a specific connection based on its name
+Connection connection = rabbitContext.getConnection(<span class="java&#45;quote">"connection1"</span>)</pre></div>
 
 
+<h2 id="connection_lifecycle">7.2.2 Starting and Stopping Connections</h2>
+The plugin handles starting and stopping connections automatically when the application is started or shut down, but
+sometimes applications may need to manually stop connections based on certain conditions or business logic. The
+<code>rabbitContext</code> contains several methods to manage the life cycle of connections.<p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th>Method</th><th>Description</th></tr><tr class="table-odd"><td><code>startConnections</code></td><td>Starts all registered connections.  If some connections are already started, the remainder&#10;                      will also be started.</td></tr><tr class="table-even"><td><code>stopConnections</code></td><td>Stops all connections and all consumers.</td></tr><tr class="table-odd"><td><code>startConnection</code></td><td>Starts a connection based on its name.</td></tr><tr class="table-even"><td><code>stopConnection</code></td><td>Stops a connection based on its name, and stops any consumers on the connection.</td></tr></table>
 
-<h2 id="transactions">7.4 Transactions</h2>
+
+<h2 id="consumer_lifecycle">7.2.3 Starting and Stopping Consumers</h2>
+Much like connections, the <code>rabbitContext</code> provides several methods to start and stop consumers if necessary.<p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th>Method</th><th>Description</th></tr><tr class="table-odd"><td><code>startConsumers</code></td><td>Starts all registered consumers.  If some consumers are already started, the remainder&#10;                              will also be started.</td></tr><tr class="table-even"><td><code>stopConsumers</code></td><td>Stops all consumers.</td></tr><tr class="table-odd"><td><code>startConsumer</code></td><td>Starts a connection based on its class name.</td></tr><tr class="table-even"><td><code>stopConsumer</code></td><td>Stops a connection based on its class name.</td></tr><tr class="table-odd"><td><code>startConsumers(String)</code></td><td>Starts all consumers on a specific connection, based on the connection name.</td></tr><tr class="table-even"><td><code>stopConsumers(String)</code></td><td>Stops all consumers on a specific connection, based on the connection name.</td></tr></table>
+
+
+<h2 id="transactions">7.3 Transactions</h2>
 The plugin provides a bit of automation around channel transactions. When a consumer is defined with the <code>transacted</code> property set to <code>true</code>, a transaction is automatically started on
 the channel passed to the message handler. When the message handler completes successfully, the transaction is automatically committed. If an unhandled exception is thrown from the message
 handler, the transaction is automatically rolled back.<p class="paragraph"/>It is <strong class="bold">especially important</strong> that any messages published from a message handler use the <code>Channel</code> instance passed in the <code>MessageContext</code> for this functionality to work.<p class="paragraph"/>Since the <code>Channel</code> is passed in the <code>MessageContext</code>, the author has full control over committing and rolling back transactions.
@@ -710,12 +788,31 @@ handler, the transaction is automatically rolled back.<p class="paragraph"/>It i
 
 
 <h1 id="upgrading">8 Upgrading</h1>
-When an update to the plugin is made that has incompatibility considers, this document will help identify the various impact considerations when
-upgrading to a new version.
+When an update to the plugin is made that has incompatibility considerations, this document will help identify the
+various impact considerations when upgrading to a new version.
 
 
 
-<h2 id="from_2_0_x">8.1 From 2.0.X</h2>
+<h2 id="from_3_0_x">8.1 From 3.0.X</h2>
+The upgrade from 3.0.X to 3.1.X includes a refactor of how the consumer and connection managers work.
+The storage of consumer handlers was moved from the connection classes into the consumer manager in order
+to support the new start/stop functionality, and it made sense for consumer handlers to reside with
+the appropriately named manager.<p class="paragraph"/>Both of the managers also now have underlying interfaces that define how a manager should behave. In addition,
+the objects being managed are now called <strong class="bold">Contexts</strong>, which also have interfaces that define their general
+behavior.  It is the intention that with these changes the plugin becomes more stable with less backwards-
+compatibility breaking changes being introduced moving forward.<p class="paragraph"/>Here are the items authors may need to address when upgrading to this version of the plugin.
+<ul class="star">
+<li>The <code>rabbitContext.getConnection()</code> methods now return the RabbitMQ <code>Connection</code> object instead of&#10;  the <code>ConnectionContext</code> instance.  This was done to make the methods more consistent with the&#10;  <code>createChannel</code> methods and to encapsulate the <code>ConnectionContext</code> objects inside the manager.&#10;  The <code>ConnectionContext</code> objects can now be retrieved from the <code>consumerManager</code> bean.</li>
+<li>Many of the methods inside of the <code>ConsumerManager</code> and <code>ConnectionManager</code> have been renamed to adhere&#10;  to a common interface.  This should only affect projects that use these beans directly.</li>
+<li>Some of the methods inside of the <code>RabbitContext</code> have been renamed to match the interface used by&#10;  the various managers.</li>
+</ul><p class="paragraph"/>Overall, users of the plugin should see no impact if the <code>rabbitContext</code> or any of the other beans are
+not used in their projects.<p class="paragraph"/>If the use of the plugin's beans is limited to the <code>rabbitContext</code>, the impact should be minimal,
+with some minor changes need to method names and some refactored code if retrieving a <code>ConnectionContext</code>.
+Users that use the other manager beans will need to account for the changed interface implemented by
+those beans.
+
+
+<h2 id="from_2_0_x">8.2 From 2.0.X</h2>
 The upgrade from any version in the 2.0.X range to 3.0.X includes a massive refactoring of the internals of the plugin.  If users did not extend or override
 the <code>RabbitContext</code>, <code>RabbitMessageBuilder</code>, or any of the other helper classes, the amount of impact is limited to a couple package name changes.<p class="paragraph"/>Below are the changes that were made, at a high level:
 <ul class="star">
@@ -741,7 +838,17 @@ the <code>RabbitContext</code>, <code>RabbitMessageBuilder</code>, or any of the
 
 
 <h1 id="changelog">9 Changelog</h1>
-<h3>Version 3.0.4 - 2/18/2015</h3>
+<h3>Version 3.1.0 - TODO</h3>
+<ul class="star">
+<li>Update the RabbitMQ Client Java library to 3.5.0.</li>
+<li>Fix an issue that caused unclean shutdowns when redeploying an application using the plugin.</li>
+<li>Added the ability to start and stop individual connections.</li>
+<li>Added the ability to start and stop individual consumers.</li>
+<li>Added the ability to start and stop consumers based on the connection they're tied to.</li>
+<li>Moved consumer adapter storage from the connection context to the consumer manager.</li>
+<li>Handle <code>Throwable</code> types that were not being handled before in the consumer handling so that channels are not closed if one of the unhandled errors occurs.</li>
+<li>Added travis-ci continous integration for all commits to the plugin.</li>
+</ul><p class="paragraph"/><h3>Version 3.0.4 - 2/18/2015</h3>
 <ul class="star">
 <li>Fix a null pointer exception when a consumer has no configuration.</li>
 <li>Add a unit test to test behavior when a consumer has no configuration.</li>

@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>7.1 Spring Beans 3.0.4</title>
+    <title>7.1 Spring Beans 3.1.0</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -89,7 +89,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 3.0.4</p>
+                    <p><strong>Version:</strong> 3.1.0</p>
 
                     
                 </div>
@@ -99,7 +99,7 @@ function addJsClass() {
                 
 
 <h2 id="beans">7.1 Spring Beans</h2>
-The are several beans defined by the plugin to perform its various operations.<p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Bean Name</strong></th><th><strong class="bold">Purpose</strong></th></tr><tr class="table-odd"><td><code>rabbitContext</code></td><td>A front-end class to the plugin that aggregates useful functionality for users of the plugin.</td></tr><tr class="table-even"><td><code>connectionManager</code></td><td>Handles loading connections from the configuration file, manages the list of configured connections, and provides those connections to callers when requested.</td></tr><tr class="table-odd"><td><code>messageConverterManager</code></td><td>Handles loading message converters and acts as the entry point when message conversion is required.</td></tr><tr class="table-even"><td><code>consumerManager</code></td><td>Handles loading any defined consumers.</td></tr><tr class="table-odd"><td><code>queueBuilder</code></td><td>Responsible for creating exchanges and queues defined in the application's configuration.</td></tr><tr class="table-even"><td><code>rabbitMessagePublisher</code></td><td>Used to send messages to a RabbitMQ broker.</td></tr></table>
+The are several beans defined by the plugin to perform its various operations.<p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Bean Name</strong></th><th><strong class="bold">Purpose</strong></th></tr><tr class="table-odd"><td><code>rabbitContext</code></td><td>A front-end class to the plugin that aggregates useful functionality for users of the&#10;                              plugin.  Besides the <code>rabbitMessagePublisher</code>, this is likely the only bean users will&#10;                              need to access, if at all.</td></tr><tr class="table-even"><td><code>connectionManager</code></td><td>Manages the lifecycle of connection instances, including loading, starting, stopping,&#10;                              unloading, and retrieval.</td></tr><tr class="table-odd"><td><code>messageConverterManager</code></td><td>Handles loading message converters and acts as the entry point when message conversion&#10;                              is required.</td></tr><tr class="table-even"><td><code>consumerManager</code></td><td>Manages the lifecycle of consumer instances, including loading, starting, stopping,&#10;                              unloading, and retrieval.</td></tr><tr class="table-odd"><td><code>queueBuilder</code></td><td>Responsible for creating exchanges and queues defined in the application's configuration.</td></tr><tr class="table-even"><td><code>rabbitMessagePublisher</code></td><td>Used to send messages to a RabbitMQ broker.</td></tr></table>
 
 
 

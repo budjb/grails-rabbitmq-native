@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>7.4 Transactions 3.0.4</title>
+    <title>7.3 Transactions 3.1.0</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -85,11 +85,11 @@ function addJsClass() {
 
 
                 <div class="project">
-                    <h1>7.4 Transactions - Reference Documentation</h1>
+                    <h1>7.3 Transactions - Reference Documentation</h1>
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 3.0.4</p>
+                    <p><strong>Version:</strong> 3.1.0</p>
 
                     
                 </div>
@@ -98,7 +98,7 @@ function addJsClass() {
 
                 
 
-<h2 id="transactions">7.4 Transactions</h2>
+<h2 id="transactions">7.3 Transactions</h2>
 The plugin provides a bit of automation around channel transactions. When a consumer is defined with the <code>transacted</code> property set to <code>true</code>, a transaction is automatically started on
 the channel passed to the message handler. When the message handler completes successfully, the transaction is automatically committed. If an unhandled exception is thrown from the message
 handler, the transaction is automatically rolled back.<p class="paragraph"/>It is <strong class="bold">especially important</strong> that any messages published from a message handler use the <code>Channel</code> instance passed in the <code>MessageContext</code> for this functionality to work.<p class="paragraph"/>Since the <code>Channel</code> is passed in the <code>MessageContext</code>, the author has full control over committing and rolling back transactions.

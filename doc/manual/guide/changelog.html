@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>9 Changelog 3.0.4</title>
+    <title>9 Changelog 3.1.0</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -87,7 +87,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 3.0.4</p>
+                    <p><strong>Version:</strong> 3.1.0</p>
 
                     
                 </div>
@@ -97,7 +97,17 @@ function addJsClass() {
                 
 
 <h1 id="changelog">9 Changelog</h1>
-<h3>Version 3.0.4 - 2/18/2015</h3>
+<h3>Version 3.1.0 - TODO</h3>
+<ul class="star">
+<li>Update the RabbitMQ Client Java library to 3.5.0.</li>
+<li>Fix an issue that caused unclean shutdowns when redeploying an application using the plugin.</li>
+<li>Added the ability to start and stop individual connections.</li>
+<li>Added the ability to start and stop individual consumers.</li>
+<li>Added the ability to start and stop consumers based on the connection they're tied to.</li>
+<li>Moved consumer adapter storage from the connection context to the consumer manager.</li>
+<li>Handle <code>Throwable</code> types that were not being handled before in the consumer handling so that channels are not closed if one of the unhandled errors occurs.</li>
+<li>Added travis-ci continous integration for all commits to the plugin.</li>
+</ul><p class="paragraph"/><h3>Version 3.0.4 - 2/18/2015</h3>
 <ul class="star">
 <li>Fix a null pointer exception when a consumer has no configuration.</li>
 <li>Add a unit test to test behavior when a consumer has no configuration.</li>

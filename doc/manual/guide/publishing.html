@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>5 Publishing Messages 3.0.4</title>
+    <title>5 Publishing Messages 3.1.0</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -89,7 +89,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 3.0.4</p>
+                    <p><strong>Version:</strong> 3.1.0</p>
 
                     
                 </div>
@@ -102,6 +102,12 @@ function addJsClass() {
                     </div>
                     
                     <div class="toc-item" style="margin-left:0px"><a href="#rpcsend"><strong>5.2</strong><span>RPC Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#bulk"><strong>5.3</strong><span>Bulk Publishing</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#confirms"><strong>5.4</strong><span>Publisher Confirms</span></a>
                     </div>
                     
                 </div>
@@ -154,6 +160,59 @@ will wait indefinitely for a response. The default value of the timeout, if not 
 More options for the <code>RabbitMessagePublisher</code> can be found in the <strong class="bold">Quick Reference</strong>.
 </blockquote>
 
+
+
+<h2 id="bulk">5.3 Bulk Publishing</h2>
+By default, the publisher opens a new channel for each message it publishes. This is acceptable when sending
+individual messages, but when bulk publishing is required, it is much more efficient to open a single channel
+and use it for batches of messages.<p class="paragraph"/><blockquote class="note">
+As an example, during testing it took about 65 milliseconds to send one message.  If 1000 messages are sent,
+the total time to publish is about 65 seconds! Using a single channel for the same operation takes about
+1 millisecond per message, cutting the time down to 1 second for all 1000 messages.<p class="paragraph"/>These times are just an example based on testing, but they will differ based on network latency and server load.
+</blockquote><p class="paragraph"/>While a channel may be manually created by authors using the <code>rabbitContext</code>, the publisher provides an easy way
+to send many messages with a single channel.  See the example below.<p class="paragraph"/><div class="code"><pre>rabbitMessagePublisher.withChannel &#123; channel &#45;&#62;
+    1000.times &#123; i &#45;&#62;
+        send &#123;
+            routingKey = <span class="java&#45;quote">"foobar"</span>
+            body = <span class="java&#45;quote">"Bulk message $i"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/>There is also a <code>withChannel</code> method that takes in a connection name for multi-server setups.<p class="paragraph"/><div class="code"><pre>rabbitMessagePublisher.withChannel(<span class="java&#45;quote">"connection1"</span>) &#123; channel &#45;&#62;
+    1000.times &#123; i &#45;&#62;
+        send &#123;
+            routingKey = <span class="java&#45;quote">"foobar"</span>
+            body = <span class="java&#45;quote">"Bulk message $i on connection1"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/>All of the <code>send</code> and <code>rpc</code> methods available with the publisher can be used with <code>withChannel</code>.
+
+
+<h2 id="confirms">5.4 Publisher Confirms</h2>
+The publisher allows authors to enable publisher confirms for a batch of messages using a similar mechanism as
+<code>withChannel</code>.  These methods use RabbitMQ's <code>waitForConfirms</code> and <code>waitForConfirmsOrDie</code> methods.  See
+RabbitMQ's documentation for more information about how publisher confirms work.<p class="paragraph"/>The reference details all of the various methods that the publisher contains to support confirms, but
+below are a couple of basic examples.<p class="paragraph"/>The <code>withConfirms</code> methods utilize the <code>waitForConfirms</code> methods from the RabbitMQ Java library.  <code>withConfirms</code> will
+block until all messages sent in the provided closure have been acked or n'acked by the server.  If a timeout
+is specified, it will only wait for the amount of time specified before throwing a <code>TimeoutException</code>.<p class="paragraph"/><div class="code"><pre>rabbitMessagePublisher.withConfirms &#123; channel &#45;&#62;
+    send &#123;
+        routingKey = <span class="java&#45;quote">"foobar"</span>
+        body = <span class="java&#45;quote">"I am a test message"</span>
+    &#125;<p class="paragraph"/>    send &#123;
+        routingKey = <span class="java&#45;quote">"barbaz"</span>
+        body = <span class="java&#45;quote">"I am also a test message"</span>
+    &#125;
+&#125;</pre></div><p class="paragraph"/>The <code>withConfirmsOrDie</code> methods utilize the <code>waitForConfirmsOrDie</code> methods from the RabbitMQ Java library.
+<code>withConfirmsOrDie</code> will block until all messages sent in the provided closure have been acked or n'acked by the
+server.  The difference with this method is that if any n'ack is received, an exception is thrown.
+As with <code>withConfirms</code>, a timeout can be used.<p class="paragraph"/><div class="code"><pre>rabbitMessagePublisher.withConfirmsOrDie &#123; channel &#45;&#62;
+    send &#123;
+        routingKey = <span class="java&#45;quote">"foobar"</span>
+        body = <span class="java&#45;quote">"I am a test message"</span>
+    &#125;<p class="paragraph"/>    send &#123;
+        routingKey = <span class="java&#45;quote">"barbaz"</span>
+        body = <span class="java&#45;quote">"I am also a test message"</span>
+    &#125;
+&#125;</pre></div><p class="paragraph"/>There are versions of both of these types of methods that take a connection name and/or a timeout.
 
 
                 <div style="clear:both;margin-top:15px;"></div>
