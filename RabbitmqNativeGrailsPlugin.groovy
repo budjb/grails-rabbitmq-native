@@ -26,7 +26,7 @@ class RabbitmqNativeGrailsPlugin {
     /**
      * Version of the plugin.
      */
-    def version = "3.0.4"
+    def version = "3.1.0"
 
     /**
      * The version or versions of Grails the plugin is designed for.
