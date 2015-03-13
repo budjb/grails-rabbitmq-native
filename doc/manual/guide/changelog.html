@@ -97,16 +97,16 @@ function addJsClass() {
                 
 
 <h1 id="changelog">9 Changelog</h1>
-<h3>Version 3.1.0 - TODO</h3>
+<h3>Version 3.1.0 - 3/13/2015</h3>
 <ul class="star">
 <li>Update the RabbitMQ Client Java library to 3.5.0.</li>
-<li>Fix an issue that caused unclean shutdowns when redeploying an application using the plugin.</li>
-<li>Added the ability to start and stop individual connections.</li>
-<li>Added the ability to start and stop individual consumers.</li>
-<li>Added the ability to start and stop consumers based on the connection they're tied to.</li>
+<li>Fix an issue that caused unclean shutdowns when redeploying an application using the plugin.&#10;  (<a href="http://github.com/budjb/grails-rabbitmq-native/issues/54" target="blank">#54</a>)</li>
+<li>Added the ability to start and stop individual connections.&#10;  (<a href="http://github.com/budjb/grails-rabbitmq-native/issues/49" target="blank">#49</a>)</li>
+<li>Added the ability to start and stop individual consumers.&#10;  (<a href="http://github.com/budjb/grails-rabbitmq-native/issues/49" target="blank">#49</a>)</li>
+<li>Added the ability to start and stop consumers based on the connection they're tied to.&#10;  (<a href="http://github.com/budjb/grails-rabbitmq-native/issues/49" target="blank">#49</a>)</li>
 <li>Moved consumer adapter storage from the connection context to the consumer manager.</li>
-<li>Handle <code>Throwable</code> types that were not being handled before in the consumer handling so that channels are not closed if one of the unhandled errors occurs.</li>
-<li>Added travis-ci continous integration for all commits to the plugin.</li>
+<li>Handle <code>Throwable</code> types that were not being handled before in the consumer handling so that channels are not closed&#10;  if one of the unhandled errors occurs.&#10;  (<a href="http://github.com/budjb/grails-rabbitmq-native/issues/47" target="blank">#47</a>)</li>
+<li>Added travis-ci continuous integration for all commits to the plugin.</li>
 </ul><p class="paragraph"/><h3>Version 3.0.4 - 2/18/2015</h3>
 <ul class="star">
 <li>Fix a null pointer exception when a consumer has no configuration.</li>
@@ -116,7 +116,7 @@ function addJsClass() {
 <ul class="star">
 <li>Introduced the <code>rabbitMessagePublisher</code> bean to replace the <code>RabbitMessageBuilder</code>.</li>
 <li>Deprecated the <code>RabbitMessageBuilder</code>.</li>
-<li>Massive refactor of the internals of the plugin.  See the upgrading page for more detailed information about what has changed.</li>
+<li>Massive refactor of the internals of the plugin.  See the upgrading page for more detailed information about what has&#10;  changed.</li>
 <li>Added the ability to configure consumers centrally in the application's configuration file (thanks Erwan Arzur).</li>
 <li>Updated RabbitMQ library version to 3.4.3.</li>
 </ul><p class="paragraph"/><h3>Version 3.0.2</h3>
@@ -130,7 +130,7 @@ function addJsClass() {
 <li>Internal Release, see 3.0.3.</li>
 </ul><p class="paragraph"/><h3>Version 2.0.10 - 9/11/2014</h3>
 <ul class="star">
-<li>Fix bug with converters that prevented converters later in the processing list from executing if another convert is unable to marshall data from bytes.</li>
+<li>Fix bug with converters that prevented converters later in the processing list from executing if another convert is&#10;  unable to marshall data from bytes.</li>
 <li>Add <code>enabled</code> flag to the configuration. If false, completely disables the plugin from starting.</li>
 </ul><p class="paragraph"/><h3>Version 2.0.9 - 9/9/2014</h3>
 <ul class="star">
@@ -150,7 +150,7 @@ function addJsClass() {
 </ul><p class="paragraph"/><h3>Version 2.0.5 - 8/01/2014</h3>
 <ul class="star">
 <li>Added heartbeat configuration for connections (thanks LuisMuniz @GitHub).</li>
-<li>Refactored Hibernate session support so that Hibernate is no longer a dependency of the plugin, and will now work with or without Hibernate present.</li>
+<li>Refactored Hibernate session support so that Hibernate is no longer a dependency of the plugin, and will now work&#10;  with or without Hibernate present.</li>
 </ul><p class="paragraph"/><h3>Version 2.0.4 - 7/28/2014</h3>
 <ul class="star">
 <li>Added multi-server support to all aspects of the plugin.</li>
@@ -159,13 +159,13 @@ function addJsClass() {
 <li>Added logic to wrap a Hibernate session around calls to consumers.</li>
 <li>Updated the RabbitMQ library to version 3.3.0.</li>
 <li>Added logging for connection/channel reconnects and channel shutdowns.</li>
-<li>Changed format for connection configurations. The old style is still supported, but will likely be removed at some point.</li>
+<li>Changed format for connection configurations. The old style is still supported, but will likely be removed at some&#10;  point.</li>
 </ul><p class="paragraph"/><h3>Version 1.0.3 - 1/7/2014</h3>
 <ul class="star">
 <li>Modified the logic to check for the existence of callbacks in consumers.</li>
 </ul><p class="paragraph"/><h3>Version 1.0.2 - 1/6/2014</h3>
 <ul class="star">
-<li>Added a cached thread pool so the user does not need to account for the number of threads consumers require. Set the default to 0 so that this is the default.</li>
+<li>Added a cached thread pool so the user does not need to account for the number of threads consumers require. Set the&#10;  default to 0 so that this is the default.</li>
 <li>Added callbacks for messages: onReceive, onSuccess, onFailure, and onComplete.</li>
 </ul><p class="paragraph"/><h3>Version 1.0.1 - 11/28/2013</h3>
 <ul class="star">
@@ -175,12 +175,12 @@ function addJsClass() {
 <li>Version bump for general release.</li>
 </ul><p class="paragraph"/><h3>Version 0.2.1 - 11/27/2013</h3>
 <ul class="star">
-<li>Fixed a bug with the message handler discovery method that caused generically-typed handlers to get called incorrectly.</li>
+<li>Fixed a bug with the message handler discovery method that caused generically-typed handlers to get called&#10;  incorrectly.</li>
 </ul><p class="paragraph"/><h3>Version 0.2.0 - 11/27/2013</h3>
 <ul class="star">
-<li>Refactored queue/exchange configuration. It is now possible configure queue binding without having to also configure the exchange being bound to.</li>
-<li>Added the <code>match</code> property to queue configuration to support headers exchange binding. <strong class="bold">This breaks backwards compatibility.</strong></li>
-<li>Renaming the <code>routingKey</code> property of the consumer configuration to <code>binding</code> to match queue configuration. <strong class="bold">This breaks backwards compatibility.</strong></li>
+<li>Refactored queue/exchange configuration. It is now possible configure queue binding without having to also configure&#10;  the exchange being bound to.</li>
+<li>Added the <code>match</code> property to queue configuration to support headers exchange binding.&#10;  <strong class="bold">This breaks backwards compatibility.</strong></li>
+<li>Renaming the <code>routingKey</code> property of the consumer configuration to <code>binding</code> to match queue configuration.&#10;  <strong class="bold">This breaks backwards compatibility.</strong></li>
 </ul><p class="paragraph"/><h3>Version 0.1.8 - 10/31/2013</h3>
 <ul class="star">
 <li>Moved the trigger to start consumers on application launch to the bootstrap.</li>

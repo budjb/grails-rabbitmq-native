@@ -1,12 +1,18 @@
-h3. Version 3.1.0 - TODO
+h3. Version 3.1.0 - 3/13/2015
 * Update the RabbitMQ Client Java library to 3.5.0.
-* Fix an issue that caused unclean shutdowns when redeploying an application using the plugin.
-* Added the ability to start and stop individual connections.
-* Added the ability to start and stop individual consumers.
-* Added the ability to start and stop consumers based on the connection they're tied to.
+* Fix an issue that caused unclean shutdowns when redeploying an application using the plugin.\
+  ([#54|http://github.com/budjb/grails-rabbitmq-native/issues/54])
+* Added the ability to start and stop individual connections.\
+  ([#49|http://github.com/budjb/grails-rabbitmq-native/issues/49])
+* Added the ability to start and stop individual consumers.\
+  ([#49|http://github.com/budjb/grails-rabbitmq-native/issues/49])
+* Added the ability to start and stop consumers based on the connection they're tied to.\
+  ([#49|http://github.com/budjb/grails-rabbitmq-native/issues/49])
 * Moved consumer adapter storage from the connection context to the consumer manager.
-* Handle @Throwable@ types that were not being handled before in the consumer handling so that channels are not closed if one of the unhandled errors occurs.
-* Added travis-ci continous integration for all commits to the plugin.
+* Handle @Throwable@ types that were not being handled before in the consumer handling so that channels are not closed\
+  if one of the unhandled errors occurs.\
+  ([#47|http://github.com/budjb/grails-rabbitmq-native/issues/47])
+* Added travis-ci continuous integration for all commits to the plugin.
 
 h3. Version 3.0.4 - 2/18/2015
 * Fix a null pointer exception when a consumer has no configuration.
@@ -16,7 +22,8 @@ h3. Version 3.0.4 - 2/18/2015
 h3. Version 3.0.3 - 2/15/2015
 * Introduced the @rabbitMessagePublisher@ bean to replace the @RabbitMessageBuilder@.
 * Deprecated the @RabbitMessageBuilder@.
-* Massive refactor of the internals of the plugin.  See the upgrading page for more detailed information about what has changed.
+* Massive refactor of the internals of the plugin.  See the upgrading page for more detailed information about what has\
+  changed.
 * Added the ability to configure consumers centrally in the application's configuration file (thanks Erwan Arzur).
 * Updated RabbitMQ library version to 3.4.3.
 
@@ -30,7 +37,8 @@ h3. Version 3.0.0
 * Internal Release, see 3.0.3.
 
 h3. Version 2.0.10 - 9/11/2014
-* Fix bug with converters that prevented converters later in the processing list from executing if another convert is unable to marshall data from bytes.
+* Fix bug with converters that prevented converters later in the processing list from executing if another convert is\
+  unable to marshall data from bytes.
 * Add @enabled@ flag to the configuration. If false, completely disables the plugin from starting.
 
 h3. Version 2.0.9 - 9/9/2014
@@ -50,7 +58,8 @@ h3. Version 2.0.6 - 8/13/2014
 
 h3. Version 2.0.5 - 8/01/2014
 * Added heartbeat configuration for connections (thanks LuisMuniz @GitHub).
-* Refactored Hibernate session support so that Hibernate is no longer a dependency of the plugin, and will now work with or without Hibernate present.
+* Refactored Hibernate session support so that Hibernate is no longer a dependency of the plugin, and will now work\
+  with or without Hibernate present.
 
 h3. Version 2.0.4 - 7/28/2014
 * Added multi-server support to all aspects of the plugin.
@@ -59,13 +68,15 @@ h3. Version 2.0.4 - 7/28/2014
 * Added logic to wrap a Hibernate session around calls to consumers.
 * Updated the RabbitMQ library to version 3.3.0.
 * Added logging for connection/channel reconnects and channel shutdowns.
-* Changed format for connection configurations. The old style is still supported, but will likely be removed at some point.
+* Changed format for connection configurations. The old style is still supported, but will likely be removed at some\
+  point.
 
 h3. Version 1.0.3 - 1/7/2014
 * Modified the logic to check for the existence of callbacks in consumers.
 
 h3. Version 1.0.2 - 1/6/2014
-* Added a cached thread pool so the user does not need to account for the number of threads consumers require. Set the default to 0 so that this is the default.
+* Added a cached thread pool so the user does not need to account for the number of threads consumers require. Set the\
+  default to 0 so that this is the default.
 * Added callbacks for messages: onReceive, onSuccess, onFailure, and onComplete.
 
 h3. Version 1.0.1 - 11/28/2013
@@ -75,12 +86,16 @@ h3. Version 1.0.0 - 11/27/2013
 * Version bump for general release.
 
 h3. Version 0.2.1 - 11/27/2013
-* Fixed a bug with the message handler discovery method that caused generically-typed handlers to get called incorrectly.
+* Fixed a bug with the message handler discovery method that caused generically-typed handlers to get called\
+  incorrectly.
 
 h3. Version 0.2.0 - 11/27/2013
-* Refactored queue/exchange configuration. It is now possible configure queue binding without having to also configure the exchange being bound to.
-* Added the @match@ property to queue configuration to support headers exchange binding. *This breaks backwards compatibility.*
-* Renaming the @routingKey@ property of the consumer configuration to @binding@ to match queue configuration. *This breaks backwards compatibility.*
+* Refactored queue/exchange configuration. It is now possible configure queue binding without having to also configure\
+  the exchange being bound to.
+* Added the @match@ property to queue configuration to support headers exchange binding.\
+  *This breaks backwards compatibility.*
+* Renaming the @routingKey@ property of the consumer configuration to @binding@ to match queue configuration.\
+  *This breaks backwards compatibility.*
 
 h3. Version 0.1.8 - 10/31/2013
 * Moved the trigger to start consumers on application launch to the bootstrap.
