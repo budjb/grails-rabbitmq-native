@@ -1,0 +1,12 @@
+Much like connections, the @rabbitContext@ provides several methods to start and stop consumers if necessary.
+
+{table}
+Method | Description
+@startConsumers@            | Starts all registered consumers.  If some consumers are already started, the remainder\
+                              will also be started.
+@stopConsumers@             | Stops all consumers.
+@startConsumer@             | Starts a connection based on its class name.
+@stopConsumer@              | Stops a connection based on its class name.
+@startConsumers(String)@    | Starts all consumers on a specific connection, based on the connection name.
+@stopConsumers(String)@     | Stops all consumers on a specific connection, based on the connection name.
+{table}

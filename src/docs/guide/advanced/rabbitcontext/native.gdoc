@@ -1,0 +1,31 @@
+The main goal of the plugin is to effectively wrap the RabbitMQ library to hide the complexity of its usage and
+make using it more inline with the conventions of Grails applications, but also allow users to gain access to the
+underlying RabbitMQ objects if needed.  @rabbitContext@ provides several methods to gain direct access to the
+RabbitMQ Java library @Connection@ and @Channel@ objects.
+
+To create a new @Channel@, use the @createChannel@ methods.
+
+{code}
+// This creates a new channel with the default connection
+Channel channel = rabbitContext.createChannel()
+
+// The same using a different connection based on its name
+Channel channel = rabbitContext.createChannel("connection1")
+{code}
+
+{warning}
+If the @createChannel@ methods are used, it is important that these channels are closed. The plugin handles opening
+and closing channels that it manages as part of publishing or consuming messages, but channels created with the
+@createChannel@ methods are not managed by the plugin.  It is the author's responsibility to close them, or connection
+leaks may and memory leaks most likely will occur.
+{warning}
+
+Use the @getConnection@ methods to gain access to the @Connection@ objects.
+
+{code}
+// To retrieve the Connection from the default connection
+Connection connection = rabbitContext.getConnection()
+
+// To retrieve the Connection from a specific connection based on its name
+Connection connection = rabbitContext.getConnection("connection1")
+{code}

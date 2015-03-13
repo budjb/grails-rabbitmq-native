@@ -1,3 +1,12 @@
+h3. Version 3.1.0 - TODO
+* Update the RabbitMQ Client Java library to 3.5.0.
+* Fix an issue that caused unclean shutdowns when redeploying an application using the plugin.
+* Added the ability to start and stop individual connections.
+* Added the ability to start and stop individual consumers.
+* Added the ability to start and stop consumers based on the connection they're tied to.
+* Moved consumer adapter storage from the connection context to the consumer manager.
+* Handle @Throwable@ types that were not being handled before in the consumer handling so that channels are not closed if one of the unhandled errors occurs.
+
 h3. Version 3.0.4 - 2/18/2015
 * Fix a null pointer exception when a consumer has no configuration.
 * Add a unit test to test behavior when a consumer has no configuration.

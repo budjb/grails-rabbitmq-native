@@ -28,16 +28,22 @@ publishing:
     title: Publishing Messages
     send: Sending Messages
     rpcsend: RPC Messages
+    bulk: Bulk Publishing
+    confirms: Publisher Confirms
 converters:
     title: Message Converters
     custom: Custom Message Converters
 advanced:
     title: Advanced Usage
     beans: Spring Beans
-    rabbitcontext: Rabbit Context
-    channels: Channels
+    rabbitcontext:
+        title: Rabbit Context
+        native: Native Objects
+        connection_lifecycle: Starting and Stopping Connections
+        consumer_lifecycle: Starting and Stopping Consumers
     transactions: Transactions
 upgrading:
     title: Upgrading
+    from_3_0_x: From 3.0.X
     from_2_0_x: From 2.0.X
 changelog: Changelog

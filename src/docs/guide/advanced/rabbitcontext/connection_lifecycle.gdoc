@@ -1,0 +1,12 @@
+The plugin handles starting and stopping connections automatically when the application is started or shut down, but
+sometimes applications may need to manually stop connections based on certain conditions or business logic. The
+@rabbitContext@ contains several methods to manage the life cycle of connections.
+
+{table}
+Method | Description
+@startConnections@  | Starts all registered connections.  If some connections are already started, the remainder\
+                      will also be started.
+@stopConnections@   | Stops all connections and all consumers.
+@startConnection@   | Starts a connection based on its name.
+@stopConnection@    | Stops a connection based on its name, and stops any consumers on the connection.
+{table}

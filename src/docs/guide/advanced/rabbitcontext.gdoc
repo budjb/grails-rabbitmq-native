@@ -1,8 +1,16 @@
-Besides the @rabbitMessagePublisher@, the @rabbitContext@ is the bean users will most likely interact with.  While you may never need to use this bean, it can be useful.
-As with any Spring bean, the @rabbitContext@ can be injected into any Spring managed bean, such as services, controllers, and rabbit consumers.
+Besides the @rabbitMessagePublisher@, the @rabbitContext@ is the bean users will most likely interact with.
+While you may never need to use this bean, it can be useful.  As with any Spring bean, the @rabbitContext@ can be
+injected into any Spring managed bean, such as services, controllers, and rabbit consumers.
 
-Below are some use cases which may be helpful for users wanting to use the plugin outside of its conventions.
+The @rabbitContext@ is intended to be used as a front-end to all of the other beans defined by the plugin to hide
+some of the complexity of interacting with the system. As such, in most cases the @rabbitContext@ proxies requests
+to the appropriate manager bean to accomplish the requested task.
 
-* The @rabbitContext.getConnection()@ method returns a @ConnectionContext@ object, which exposes the RabbitMQ @Connection@ object through its own @getConnection()@ method.
-* The @rabbitContext.getChannel()@ method returns a RabbitMQ @Channel@ object, which can be used to manually send messages, consume messages, and much more.
-* The @rabbitContext.startConsumers()@ method is useful when a user of the plugin wants to control when to start consumer messages during the application startup.
+{warning}
+In some cases, interactions with multiple managers are necessary to safely carry out the action. Therefore, unless
+the @rabbitContext@ does not provide the required functionality, it should be considered best-practice to use
+the @rabbitContext@ instead of the other beans directly.  If you find that you are frequently resorting to using
+one of the other beans, I encourage you to post an issue on the GitHub project.
+{warning}
+
+The follow subsections describe some of the more useful functionality the @rabbitContext@ provides.

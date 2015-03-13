@@ -46,9 +46,6 @@ interface RabbitContext {
     void start(boolean deferConsumers)
 
     /**
-     * Starts all connections
-     */
-    /**
      * Stops all consumers and connections.
      */
     void stop()
