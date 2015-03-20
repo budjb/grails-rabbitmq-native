@@ -24,6 +24,7 @@ import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsClass
+import org.codehaus.groovy.grails.commons.GrailsClassUtils
 import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
@@ -278,21 +279,13 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      * @return
      */
     protected Map loadConsumerLocalConfiguration(Object consumer) {
-        try {
-            Field field = consumer.class.getDeclaredField(RABBIT_CONFIG_NAME)
-            if (!Modifier.isStatic(field.modifiers)) {
-                return null
-            }
-        }
-        catch (NoSuchFieldException e) {
+        def config = GrailsClassUtils.getStaticPropertyValue(consumer.getClass(), RABBIT_CONFIG_NAME)
+
+        if (config == null || !(config instanceof Map)) {
             return null
         }
 
-        if (!Map.class.isAssignableFrom(consumer."${RABBIT_CONFIG_NAME}".getClass())) {
-            return null
-        }
-
-        return consumer."${RABBIT_CONFIG_NAME}"
+        return config as Map
     }
 
     /**

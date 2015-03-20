@@ -1,3 +1,8 @@
+h3. Version 3.1.1 - TODO
+* Refactored the code to load a consumer's configuration from a static variable so that it works correctly when the\
+  consumer is annotated with @\@Transactional@.\
+  ([#55|http://github.com/budjb/grails-rabbitmq-native/issues/55])
+
 h3. Version 3.1.0 - 3/13/2015
 * Update the RabbitMQ Client Java library to 3.5.0.
 * Fix an issue that caused unclean shutdowns when redeploying an application using the plugin.\
