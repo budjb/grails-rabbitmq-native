@@ -29,9 +29,6 @@ import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 
-import java.lang.reflect.Field
-import java.lang.reflect.Modifier
-
 class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
     /**
      * Name of the configuration variable a consumer is expected to define.
