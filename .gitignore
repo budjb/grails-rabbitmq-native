@@ -19,3 +19,6 @@ stacktrace.log
 .project
 *.iml
 .idea
+.gradle
+build/
+*.ipr
