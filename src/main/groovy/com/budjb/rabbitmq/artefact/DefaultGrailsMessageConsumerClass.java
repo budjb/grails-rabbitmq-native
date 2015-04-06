@@ -20,11 +20,11 @@ import org.grails.core.AbstractInjectableGrailsClass;
 public class DefaultGrailsMessageConsumerClass extends AbstractInjectableGrailsClass implements GrailsMessageConverterClass {
     public static final String MESSAGECONSUMER = "MessageConsumer";
 
-    public DefaultGrailsMessageConsumerClass(@SuppressWarnings("rawtypes") Class clazz) {
+    public DefaultGrailsMessageConsumerClass(Class clazz) {
         super(clazz, MESSAGECONSUMER);
     }
 
-    public DefaultGrailsMessageConsumerClass(@SuppressWarnings("rawtypes") Class clazz, String trailingName) {
+    public DefaultGrailsMessageConsumerClass(Class clazz, String trailingName) {
         super(clazz, trailingName);
     }
 }

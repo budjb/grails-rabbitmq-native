@@ -16,6 +16,7 @@
 package com.budjb.rabbitmq.test
 
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
+import org.springframework.beans.factory.annotation.Autowired
 
 import java.util.concurrent.TimeoutException
 import spock.lang.Specification
@@ -24,6 +25,7 @@ class MessageConsumerIntegrationTest extends Specification {
     /**
      * Rabbit message publisher bean.
      */
+    @Autowired
     RabbitMessagePublisher rabbitMessagePublisher
 
     /**

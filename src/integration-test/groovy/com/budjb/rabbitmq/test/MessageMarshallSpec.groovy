@@ -16,9 +16,11 @@
 package com.budjb.rabbitmq.test
 
 import grails.test.mixin.integration.Integration
+import org.springframework.beans.factory.annotation.Autowired
 
 @Integration
 class MessageMarshallSpec extends MessageConsumerIntegrationTest {
+    @Autowired
     ReportingConsumer reportingConsumer
 
     def setup() {

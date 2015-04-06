@@ -22,11 +22,13 @@ import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import grails.core.GrailsApplication
 import org.apache.log4j.Logger
+import org.springframework.beans.factory.annotation.Autowired
 
 class ConnectionManagerImpl implements ConnectionManager {
     /**
      * Grails application bean.
      */
+    @Autowired
     GrailsApplication grailsApplication
 
     /**

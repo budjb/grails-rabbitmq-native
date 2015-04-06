@@ -20,11 +20,11 @@ import org.grails.core.AbstractInjectableGrailsClass;
 public class DefaultGrailsMessageConverterClass extends AbstractInjectableGrailsClass implements GrailsMessageConverterClass {
     public static final String MESSAGECONVERTER = "MessageConverter";
 
-    public DefaultGrailsMessageConverterClass(@SuppressWarnings("rawtypes") Class clazz) {
+    public DefaultGrailsMessageConverterClass(Class clazz) {
         super(clazz, MESSAGECONVERTER);
     }
 
-    public DefaultGrailsMessageConverterClass(@SuppressWarnings("rawtypes") Class clazz, String trailingName) {
+    public DefaultGrailsMessageConverterClass(Class clazz, String trailingName) {
         super(clazz, trailingName);
     }
 }

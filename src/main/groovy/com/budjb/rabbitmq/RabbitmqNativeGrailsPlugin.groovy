@@ -25,6 +25,7 @@ import com.budjb.rabbitmq.converter.MessageConverterManagerImpl
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisherImpl
 import grails.core.GrailsClass
 import grails.plugins.Plugin
+import org.apache.commons.lang.ObjectUtils
 import org.apache.log4j.Logger
 
 class RabbitmqNativeGrailsPlugin extends Plugin {
@@ -36,7 +37,7 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
     /**
      * The version or versions of Grails the plugin is designed for.
      */
-    def grailsVersion = "2.0 > *"
+    def grailsVersion = "3.0 > *"
 
     /**
      * Title/name of the plugin.
@@ -89,7 +90,7 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
     def pluginExcludes = [
         'test/**',
         'grails-app/rabbit-consumers/**',
-        'grails-app/conf/Config.groovy',
+        'grails-app/conf/application.groovyroovy',
         'src/groovy/com/budjb/rabbitmq/test/**',
         'src/docs/**'
     ]
@@ -115,53 +116,48 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
     /**
      * Logger.
      */
-    Logger log = Logger.getLogger('com.budjb.rabbitmq.RabbitmqNativeGrailsPlugin')
+    Logger log = Logger.getLogger(RabbitmqNativeGrailsPlugin)
 
     /**
      * Spring actions.
      */
     Closure doWithSpring() {{ ->
-        // Create the null rabbit context bean
-        nullRabbitContext(NullRabbitContext)
-
-        // Create the live rabbit context bean
-        rabbitContextImpl(RabbitContextImpl) { bean ->
-            bean.autowire = true
+        if (grailsApplication.config.rabbitmq.enabled == false) {
+            log.warn("The rabbitmq-native plugin has been disabled by the application's configuration.")
+            rabbitContext(NullRabbitContext)
         }
-
-        // Create the proxy rabbit context bean
-        rabbitContext(RabbitContextProxy) {
-            if (grailsApplication.config.rabbitmq.enabled == false) {
-                log.warn("The rabbitmq-native plugin has been disabled by the application's configuration.")
-                target = ref('nullRabbitContext')
-            }
-            else {
-                target = ref('rabbitContextImpl')
+        else {
+            rabbitContext(RabbitContextImpl) {
+                messageConverterManager = ref('messageConverterManager')
+                connectionManager = ref('connectionManager')
+                consumerManager = ref('consumerManager')
+                queueBuilder = ref('queueBuilder')
             }
         }
 
-        connectionManager(ConnectionManagerImpl) { bean ->
-            bean.autowire = true
+        connectionManager(ConnectionManagerImpl) {
+            connectionBuilder = ref('connectionBuilder')
         }
 
-        connectionBuilder(ConnectionBuilderImpl) { bean ->
-            bean.autowire = true
+        connectionBuilder(ConnectionBuilderImpl) {
+            connectionManager = ref('connectionManager')
         }
 
-        queueBuilder(QueueBuilderImpl) { bean ->
-            bean.autowire = true
+        queueBuilder(QueueBuilderImpl) {
+            connectionManager = ref('connectionManager')
         }
 
-        messageConverterManager(MessageConverterManagerImpl) { bean ->
-            bean.autowire = true
+        messageConverterManager(MessageConverterManagerImpl)
+
+        consumerManager(ConsumerManagerImpl) {
+            messageConverterManager = ref('messageConverterManager')
+            rabbitMessagePublisher = ref('rabbitMessagePublisher')
+            connectionManager = ref('connectionManager')
         }
 
-        consumerManager(ConsumerManagerImpl) { bean ->
-            bean.autowire = true
-        }
-
-        rabbitMessagePublisher(RabbitMessagePublisherImpl) { bean ->
-            bean.autowire = true
+        rabbitMessagePublisher(RabbitMessagePublisherImpl) {
+            connectionManager = ref('connectionManager')
+            messageConverterManager = ref('messageConverterManager')
         }
 
         // Create application-provided converter beans

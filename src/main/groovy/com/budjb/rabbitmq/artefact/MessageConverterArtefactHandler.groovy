@@ -13,26 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.budjb.rabbitmq.artefact;
+package com.budjb.rabbitmq.artefact
 
-import grails.core.ArtefactHandlerAdapter;
+import grails.core.ArtefactHandlerAdapter
 
-public class MessageConsumerArtefactHandler extends ArtefactHandlerAdapter {
+public class MessageConverterArtefactHandler extends ArtefactHandlerAdapter {
     /**
      * Our artefact type.
      */
-    public static final String TYPE = "MessageConsumer";
+    static final String TYPE = "MessageConverter"
 
     /**
      * Class suffix.
      */
-    public static final String SUFFIX = "Consumer";
+    static final String SUFFIX = "Converter"
 
     /**
      * Constructor.
      */
-    public MessageConsumerArtefactHandler() {
-        super(TYPE, GrailsMessageConsumerClass.class, DefaultGrailsMessageConsumerClass.class, SUFFIX);
+    MessageConverterArtefactHandler() {
+        super(TYPE, GrailsMessageConverterClass, DefaultGrailsMessageConverterClass, SUFFIX)
     }
 
     /**
@@ -41,21 +41,21 @@ public class MessageConsumerArtefactHandler extends ArtefactHandlerAdapter {
      * @param clazz
      * @return
      */
-    public boolean isArtefactClass(@SuppressWarnings("rawtypes") Class clazz) {
+    boolean isArtefactClass(Class clazz) {
         if (clazz == null) {
-            return false;
+            return false
         }
 
-        return isConsumer(clazz);
+        return isMessageConverter(clazz)
     }
 
     /**
-     * Determines if a class is a RabbitMQ consumer.
+     * Determines if a class is a message converter.
      *
      * @param clazz
      * @return
      */
-    public static boolean isConsumer(@SuppressWarnings("rawtypes") Class clazz) {
-        return clazz.getName().endsWith(SUFFIX);
+    static boolean isMessageConverter(@SuppressWarnings("rawtypes") Class clazz) {
+        return clazz.getName().endsWith(SUFFIX)
     }
 }

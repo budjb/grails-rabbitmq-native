@@ -16,13 +16,19 @@
 package com.budjb.rabbitmq.test
 
 import grails.test.mixin.integration.Integration
+import org.springframework.beans.factory.annotation.Autowired
 
 import java.util.concurrent.TimeoutException
 
 @Integration
 class TopicExchangeSpec extends MessageConsumerIntegrationTest {
+    @Autowired
     AllTopicConsumer allTopicConsumer
+
+    @Autowired
     SubsetTopicConsumer subsetTopicConsumer
+
+    @Autowired
     SpecificTopicConsumer specificTopicConsumer
 
     def setup() {
@@ -73,13 +79,13 @@ class TopicExchangeSpec extends MessageConsumerIntegrationTest {
         allTopicConsumer.lastMessage != null
 
         when:
-        waitUntilMessageReceived(1000) { subsetTopicConsumer.lastMessage }
+        waitUntilMessageReceived(5000) { subsetTopicConsumer.lastMessage }
 
         then:
         subsetTopicConsumer.lastMessage != null
 
         when:
-        waitUntilMessageReceived(1000) { specificTopicConsumer.lastMessage }
+        waitUntilMessageReceived(5000) { specificTopicConsumer.lastMessage }
 
         then:
         thrown TimeoutException
@@ -100,13 +106,13 @@ class TopicExchangeSpec extends MessageConsumerIntegrationTest {
         allTopicConsumer.lastMessage != null
 
         when:
-        waitUntilMessageReceived(1000) { subsetTopicConsumer.lastMessage }
+        waitUntilMessageReceived(5000) { subsetTopicConsumer.lastMessage }
 
         then:
         subsetTopicConsumer.lastMessage != null
 
         when:
-        waitUntilMessageReceived(1000) { specificTopicConsumer.lastMessage }
+        waitUntilMessageReceived(5000) { specificTopicConsumer.lastMessage }
 
         then:
         specificTopicConsumer.lastMessage != null

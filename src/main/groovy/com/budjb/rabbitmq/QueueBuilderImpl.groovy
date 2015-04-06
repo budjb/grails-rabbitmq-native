@@ -20,6 +20,7 @@ import com.budjb.rabbitmq.connection.ConnectionManager
 import com.rabbitmq.client.Channel
 import grails.core.GrailsApplication
 import org.apache.log4j.Logger
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * This class is based off of the queue builder present in the official Grails RabbitMQ plugin.
@@ -33,6 +34,7 @@ class QueueBuilderImpl implements QueueBuilder {
     /**
      * Grails application bean.
      */
+    @Autowired
     GrailsApplication grailsApplication
 
     /**

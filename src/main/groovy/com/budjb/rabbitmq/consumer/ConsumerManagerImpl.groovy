@@ -26,6 +26,7 @@ import grails.core.GrailsClass
 import grails.persistence.support.PersistenceContextInterceptor
 import grails.util.GrailsClassUtils
 import org.apache.log4j.Logger
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 
@@ -38,6 +39,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
     /**
      * Grails application bean.
      */
+    @Autowired
     GrailsApplication grailsApplication
 
     /**
@@ -45,6 +47,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      *
      * This will be null if Hibernate is not present.
      */
+    @Autowired(required = false)
     PersistenceContextInterceptor persistenceInterceptor
 
     /**

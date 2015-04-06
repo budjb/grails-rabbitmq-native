@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import com.budjb.rabbitmq.RabbitContext
-import org.codehaus.groovy.grails.commons.GrailsApplication
+package com.budjb.rabbitmq
 
-class RabbitmqNativeBootStrap {
+import grails.core.GrailsApplication
+
+class BootStrap {
     RabbitContext rabbitContext
     GrailsApplication grailsApplication
 

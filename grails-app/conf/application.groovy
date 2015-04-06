@@ -1,9 +1,5 @@
 grails.doc.images = new File('src/docs/images')
 
-log4j = {
-    trace 'com.budjb.rabbitmq'
-}
-
 rabbitmq {
     connection = {
         connection(

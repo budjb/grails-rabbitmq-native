@@ -13,5 +13,4 @@ before_script:
 - sudo rabbitmqctl set_permissions -p test2.rabbitmq.budjb.com guest ".*" ".*" ".*"
 
 script:
-- ./grailsw refresh-dependencies --non-interactive
-- ./grailsw test-app -Dserver.port=8099 --refresh-dependencies --non-interactive --stacktrace
+- ./gradlew --refresh-dependencies test integrationTest

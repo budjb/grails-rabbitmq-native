@@ -17,13 +17,19 @@ package com.budjb.rabbitmq.test
 
 import com.budjb.rabbitmq.RabbitContext
 import grails.test.mixin.integration.Integration
+import org.springframework.beans.factory.annotation.Autowired
 
 import java.util.concurrent.TimeoutException
 
 @Integration
 class StartStopConsumerSpec extends MessageConsumerIntegrationTest {
+    @Autowired
     ReportingConsumer reportingConsumer
+
+    @Autowired
     RabbitContext rabbitContext
+
+    @Autowired
     Connection2Consumer connection2Consumer
 
     def 'Test consumer behavior when a specific consumer is stopped and started again'() {

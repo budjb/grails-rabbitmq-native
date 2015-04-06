@@ -19,6 +19,7 @@ import com.budjb.rabbitmq.exception.MessageConvertException
 import grails.core.GrailsApplication
 import grails.core.GrailsClass
 import org.apache.log4j.Logger
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 
@@ -36,6 +37,7 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
     /**
      * Grails application bean.
      */
+    @Autowired
     GrailsApplication grailsApplication
 
     /**
