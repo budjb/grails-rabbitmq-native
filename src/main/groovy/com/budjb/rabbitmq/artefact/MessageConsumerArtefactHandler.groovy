@@ -30,8 +30,6 @@ public class MessageConsumerArtefactHandler extends ArtefactHandlerAdapter {
      */
     static final String SUFFIX = "Consumer"
 
-    Logger log = Logger.getLogger(MessageConsumerArtefactHandler)
-
     /**
      * Constructor.
      */
