@@ -24,7 +24,6 @@ import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import grails.core.GrailsApplication
 import grails.core.GrailsClass
 import grails.persistence.support.PersistenceContextInterceptor
-import grails.util.GrailsClassUtils
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -221,7 +220,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      * @return
      */
     @Override
-    ConsumerContext createContext(Object consumer) throws MissingConfigurationException {
+    ConsumerContext createContext(MessageConsumer consumer) throws MissingConfigurationException {
         return new ConsumerContextImpl(
             loadConsumerConfiguration(consumer),
             consumer,
@@ -240,17 +239,23 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      */
     @Override
     ConsumerContext createContext(GrailsClass artefact) {
-        return createContext(applicationContext.getBean(artefact.propertyName))
+        return createContext(applicationContext.getBean(artefact.propertyName) as MessageConsumer)
     }
 
     /**
      * Attempts to load a consumer's configuration.
      *
      * @param consumer
-     * @return A ConsumerConfiguration instance, or null if a configuration is not found.
+     * @return A ConsumerConfiguration instance.
+     * @throws MissingConfigurationException
      */
-    protected ConsumerConfiguration loadConsumerConfiguration(Object consumer) throws MissingConfigurationException {
-        Map configuration = loadConsumerLocalConfiguration(consumer) ?: loadConsumerApplicationConfiguration(consumer)
+    protected ConsumerConfiguration loadConsumerConfiguration(MessageConsumer consumer) throws MissingConfigurationException {
+        Map configuration = consumer.getRabbitConfig()
+
+        if (!configuration) {
+            configuration = loadConsumerApplicationConfiguration(consumer)
+        }
+
         if (!configuration) {
             throw new MissingConfigurationException("consumer has no configuration defined either within either its class or the application configuration")
         }
@@ -263,7 +268,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      *
      * @return
      */
-    protected Map loadConsumerApplicationConfiguration(Object consumer) {
+    protected Map loadConsumerApplicationConfiguration(MessageConsumer consumer) {
         def configuration = grailsApplication.config.rabbitmq.consumers."${consumer.getClass().simpleName}"
 
         if (!configuration || !Map.class.isAssignableFrom(configuration.getClass())) {
@@ -271,21 +276,6 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
         }
 
         return configuration
-    }
-
-    /**
-     * Finds and returns a consumer's local configuration, or null if it doesn't exist.
-     *
-     * @return
-     */
-    protected Map loadConsumerLocalConfiguration(Object consumer) {
-        def config = GrailsClassUtils.getStaticPropertyValue(consumer.getClass(), RABBIT_CONFIG_NAME)
-
-        if (config == null || !(config instanceof Map)) {
-            return null
-        }
-
-        return config as Map
     }
 
     /**

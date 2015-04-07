@@ -16,7 +16,6 @@
 package com.budjb.rabbitmq.consumer
 
 import org.apache.log4j.Logger
-import org.grails.config.NavigableMap
 
 class ConsumerConfigurationImpl implements ConsumerConfiguration {
     /**
@@ -83,7 +82,7 @@ class ConsumerConfigurationImpl implements ConsumerConfiguration {
     /**
      * Empty constructor.
      */
-    ConsumerConfigurationImpl() {}
+    ConsumerConfigurationImpl() { }
 
     /**
      * Constructor that parses the options defined in the service consumer.

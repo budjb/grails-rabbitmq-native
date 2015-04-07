@@ -25,7 +25,6 @@ import com.budjb.rabbitmq.converter.MessageConverterManagerImpl
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisherImpl
 import grails.core.GrailsClass
 import grails.plugins.Plugin
-import org.apache.commons.lang.ObjectUtils
 import org.apache.log4j.Logger
 
 class RabbitmqNativeGrailsPlugin extends Plugin {

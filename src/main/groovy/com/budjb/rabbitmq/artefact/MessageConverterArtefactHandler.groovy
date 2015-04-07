@@ -15,6 +15,7 @@
  */
 package com.budjb.rabbitmq.artefact
 
+import com.budjb.rabbitmq.converter.MessageConverter
 import grails.core.ArtefactHandlerAdapter
 
 public class MessageConverterArtefactHandler extends ArtefactHandlerAdapter {
@@ -56,6 +57,6 @@ public class MessageConverterArtefactHandler extends ArtefactHandlerAdapter {
      * @return
      */
     static boolean isMessageConverter(@SuppressWarnings("rawtypes") Class clazz) {
-        return clazz.getName().endsWith(SUFFIX)
+        return clazz.getName().endsWith(SUFFIX) && MessageConverter.class.isAssignableFrom(clazz)
     }
 }

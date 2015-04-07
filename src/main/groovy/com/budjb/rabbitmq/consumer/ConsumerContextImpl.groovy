@@ -98,26 +98,6 @@ class ConsumerContextImpl implements ConsumerContext {
     static final String RABBIT_HANDLER_NAME = 'handleMessage'
 
     /**
-     * Name of the method that will be called when a message is received, but before it is processed.
-     */
-    static final String CONSUME_ON_RECEIVE_METHOD_NAME = 'onReceive'
-
-    /**
-     * Name of the method that will be called when a message has been successfully processed.
-     */
-    static final String CONSUME_ON_SUCCESS_METHOD_NAME = 'onSuccess'
-
-    /**
-     * Name of the method that will be called after a message has attempted to be processed, whether it worked or not.
-     */
-    static final String CONSUME_ON_COMPLETE_METHOD_NAME = 'onComplete'
-
-    /**
-     * Name of the method that will be called when an exception is caught handling the message.
-     */
-    static final String CONSUME_ON_FAILURE_METHOD_NAME = 'onFailure'
-
-    /**
      * Logger.
      */
     private Logger log = Logger.getLogger(ConsumerContextImpl)
@@ -125,7 +105,7 @@ class ConsumerContextImpl implements ConsumerContext {
     /**
      * Consumer bean.
      */
-    Object consumer
+    MessageConsumer consumer
 
     /**
      * The consumer's configuration.
@@ -165,7 +145,7 @@ class ConsumerContextImpl implements ConsumerContext {
      */
     ConsumerContextImpl(
         ConsumerConfiguration configuration,
-        Object consumer,
+        MessageConsumer consumer,
         ConnectionManager connectionManager,
         MessageConverterManager messageConverterManager,
         PersistenceContextInterceptor persistenceInterceptor,
@@ -310,7 +290,7 @@ class ConsumerContextImpl implements ConsumerContext {
             // Create a queue
             String queue = channel.queueDeclare().queue
             if (!configuration.binding || configuration.binding instanceof String) {
-                channel.queueBind(queue, configuration.exchange, configuration.binding ?: '')
+                channel.queueBind(queue, configuration.exchange, (configuration.binding ?: '') as String)
             }
             else if (configuration.binding instanceof Map) {
                 channel.queueBind(queue, configuration.exchange, '', configuration.binding + ['x-match': configuration.match])
@@ -423,17 +403,17 @@ class ConsumerContextImpl implements ConsumerContext {
                 context.channel.basicReject(context.envelope.deliveryTag, configuration.getRetry())
             }
             log.error("${getId()} does not have a message handler defined to handle class type ${converted.getClass()}")
-            return
+            return null
         }
 
         // Open a session
         openSession()
 
-        // Call the received message callback
-        onReceive(context)
-
         // Pass off the message
         try {
+            // Call the received message callback
+            consumer.onReceive(context)
+
             // Start the transaction if requested
             if (configuration.getTransacted()) {
                 context.channel.txSelect()
@@ -462,7 +442,7 @@ class ConsumerContextImpl implements ConsumerContext {
             }
 
             // Call the success callback
-            onSuccess(context)
+            consumer.onSuccess(context)
 
             return response
         }
@@ -486,13 +466,13 @@ class ConsumerContextImpl implements ConsumerContext {
             }
 
             // Call the failure callback
-            onFailure(context)
+            consumer.onFailure(context)
 
             return null
         }
         finally {
             // Call the complete callback
-            onComplete(context)
+            consumer.onComplete(context)
 
             // Close the session
             closeSession()
@@ -575,7 +555,7 @@ class ConsumerContextImpl implements ConsumerContext {
      */
     private Method getHandlerWithSignature(List<Class> requested) {
         // Get a list of methods that match the handler name
-        List<Method> methods = consumer.class.getDeclaredMethods().findAll { it.name == RABBIT_HANDLER_NAME }
+        List<Method> methods = consumer.getClass().getDeclaredMethods().findAll { it.name == RABBIT_HANDLER_NAME }
 
         // Find a matching method
         return methods.find { method ->
@@ -596,56 +576,6 @@ class ConsumerContextImpl implements ConsumerContext {
 
             return true
         }
-    }
-
-    /**
-     * Initiates one of the callback methods if the method exists.
-     *
-     * @param methodName
-     * @param context
-     */
-    private void doCallback(String methodName, MessageContext context) {
-        if (!consumer.class.metaClass.methods.find { it.name == methodName }) {
-            return
-        }
-
-        consumer."${methodName}"(context)
-    }
-
-    /**
-     * Initiates the "on received" callback.
-     *
-     * @param context
-     */
-    private void onReceive(MessageContext context) {
-        doCallback(CONSUME_ON_RECEIVE_METHOD_NAME, context)
-    }
-
-    /**
-     * Initiates the "on success" callback.
-     *
-     * @param context
-     */
-    private void onSuccess(MessageContext context) {
-        doCallback(CONSUME_ON_SUCCESS_METHOD_NAME, context)
-    }
-
-    /**
-     * Initiates the "on failure" callback.
-     *
-     * @param context
-     */
-    private void onComplete(MessageContext context) {
-        doCallback(CONSUME_ON_COMPLETE_METHOD_NAME, context)
-    }
-
-    /**
-     * Initiates the "on complete" callback.
-     *
-     * @param context
-     */
-    private void onFailure(MessageContext context) {
-        doCallback(CONSUME_ON_FAILURE_METHOD_NAME, context)
     }
 
     /**

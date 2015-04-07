@@ -18,6 +18,7 @@ package com.budjb.rabbitmq
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
+import com.budjb.rabbitmq.consumer.MessageConsumer
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.rabbitmq.client.Channel
@@ -50,7 +51,7 @@ class NullRabbitContext implements RabbitContext {
     }
 
     @Override
-    void registerConsumer(Object consumer) {
+    void registerConsumer(MessageConsumer consumer) {
 
     }
 

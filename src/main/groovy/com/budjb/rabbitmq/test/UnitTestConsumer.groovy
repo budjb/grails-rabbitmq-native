@@ -15,29 +15,21 @@
  */
 package com.budjb.rabbitmq.test
 
-class UnitTestConsumer {
-    static rabbitConfig = [
+import com.budjb.rabbitmq.consumer.MessageConsumer
+
+class UnitTestConsumer extends MessageConsumer {
+    Map rabbitConfig = [
         queue: 'test-queue',
         consumers: 5
     ]
 
-    def handleMessage(def body, def context) {
-        return body
-    }
-
-    void onReceive(def context) {
-
-    }
-
-    def onSuccess(def context) {
-
-    }
-
-    def onComplete(def context) {
-
-    }
-
-    def onFailure(def context) {
-
+    /**
+     * Used for most of the test cases.
+     *
+     * @param message
+     * @return
+     */
+    def handleMessage(def message) {
+        return message
     }
 }

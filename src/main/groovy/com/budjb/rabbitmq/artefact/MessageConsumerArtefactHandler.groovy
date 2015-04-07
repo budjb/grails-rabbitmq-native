@@ -15,6 +15,7 @@
  */
 package com.budjb.rabbitmq.artefact
 
+import com.budjb.rabbitmq.consumer.MessageConsumer
 import grails.core.ArtefactHandlerAdapter
 import org.apache.log4j.Logger
 
@@ -59,6 +60,6 @@ public class MessageConsumerArtefactHandler extends ArtefactHandlerAdapter {
      * @return
      */
     static boolean isConsumer(Class clazz) {
-        return clazz.getName().endsWith(SUFFIX)
+        return clazz.getName().endsWith(SUFFIX) && MessageConsumer.class.isAssignableFrom(clazz)
     }
 }

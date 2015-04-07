@@ -19,6 +19,7 @@ import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
+import com.budjb.rabbitmq.consumer.MessageConsumer
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.rabbitmq.client.Channel
@@ -172,7 +173,7 @@ class RabbitContextImpl implements RabbitContext {
      * @param candidate
      */
     @Override
-    void registerConsumer(Object consumer) {
+    void registerConsumer(MessageConsumer consumer) {
         consumerManager.register(consumerManager.createContext(consumer))
     }
 

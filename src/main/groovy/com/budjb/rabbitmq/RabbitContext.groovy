@@ -18,6 +18,7 @@ package com.budjb.rabbitmq
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
+import com.budjb.rabbitmq.consumer.MessageConsumer
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.rabbitmq.client.Channel
@@ -101,7 +102,7 @@ interface RabbitContext {
      *
      * @param consumer
      */
-    void registerConsumer(Object consumer)
+    void registerConsumer(MessageConsumer consumer)
 
     /**
      * Registers a message converter.

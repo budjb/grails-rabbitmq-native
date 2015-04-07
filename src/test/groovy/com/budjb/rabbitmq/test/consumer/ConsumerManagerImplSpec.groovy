@@ -17,10 +17,7 @@ package com.budjb.rabbitmq.test.consumer
 
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
-import com.budjb.rabbitmq.consumer.ConsumerConfiguration
-import com.budjb.rabbitmq.consumer.ConsumerContext
-import com.budjb.rabbitmq.consumer.ConsumerContextImpl
-import com.budjb.rabbitmq.consumer.ConsumerManagerImpl
+import com.budjb.rabbitmq.consumer.*
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
@@ -426,8 +423,8 @@ class ConsumerManagerImplSpec extends Specification {
         1 * consumer2.stop()
     }
 
-    class Consumer1 {
-        static rabbitConfig = [
+    class Consumer1 extends MessageConsumer {
+        Map rabbitConfig = [
             'queue': 'test-queue-1'
         ]
 
@@ -436,8 +433,8 @@ class ConsumerManagerImplSpec extends Specification {
         }
     }
 
-    class Consumer2 {
-        static rabbitConfig = [
+    class Consumer2 extends MessageConsumer {
+        Map rabbitConfig = [
             'queue': 'test-queue-2'
         ]
 
