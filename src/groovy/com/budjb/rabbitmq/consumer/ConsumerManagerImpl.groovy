@@ -218,7 +218,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      * @return
      */
     @Override
-    ConsumerContext createContext(Object consumer) throws MissingConfigurationException {
+    ConsumerContext createContext(Object consumer) {
         return new ConsumerContextImpl(
             loadConsumerConfiguration(consumer),
             consumer,
