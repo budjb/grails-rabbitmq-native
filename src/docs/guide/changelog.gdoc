@@ -1,4 +1,4 @@
-h3. Version 3.1.1 - TODO
+h3. Version 3.1.1 - 5/13/2015
 * Refactored the code to load a consumer's configuration from a static variable so that it works correctly when the\
   consumer is annotated with @\@Transactional@.\
   ([#55|http://github.com/budjb/grails-rabbitmq-native/issues/55])
