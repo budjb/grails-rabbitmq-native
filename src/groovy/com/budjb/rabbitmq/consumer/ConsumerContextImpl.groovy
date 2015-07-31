@@ -15,11 +15,13 @@
  */
 package com.budjb.rabbitmq.consumer
 
+import com.budjb.rabbitmq.RabbitManagedContextState
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.MessageConvertException
+import com.budjb.rabbitmq.publisher.RabbitMessageProperties
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
@@ -51,6 +53,22 @@ class ConsumerContextImpl implements ConsumerContext {
         String consumerTag
 
         /**
+         * Lock to synchronize access to the processing flag.
+         */
+        private final Object processLock = new Object()
+
+        /**
+         * Whether the consumer thread is currently "working", that is,
+         * processing a message.
+         */
+        private boolean processing = false
+
+        /**
+         * Current state of the consumer.
+         */
+        RabbitManagedContextState state = RabbitManagedContextState.STOPPED
+
+        /**
          * Constructs an instance of a consumer.
          *
          * @param channel
@@ -77,18 +95,68 @@ class ConsumerContextImpl implements ConsumerContext {
          */
         @Override
         void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
-            // Wrap up the parameters into a context
-            MessageContext context = new MessageContext(
-                channel: channel,
-                consumerTag: consumerTag,
-                envelope: envelope,
-                properties: properties,
-                body: body,
-                connectionContext: connectionContext
-            )
+            synchronized (processLock) {
+                // Mark that the consumer is busy processing a message
+                processing = true
 
-            // Hand off the message to the context.
-            ConsumerContextImpl.this.deliverMessage(context)
+                // Wrap up the parameters into a context
+                MessageContext context = new MessageContext(
+                    channel: channel,
+                    consumerTag: consumerTag,
+                    envelope: envelope,
+                    properties: properties,
+                    body: body,
+                    connectionContext: connectionContext
+                )
+
+                // Hand off the message to the context.
+                ConsumerContextImpl.this.deliverMessage(context)
+
+                // Mark that the consumer is no longer busy processing a message
+                processing = false
+            }
+
+            if (state == RabbitManagedContextState.SHUTTING_DOWN) {
+                shutdown()
+            }
+        }
+
+        /**
+         * Gracefully stops the consumer, allowing any in-flight processing to complete.
+         */
+        void shutdown() {
+            state = RabbitManagedContextState.SHUTTING_DOWN
+
+            if (consumerTag) {
+                channel.basicCancel(consumerTag)
+                consumerTag = null
+            }
+
+            synchronized (processLock) {
+                if (!processing) {
+                    if (channel.isOpen()) {
+                        channel.close()
+                    }
+
+                    state = RabbitManagedContextState.STOPPED
+                }
+            }
+        }
+
+        /**
+         * Stops the consumer immediately. Messages being processed will likely fail.
+         */
+        void stop() {
+            if (consumerTag) {
+                channel.basicCancel(consumerTag)
+                consumerTag = null
+            }
+
+            if (channel.isOpen()) {
+                channel.close()
+            }
+
+            state = RabbitManagedContextState.STOPPED
         }
     }
 
@@ -241,7 +309,7 @@ class ConsumerContextImpl implements ConsumerContext {
      */
     @Override
     void start() throws IllegalStateException {
-        if (consumers.size()) {
+        if (getState() != RabbitManagedContextState.STOPPED) {
             throw new IllegalStateException("attempted to start consumer '${getId()}' but it is already started")
         }
 
@@ -310,7 +378,7 @@ class ConsumerContextImpl implements ConsumerContext {
             // Create a queue
             String queue = channel.queueDeclare().queue
             if (!configuration.binding || configuration.binding instanceof String) {
-                channel.queueBind(queue, configuration.exchange, configuration.binding ?: '')
+                channel.queueBind(queue, configuration.exchange, (String) configuration.binding ?: '')
             }
             else if (configuration.binding instanceof Map) {
                 channel.queueBind(queue, configuration.exchange, '', configuration.binding + ['x-match': configuration.match])
@@ -342,18 +410,26 @@ class ConsumerContextImpl implements ConsumerContext {
      */
     @Override
     void stop() {
-        if (!consumers.size()) {
+        if (getState() == RabbitManagedContextState.STOPPED) {
             return
         }
-        consumers.each {
-            if (it.channel.isOpen()) {
-                it.channel.basicCancel(it.consumerTag)
-                it.channel.close()
-            }
-        }
-        consumers.clear()
-        log.debug("stopped consumer '${getId()}' on connection '${getConnectionName()}'")
 
+        consumers*.stop()
+        consumers.clear()
+
+        log.debug("stopped consumer '${getId()}' on connection '${getConnectionName()}'")
+    }
+
+    /**
+     * Starts a graceful shutdown.
+     */
+    @Override
+    void shutdown() {
+        if (getState() != RabbitManagedContextState.STARTED) {
+            return
+        }
+
+        consumers*.shutdown()
     }
 
     /**
@@ -375,12 +451,12 @@ class ConsumerContextImpl implements ConsumerContext {
             try {
                 // If a response was given and a replyTo is set, send the message back
                 if (context.properties.replyTo && response) {
-                    rabbitMessagePublisher.send {
-                        channel = context.channel
-                        routingKey = context.properties.replyTo
-                        correlationId = context.properties.correlationId
-                        delegate.body = response
-                    }
+                    rabbitMessagePublisher.send(new RabbitMessageProperties(
+                        channel: context.channel,
+                        routingKey: context.properties.replyTo,
+                        correlationId: context.properties.correlationId,
+                        body: response
+                    ))
                 }
             }
             catch (Throwable e) {
@@ -669,5 +745,28 @@ class ConsumerContextImpl implements ConsumerContext {
 
         persistenceInterceptor.flush()
         persistenceInterceptor.destroy()
+    }
+
+    /**
+     * Returns whether the consumer is active.
+     *
+     * @return
+     */
+    RabbitManagedContextState getState() {
+        if (consumers.size() == 0) {
+            return RabbitManagedContextState.STOPPED
+        }
+
+        List<RabbitManagedContextState> states = consumers*.getState()
+
+        if (states.any { it == RabbitManagedContextState.SHUTTING_DOWN }) {
+            return RabbitManagedContextState.SHUTTING_DOWN
+        }
+
+        if (states.every { it == RabbitManagedContextState.STOPPED }) {
+            return RabbitManagedContextState.STOPPED
+        }
+
+        return RabbitManagedContextState.STARTED
     }
 }

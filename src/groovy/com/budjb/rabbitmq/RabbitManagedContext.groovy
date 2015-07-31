@@ -29,6 +29,18 @@ interface RabbitManagedContext {
     void stop()
 
     /**
+     * Starts a graceful shutdown.
+     */
+    void shutdown()
+
+    /**
+     * Get the context's state.
+     *
+     * @return
+     */
+    RabbitManagedContextState getState()
+
+    /**
      * Returns the context's ID.
      *
      * @return
