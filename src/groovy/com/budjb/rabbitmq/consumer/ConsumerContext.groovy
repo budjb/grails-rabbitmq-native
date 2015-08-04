@@ -38,4 +38,9 @@ interface ConsumerContext extends RabbitManagedContext {
      * @return
      */
     boolean isValid()
+
+    /**
+     * Performs a graceful shutdown.
+     */
+    void shutdown()
 }

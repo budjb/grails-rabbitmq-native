@@ -1,6 +1,6 @@
 package com.budjb.rabbitmq
 
-enum RabbitManagedContextState {
+enum ContextState {
     STOPPED,
     STARTED,
     SHUTTING_DOWN

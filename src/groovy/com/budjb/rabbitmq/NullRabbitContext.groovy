@@ -168,4 +168,24 @@ class NullRabbitContext implements RabbitContext {
     void createExchangesAndQueues() {
 
     }
+
+    /**
+     * Get the overall state of consumers and connections.
+     *
+     * @return
+     */
+    @Override
+    ContextState getState() {
+        throw new UnsupportedOperationException('can not get state on a null rabbit context')
+    }
+
+    /**
+     * Perform a graceful shutdown of consumers and then disconnect.
+     *
+     * This method blocks until the full shutdown is complete.
+     */
+    @Override
+    void shutdown() {
+
+    }
 }
