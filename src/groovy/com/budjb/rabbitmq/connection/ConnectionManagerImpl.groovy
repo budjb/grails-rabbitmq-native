@@ -15,6 +15,7 @@
  */
 package com.budjb.rabbitmq.connection
 
+import com.budjb.rabbitmq.ContextState
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
@@ -312,5 +313,15 @@ class ConnectionManagerImpl implements ConnectionManager {
     @Override
     List<ConnectionContext> getContexts() {
         return connections
+    }
+
+    /**
+     * Returns the state of the contexts the manager.
+     *
+     * @return
+     */
+    @Override
+    ContextState getState() {
+        return connections.every { it.getState() == ContextState.STARTED } ? ContextState.STARTED : ContextState.STOPPED
     }
 }

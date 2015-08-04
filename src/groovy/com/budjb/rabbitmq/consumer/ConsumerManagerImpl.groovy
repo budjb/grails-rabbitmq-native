@@ -15,12 +15,14 @@
  */
 package com.budjb.rabbitmq.consumer
 
+import com.budjb.rabbitmq.ContextState
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
+import groovyx.gpars.GParsPool
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsClass
@@ -324,6 +326,38 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
     }
 
     /**
+     * Performs a graceful shutdown of all consumers.
+     */
+    @Override
+    void shutdown() {
+        GParsPool.withPool {
+            consumers.eachParallel {
+                it.shutdown()
+            }
+        }
+    }
+
+    /**
+     * Performs a graceful shutdown of the given consumer context
+     *
+     * @param consumerContext
+     */
+    @Override
+    void shutdown(ConsumerContext consumerContext) {
+        consumerContext.shutdown()
+    }
+
+    /**
+     * Performs a graceful shutdown of the consumer with the given name.
+     *
+     * @param name
+     */
+    @Override
+    void shutdown(String name) {
+        getContext(name).shutdown()
+    }
+
+    /**
      * Returns a list of all registered contexts.
      *
      * @return
@@ -331,5 +365,22 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
     @Override
     List<ConsumerContext> getContexts() {
         return consumers
+    }
+
+    /**
+     * Returns the state of the contexts the manager
+     * @return
+     */
+    @Override
+    ContextState getState() {
+        if (consumers.every { it.getState() == ContextState.STOPPED }) {
+            return ContextState.STOPPED
+        }
+        else if (consumers.every { it.getState() == ContextState.STARTED }) {
+            return ContextState.STARTED
+        }
+        else {
+            return ContextState.SHUTTING_DOWN
+        }
     }
 }

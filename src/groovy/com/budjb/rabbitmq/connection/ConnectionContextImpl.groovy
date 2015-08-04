@@ -15,6 +15,7 @@
  */
 package com.budjb.rabbitmq.connection
 
+import com.budjb.rabbitmq.ContextState
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
@@ -110,10 +111,20 @@ class ConnectionContextImpl implements ConnectionContext {
             return
         }
 
-        log.debug("closing connection to the RabbitMQ server with name '${getId()}'")
-
         connection.close()
         connection = null
+
+        log.debug("closed connection to the RabbitMQ server with name '${getId()}'")
+    }
+
+    /**
+     * Get the context's state.
+     *
+     * @return
+     */
+    @Override
+    ContextState getState() {
+        return this.connection == null ? ContextState.STOPPED : ContextState.STARTED
     }
 
     /**

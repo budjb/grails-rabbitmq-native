@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq.consumer
 
-import com.budjb.rabbitmq.RabbitManagedContextState
+import com.budjb.rabbitmq.ContextState
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
@@ -27,6 +27,7 @@ import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
+import groovyx.gpars.GParsPool
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 
@@ -58,15 +59,9 @@ class ConsumerContextImpl implements ConsumerContext {
         private final Object processLock = new Object()
 
         /**
-         * Whether the consumer thread is currently "working", that is,
-         * processing a message.
-         */
-        private boolean processing = false
-
-        /**
          * Current state of the consumer.
          */
-        RabbitManagedContextState state = RabbitManagedContextState.STOPPED
+        ContextState state = ContextState.STOPPED
 
         /**
          * Constructs an instance of a consumer.
@@ -96,9 +91,6 @@ class ConsumerContextImpl implements ConsumerContext {
         @Override
         void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
             synchronized (processLock) {
-                // Mark that the consumer is busy processing a message
-                processing = true
-
                 // Wrap up the parameters into a context
                 MessageContext context = new MessageContext(
                     channel: channel,
@@ -111,12 +103,9 @@ class ConsumerContextImpl implements ConsumerContext {
 
                 // Hand off the message to the context.
                 ConsumerContextImpl.this.deliverMessage(context)
-
-                // Mark that the consumer is no longer busy processing a message
-                processing = false
             }
 
-            if (state == RabbitManagedContextState.SHUTTING_DOWN) {
+            if (state == ContextState.SHUTTING_DOWN) {
                 shutdown()
             }
         }
@@ -125,7 +114,7 @@ class ConsumerContextImpl implements ConsumerContext {
          * Gracefully stops the consumer, allowing any in-flight processing to complete.
          */
         void shutdown() {
-            state = RabbitManagedContextState.SHUTTING_DOWN
+            state = ContextState.SHUTTING_DOWN
 
             if (consumerTag) {
                 channel.basicCancel(consumerTag)
@@ -133,13 +122,11 @@ class ConsumerContextImpl implements ConsumerContext {
             }
 
             synchronized (processLock) {
-                if (!processing) {
-                    if (channel.isOpen()) {
-                        channel.close()
-                    }
-
-                    state = RabbitManagedContextState.STOPPED
+                if (channel.isOpen()) {
+                    channel.close()
                 }
+
+                state = ContextState.STOPPED
             }
         }
 
@@ -156,7 +143,7 @@ class ConsumerContextImpl implements ConsumerContext {
                 channel.close()
             }
 
-            state = RabbitManagedContextState.STOPPED
+            state = ContextState.STOPPED
         }
     }
 
@@ -309,7 +296,8 @@ class ConsumerContextImpl implements ConsumerContext {
      */
     @Override
     void start() throws IllegalStateException {
-        if (getState() != RabbitManagedContextState.STOPPED) {
+        // Ensure the consumer's stopped
+        if (getState() != ContextState.STOPPED) {
             throw new IllegalStateException("attempted to start consumer '${getId()}' but it is already started")
         }
 
@@ -333,6 +321,11 @@ class ConsumerContextImpl implements ConsumerContext {
         catch (ContextNotFoundException e) {
             log.warn("not starting consumer '${getId()}' because a suitable connection could not be found")
             return
+        }
+
+        // Error if the connection is not started
+        if (connectionContext.getState() != ContextState.STARTED) {
+            throw new IllegalStateException("attempted to start consumer '${getId()}' but its connection is not started")
         }
 
         // Start the consumers
@@ -363,6 +356,9 @@ class ConsumerContextImpl implements ConsumerContext {
 
                 // Store the consumer tag
                 consumer.consumerTag = consumerTag
+
+                // Mark the consumer as started
+                consumer.state = ContextState.STARTED
 
                 // Store the consumer
                 consumers << consumer
@@ -400,6 +396,9 @@ class ConsumerContextImpl implements ConsumerContext {
             // Store the consumer tag
             consumer.consumerTag = consumerTag
 
+            // Mark the consumer as started
+            consumer.state = ContextState.STARTED
+
             // Store the consumer
             consumers << consumer
         }
@@ -410,26 +409,37 @@ class ConsumerContextImpl implements ConsumerContext {
      */
     @Override
     void stop() {
-        if (getState() == RabbitManagedContextState.STOPPED) {
+        if (getState() == ContextState.STOPPED) {
             return
         }
 
-        consumers*.stop()
+        consumers.each {
+            it.stop()
+        }
+
         consumers.clear()
 
         log.debug("stopped consumer '${getId()}' on connection '${getConnectionName()}'")
     }
 
     /**
-     * Starts a graceful shutdown.
+     * Performs a graceful shutdown.
      */
     @Override
     void shutdown() {
-        if (getState() != RabbitManagedContextState.STARTED) {
+        log.debug("shutting down consumer '${getId()}' on connection '${getConnectionName()}'")
+
+        if (getState() != ContextState.STARTED) {
             return
         }
 
-        consumers*.shutdown()
+        GParsPool.withPool {
+            consumers.eachParallel { it.shutdown() }
+        }
+
+        consumers.clear()
+
+        log.debug("stopped consumer '${getId()}' on connection '${getConnectionName()}'")
     }
 
     /**
@@ -752,21 +762,21 @@ class ConsumerContextImpl implements ConsumerContext {
      *
      * @return
      */
-    RabbitManagedContextState getState() {
+    ContextState getState() {
         if (consumers.size() == 0) {
-            return RabbitManagedContextState.STOPPED
+            return ContextState.STOPPED
         }
 
-        List<RabbitManagedContextState> states = consumers*.getState()
+        List<ContextState> states = consumers*.getState()
 
-        if (states.any { it == RabbitManagedContextState.SHUTTING_DOWN }) {
-            return RabbitManagedContextState.SHUTTING_DOWN
+        if (states.any { it == ContextState.SHUTTING_DOWN }) {
+            return ContextState.SHUTTING_DOWN
         }
 
-        if (states.every { it == RabbitManagedContextState.STOPPED }) {
-            return RabbitManagedContextState.STOPPED
+        if (states.every { it == ContextState.STOPPED }) {
+            return ContextState.STOPPED
         }
 
-        return RabbitManagedContextState.STARTED
+        return ContextState.STARTED
     }
 }

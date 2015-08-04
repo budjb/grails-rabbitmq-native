@@ -285,4 +285,39 @@ class RabbitContextImpl implements RabbitContext {
     void createExchangesAndQueues() {
         queueBuilder.configureQueues()
     }
+
+    /**
+     * Get the overall state of consumers and connections.
+     *
+     * @return
+     */
+    @Override
+    ContextState getState() {
+        ContextState connectionState = connectionManager.getState()
+        ContextState consumerState = consumerManager.getState()
+
+        if (connectionState == ContextState.STOPPED) {
+            if (consumerState != ContextState.STOPPED) {
+                consumerManager.stop()
+            }
+            return ContextState.STOPPED
+        }
+
+        if (consumerState == ContextState.SHUTTING_DOWN) {
+            return ContextState.SHUTTING_DOWN
+        }
+
+        return ContextState.STARTED
+    }
+
+    /**
+     * Perform a graceful shutdown of consumers and then disconnects.
+     *
+     * This method blocks until the full shutdown is complete.
+     */
+    @Override
+    void shutdown() {
+        consumerManager.shutdown()
+        connectionManager.stop()
+    }
 }
