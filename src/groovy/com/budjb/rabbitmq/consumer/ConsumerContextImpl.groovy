@@ -104,10 +104,6 @@ class ConsumerContextImpl implements ConsumerContext {
                 // Hand off the message to the context.
                 ConsumerContextImpl.this.deliverMessage(context)
             }
-
-            if (state == ContextState.SHUTTING_DOWN) {
-                shutdown()
-            }
         }
 
         /**
