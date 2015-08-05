@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq.test
 
-import com.budjb.rabbitmq.ContextState
+import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.QueueBuilder
 import com.budjb.rabbitmq.RabbitContextImpl
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
@@ -298,11 +298,11 @@ class RabbitContextImplSpec extends Specification {
     @Unroll
     def 'When consumerManager has state #consumer and connection manager has state #connection, state #result is returned'() {
         setup:
-        consumerManager.getState() >> consumer
-        connectionManager.getState() >> connection
+        consumerManager.getRunningState() >> consumer
+        connectionManager.getRunningState() >> connection
 
         when:
-        ContextState resultState = rabbitContext.getState()
+        RunningState resultState = rabbitContext.getRunningState()
 
         then:
         resultState == result
@@ -310,11 +310,11 @@ class RabbitContextImplSpec extends Specification {
 
         where:
         consumer                    | connection            | consumersStopped  | result
-        ContextState.STARTED        | ContextState.STARTED  | 0                 | ContextState.STARTED
-        ContextState.STOPPED        | ContextState.STARTED  | 0                 | ContextState.STARTED
-        ContextState.SHUTTING_DOWN  | ContextState.STARTED  | 0                 | ContextState.SHUTTING_DOWN
-        ContextState.STARTED        | ContextState.STOPPED  | 1                 | ContextState.STOPPED
-        ContextState.STOPPED        | ContextState.STOPPED  | 0                 | ContextState.STOPPED
-        ContextState.SHUTTING_DOWN  | ContextState.STOPPED  | 1                 | ContextState.STOPPED
+        RunningState.RUNNING        | RunningState.RUNNING  | 0                 | RunningState.RUNNING
+        RunningState.STOPPED        | RunningState.RUNNING  | 0                 | RunningState.RUNNING
+        RunningState.SHUTTING_DOWN  | RunningState.RUNNING  | 0                 | RunningState.SHUTTING_DOWN
+        RunningState.RUNNING        | RunningState.STOPPED  | 1                 | RunningState.STOPPED
+        RunningState.STOPPED        | RunningState.STOPPED  | 0                 | RunningState.STOPPED
+        RunningState.SHUTTING_DOWN  | RunningState.STOPPED  | 1                 | RunningState.STOPPED
     }
 }

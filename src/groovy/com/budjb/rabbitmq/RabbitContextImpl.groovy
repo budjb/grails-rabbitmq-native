@@ -292,22 +292,22 @@ class RabbitContextImpl implements RabbitContext {
      * @return
      */
     @Override
-    ContextState getState() {
-        ContextState connectionState = connectionManager.getState()
-        ContextState consumerState = consumerManager.getState()
+    RunningState getRunningState() {
+        RunningState connectionState = connectionManager.getRunningState()
+        RunningState consumerState = consumerManager.getRunningState()
 
-        if (connectionState == ContextState.STOPPED) {
-            if (consumerState != ContextState.STOPPED) {
+        if (connectionState == RunningState.STOPPED) {
+            if (consumerState != RunningState.STOPPED) {
                 consumerManager.stop()
             }
-            return ContextState.STOPPED
+            return RunningState.STOPPED
         }
 
-        if (consumerState == ContextState.SHUTTING_DOWN) {
-            return ContextState.SHUTTING_DOWN
+        if (consumerState == RunningState.SHUTTING_DOWN) {
+            return RunningState.SHUTTING_DOWN
         }
 
-        return ContextState.STARTED
+        return RunningState.RUNNING
     }
 
     /**

@@ -170,12 +170,12 @@ class NullRabbitContext implements RabbitContext {
     }
 
     /**
-     * Get the overall state of consumers and connections.
+     * Get the overall running state of consumers and connections.
      *
      * @return
      */
     @Override
-    ContextState getState() {
+    RunningState getRunningState() {
         throw new UnsupportedOperationException('can not get state on a null rabbit context')
     }
 
