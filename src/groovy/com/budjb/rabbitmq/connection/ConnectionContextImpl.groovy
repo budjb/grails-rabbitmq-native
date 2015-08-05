@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq.connection
 
-import com.budjb.rabbitmq.ContextState
+import com.budjb.rabbitmq.RunningState
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
@@ -123,8 +123,8 @@ class ConnectionContextImpl implements ConnectionContext {
      * @return
      */
     @Override
-    ContextState getState() {
-        return this.connection == null ? ContextState.STOPPED : ContextState.STARTED
+    RunningState getRunningState() {
+        return this.connection == null ? RunningState.STOPPED : RunningState.RUNNING
     }
 
     /**

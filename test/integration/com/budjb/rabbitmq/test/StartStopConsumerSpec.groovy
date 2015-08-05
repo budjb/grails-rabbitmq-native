@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq.test
 
-import com.budjb.rabbitmq.ContextState
+import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.RabbitContext
 
 import java.util.concurrent.TimeoutException
@@ -140,21 +140,21 @@ class StartStopConsumerSpec extends MessageConsumerIntegrationTest {
         Thread thread = new Thread(new ShutdownRunnable(rabbitContext))
 
         expect:
-        rabbitContext.getState() == ContextState.STARTED
+        rabbitContext.getRunningState() == RunningState.RUNNING
 
         when:
         thread.start()
         sleep(500)
 
         then:
-        rabbitContext.getState() == ContextState.STOPPED
+        rabbitContext.getRunningState() == RunningState.STOPPED
 
         when:
         thread.join()
         rabbitContext.start()
 
         then:
-        rabbitContext.getState() == ContextState.STARTED
+        rabbitContext.getRunningState() == RunningState.RUNNING
     }
 
     def 'When messages are being consumed, shutting down should wait until in-flight messages are complete'() {
@@ -162,7 +162,7 @@ class StartStopConsumerSpec extends MessageConsumerIntegrationTest {
         Thread thread = new Thread(new ShutdownRunnable(rabbitContext))
 
         expect:
-        rabbitContext.getState() == ContextState.STARTED
+        rabbitContext.getRunningState() == RunningState.RUNNING
 
         when:
         rabbitMessagePublisher.send {
@@ -175,25 +175,25 @@ class StartStopConsumerSpec extends MessageConsumerIntegrationTest {
         sleep(1000)
 
         then:
-        rabbitContext.getState() == ContextState.SHUTTING_DOWN
+        rabbitContext.getRunningState() == RunningState.SHUTTING_DOWN
 
         when:
         sleep(1000)
 
         then:
-        rabbitContext.getState() == ContextState.SHUTTING_DOWN
+        rabbitContext.getRunningState() == RunningState.SHUTTING_DOWN
 
         when:
         thread.join()
 
         then:
-        rabbitContext.getState() == ContextState.STOPPED
+        rabbitContext.getRunningState() == RunningState.STOPPED
 
         when:
         rabbitContext.start()
 
         then:
-        rabbitContext.getState() == ContextState.STARTED
+        rabbitContext.getRunningState() == RunningState.RUNNING
     }
 
     class ShutdownRunnable implements Runnable {

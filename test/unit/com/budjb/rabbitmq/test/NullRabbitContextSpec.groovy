@@ -59,7 +59,7 @@ class NullRabbitContextSpec extends Specification {
 
     def 'If getState() is called, an UnsupportedOperationException should be thrown'() {
         when:
-        rabbitContext.getState()
+        rabbitContext.getRunningState()
 
         then:
         thrown UnsupportedOperationException

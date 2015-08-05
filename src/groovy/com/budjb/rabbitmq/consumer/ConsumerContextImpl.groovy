@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq.consumer
 
-import com.budjb.rabbitmq.ContextState
+import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
@@ -61,7 +61,7 @@ class ConsumerContextImpl implements ConsumerContext {
         /**
          * Current state of the consumer.
          */
-        ContextState state = ContextState.STOPPED
+        RunningState state = RunningState.STOPPED
 
         /**
          * Constructs an instance of a consumer.
@@ -110,7 +110,7 @@ class ConsumerContextImpl implements ConsumerContext {
          * Gracefully stops the consumer, allowing any in-flight processing to complete.
          */
         void shutdown() {
-            state = ContextState.SHUTTING_DOWN
+            state = RunningState.SHUTTING_DOWN
 
             if (consumerTag) {
                 channel.basicCancel(consumerTag)
@@ -122,7 +122,7 @@ class ConsumerContextImpl implements ConsumerContext {
                     channel.close()
                 }
 
-                state = ContextState.STOPPED
+                state = RunningState.STOPPED
             }
         }
 
@@ -139,7 +139,7 @@ class ConsumerContextImpl implements ConsumerContext {
                 channel.close()
             }
 
-            state = ContextState.STOPPED
+            state = RunningState.STOPPED
         }
     }
 
@@ -293,7 +293,7 @@ class ConsumerContextImpl implements ConsumerContext {
     @Override
     void start() throws IllegalStateException {
         // Ensure the consumer's stopped
-        if (getState() != ContextState.STOPPED) {
+        if (getRunningState() != RunningState.STOPPED) {
             throw new IllegalStateException("attempted to start consumer '${getId()}' but it is already started")
         }
 
@@ -320,7 +320,7 @@ class ConsumerContextImpl implements ConsumerContext {
         }
 
         // Error if the connection is not started
-        if (connectionContext.getState() != ContextState.STARTED) {
+        if (connectionContext.getRunningState() != RunningState.RUNNING) {
             throw new IllegalStateException("attempted to start consumer '${getId()}' but its connection is not started")
         }
 
@@ -354,7 +354,7 @@ class ConsumerContextImpl implements ConsumerContext {
                 consumer.consumerTag = consumerTag
 
                 // Mark the consumer as started
-                consumer.state = ContextState.STARTED
+                consumer.state = RunningState.RUNNING
 
                 // Store the consumer
                 consumers << consumer
@@ -393,7 +393,7 @@ class ConsumerContextImpl implements ConsumerContext {
             consumer.consumerTag = consumerTag
 
             // Mark the consumer as started
-            consumer.state = ContextState.STARTED
+            consumer.state = RunningState.RUNNING
 
             // Store the consumer
             consumers << consumer
@@ -405,7 +405,7 @@ class ConsumerContextImpl implements ConsumerContext {
      */
     @Override
     void stop() {
-        if (getState() == ContextState.STOPPED) {
+        if (getRunningState() == RunningState.STOPPED) {
             return
         }
 
@@ -425,7 +425,7 @@ class ConsumerContextImpl implements ConsumerContext {
     void shutdown() {
         log.debug("shutting down consumer '${getId()}' on connection '${getConnectionName()}'")
 
-        if (getState() != ContextState.STARTED) {
+        if (getRunningState() != RunningState.RUNNING) {
             return
         }
 
@@ -758,21 +758,21 @@ class ConsumerContextImpl implements ConsumerContext {
      *
      * @return
      */
-    ContextState getState() {
+    RunningState getRunningState() {
         if (consumers.size() == 0) {
-            return ContextState.STOPPED
+            return RunningState.STOPPED
         }
 
-        List<ContextState> states = consumers*.getState()
+        List<RunningState> states = consumers*.getState()
 
-        if (states.any { it == ContextState.SHUTTING_DOWN }) {
-            return ContextState.SHUTTING_DOWN
+        if (states.any { it == RunningState.SHUTTING_DOWN }) {
+            return RunningState.SHUTTING_DOWN
         }
 
-        if (states.every { it == ContextState.STOPPED }) {
-            return ContextState.STOPPED
+        if (states.every { it == RunningState.STOPPED }) {
+            return RunningState.STOPPED
         }
 
-        return ContextState.STARTED
+        return RunningState.RUNNING
     }
 }

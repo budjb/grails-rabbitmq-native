@@ -202,11 +202,11 @@ interface RabbitContext {
     void createExchangesAndQueues()
 
     /**
-     * Get the overall state of consumers and connections.
+     * Get the overall running state of consumers and connections.
      *
      * @return
      */
-    ContextState getState()
+    RunningState getRunningState()
 
     /**
      * Perform a graceful shutdown of consumers and then disconnect.

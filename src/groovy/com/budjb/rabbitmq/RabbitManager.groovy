@@ -104,5 +104,5 @@ interface RabbitManager<C extends RabbitManagedContext, I extends RabbitManagedC
      * Returns the state of the contexts the manager
      * @return
      */
-    ContextState getState()
+    RunningState getRunningState()
 }

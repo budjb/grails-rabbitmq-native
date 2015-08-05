@@ -1,7 +1,7 @@
 package com.budjb.rabbitmq
 
-enum ContextState {
+enum RunningState {
     STOPPED,
-    STARTED,
+    RUNNING,
     SHUTTING_DOWN
 }

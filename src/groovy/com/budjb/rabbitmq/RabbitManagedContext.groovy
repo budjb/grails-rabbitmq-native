@@ -33,7 +33,7 @@ interface RabbitManagedContext {
      *
      * @return
      */
-    ContextState getState()
+    RunningState getRunningState()
 
     /**
      * Returns the context's ID.

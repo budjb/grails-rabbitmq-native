@@ -194,13 +194,13 @@ class RabbitContextProxy implements RabbitContext, InitializingBean {
     }
 
     /**
-     * Get the overall state of consumers and connections.
+     * Get the overall running state of consumers and connections.
      *
      * @return
      */
     @Override
-    ContextState getState() {
-        return target.getState()
+    RunningState getRunningState() {
+        return target.getRunningState()
     }
 
     /**

@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq.consumer
 
-import com.budjb.rabbitmq.ContextState
+import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
@@ -372,15 +372,15 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      * @return
      */
     @Override
-    ContextState getState() {
-        if (consumers.every { it.getState() == ContextState.STOPPED }) {
-            return ContextState.STOPPED
+    RunningState getRunningState() {
+        if (consumers.every { it.getRunningState() == RunningState.STOPPED }) {
+            return RunningState.STOPPED
         }
-        else if (consumers.every { it.getState() == ContextState.STARTED }) {
-            return ContextState.STARTED
+        else if (consumers.every { it.getRunningState() == RunningState.RUNNING }) {
+            return RunningState.RUNNING
         }
         else {
-            return ContextState.SHUTTING_DOWN
+            return RunningState.SHUTTING_DOWN
         }
     }
 }
