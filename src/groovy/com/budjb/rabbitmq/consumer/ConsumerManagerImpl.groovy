@@ -99,13 +99,14 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      */
     @Override
     void start() {
+        RunningState runningState = getRunningState()
+
+        if (runningState == RunningState.SHUTTING_DOWN) {
+            throw new IllegalStateException('can not start consumers when they are in the process of shutting down')
+        }
+
         consumers.each {
-            try {
-                start(it)
-            }
-            catch (IllegalStateException e) {
-                // Continue...
-            }
+            start(it)
         }
     }
 
@@ -116,7 +117,9 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      */
     @Override
     void start(ConsumerContext context) {
-        context.start()
+        if (context.getRunningState() == RunningState.STOPPED) {
+            context.start()
+        }
     }
 
     /**
@@ -135,7 +138,9 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      */
     @Override
     void stop() {
-        consumers.each { stop(it) }
+        consumers.each {
+            stop(it)
+        }
     }
 
     /**
@@ -368,19 +373,22 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
     }
 
     /**
-     * Returns the state of the contexts the manager
+     * Returns the state of the contexts the manager.
+     *
      * @return
      */
     @Override
     RunningState getRunningState() {
-        if (consumers.every { it.getRunningState() == RunningState.STOPPED }) {
+        List<RunningState> runningStates = consumers*.getRunningState()
+
+        if (runningStates.any { it == RunningState.SHUTTING_DOWN }) {
+            return RunningState.SHUTTING_DOWN
+        }
+        else if (runningStates.every { it == RunningState.STOPPED }) {
             return RunningState.STOPPED
         }
-        else if (consumers.every { it.getRunningState() == RunningState.RUNNING }) {
-            return RunningState.RUNNING
-        }
         else {
-            return RunningState.SHUTTING_DOWN
+            return RunningState.RUNNING
         }
     }
 }

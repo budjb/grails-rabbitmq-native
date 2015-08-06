@@ -423,11 +423,11 @@ class ConsumerContextImpl implements ConsumerContext {
      */
     @Override
     void shutdown() {
-        log.debug("shutting down consumer '${getId()}' on connection '${getConnectionName()}'")
-
         if (getRunningState() != RunningState.RUNNING) {
             return
         }
+
+        log.debug("shutting down consumer '${getId()}' on connection '${getConnectionName()}'")
 
         GParsPool.withPool {
             consumers.eachParallel { it.shutdown() }
