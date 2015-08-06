@@ -29,6 +29,13 @@ interface RabbitManagedContext {
     void stop()
 
     /**
+     * Get the context's state.
+     *
+     * @return
+     */
+    RunningState getRunningState()
+
+    /**
      * Returns the context's ID.
      *
      * @return

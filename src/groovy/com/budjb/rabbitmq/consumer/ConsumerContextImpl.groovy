@@ -15,16 +15,19 @@
  */
 package com.budjb.rabbitmq.consumer
 
+import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.MessageConvertException
+import com.budjb.rabbitmq.publisher.RabbitMessageProperties
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
+import groovyx.gpars.GParsPool
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 
@@ -49,6 +52,16 @@ class ConsumerContextImpl implements ConsumerContext {
          * Consumer tag.
          */
         String consumerTag
+
+        /**
+         * Lock to synchronize access to the processing flag.
+         */
+        private final Object processLock = new Object()
+
+        /**
+         * Current state of the consumer.
+         */
+        RunningState state = RunningState.STOPPED
 
         /**
          * Constructs an instance of a consumer.
@@ -77,18 +90,56 @@ class ConsumerContextImpl implements ConsumerContext {
          */
         @Override
         void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
-            // Wrap up the parameters into a context
-            MessageContext context = new MessageContext(
-                channel: channel,
-                consumerTag: consumerTag,
-                envelope: envelope,
-                properties: properties,
-                body: body,
-                connectionContext: connectionContext
-            )
+            synchronized (processLock) {
+                // Wrap up the parameters into a context
+                MessageContext context = new MessageContext(
+                    channel: channel,
+                    consumerTag: consumerTag,
+                    envelope: envelope,
+                    properties: properties,
+                    body: body,
+                    connectionContext: connectionContext
+                )
 
-            // Hand off the message to the context.
-            ConsumerContextImpl.this.deliverMessage(context)
+                // Hand off the message to the context.
+                ConsumerContextImpl.this.deliverMessage(context)
+            }
+        }
+
+        /**
+         * Gracefully stops the consumer, allowing any in-flight processing to complete.
+         */
+        void shutdown() {
+            state = RunningState.SHUTTING_DOWN
+
+            if (consumerTag) {
+                channel.basicCancel(consumerTag)
+                consumerTag = null
+            }
+
+            synchronized (processLock) {
+                if (channel.isOpen()) {
+                    channel.close()
+                }
+
+                state = RunningState.STOPPED
+            }
+        }
+
+        /**
+         * Stops the consumer immediately. Messages being processed will likely fail.
+         */
+        void stop() {
+            if (consumerTag) {
+                channel.basicCancel(consumerTag)
+                consumerTag = null
+            }
+
+            if (channel.isOpen()) {
+                channel.close()
+            }
+
+            state = RunningState.STOPPED
         }
     }
 
@@ -241,7 +292,8 @@ class ConsumerContextImpl implements ConsumerContext {
      */
     @Override
     void start() throws IllegalStateException {
-        if (consumers.size()) {
+        // Ensure the consumer's stopped
+        if (getRunningState() != RunningState.STOPPED) {
             throw new IllegalStateException("attempted to start consumer '${getId()}' but it is already started")
         }
 
@@ -265,6 +317,11 @@ class ConsumerContextImpl implements ConsumerContext {
         catch (ContextNotFoundException e) {
             log.warn("not starting consumer '${getId()}' because a suitable connection could not be found")
             return
+        }
+
+        // Error if the connection is not started
+        if (connectionContext.getRunningState() != RunningState.RUNNING) {
+            throw new IllegalStateException("attempted to start consumer '${getId()}' but its connection is not started")
         }
 
         // Start the consumers
@@ -296,6 +353,9 @@ class ConsumerContextImpl implements ConsumerContext {
                 // Store the consumer tag
                 consumer.consumerTag = consumerTag
 
+                // Mark the consumer as started
+                consumer.state = RunningState.RUNNING
+
                 // Store the consumer
                 consumers << consumer
             }
@@ -310,7 +370,7 @@ class ConsumerContextImpl implements ConsumerContext {
             // Create a queue
             String queue = channel.queueDeclare().queue
             if (!configuration.binding || configuration.binding instanceof String) {
-                channel.queueBind(queue, configuration.exchange, configuration.binding ?: '')
+                channel.queueBind(queue, configuration.exchange, (String) configuration.binding ?: '')
             }
             else if (configuration.binding instanceof Map) {
                 channel.queueBind(queue, configuration.exchange, '', configuration.binding + ['x-match': configuration.match])
@@ -332,6 +392,9 @@ class ConsumerContextImpl implements ConsumerContext {
             // Store the consumer tag
             consumer.consumerTag = consumerTag
 
+            // Mark the consumer as started
+            consumer.state = RunningState.RUNNING
+
             // Store the consumer
             consumers << consumer
         }
@@ -342,18 +405,37 @@ class ConsumerContextImpl implements ConsumerContext {
      */
     @Override
     void stop() {
-        if (!consumers.size()) {
+        if (getRunningState() == RunningState.STOPPED) {
             return
         }
-        consumers.each {
-            if (it.channel.isOpen()) {
-                it.channel.basicCancel(it.consumerTag)
-                it.channel.close()
-            }
-        }
-        consumers.clear()
-        log.debug("stopped consumer '${getId()}' on connection '${getConnectionName()}'")
 
+        consumers.each {
+            it.stop()
+        }
+
+        consumers.clear()
+
+        log.debug("stopped consumer '${getId()}' on connection '${getConnectionName()}'")
+    }
+
+    /**
+     * Performs a graceful shutdown.
+     */
+    @Override
+    void shutdown() {
+        if (getRunningState() != RunningState.RUNNING) {
+            return
+        }
+
+        log.debug("shutting down consumer '${getId()}' on connection '${getConnectionName()}'")
+
+        GParsPool.withPool {
+            consumers.eachParallel { it.shutdown() }
+        }
+
+        consumers.clear()
+
+        log.debug("stopped consumer '${getId()}' on connection '${getConnectionName()}'")
     }
 
     /**
@@ -375,12 +457,12 @@ class ConsumerContextImpl implements ConsumerContext {
             try {
                 // If a response was given and a replyTo is set, send the message back
                 if (context.properties.replyTo && response) {
-                    rabbitMessagePublisher.send {
-                        channel = context.channel
-                        routingKey = context.properties.replyTo
-                        correlationId = context.properties.correlationId
-                        delegate.body = response
-                    }
+                    rabbitMessagePublisher.send(new RabbitMessageProperties(
+                        channel: context.channel,
+                        routingKey: context.properties.replyTo,
+                        correlationId: context.properties.correlationId,
+                        body: response
+                    ))
                 }
             }
             catch (Throwable e) {
@@ -669,5 +751,28 @@ class ConsumerContextImpl implements ConsumerContext {
 
         persistenceInterceptor.flush()
         persistenceInterceptor.destroy()
+    }
+
+    /**
+     * Returns whether the consumer is active.
+     *
+     * @return
+     */
+    RunningState getRunningState() {
+        if (consumers.size() == 0) {
+            return RunningState.STOPPED
+        }
+
+        List<RunningState> states = consumers*.getState()
+
+        if (states.any { it == RunningState.SHUTTING_DOWN }) {
+            return RunningState.SHUTTING_DOWN
+        }
+
+        if (states.every { it == RunningState.STOPPED }) {
+            return RunningState.STOPPED
+        }
+
+        return RunningState.RUNNING
     }
 }
