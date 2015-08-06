@@ -192,4 +192,24 @@ class RabbitContextProxy implements RabbitContext, InitializingBean {
     void createExchangesAndQueues() {
         target.createExchangesAndQueues()
     }
+
+    /**
+     * Get the overall running state of consumers and connections.
+     *
+     * @return
+     */
+    @Override
+    RunningState getRunningState() {
+        return target.getRunningState()
+    }
+
+    /**
+     * Perform a graceful shutdown of consumers and then disconnect.
+     *
+     * This method blocks until the full shutdown is complete.
+     */
+    @Override
+    void shutdown() {
+        target.shutdown()
+    }
 }

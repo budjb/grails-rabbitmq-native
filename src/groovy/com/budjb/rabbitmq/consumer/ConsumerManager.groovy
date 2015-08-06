@@ -57,4 +57,23 @@ interface ConsumerManager extends RabbitManager<ConsumerContext, ConsumerConfigu
      * @return
      */
     List<ConsumerContext> getContexts(ConnectionContext connectionContext)
+
+    /**
+     * Performs a graceful shutdown of all consumers.
+     */
+    void shutdown()
+
+    /**
+     * Performs a graceful shutdown of all consumers associated with the given connection context.
+     *
+     * @param consumerContext
+     */
+    void shutdown(ConsumerContext consumerContext)
+
+    /**
+     * Performs a graceful shutdown of the consumer with the given name.
+     *
+     * @param name
+     */
+    void shutdown(String name)
 }
