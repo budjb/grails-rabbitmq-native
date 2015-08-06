@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
     <head>
-        <title>Rabbitmq Native Plugin 3.1.1</title>
+        <title>Rabbitmq Native Plugin 3.1.2</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8" />
         <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8" />
@@ -68,7 +68,7 @@ function addJsClass(el) {
                         <div class="project">
                             <h1>Rabbitmq Native Plugin - Reference Documentation</h1>
                             <p><strong>Authors:</strong> Bud Byrd</p>
-                            <p><strong>Version:</strong> 3.1.1</p>
+                            <p><strong>Version:</strong> 3.1.2</p>
                             
                         </div>
 
@@ -838,7 +838,13 @@ the <code>RabbitContext</code>, <code>RabbitMessageBuilder</code>, or any of the
 
 
 <h1 id="changelog">9 Changelog</h1>
-<h3>Version 3.1.1 - 5/13/2015</h3>
+<h3>Version 3.1.2 - 8/6/2015</h3>
+<ul class="star">
+<li>Added graceful shutdown support. See <code>rabbitContext.shutdown()</code>.</li>
+<li>Added methods to check running state on most managers and contexts.</li>
+<li>Updated rabbitmq Java library to 3.5.4.</li>
+<li>Added the <code>gpars</code> plugin as a dependency.</li>
+</ul><p class="paragraph"/><h3>Version 3.1.1 - 5/13/2015</h3>
 <ul class="star">
 <li>Refactored the code to load a consumer's configuration from a static variable so that it works correctly when the&#10;  consumer is annotated with <code>&#64;Transactional</code>.&#10;  (<a href="http://github.com/budjb/grails-rabbitmq-native/issues/55" target="blank">#55</a>)</li>
 <li>Add setter methods for the message TTL (<code>expiration</code>).&#10;  (<a href="http://github.com/budjb/grails-rabbitmq-native/issues/56" target="blank">#56</a>)</li>
