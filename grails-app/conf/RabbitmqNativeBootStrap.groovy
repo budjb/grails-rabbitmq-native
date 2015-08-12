@@ -17,9 +17,19 @@ import com.budjb.rabbitmq.RabbitContext
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 class RabbitmqNativeBootStrap {
+    /**
+     * Rabbit Context.
+     */
     RabbitContext rabbitContext
+
+    /**
+     * Grails Application.
+     */
     GrailsApplication grailsApplication
 
+    /**
+     * Bootstrap initialization.
+     */
     def init = { servletContext ->
         def autoStartup = grailsApplication.config.rabbitmq.autoStart
         if (!(autoStartup instanceof Boolean) || autoStartup == true) {
@@ -27,6 +37,9 @@ class RabbitmqNativeBootStrap {
         }
     }
 
+    /**
+     * Application shutdown.
+     */
     def destroy = {
         rabbitContext.stop()
     }

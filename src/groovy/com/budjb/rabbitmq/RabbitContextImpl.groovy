@@ -20,6 +20,7 @@ import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
+import com.budjb.rabbitmq.report.ConnectionReport
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 
@@ -319,5 +320,21 @@ class RabbitContextImpl implements RabbitContext {
     void shutdown() {
         consumerManager.shutdown()
         connectionManager.stop()
+    }
+
+    /**
+     * Generates a report about all connections and consumers.
+     *
+     * @return
+     */
+    @Override
+    List<ConnectionReport> getStatusReport() {
+        return connectionManager.getContexts().collect {
+            ConnectionReport report = it.getStatusReport()
+
+            report.consumers = consumerManager.getContexts(it)*.getStatusReport()
+
+            return report
+        }
     }
 }

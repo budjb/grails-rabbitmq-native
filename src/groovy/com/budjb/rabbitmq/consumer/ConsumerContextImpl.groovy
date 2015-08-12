@@ -23,10 +23,8 @@ import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.MessageConvertException
 import com.budjb.rabbitmq.publisher.RabbitMessageProperties
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
-import com.rabbitmq.client.AMQP
+import com.budjb.rabbitmq.report.ConsumerReport
 import com.rabbitmq.client.Channel
-import com.rabbitmq.client.DefaultConsumer
-import com.rabbitmq.client.Envelope
 import groovyx.gpars.GParsPool
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
@@ -37,111 +35,6 @@ class ConsumerContextImpl implements ConsumerContext {
     /**
      * Consumer object used to receive messages from the RabbitMQ library.
      */
-    private class RabbitConsumer extends DefaultConsumer {
-        /**
-         * Consumer context containing the context for this consumer.
-         */
-        ConsumerContextImpl context
-
-        /**
-         * Connection context associated with the consumer.
-         */
-        ConnectionContext connectionContext
-
-        /**
-         * Consumer tag.
-         */
-        String consumerTag
-
-        /**
-         * Lock to synchronize access to the processing flag.
-         */
-        private final Object processLock = new Object()
-
-        /**
-         * Current state of the consumer.
-         */
-        RunningState state = RunningState.STOPPED
-
-        /**
-         * Constructs an instance of a consumer.
-         *
-         * @param channel
-         * @param context
-         */
-        private RabbitConsumer(Channel channel, ConsumerContextImpl context, ConnectionContext connectionContext) {
-            // Run the parent
-            super(channel)
-
-            // Store the context
-            this.context = context
-
-            // Store the connection context
-            this.connectionContext = connectionContext
-        }
-
-        /**
-         * Passes delivery of a message back to the context for processing.
-         *
-         * @param consumerTag
-         * @param envelope
-         * @param properties
-         * @param body
-         */
-        @Override
-        void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
-            synchronized (processLock) {
-                // Wrap up the parameters into a context
-                MessageContext context = new MessageContext(
-                    channel: channel,
-                    consumerTag: consumerTag,
-                    envelope: envelope,
-                    properties: properties,
-                    body: body,
-                    connectionContext: connectionContext
-                )
-
-                // Hand off the message to the context.
-                ConsumerContextImpl.this.deliverMessage(context)
-            }
-        }
-
-        /**
-         * Gracefully stops the consumer, allowing any in-flight processing to complete.
-         */
-        void shutdown() {
-            state = RunningState.SHUTTING_DOWN
-
-            if (consumerTag) {
-                channel.basicCancel(consumerTag)
-                consumerTag = null
-            }
-
-            synchronized (processLock) {
-                if (channel.isOpen()) {
-                    channel.close()
-                }
-
-                state = RunningState.STOPPED
-            }
-        }
-
-        /**
-         * Stops the consumer immediately. Messages being processed will likely fail.
-         */
-        void stop() {
-            if (consumerTag) {
-                channel.basicCancel(consumerTag)
-                consumerTag = null
-            }
-
-            if (channel.isOpen()) {
-                channel.close()
-            }
-
-            state = RunningState.STOPPED
-        }
-    }
 
     /**
      * Name of the handler method a consumer is expected to define.
@@ -206,7 +99,7 @@ class ConsumerContextImpl implements ConsumerContext {
     /**
      * List of active rabbit consumers.
      */
-    protected List<RabbitConsumer> consumers = []
+    protected List<RabbitMessageHandler> consumers = []
 
     /**
      * Constructor.
@@ -341,7 +234,7 @@ class ConsumerContextImpl implements ConsumerContext {
                 channel.basicQos(configuration.prefetchCount)
 
                 // Create the rabbit consumer object
-                RabbitConsumer consumer = new RabbitConsumer(channel, this, connectionContext)
+                RabbitMessageHandler consumer = new RabbitMessageHandler(channel, queue, this, connectionContext)
 
                 // Set up the consumer
                 String consumerTag = channel.basicConsume(
@@ -349,12 +242,6 @@ class ConsumerContextImpl implements ConsumerContext {
                     configuration.autoAck == AutoAck.ALWAYS,
                     consumer
                 )
-
-                // Store the consumer tag
-                consumer.consumerTag = consumerTag
-
-                // Mark the consumer as started
-                consumer.state = RunningState.RUNNING
 
                 // Store the consumer
                 consumers << consumer
@@ -380,7 +267,7 @@ class ConsumerContextImpl implements ConsumerContext {
             channel.basicQos(configuration.prefetchCount)
 
             // Create the rabbit consumer object
-            RabbitConsumer consumer = new RabbitConsumer(channel, this, connectionContext)
+            RabbitMessageHandler consumer = new RabbitMessageHandler(channel, queue, this, connectionContext)
 
             // Set up the consumer
             String consumerTag = channel.basicConsume(
@@ -388,12 +275,6 @@ class ConsumerContextImpl implements ConsumerContext {
                 configuration.autoAck == AutoAck.ALWAYS,
                 consumer
             )
-
-            // Store the consumer tag
-            consumer.consumerTag = consumerTag
-
-            // Mark the consumer as started
-            consumer.state = RunningState.RUNNING
 
             // Store the consumer
             consumers << consumer
@@ -439,11 +320,37 @@ class ConsumerContextImpl implements ConsumerContext {
     }
 
     /**
+     * Generate a status report about the context and its consumers.
+     *
+     * @return
+     */
+    @Override
+    ConsumerReport getStatusReport() {
+        ConsumerReport report = new ConsumerReport()
+
+        ConsumerConfiguration configuration = getConfiguration()
+
+        report.name = getId()
+        report.fullName = this.getClass().name
+
+        report.runningState = getRunningState()
+
+        report.queue = configuration.queue ?: consumers.size() > 0 ? consumers[0].queue : null
+
+        report.numConfigured = configuration.consumers
+        report.numConsuming = consumers.count { it.getRunningState() == RunningState.RUNNING }
+        report.numProcessing = consumers.count { it.isProcessing() }
+        report.load = report.numConsuming > 0 ? report.numProcessing / report.numConsuming * 100 : 0
+
+        return report
+    }
+
+    /**
      * Processes and delivers an incoming message to the consumer.
      *
      * @param context
      */
-    private void deliverMessage(MessageContext context) {
+    void deliverMessage(MessageContext context) {
         Object response
         try {
             // Process the message
@@ -763,7 +670,7 @@ class ConsumerContextImpl implements ConsumerContext {
             return RunningState.STOPPED
         }
 
-        List<RunningState> states = consumers*.getState()
+        List<RunningState> states = consumers*.getRunningState()
 
         if (states.any { it == RunningState.SHUTTING_DOWN }) {
             return RunningState.SHUTTING_DOWN

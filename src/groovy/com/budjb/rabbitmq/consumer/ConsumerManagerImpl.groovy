@@ -327,7 +327,9 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      */
     @Override
     List<ConsumerContext> getContexts(ConnectionContext connectionContext) {
-        return consumers.findAll { it.connectionName == connectionContext.id }
+        return consumers.findAll {
+            return (connectionContext.isDefault && !it.connectionName) || (it.connectionName == connectionContext.id)
+        }
     }
 
     /**

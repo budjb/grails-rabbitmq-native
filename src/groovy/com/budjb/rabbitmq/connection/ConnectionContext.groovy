@@ -16,6 +16,7 @@
 package com.budjb.rabbitmq.connection
 
 import com.budjb.rabbitmq.RabbitManagedContext
+import com.budjb.rabbitmq.report.ConnectionReport
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 
@@ -54,4 +55,11 @@ interface ConnectionContext extends RabbitManagedContext {
      * @return
      */
     Channel createChannel() throws IllegalStateException
+
+    /**
+     * Create a status report of the connection context.
+     *
+     * @return
+     */
+    ConnectionReport getStatusReport()
 }

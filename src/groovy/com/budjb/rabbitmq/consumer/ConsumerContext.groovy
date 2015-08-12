@@ -16,6 +16,7 @@
 package com.budjb.rabbitmq.consumer
 
 import com.budjb.rabbitmq.RabbitManagedContext
+import com.budjb.rabbitmq.report.ConsumerReport
 
 interface ConsumerContext extends RabbitManagedContext {
     /**
@@ -43,4 +44,18 @@ interface ConsumerContext extends RabbitManagedContext {
      * Performs a graceful shutdown.
      */
     void shutdown()
+
+    /**
+     * Generate a status report about the context and its consumers.
+     *
+     * @return
+     */
+    ConsumerReport getStatusReport()
+
+    /**
+     * Processes and delivers an incoming message to the consumer.
+     *
+     * @param context
+     */
+    void deliverMessage(MessageContext context)
 }

@@ -184,7 +184,7 @@ class RabbitmqNativeGrailsPlugin {
         }
 
         // Load and start the rabbit service, without starting consumers.
-        RabbitContext rabbitContext = applicationContext.getBean('rabbitContext')
+        RabbitContext rabbitContext = (RabbitContext)applicationContext.getBean('rabbitContext')
         rabbitContext.load()
         rabbitContext.start(true)
     }

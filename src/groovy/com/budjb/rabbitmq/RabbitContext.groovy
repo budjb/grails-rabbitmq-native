@@ -20,6 +20,7 @@ import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
+import com.budjb.rabbitmq.report.ConnectionReport
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 
@@ -214,4 +215,11 @@ interface RabbitContext {
      * This method blocks until the full shutdown is complete.
      */
     void shutdown()
+
+    /**
+     * Generates a report about all connections and consumers.
+     *
+     * @return
+     */
+    List<ConnectionReport> getStatusReport()
 }
