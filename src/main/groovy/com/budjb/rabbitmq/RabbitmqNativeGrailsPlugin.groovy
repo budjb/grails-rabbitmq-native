@@ -89,7 +89,7 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
     def pluginExcludes = [
         'test/**',
         'grails-app/rabbit-consumers/**',
-        'grails-app/conf/application.groovyroovy',
+        'grails-app/conf/application.groovy',
         'src/groovy/com/budjb/rabbitmq/test/**',
         'src/docs/**'
     ]

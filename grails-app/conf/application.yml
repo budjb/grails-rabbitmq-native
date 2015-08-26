@@ -2,7 +2,7 @@
 grails:
     profile: web-plugin
     codegen:
-        defaultPackage: rabbitmq.native
+        defaultPackage: com.budjb.rabbitmq
 info:
     app:
         name: '@info.app.name@'
