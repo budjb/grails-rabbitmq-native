@@ -247,6 +247,9 @@ class RabbitContextImplSpec extends Specification {
     }
 
     def 'Ensure stopConnection(String) is proxied to the connection manager'() {
+        setup:
+        connectionManager.getContext('connection') >> Mock(ConnectionContext)
+
         when:
         rabbitContext.stopConnection('connection')
 

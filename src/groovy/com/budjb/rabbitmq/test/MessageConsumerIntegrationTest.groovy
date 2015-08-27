@@ -16,7 +16,7 @@
 package com.budjb.rabbitmq.test
 
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
-import grails.plugin.spock.IntegrationSpec
+import grails.test.spock.IntegrationSpec
 
 import java.util.concurrent.TimeoutException
 
