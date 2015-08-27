@@ -15,8 +15,8 @@
  */
 package com.budjb.rabbitmq.test
 
-import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.RabbitContext
+import com.budjb.rabbitmq.RunningState
 
 import java.util.concurrent.TimeoutException
 
@@ -194,18 +194,5 @@ class StartStopConsumerSpec extends MessageConsumerIntegrationTest {
 
         then:
         rabbitContext.getRunningState() == RunningState.RUNNING
-    }
-
-    class ShutdownRunnable implements Runnable {
-        RabbitContext rabbitContext
-
-        ShutdownRunnable(RabbitContext rabbitContext) {
-            this.rabbitContext = rabbitContext
-        }
-
-        @Override
-        void run() {
-            rabbitContext.shutdown()
-        }
     }
 }
