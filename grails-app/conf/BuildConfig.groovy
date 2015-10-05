@@ -37,6 +37,5 @@ grails.project.dependency.resolution = {
         test ":code-coverage:1.2.7", {
             export = false
         }
-        compile ":gpars:0.3"
     }
 }
