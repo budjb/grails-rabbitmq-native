@@ -467,8 +467,8 @@ class ConsumerManagerImplSpec extends Specification {
         }
     }
 
-    class Consumer2 extends MessageConsumer {
-        Map rabbitConfig = [
+    class Consumer2 {
+        static rabbitConfig = [
             'queue': 'test-queue-2'
         ]
 

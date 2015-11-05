@@ -15,6 +15,24 @@
  */
 package com.budjb.rabbitmq.test
 
-import com.budjb.rabbitmq.consumer.MessageConsumer
+class MissingConfigurationConsumer {
+    def handleMessage(def body, def context) {
 
-class MissingConfigurationConsumer extends MessageConsumer { }
+    }
+
+    void onReceive(def context) {
+
+    }
+
+    def onSuccess(def context) {
+
+    }
+
+    def onComplete(def context) {
+
+    }
+
+    def onFailure(def context) {
+
+    }
+}

@@ -15,11 +15,10 @@
  */
 package com.budjb.rabbitmq.test
 
-import com.budjb.rabbitmq.consumer.MessageConsumer
 import com.budjb.rabbitmq.consumer.MessageContext
 
-class Connection2Consumer extends MessageConsumer {
-    Map rabbitConfig = [
+class Connection2Consumer {
+    static rabbitConfig = [
         connection: 'connection2',
         queue: 'connection2-queue'
     ]

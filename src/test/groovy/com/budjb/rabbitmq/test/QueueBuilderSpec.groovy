@@ -15,6 +15,7 @@
  */
 package com.budjb.rabbitmq.test
 
+import com.budjb.rabbitmq.QueueBuilder
 import com.budjb.rabbitmq.QueueBuilderImpl
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
@@ -25,7 +26,7 @@ import org.grails.config.PropertySourcesConfig
 import spock.lang.Specification
 
 class QueueBuilderSpec extends Specification {
-    QueueBuilderImpl queueBuilder
+    QueueBuilder queueBuilder
     GrailsApplication grailsApplication
     ConnectionManager connectionManager
 

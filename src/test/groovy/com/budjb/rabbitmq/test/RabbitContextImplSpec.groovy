@@ -23,7 +23,7 @@ import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerContext
 import com.budjb.rabbitmq.consumer.ConsumerManager
-import com.budjb.rabbitmq.consumer.MessageConsumer
+
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import grails.core.GrailsApplication
@@ -96,7 +96,7 @@ class RabbitContextImplSpec extends Specification {
 
     def 'Ensure registerConsumer(Object) is proxied to the rabbit consumer manager'() {
         setup:
-        MessageConsumer consumer = Mock(MessageConsumer)
+        Object consumer = Mock(Object)
         ConsumerContext context = Mock(ConsumerContext)
 
         consumerManager.createContext(consumer) >> context

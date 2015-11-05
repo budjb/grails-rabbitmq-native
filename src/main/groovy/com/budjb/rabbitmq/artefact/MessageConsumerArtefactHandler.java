@@ -13,27 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.budjb.rabbitmq.artefact
+package com.budjb.rabbitmq.artefact;
 
-import com.budjb.rabbitmq.converter.MessageConverter
-import grails.core.ArtefactHandlerAdapter
+import grails.core.ArtefactHandlerAdapter;
 
-public class MessageConverterArtefactHandler extends ArtefactHandlerAdapter {
+public class MessageConsumerArtefactHandler extends ArtefactHandlerAdapter {
     /**
      * Our artefact type.
      */
-    static final String TYPE = "MessageConverter"
+    public static final String TYPE = "MessageConsumer";
 
     /**
      * Class suffix.
      */
-    static final String SUFFIX = "Converter"
+    public static final String SUFFIX = "Consumer";
 
     /**
      * Constructor.
      */
-    MessageConverterArtefactHandler() {
-        super(TYPE, GrailsMessageConverterClass, DefaultGrailsMessageConverterClass, SUFFIX)
+    public MessageConsumerArtefactHandler() {
+        super(TYPE, GrailsMessageConsumerClass.class, DefaultGrailsMessageConsumerClass.class, SUFFIX);
     }
 
     /**
@@ -42,21 +41,21 @@ public class MessageConverterArtefactHandler extends ArtefactHandlerAdapter {
      * @param clazz
      * @return
      */
-    boolean isArtefactClass(Class clazz) {
+    public boolean isArtefactClass(@SuppressWarnings("rawtypes") Class clazz) {
         if (clazz == null) {
-            return false
+            return false;
         }
 
-        return isMessageConverter(clazz)
+        return isConsumer(clazz);
     }
 
     /**
-     * Determines if a class is a message converter.
+     * Determines if a class is a RabbitMQ consumer.
      *
      * @param clazz
      * @return
      */
-    static boolean isMessageConverter(@SuppressWarnings("rawtypes") Class clazz) {
-        return clazz.getName().endsWith(SUFFIX) && MessageConverter.class.isAssignableFrom(clazz)
+    public static boolean isConsumer(@SuppressWarnings("rawtypes") Class clazz) {
+        return clazz.getName().endsWith(SUFFIX);
     }
 }

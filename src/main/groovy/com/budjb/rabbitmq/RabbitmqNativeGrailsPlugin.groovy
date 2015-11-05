@@ -121,42 +121,47 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
      * Spring actions.
      */
     Closure doWithSpring() {{ ->
-        if (grailsApplication.config.rabbitmq.enabled == false) {
-            log.warn("The rabbitmq-native plugin has been disabled by the application's configuration.")
-            rabbitContext(NullRabbitContext)
+        // Create the null rabbit context bean
+        'nullRabbitContext'(NullRabbitContext)
+
+        // Create the live rabbit context bean
+        'rabbitContextImpl'(RabbitContextImpl) { bean ->
+            bean.autowire = true
         }
-        else {
-            rabbitContext(RabbitContextImpl) {
-                messageConverterManager = ref('messageConverterManager')
-                connectionManager = ref('connectionManager')
-                consumerManager = ref('consumerManager')
-                queueBuilder = ref('queueBuilder')
+
+        // Create the proxy rabbit context bean
+        'rabbitContext'(RabbitContextProxy) {
+            if (grailsApplication.config.rabbitmq.enabled == false) {
+                log.warn("The rabbitmq-native plugin has been disabled by the application's configuration.")
+                target = ref('nullRabbitContext')
+            }
+            else {
+                target = ref('rabbitContextImpl')
             }
         }
 
-        connectionManager(ConnectionManagerImpl) {
-            connectionBuilder = ref('connectionBuilder')
+        "connectionManager"(ConnectionManagerImpl) { bean ->
+            bean.autowire = true
         }
 
-        connectionBuilder(ConnectionBuilderImpl) {
-            connectionManager = ref('connectionManager')
+        "connectionBuilder"(ConnectionBuilderImpl) { bean ->
+            bean.autowire = true
         }
 
-        queueBuilder(QueueBuilderImpl) {
-            connectionManager = ref('connectionManager')
+        "queueBuilder"(QueueBuilderImpl) { bean ->
+            bean.autowire = true
         }
 
-        messageConverterManager(MessageConverterManagerImpl)
-
-        consumerManager(ConsumerManagerImpl) {
-            messageConverterManager = ref('messageConverterManager')
-            rabbitMessagePublisher = ref('rabbitMessagePublisher')
-            connectionManager = ref('connectionManager')
+        "messageConverterManager"(MessageConverterManagerImpl) { bean ->
+            bean.autowire = true
         }
 
-        rabbitMessagePublisher(RabbitMessagePublisherImpl) {
-            connectionManager = ref('connectionManager')
-            messageConverterManager = ref('messageConverterManager')
+        "consumerManager"(ConsumerManagerImpl) { bean ->
+            bean.autowire = true
+        }
+
+        "rabbitMessagePublisher"(RabbitMessagePublisherImpl) { bean ->
+            bean.autowire = true
         }
 
         // Create application-provided converter beans

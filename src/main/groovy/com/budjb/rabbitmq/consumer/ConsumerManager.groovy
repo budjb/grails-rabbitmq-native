@@ -26,7 +26,7 @@ interface ConsumerManager extends RabbitManager<ConsumerContext, ConsumerConfigu
      * @param consumer
      * @return
      */
-    ConsumerContext createContext(MessageConsumer consumer)
+    ConsumerContext createContext(Object consumer)
 
     /**
      * Create a consumer context withe consumer represented by the given Grails artefact.

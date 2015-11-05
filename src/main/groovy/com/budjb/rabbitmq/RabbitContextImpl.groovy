@@ -16,10 +16,8 @@
 package com.budjb.rabbitmq
 
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
-import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
-import com.budjb.rabbitmq.consumer.MessageConsumer
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.report.ConnectionReport
@@ -155,7 +153,7 @@ class RabbitContextImpl implements RabbitContext {
      */
     @Override
     void stopConsumers(String connectionName) {
-        consumerManager.stop((ConnectionContext)connectionManager.getContext(connectionName))
+        consumerManager.stop(connectionManager.getContext(connectionName))
     }
 
     /**
@@ -174,7 +172,7 @@ class RabbitContextImpl implements RabbitContext {
      * @param candidate
      */
     @Override
-    void registerConsumer(MessageConsumer consumer) {
+    void registerConsumer(Object consumer) {
         consumerManager.register(consumerManager.createContext(consumer))
     }
 
