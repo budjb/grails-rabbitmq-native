@@ -16,6 +16,7 @@
 package com.budjb.rabbitmq.test
 
 import com.budjb.rabbitmq.RabbitContext
+import com.budjb.rabbitmq.RunningState
 import grails.test.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -140,5 +141,66 @@ class StartStopConsumerSpec extends MessageConsumerIntegrationTest {
         then:
         notThrown TimeoutException
         response.body == 'hello'
+    }
+
+    def 'When no messages are being consumed, shutting down should immediately stop consuming'() {
+        setup:
+        Thread thread = new Thread(new ShutdownRunnable(rabbitContext))
+
+        expect:
+        rabbitContext.getRunningState() == RunningState.RUNNING
+
+        when:
+        thread.start()
+        sleep(500)
+
+        then:
+        rabbitContext.getRunningState() == RunningState.STOPPED
+
+        when:
+        thread.join()
+        rabbitContext.start()
+
+        then:
+        rabbitContext.getRunningState() == RunningState.RUNNING
+    }
+
+    def 'When messages are being consumed, shutting down should wait until in-flight messages are complete'() {
+        setup:
+        Thread thread = new Thread(new ShutdownRunnable(rabbitContext))
+
+        expect:
+        rabbitContext.getRunningState() == RunningState.RUNNING
+
+        when:
+        rabbitMessagePublisher.send {
+            routingKey = 'sleeping'
+            body = 10000
+        }
+
+        thread.start()
+
+        sleep(1000)
+
+        then:
+        rabbitContext.getRunningState() == RunningState.SHUTTING_DOWN
+
+        when:
+        sleep(1000)
+
+        then:
+        rabbitContext.getRunningState() == RunningState.SHUTTING_DOWN
+
+        when:
+        thread.join()
+
+        then:
+        rabbitContext.getRunningState() == RunningState.STOPPED
+
+        when:
+        rabbitContext.start()
+
+        then:
+        rabbitContext.getRunningState() == RunningState.RUNNING
     }
 }

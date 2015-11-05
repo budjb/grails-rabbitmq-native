@@ -21,6 +21,7 @@ import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.consumer.MessageConsumer
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
+import com.budjb.rabbitmq.report.ConnectionReport
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 
@@ -201,4 +202,25 @@ interface RabbitContext {
      * Creates any configured exchanges and queues.
      */
     void createExchangesAndQueues()
+
+    /**
+     * Get the overall running state of consumers and connections.
+     *
+     * @return
+     */
+    RunningState getRunningState()
+
+    /**
+     * Perform a graceful shutdown of consumers and then disconnect.
+     *
+     * This method blocks until the full shutdown is complete.
+     */
+    void shutdown()
+
+    /**
+     * Generates a report about all connections and consumers.
+     *
+     * @return
+     */
+    List<ConnectionReport> getStatusReport()
 }

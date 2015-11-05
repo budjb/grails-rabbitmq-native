@@ -15,6 +15,7 @@
  */
 package com.budjb.rabbitmq.test.consumer
 
+import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerConfiguration
@@ -141,6 +142,7 @@ class ConsumerContextImplSpec extends Specification {
         configuration.consumers = 5
 
         ConnectionContext connectionContext = Mock(ConnectionContext)
+        connectionContext.getRunningState() >> RunningState.RUNNING
         connectionContext.createChannel(*_) >> {
             return Mock(Channel)
         }
@@ -206,6 +208,7 @@ class ConsumerContextImplSpec extends Specification {
         channel.queueDeclare(*_) >> { new DeclareOk('temp-queue', 0, 0) }
 
         ConnectionContext connectionContext = Mock(ConnectionContext)
+        connectionContext.getRunningState() >> RunningState.RUNNING
         connectionContext.createChannel(*_) >> channel
 
         connectionManager.getContext(*_) >> connectionContext

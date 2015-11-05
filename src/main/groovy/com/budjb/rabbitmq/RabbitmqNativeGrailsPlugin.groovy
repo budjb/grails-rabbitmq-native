@@ -31,7 +31,7 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
     /**
      * Version of the plugin.
      */
-    def version = "3.1.0"
+    def version = "3.1.2"
 
     /**
      * The version or versions of Grails the plugin is designed for.
@@ -184,7 +184,7 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
         }
 
         // Load and start the rabbit service, without starting consumers.
-        RabbitContext rabbitContext = applicationContext.getBean('rabbitContext')
+        RabbitContext rabbitContext = (RabbitContext)applicationContext.getBean('rabbitContext')
         rabbitContext.load()
         rabbitContext.start(true)
     }

@@ -119,6 +119,10 @@ class ConnectionConfigurationImpl implements ConnectionConfiguration {
                 continue
             }
 
+            if (value instanceof ConfigObject) {
+                continue
+            }
+
             try {
                 return value.asType(clazz)
             }

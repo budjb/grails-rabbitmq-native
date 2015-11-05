@@ -65,7 +65,7 @@ dependencies {
 
     console "org.grails:grails-console"
 
-    compile 'com.rabbitmq:amqp-client:3.5.0'
+    compile 'com.rabbitmq:amqp-client:3.5.4'
 }
 
 task wrapper(type: Wrapper) {

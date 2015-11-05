@@ -15,6 +15,7 @@
  */
 package com.budjb.rabbitmq.test.consumer
 
+import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.*
@@ -63,7 +64,7 @@ class ConsumerManagerImplSpec extends Specification {
         UnitTestConsumer consumer = new UnitTestConsumer()
 
         when:
-        ConsumerContextImpl context = consumerManager.createContext(consumer)
+        ConsumerContextImpl context = (ConsumerContextImpl) consumerManager.createContext(consumer)
 
         then:
         context.consumer == consumer
@@ -153,9 +154,11 @@ class ConsumerManagerImplSpec extends Specification {
         setup:
         ConsumerContext consumerContext1 = Mock(ConsumerContext)
         consumerContext1.getId() >> "Consumer1"
+        consumerContext1.getRunningState() >> RunningState.STOPPED
 
         ConsumerContext consumerContext2 = Mock(ConsumerContext)
         consumerContext2.getId() >> "Consumer2"
+        consumerContext2.getRunningState() >> RunningState.STOPPED
 
         consumerManager.register(consumerContext1)
         consumerManager.register(consumerContext2)
@@ -172,9 +175,11 @@ class ConsumerManagerImplSpec extends Specification {
         setup:
         ConsumerContext consumerContext1 = Mock(ConsumerContext)
         consumerContext1.getId() >> "Consumer1"
+        consumerContext1.getRunningState() >> RunningState.STOPPED
 
         ConsumerContext consumerContext2 = Mock(ConsumerContext)
         consumerContext2.getId() >> "Consumer2"
+        consumerContext2.getRunningState() >> RunningState.STOPPED
 
         consumerManager.register(consumerContext1)
         consumerManager.register(consumerContext2)
@@ -254,7 +259,7 @@ class ConsumerManagerImplSpec extends Specification {
             rabbitmq: [
                 consumers: [
                     'MissingConfigurationConsumer': [
-                        queue: 'test-queue',
+                        queue    : 'test-queue',
                         consumers: 10
                     ]
                 ]
@@ -292,7 +297,7 @@ class ConsumerManagerImplSpec extends Specification {
         MissingConfigurationConsumer consumer = new MissingConfigurationConsumer()
 
         when:
-        ConsumerContext consumerContext = consumerManager.createContext(consumer)
+        consumerManager.createContext(consumer)
 
         then:
         thrown MissingConfigurationException
@@ -332,22 +337,18 @@ class ConsumerManagerImplSpec extends Specification {
     def 'If all consumers are started while some of those consumers are already started, the IllegalStateException should be swallowed'() {
         setup:
         ConsumerContext consumer1 = Mock(ConsumerContext)
+        consumer1.getRunningState() >> RunningState.RUNNING
+
         ConsumerContext consumer2 = Mock(ConsumerContext)
+        consumer2.getRunningState() >> RunningState.STOPPED
 
         consumerManager.consumers = [consumer1, consumer2]
-
-        when:
-        consumerManager.start(consumer1)
-
-        then:
-        1 * consumer1.start()
-        0 * consumer2.start()
 
         when:
         consumerManager.start()
 
         then:
-        1 * consumer1.start() >> { throw new IllegalStateException('already started bro') }
+        0 * consumer1.start()
         1 * consumer2.start()
         notThrown IllegalStateException
     }
@@ -423,12 +424,45 @@ class ConsumerManagerImplSpec extends Specification {
         1 * consumer2.stop()
     }
 
-    class Consumer1 extends MessageConsumer {
-        Map rabbitConfig = [
+    def 'When a consumer context is shutting down, starting consumers will throw an IllegalStateException'() {
+        setup:
+        ConsumerContext consumer1 = Mock(ConsumerContext)
+        consumer1.getRunningState() >> RunningState.STOPPED
+
+        ConsumerContext consumer2 = Mock(ConsumerContext)
+        consumer2.getRunningState() >> RunningState.SHUTTING_DOWN
+
+        consumerManager.consumers = [consumer1, consumer2]
+
+        when:
+        consumerManager.start()
+
+        then:
+        thrown IllegalStateException
+    }
+
+    def 'When a consumer is already running, starting consumers has no effect'() {
+        setup:
+        ConsumerContext consumer1 = Mock(ConsumerContext)
+        consumer1.getRunningState() >> RunningState.RUNNING
+
+        ConsumerContext consumer2 = Mock(ConsumerContext)
+        consumer2.getRunningState() >> RunningState.RUNNING
+
+        when:
+        consumerManager.start()
+
+        then:
+        0 * consumer1.start()
+        0 * consumer2.start()
+    }
+
+    class Consumer1 {
+        static rabbitConfig = [
             'queue': 'test-queue-1'
         ]
 
-        def handleMessage(def body, def messageConext) {
+        def handleMessage(def body, def messageContext) {
 
         }
     }

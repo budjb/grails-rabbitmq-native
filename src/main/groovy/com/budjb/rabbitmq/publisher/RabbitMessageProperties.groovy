@@ -80,7 +80,7 @@ class RabbitMessageProperties {
     String replyTo
 
     /**
-     * Message expiration.
+     * Message TTL.
      */
     String expiration
 
@@ -219,5 +219,23 @@ class RabbitMessageProperties {
         }
 
         return builder.build()
+    }
+
+    /**
+     * Sets the message TTL.
+     *
+     * @param expiration
+     */
+    void setExpiration(String expiration) {
+        this.expiration = expiration
+    }
+
+    /**
+     * Sets the message TTL.
+     *
+     * @param expiration
+     */
+    void setExpiration(Number expiration) {
+        this.expiration = expiration.toString()
     }
 }

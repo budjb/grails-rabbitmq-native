@@ -1,7 +1,18 @@
-h3. Version 3.1.1 - TODO
+h3. Version 3.1.2 - 8/6/2015
+* Added graceful shutdown support. See @rabbitContext.shutdown()@.
+* Added methods to check running state on most managers and contexts.
+* Updated rabbitmq Java library to 3.5.4.
+* Added the @gpars@ plugin as a dependency.
+
+h3. Version 3.1.1 - 5/13/2015
 * Refactored the code to load a consumer's configuration from a static variable so that it works correctly when the\
   consumer is annotated with @\@Transactional@.\
   ([#55|http://github.com/budjb/grails-rabbitmq-native/issues/55])
+* Add setter methods for the message TTL (@expiration@).\
+  ([#56|http://github.com/budjb/grails-rabbitmq-native/issues/56])
+* Fix bug where missing connection configuration values do not allow the use of default values.
+* Remove checked exception from ConsumerManageImpl that does not exist in its interface.\
+  ([#59|http://github.com/budjb/grails-rabbitmq-native/issues/59])
 
 h3. Version 3.1.0 - 3/13/2015
 * Update the RabbitMQ Client Java library to 3.5.0.

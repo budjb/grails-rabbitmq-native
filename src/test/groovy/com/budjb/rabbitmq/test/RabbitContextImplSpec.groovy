@@ -15,6 +15,7 @@
  */
 package com.budjb.rabbitmq.test
 
+import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.QueueBuilder
 import com.budjb.rabbitmq.RabbitContextImpl
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
@@ -27,6 +28,7 @@ import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import grails.core.GrailsApplication
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class RabbitContextImplSpec extends Specification {
     GrailsApplication grailsApplication
@@ -246,6 +248,9 @@ class RabbitContextImplSpec extends Specification {
     }
 
     def 'Ensure stopConnection(String) is proxied to the connection manager'() {
+        setup:
+        connectionManager.getContext('connection') >> Mock(ConnectionContext)
+
         when:
         rabbitContext.stopConnection('connection')
 
@@ -273,5 +278,47 @@ class RabbitContextImplSpec extends Specification {
 
         then:
         1 * queueBuilder.configureQueues()
+    }
+
+    def 'Ensure all managers are reset when reset() is called'() {
+        when:
+        rabbitContext.reset()
+
+        then:
+        1 * consumerManager.reset()
+        1 * connectionManager.reset()
+        1 * messageConverterManager.reset()
+    }
+
+    def 'When shutdown() is called, the consumer manager is shut down and connection manager is stopped'() {
+        when:
+        rabbitContext.shutdown()
+
+        then:
+        1 * consumerManager.shutdown()
+        1 * connectionManager.stop()
+    }
+
+    @Unroll
+    def 'When consumerManager has state #consumer and connection manager has state #connection, state #result is returned'() {
+        setup:
+        consumerManager.getRunningState() >> consumer
+        connectionManager.getRunningState() >> connection
+
+        when:
+        RunningState resultState = rabbitContext.getRunningState()
+
+        then:
+        resultState == result
+        (consumersStopped) * consumerManager.stop()
+
+        where:
+        consumer                    | connection            | consumersStopped  | result
+        RunningState.RUNNING        | RunningState.RUNNING  | 0                 | RunningState.RUNNING
+        RunningState.STOPPED        | RunningState.RUNNING  | 0                 | RunningState.RUNNING
+        RunningState.SHUTTING_DOWN  | RunningState.RUNNING  | 0                 | RunningState.SHUTTING_DOWN
+        RunningState.RUNNING        | RunningState.STOPPED  | 1                 | RunningState.STOPPED
+        RunningState.STOPPED        | RunningState.STOPPED  | 0                 | RunningState.STOPPED
+        RunningState.SHUTTING_DOWN  | RunningState.STOPPED  | 1                 | RunningState.STOPPED
     }
 }

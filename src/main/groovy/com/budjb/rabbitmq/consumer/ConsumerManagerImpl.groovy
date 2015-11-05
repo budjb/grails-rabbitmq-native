@@ -15,6 +15,7 @@
  */
 package com.budjb.rabbitmq.consumer
 
+import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
@@ -24,6 +25,7 @@ import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import grails.core.GrailsApplication
 import grails.core.GrailsClass
 import grails.persistence.support.PersistenceContextInterceptor
+import groovyx.gpars.GParsPool
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -99,13 +101,14 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      */
     @Override
     void start() {
+        RunningState runningState = getRunningState()
+
+        if (runningState == RunningState.SHUTTING_DOWN) {
+            throw new IllegalStateException('can not start consumers when they are in the process of shutting down')
+        }
+
         consumers.each {
-            try {
-                start(it)
-            }
-            catch (IllegalStateException e) {
-                // Continue...
-            }
+            start(it)
         }
     }
 
@@ -116,7 +119,9 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      */
     @Override
     void start(ConsumerContext context) {
-        context.start()
+        if (context.getRunningState() == RunningState.STOPPED) {
+            context.start()
+        }
     }
 
     /**
@@ -135,7 +140,9 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      */
     @Override
     void stop() {
-        consumers.each { stop(it) }
+        consumers.each {
+            stop(it)
+        }
     }
 
     /**
@@ -220,7 +227,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      * @return
      */
     @Override
-    ConsumerContext createContext(MessageConsumer consumer) throws MissingConfigurationException {
+    ConsumerContext createContext(Object consumer) {
         return new ConsumerContextImpl(
             loadConsumerConfiguration(consumer),
             consumer,
@@ -313,7 +320,41 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      */
     @Override
     List<ConsumerContext> getContexts(ConnectionContext connectionContext) {
-        return consumers.findAll { it.connectionName == connectionContext.id }
+        return consumers.findAll {
+            return (connectionContext.isDefault && !it.connectionName) || (it.connectionName == connectionContext.id)
+        }
+    }
+
+    /**
+     * Performs a graceful shutdown of all consumers.
+     */
+    @Override
+    void shutdown() {
+        GParsPool.withPool {
+            consumers.eachParallel {
+                it.shutdown()
+            }
+        }
+    }
+
+    /**
+     * Performs a graceful shutdown of the given consumer context
+     *
+     * @param consumerContext
+     */
+    @Override
+    void shutdown(ConsumerContext consumerContext) {
+        consumerContext.shutdown()
+    }
+
+    /**
+     * Performs a graceful shutdown of the consumer with the given name.
+     *
+     * @param name
+     */
+    @Override
+    void shutdown(String name) {
+        getContext(name).shutdown()
     }
 
     /**
@@ -324,5 +365,25 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
     @Override
     List<ConsumerContext> getContexts() {
         return consumers
+    }
+
+    /**
+     * Returns the state of the contexts the manager.
+     *
+     * @return
+     */
+    @Override
+    RunningState getRunningState() {
+        List<RunningState> runningStates = consumers*.getRunningState()
+
+        if (runningStates.any { it == RunningState.SHUTTING_DOWN }) {
+            return RunningState.SHUTTING_DOWN
+        }
+        else if (runningStates.every { it == RunningState.STOPPED }) {
+            return RunningState.STOPPED
+        }
+        else {
+            return RunningState.RUNNING
+        }
     }
 }

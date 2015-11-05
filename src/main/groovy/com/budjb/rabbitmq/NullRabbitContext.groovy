@@ -21,6 +21,7 @@ import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.consumer.MessageConsumer
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
+import com.budjb.rabbitmq.report.ConnectionReport
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 
@@ -168,5 +169,35 @@ class NullRabbitContext implements RabbitContext {
     @Override
     void createExchangesAndQueues() {
 
+    }
+
+    /**
+     * Get the overall running state of consumers and connections.
+     *
+     * @return
+     */
+    @Override
+    RunningState getRunningState() {
+        throw new UnsupportedOperationException('can not get state on a null rabbit context')
+    }
+
+    /**
+     * Perform a graceful shutdown of consumers and then disconnect.
+     *
+     * This method blocks until the full shutdown is complete.
+     */
+    @Override
+    void shutdown() {
+
+    }
+
+    /**
+     * Generates a report about all connections and consumers.
+     *
+     * @return
+     */
+    @Override
+    List<ConnectionReport> getStatusReport() {
+        return []
     }
 }

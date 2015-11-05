@@ -15,6 +15,8 @@
  */
 package com.budjb.rabbitmq.connection
 
+import com.budjb.rabbitmq.RunningState
+import com.budjb.rabbitmq.report.ConnectionReport
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
@@ -110,10 +112,20 @@ class ConnectionContextImpl implements ConnectionContext {
             return
         }
 
-        log.debug("closing connection to the RabbitMQ server with name '${getId()}'")
-
         connection.close()
         connection = null
+
+        log.debug("closed connection to the RabbitMQ server with name '${getId()}'")
+    }
+
+    /**
+     * Get the context's state.
+     *
+     * @return
+     */
+    @Override
+    RunningState getRunningState() {
+        return this.connection == null ? RunningState.STOPPED : RunningState.RUNNING
     }
 
     /**
@@ -184,5 +196,25 @@ class ConnectionContextImpl implements ConnectionContext {
     @Override
     void setIsDefault(boolean isDefault) {
         getConfiguration().isDefault = isDefault
+    }
+
+    /**
+     * Create a status report of the connection context.
+     *
+     * @return
+     */
+    @Override
+    ConnectionReport getStatusReport() {
+        ConnectionReport report = new ConnectionReport()
+
+        ConnectionConfiguration configuration = getConfiguration()
+
+        report.name = getId()
+        report.host = configuration.host
+        report.port = configuration.port
+        report.virtualHost = configuration.virtualHost
+        report.runningState = getRunningState()
+
+        return report
     }
 }
