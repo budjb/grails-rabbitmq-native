@@ -25,6 +25,7 @@ import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import grails.core.GrailsApplication
 import grails.core.GrailsClass
 import grails.persistence.support.PersistenceContextInterceptor
+import grails.util.GrailsClassUtils
 import groovyx.gpars.GParsPool
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired

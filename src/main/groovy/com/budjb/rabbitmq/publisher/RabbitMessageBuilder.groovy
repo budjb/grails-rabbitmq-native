@@ -160,7 +160,7 @@ class RabbitMessageBuilder {
         properties.correlationId = correlationId
         properties.deliveryMode = deliveryMode
         properties.exchange = exchange
-        properties.expiration = expiration
+        properties.setExpiration((String)expiration)
         properties.headers = headers
         properties.messageId = messageId
         properties.priority = priority
