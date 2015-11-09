@@ -84,3 +84,26 @@ dependencies {
 task wrapper(type: Wrapper) {
     gradleVersion = gradleWrapperVersion
 }
+
+List excludedFiles = [
+    "application.groovy",
+    "com/budjb/rabbitmq/test/**"
+]
+
+jar {
+    excludedFiles.each {
+        exclude it
+    }
+}
+
+sourcesJar {
+    excludedFiles.each {
+        exclude it
+    }
+}
+
+javadocJar {
+    excludedFiles.each {
+        exclude it
+    }
+}

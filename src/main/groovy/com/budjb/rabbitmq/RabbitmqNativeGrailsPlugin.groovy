@@ -84,17 +84,6 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
     def loadAfter = ['controllers', 'services', 'domains', 'hibernate', 'spring-security-core']
 
     /**
-     * Excluded files.
-     */
-    def pluginExcludes = [
-        'test/**',
-        'grails-app/rabbit-consumers/**',
-        'grails-app/conf/application.groovy',
-        'src/groovy/com/budjb/rabbitmq/test/**',
-        'src/docs/**'
-    ]
-
-    /**
      * Resources this plugin should monitor changes for.
      */
     def watchedResources = [
