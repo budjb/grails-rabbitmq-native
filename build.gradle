@@ -19,19 +19,6 @@ plugins {
 version "3.1.2-beta1"
 group "org.grails.plugins"
 
-bintray {
-    pkg {
-        userOrg = ''
-        name = "$project.name"
-        issueTrackerUrl = "https://github.com/budjb/grails-$project.name/issues"
-        vcsUrl = "https://github.com/budjb/grails-$project.name"
-        version {
-            attributes = ['grails-plugin': "$project.group:$project.name"]
-            name = project.version
-        }
-    }
-}
-
 apply plugin: 'maven-publish'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
@@ -50,6 +37,19 @@ ext {
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
+bintray {
+    pkg {
+        repo = 'grails-plugins'
+        userOrg = ''
+        name = "$project.name"
+        issueTrackerUrl = "https://github.com/budjb/grails-$project.name/issues"
+        vcsUrl = "https://github.com/budjb/grails-$project.name"
+        version {
+            attributes = ['grails-plugin': "$project.group:$project.name"]
+            name = project.version
+        }
+    }
+}
 
 repositories {
     mavenLocal()
