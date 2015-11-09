@@ -29,6 +29,7 @@ class QueueBuilderImpl implements QueueBuilder {
     /**
      * Connection manager.
      */
+    @Autowired
     ConnectionManager connectionManager
 
     /**

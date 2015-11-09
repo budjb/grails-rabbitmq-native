@@ -23,26 +23,31 @@ import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.report.ConnectionReport
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
+import org.springframework.beans.factory.annotation.Autowired
 
 class RabbitContextImpl implements RabbitContext {
     /**
      * Message converter manager.
      */
+    @Autowired
     MessageConverterManager messageConverterManager
 
     /**
      * Connection manager.
      */
+    @Autowired
     ConnectionManager connectionManager
 
     /**
      * Consumer manager.
      */
+    @Autowired
     ConsumerManager consumerManager
 
     /**
      * Queue builder.
      */
+    @Autowired
     QueueBuilder queueBuilder
 
     /**

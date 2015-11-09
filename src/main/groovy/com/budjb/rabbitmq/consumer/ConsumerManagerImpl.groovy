@@ -55,16 +55,19 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
     /**
      * Message converter manager.
      */
+    @Autowired
     MessageConverterManager messageConverterManager
 
     /**
      * Rabbit message publisher.
      */
+    @Autowired
     RabbitMessagePublisher rabbitMessagePublisher
 
     /**
      * Connection manager.
      */
+    @Autowired
     ConnectionManager connectionManager
 
     /**

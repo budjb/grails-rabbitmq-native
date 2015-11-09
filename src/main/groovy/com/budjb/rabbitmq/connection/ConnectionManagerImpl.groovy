@@ -35,6 +35,7 @@ class ConnectionManagerImpl implements ConnectionManager {
     /**
      * Connection builder bean.
      */
+    @Autowired
     ConnectionBuilder connectionBuilder
 
     /**

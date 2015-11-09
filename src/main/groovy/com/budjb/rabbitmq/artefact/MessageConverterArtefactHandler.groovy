@@ -15,24 +15,25 @@
  */
 package com.budjb.rabbitmq.artefact;
 
-import grails.core.ArtefactHandlerAdapter;
+import com.budjb.rabbitmq.converter.MessageConverter
+import grails.core.ArtefactHandlerAdapter
 
 public class MessageConverterArtefactHandler extends ArtefactHandlerAdapter {
     /**
      * Our artefact type.
      */
-    public static final String TYPE = "MessageConverter";
+    static final String TYPE = "MessageConverter"
 
     /**
      * Class suffix.
      */
-    public static final String SUFFIX = "Converter";
+    static final String SUFFIX = "Converter"
 
     /**
      * Constructor.
      */
     public MessageConverterArtefactHandler() {
-        super(TYPE, GrailsMessageConverterClass.class, DefaultGrailsMessageConverterClass.class, SUFFIX);
+        super(TYPE, GrailsMessageConverterClass, DefaultGrailsMessageConverterClass, SUFFIX)
     }
 
     /**
@@ -41,12 +42,12 @@ public class MessageConverterArtefactHandler extends ArtefactHandlerAdapter {
      * @param clazz
      * @return
      */
-    public boolean isArtefactClass(@SuppressWarnings("rawtypes") Class clazz) {
+    boolean isArtefactClass(@SuppressWarnings("rawtypes") Class clazz) {
         if (clazz == null) {
-            return false;
+            return false
         }
 
-        return isMessageConverter(clazz);
+        return isMessageConverter(clazz)
     }
 
     /**
@@ -55,7 +56,7 @@ public class MessageConverterArtefactHandler extends ArtefactHandlerAdapter {
      * @param clazz
      * @return
      */
-    public static boolean isMessageConverter(@SuppressWarnings("rawtypes") Class clazz) {
-        return clazz.getName().endsWith(SUFFIX);
+    static boolean isMessageConverter(@SuppressWarnings("rawtypes") Class clazz) {
+        return clazz.getName().endsWith(SUFFIX) && MessageConverter.class.isAssignableFrom(clazz)
     }
 }

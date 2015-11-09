@@ -15,6 +15,8 @@
  */
 package com.budjb.rabbitmq.connection
 
+import org.springframework.beans.factory.annotation.Autowired
+
 /**
  * Builder class for building connection contexts from a configuration file.
  */
@@ -41,6 +43,7 @@ class ConnectionBuilderImpl implements ConnectionBuilder {
     /**
      * Connection manager.
      */
+    @Autowired
     ConnectionManager connectionManager
 
     /**

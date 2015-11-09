@@ -105,14 +105,6 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
     ]
 
     /**
-     * Custom artefacts
-     */
-    def artefacts = [
-        new MessageConverterArtefactHandler(),
-        new MessageConsumerArtefactHandler()
-    ]
-
-    /**
      * Logger.
      */
     Logger log = Logger.getLogger(RabbitmqNativeGrailsPlugin)
@@ -125,9 +117,7 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
         'nullRabbitContext'(NullRabbitContext)
 
         // Create the live rabbit context bean
-        'rabbitContextImpl'(RabbitContextImpl) { bean ->
-            bean.autowire = true
-        }
+        'rabbitContextImpl'(RabbitContextImpl)
 
         // Create the proxy rabbit context bean
         'rabbitContext'(RabbitContextProxy) {
@@ -140,29 +130,17 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
             }
         }
 
-        "connectionManager"(ConnectionManagerImpl) { bean ->
-            bean.autowire = true
-        }
+        "connectionManager"(ConnectionManagerImpl)
 
-        "connectionBuilder"(ConnectionBuilderImpl) { bean ->
-            bean.autowire = true
-        }
+        "connectionBuilder"(ConnectionBuilderImpl)
 
-        "queueBuilder"(QueueBuilderImpl) { bean ->
-            bean.autowire = true
-        }
+        "queueBuilder"(QueueBuilderImpl)
 
-        "messageConverterManager"(MessageConverterManagerImpl) { bean ->
-            bean.autowire = true
-        }
+        "messageConverterManager"(MessageConverterManagerImpl)
 
-        "consumerManager"(ConsumerManagerImpl) { bean ->
-            bean.autowire = true
-        }
+        "consumerManager"(ConsumerManagerImpl)
 
-        "rabbitMessagePublisher"(RabbitMessagePublisherImpl) { bean ->
-            bean.autowire = true
-        }
+        "rabbitMessagePublisher"(RabbitMessagePublisherImpl)
 
         // Create application-provided converter beans
         grailsApplication.getArtefacts('MessageConverter').each { GrailsClass clazz ->

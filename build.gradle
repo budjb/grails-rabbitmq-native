@@ -12,12 +12,25 @@ buildscript {
 }
 
 plugins {
-    id "io.spring.dependency-management" version "0.4.0.RELEASE"
-    id "com.jfrog.bintray" version "1.1"
+    id "io.spring.dependency-management" version "0.5.2.RELEASE"
+    id "com.jfrog.bintray" version "1.2"
 }
 
-version "0.1-SNAPSHOT"
+version "3.1.2-beta1"
 group "org.grails.plugins"
+
+bintray {
+    pkg {
+        userOrg = ''
+        name = "$project.name"
+        issueTrackerUrl = "https://github.com/budjb/grails-$project.name/issues"
+        vcsUrl = "https://github.com/budjb/grails-$project.name"
+        version {
+            attributes = ['grails-plugin': "$project.group:$project.name"]
+            name = project.version
+        }
+    }
+}
 
 apply plugin: 'maven-publish'
 apply plugin: 'eclipse'

@@ -25,6 +25,7 @@ import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
 import com.rabbitmq.client.ShutdownSignalException
 import org.apache.log4j.Logger
+import org.springframework.beans.factory.annotation.Autowired
 
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.TimeUnit
@@ -34,11 +35,13 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
     /**
      * Connection manager.
      */
+    @Autowired
     ConnectionManager connectionManager
 
     /**
      * Message converter manager.
      */
+    @Autowired
     MessageConverterManager messageConverterManager
 
     /**
