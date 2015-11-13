@@ -90,7 +90,7 @@ class ConsumerConfigurationImpl implements ConsumerConfiguration {
      * @param options
      */
     ConsumerConfigurationImpl(Map options) {
-        if (!options == null) {
+        if (options == null) {
             throw new NullPointerException("consumer configuration options must not be null")
         }
 
@@ -116,18 +116,21 @@ class ConsumerConfigurationImpl implements ConsumerConfiguration {
      * @param values
      * @return
      */
-    private Object parseConfigOption(Class clazz, Object... values) {
+    private <T> T parseConfigOption(Class<T> clazz, Object... values) {
         for (Object value : values) {
             if (value == null) {
                 continue
             }
 
-            try {
-                return value.asType(clazz)
+            if (value instanceof ConfigObject) {
+                continue
             }
-            catch (Exception e) {
-                // Continue...
+
+            if (!clazz.isAssignableFrom(value.getClass())) {
+                continue
             }
+
+            return value as T
         }
 
         return null
@@ -152,7 +155,7 @@ class ConsumerConfigurationImpl implements ConsumerConfiguration {
     void setTransacted(boolean transacted) {
         this.transacted = transacted
 
-        if (transacted == true) {
+        if (transacted) {
             setAutoAck(AutoAck.POST)
         }
     }
