@@ -20,23 +20,33 @@ import org.codehaus.groovy.grails.commons.GrailsClass
 
 interface MessageConverterManager {
     /**
+     * Attempt to marshall a byte array to some other object type as long
+     * as that object type has been provided in the given list of classes.
+     *
+     * @param source
+     * @param availableClasses
+     * @return
+     */
+    Object convertFromBytes(byte[] source, List<Class<?>> availableClasses)
+
+    /**
      * Attempt to marshall a byte array to some other object type.
      *
      * @param source
      * @return
-     * @throws MessageConvertException when conversion can not be completed.
      */
-    Object convertFromBytes(byte[] source) throws MessageConvertException
+    Object convertFromBytes(byte[] source)
 
     /**
      * Attempt to marshall a byte array to some other object type with a content type hint.
      *
      * @param source
+     * @param availableClasses
      * @param contentType
      * @return
      * @throws MessageConvertException when conversion can not be completed.
      */
-    Object convertFromBytes(byte[] source, String contentType) throws MessageConvertException
+    Object convertFromBytes(byte[] source, List<Class<?>> availableClasses, String contentType) throws MessageConvertException
 
     /**
      * Attempt to marshall an object to a byte array.

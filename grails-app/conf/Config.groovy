@@ -41,6 +41,7 @@ rabbitmq {
         connection('connection1') {
             queue(name: 'reporting', autoDelete: true)
             queue(name: 'sleeping', autoDelete: true)
+            queue(name: 'string-test', autoDelete: true)
             exchange(name: 'topic-exchange', type: 'topic', autoDelete: true) {
                 queue(name: 'topic-queue-all', autoDelete: true, binding: '#')
                 queue(name: 'topic-queue-subset', autoDelete: true, binding: 'com.budjb.#')

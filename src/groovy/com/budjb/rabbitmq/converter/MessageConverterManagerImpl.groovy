@@ -48,6 +48,7 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
      *
      * @param messageConverter
      */
+    @Override
     void register(MessageConverter<?> messageConverter) {
         messageConverters << messageConverter
     }
@@ -57,36 +58,20 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
      *
      * @param artefact
      */
+    @Override
     void register(GrailsClass artefact) {
-        register(applicationContext.getBean(artefact.propertyName))
+        register(applicationContext.getBean(artefact.propertyName, MessageConverter))
     }
 
     /**
-     * Converts a byte array to some other type.
+     * Attempt to marshall a byte array to some other object type.
      *
-     * @param source Byte array to convert.
+     * @param source
      * @return
-     * @throws MessageConvertException if there is no converter for the source.
      */
-    Object convertFromBytes(byte[] source) throws MessageConvertException {
-        for (MessageConverter converter in messageConverters) {
-            if (!converter.canConvertTo()) {
-                continue
-            }
-
-            try {
-                Object converted = converter.convertTo(source)
-
-                if (converted != null) {
-                    return converted
-                }
-            }
-            catch (Exception e) {
-                log.error("unhandled exception caught from message converter ${converter.class.simpleName}", e)
-            }
-        }
-
-        throw new MessageConvertException('no message converter found to convert from a byte array')
+    @Override
+    Object convertFromBytes(byte[] source) {
+        return convertFromBytes(source, [Object])
     }
 
     /**
@@ -97,13 +82,20 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
      * @return
      * @throws MessageConvertException if there is no converter for the source.
      */
-    Object convertFromBytes(byte[] source, String contentType) throws MessageConvertException {
-        // Find all converters that can handle the content type
-        List<MessageConverter> converters = messageConverters.findAll { it.contentType == contentType }
+    @Override
+    Object convertFromBytes(byte[] source, List<Class<?>> availableClasses, String contentType = null) throws MessageConvertException {
+        List<MessageConverter> converters = messageConverters
 
-        // If converters are found and it can convert to its type, allow it to do so
+        if (contentType != null) {
+            converters = converters.findAll { it.contentType == contentType }
+        }
+
         for (MessageConverter converter in converters) {
             if (!converter.canConvertTo()) {
+                continue
+            }
+
+            if (!availableClasses.any { it.isAssignableFrom(converter.getType()) }) {
                 continue
             }
 
@@ -129,18 +121,16 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
      * @return
      * @throws MessageConvertException
      */
+    @Override
     byte[] convertToBytes(Object source) throws MessageConvertException {
-        // If the source is null, there's nothing to do
         if (source == null) {
             return null
         }
 
-        // Just return the source if it's already a byte array
         if (source instanceof byte[]) {
             return source
         }
 
-        // Try to find a converter that works
         for (MessageConverter converter in messageConverters) {
             if (!converter.canConvertFrom()) {
                 continue
@@ -168,6 +158,7 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
     /**
      * Resets the message converter manager.
      */
+    @Override
     void reset() {
         messageConverters.clear()
     }
@@ -175,11 +166,10 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
     /**
      * Loads message converters.
      */
+    @Override
     void load() {
-        // Register application-provided converters
         grailsApplication.getArtefacts('MessageConverter').each { register(it) }
 
-        // Register built-in message converters
         // Note: the order matters, we want string to be the last one
         register(new IntegerMessageConverter())
         register(new MapMessageConverter())
