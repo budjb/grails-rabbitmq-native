@@ -121,7 +121,7 @@ class MessageConverterManagerImplSpec extends Specification {
         ExpandoMockConverter customConverter = new ExpandoMockConverter()
         GrailsClass grailsClass = Mock(GrailsClass)
         grailsClass.getPropertyName() >> "ExpandoMockConverter"
-        applicationContext.getBean("ExpandoMockConverter") >> customConverter
+        applicationContext.getBean("ExpandoMockConverter", _) >> customConverter
         grailsApplication.getArtefacts('MessageConverter') >> [grailsClass]
 
         when:
@@ -129,7 +129,7 @@ class MessageConverterManagerImplSpec extends Specification {
 
         then:
         messageConverterManager.getMessageConverters().size() == 6
-        messageConverterManager.getMessageConverters().contains(customConverter) == true
+        messageConverterManager.getMessageConverters().contains(customConverter)
 
         when:
         Object convertedFromBytes = messageConverterManager.convertFromBytes([102, 111, 111, 98, 97, 114, 98, 97, 122] as byte[])

@@ -30,16 +30,13 @@ import groovyx.gpars.GParsPool
 import org.apache.log4j.Logger
 
 import java.lang.reflect.Method
+import java.lang.reflect.Modifier
 
 class ConsumerContextImpl implements ConsumerContext {
     /**
-     * Consumer object used to receive messages from the RabbitMQ library.
-     */
-
-    /**
      * Name of the handler method a consumer is expected to define.
      */
-    static final String RABBIT_HANDLER_NAME = 'handleMessage'
+    private static final String RABBIT_HANDLER_NAME = 'handleMessage'
 
     /**
      * Name of the method that will be called when a message is received, but before it is processed.
@@ -102,6 +99,11 @@ class ConsumerContextImpl implements ConsumerContext {
     protected List<RabbitMessageHandler> consumers = []
 
     /**
+     * List of message handler method descriptors.
+     */
+    protected List<Class<?>> validHandlerTargets = []
+
+    /**
      * Constructor.
      *
      * @param clazz
@@ -121,6 +123,8 @@ class ConsumerContextImpl implements ConsumerContext {
         this.messageConverterManager = messageConverterManager
         this.persistenceInterceptor = persistenceInterceptor
         this.rabbitMessagePublisher = rabbitMessagePublisher
+
+        loadValidHandlerTargets()
     }
 
     /**
@@ -140,28 +144,24 @@ class ConsumerContextImpl implements ConsumerContext {
      */
     @Override
     boolean isValid() {
-        // Get the configuration
         ConsumerConfiguration configuration
         try {
             configuration = getConfiguration()
         }
-        catch (Exception e) {
+        catch (Exception ignore) {
             log.error("unable to retrieve configuration for consumer '${getId()}")
             return false
         }
 
-        // Check if there is either a local or central configuration
         if (!configuration) {
             return false
         }
 
-        // Check if the configuration is invalid
         if (!configuration.isValid()) {
             return false
         }
 
-        // Check if we find any handler defined
-        if (!consumer.getClass().getDeclaredMethods().any { it.name == RABBIT_HANDLER_NAME }) {
+        if (!getAllMethods(consumer.getClass()).any { isValidHandlerMethod(it) }) {
             return false
         }
 
@@ -185,98 +185,76 @@ class ConsumerContextImpl implements ConsumerContext {
      */
     @Override
     void start() throws IllegalStateException {
-        // Ensure the consumer's stopped
         if (getRunningState() != RunningState.STOPPED) {
             throw new IllegalStateException("attempted to start consumer '${getId()}' but it is already started")
         }
 
-        // Ensure the configuration is valid
         if (!isValid()) {
             log.warn("not starting consumer '${getId()}' because it is not valid")
             return
         }
 
-        // Get the configuration
         ConsumerConfiguration configuration = getConfiguration()
 
-        // Get the connection name
-        String connectionName = configuration.connection
+        String connectionName = configuration.getConnection()
 
-        // Get the proper connection
         ConnectionContext connectionContext
         try {
             connectionContext = connectionManager.getContext(connectionName)
         }
-        catch (ContextNotFoundException e) {
+        catch (ContextNotFoundException ignore) {
             log.warn("not starting consumer '${getId()}' because a suitable connection could not be found")
             return
         }
 
-        // Error if the connection is not started
         if (connectionContext.getRunningState() != RunningState.RUNNING) {
             throw new IllegalStateException("attempted to start consumer '${getId()}' but its connection is not started")
         }
 
-        // Start the consumers
         if (configuration.queue) {
-            // Log our intentions
             log.debug("starting consumer '${getId()}' on connection '${connectionContext.id}' with ${configuration.consumers} consumer(s)")
 
-            // Create all requested consumer instances
             configuration.consumers.times {
-                // Create the channel
                 Channel channel = connectionContext.createChannel()
 
-                // Determine the queue
-                String queue = configuration.queue
+                String queue = configuration.getQueue()
 
-                // Set the QOS
-                channel.basicQos(configuration.prefetchCount)
+                channel.basicQos(configuration.getPrefetchCount())
 
-                // Create the rabbit consumer object
                 RabbitMessageHandler consumer = new RabbitMessageHandler(channel, queue, this, connectionContext)
 
-                // Set up the consumer
-                String consumerTag = channel.basicConsume(
+                channel.basicConsume(
                     queue,
-                    configuration.autoAck == AutoAck.ALWAYS,
+                    configuration.getAutoAck() == AutoAck.ALWAYS,
                     consumer
                 )
 
-                // Store the consumer
                 consumers << consumer
             }
         }
         else {
-            // Log our intentions
             log.debug("starting consumer '${getId()}' on connection '${connectionContext.id}'")
 
-            // Create the channel
             Channel channel = connectionContext.createChannel()
 
-            // Create a queue
-            String queue = channel.queueDeclare().queue
-            if (!configuration.binding || configuration.binding instanceof String) {
-                channel.queueBind(queue, configuration.exchange, (String) configuration.binding ?: '')
+            String queue = channel.queueDeclare().getQueue()
+            if (!configuration.getBinding() || configuration.getBinding() instanceof String) {
+                channel.queueBind(queue, configuration.getExchange(), (String) configuration.getBinding() ?: '')
             }
-            else if (configuration.binding instanceof Map) {
-                channel.queueBind(queue, configuration.exchange, '', configuration.binding + ['x-match': configuration.match])
+            else if (configuration.getBinding() instanceof Map) {
+                channel.queueBind(queue, configuration.getExchange(), '', (configuration.getBinding() as Map) + ['x-match': configuration.getMatch()])
             }
 
-            // Set the QOS
-            channel.basicQos(configuration.prefetchCount)
+            channel.basicQos(configuration.getPrefetchCount())
 
-            // Create the rabbit consumer object
             RabbitMessageHandler consumer = new RabbitMessageHandler(channel, queue, this, connectionContext)
 
-            // Set up the consumer
-            String consumerTag = channel.basicConsume(
+            channel.basicConsume(
                 queue,
-                configuration.autoAck == AutoAck.ALWAYS,
+                configuration.getAutoAck() == AutoAck.ALWAYS,
                 consumer
             )
 
-            // Store the consumer
             consumers << consumer
         }
     }
@@ -350,19 +328,28 @@ class ConsumerContextImpl implements ConsumerContext {
      *
      * @param context
      */
+    @Override
     void deliverMessage(MessageContext context) {
+        Object convertedBody
+        try {
+            convertedBody = convertMessage(context)
+        }
+        catch (Throwable e) {
+            log.error("unexpected exception ${e.getClass()} encountered converting incoming request with handler ${getId()}", e)
+            return
+        }
+
         Object response
         try {
-            // Process the message
-            response = handoffMessage(context)
+            response = invokeHandler(convertedBody, context)
         }
         catch (Throwable e) {
             log.error("unexpected exception ${e.getClass()} encountered in the rabbit consumer associated with handler ${getId()}", e)
+            return
         }
 
         if (context.properties.replyTo && response != null) {
             try {
-                // If a response was given and a replyTo is set, send the message back
                 if (context.properties.replyTo && response) {
                     rabbitMessagePublisher.send(new RabbitMessageProperties(
                         channel: context.channel,
@@ -381,92 +368,54 @@ class ConsumerContextImpl implements ConsumerContext {
     /**
      * Hands off the message to the handler (if a valid one is found).
      *
-     * @param context
+     * @param messageContext
      * @return Any returned value from the handler.
      */
-    private Object handoffMessage(MessageContext context) {
-        // Get the configuration
-        ConsumerConfiguration configuration = getConfiguration()
+    protected Object invokeHandler(Object body, MessageContext messageContext) {
+        Method handler = findHandlerForClass(body.getClass())
 
-        // Track whether the handler is MessageContext only
-        boolean contextOnly = false
-
-        // Convert the message body
-        Object converted = convertMessage(context)
-
-        // Find a valid handler
-        Method method = getHandlerMethodForType(converted.getClass())
-
-        // If no method is found, attempt to find the MessageContext handler
-        if (!method) {
-            method = getHandlerWithSignature([MessageContext])
-            if (method) {
-                contextOnly = true
-            }
+        if (!handler) {
+            throw new IllegalStateException("Could not find the handler method for class type ${body.getClass()}. This shoult not occur. Please file a bug.")
         }
 
-        // Confirm that there is a handler defined to handle our message.
-        if (!method) {
-            // Reject the message
-            if (configuration.getAutoAck() == AutoAck.POST) {
-                context.channel.basicReject(context.envelope.deliveryTag, configuration.getRetry())
-            }
-            log.error("${getId()} does not have a message handler defined to handle class type ${converted.getClass()}")
-            return
-        }
-
-        // Open a session
         openSession()
 
-        // Call the received message callback
-        onReceive(context)
+        onReceive(messageContext)
 
-        // Pass off the message
         try {
-            // Start the transaction if requested
             if (configuration.getTransacted()) {
-                context.channel.txSelect()
+                messageContext.getChannel().txSelect()
             }
 
-            // Invoke the handler
             Object response
-            if (contextOnly) {
-                response = consumer."${RABBIT_HANDLER_NAME}"(context)
-            }
-            else if (method.parameterTypes.size() == 2) {
-                response = consumer."${RABBIT_HANDLER_NAME}"(converted, context)
+            if (handler.getParameterTypes().size() == 1) {
+                response = handler.invoke(consumer, body)
             }
             else {
-                response = consumer."${RABBIT_HANDLER_NAME}"(converted)
+                response = handler.invoke(consumer, body, messageContext)
             }
 
-            // Ack the message
             if (configuration.getAutoAck() == AutoAck.POST) {
-                context.channel.basicAck(context.envelope.deliveryTag, false)
+                messageContext.getChannel().basicAck(messageContext.getEnvelope().deliveryTag, false)
             }
 
-            // Commit the transaction if requested
             if (configuration.getTransacted()) {
-                context.channel.txCommit()
+                messageContext.getChannel().txCommit()
             }
 
-            // Call the success callback
-            onSuccess(context)
+            onSuccess(messageContext)
 
             return response
         }
-        catch (Throwable e) {
-            // Rollback the transaction
+        catch (Exception e) {
             if (configuration.getTransacted()) {
-                context.channel.txRollback()
+                messageContext.getChannel().txRollback()
             }
 
-            // Reject the message, optionally submitting for requeue
             if (configuration.getAutoAck() == AutoAck.POST) {
-                context.channel.basicReject(context.envelope.deliveryTag, configuration.getRetry())
+                messageContext.getChannel().basicReject(messageContext.getEnvelope().deliveryTag, configuration.getRetry())
             }
 
-            // Log the error
             if (configuration.getTransacted()) {
                 log.error("transaction rolled back due to unhandled exception ${e.getClass().name} caught in RabbitMQ message handler for consumer ${getId()}", e)
             }
@@ -474,16 +423,13 @@ class ConsumerContextImpl implements ConsumerContext {
                 log.error("unhandled exception ${e.getClass().name} caught in RabbitMQ message handler for consumer ${getId()}", e)
             }
 
-            // Call the failure callback
-            onFailure(context)
+            onFailure(messageContext)
 
             return null
         }
         finally {
-            // Call the complete callback
-            onComplete(context)
+            onComplete(messageContext)
 
-            // Close the session
             closeSession()
         }
     }
@@ -497,94 +443,34 @@ class ConsumerContextImpl implements ConsumerContext {
      * @param context
      * @return
      */
-    private Object convertMessage(MessageContext context) {
-        // Get the configuration
+    protected Object convertMessage(MessageContext context) {
         ConsumerConfiguration configuration = getConfiguration()
 
-        // Check if the consumers wants us to not convert
         if (configuration.getConvert() == MessageConvertMethod.DISABLED) {
-            return context.body
+            return context.getBody()
         }
 
-        // If a content-type this converter is aware of is given, respect it.
-        if (context.properties.contentType) {
+        if (context.getProperties().getContentType()) {
             try {
-                return messageConverterManager.convertFromBytes(context.body, context.properties.contentType)
+                return messageConverterManager.convertFromBytes(context.getBody(), validHandlerTargets, context.getProperties().getContentType())
             }
-            catch (MessageConvertException e) {
+            catch (MessageConvertException ignore) {
                 // Continue
             }
         }
 
-        // If no content-type was handled, the config may specify to stop
         if (configuration.getConvert() == MessageConvertMethod.HEADER) {
-            return context.body
+            return context.getBody()
         }
 
-        // Try all message converters
         try {
-            return messageConverterManager.convertFromBytes(context.body)
+            return messageConverterManager.convertFromBytes(context.getBody(), validHandlerTargets)
         }
-        catch (MessageConvertException e) {
+        catch (MessageConvertException ignore) {
             // Continue
         }
 
-        // No converters worked, so fall back to the byte array
-        return context.body
-    }
-
-    /**
-     * Determines if there is a message handler defined that will accommodate
-     * a specific body class type.
-     *
-     * @param requested
-     * @return
-     */
-    private Method getHandlerMethodForType(Class requested) {
-        // Check for long parameter list
-        Method method = getHandlerWithSignature([requested, MessageContext])
-        if (method) {
-            return method
-        }
-
-        // Check for short parameter list
-        method = getHandlerWithSignature([requested])
-        if (method) {
-            return method
-        }
-
-        return null
-    }
-
-    /**
-     * Attempts to locate a message handler that will accept the given object types.
-     *
-     * @param requested
-     * @return
-     */
-    private Method getHandlerWithSignature(List<Class> requested) {
-        // Get a list of methods that match the handler name
-        List<Method> methods = consumer.class.getDeclaredMethods().findAll { it.name == RABBIT_HANDLER_NAME }
-
-        // Find a matching method
-        return methods.find { method ->
-            // Get the method signature
-            List<Class> signature = method.parameterTypes
-
-            // Ensure we get the right number of parameters
-            if (signature.size() != requested.size()) {
-                return false
-            }
-
-            // Ensure each parameter is assignable
-            for (int i = 0; i < signature.size(); i++) {
-                if (!signature[i].isAssignableFrom(requested[i])) {
-                    return false
-                }
-            }
-
-            return true
-        }
+        return context.getBody()
     }
 
     /**
@@ -593,7 +479,7 @@ class ConsumerContextImpl implements ConsumerContext {
      * @param methodName
      * @param context
      */
-    private void doCallback(String methodName, MessageContext context) {
+    protected void doCallback(String methodName, MessageContext context) {
         if (!consumer.class.metaClass.methods.find { it.name == methodName }) {
             return
         }
@@ -606,7 +492,7 @@ class ConsumerContextImpl implements ConsumerContext {
      *
      * @param context
      */
-    private void onReceive(MessageContext context) {
+    protected void onReceive(MessageContext context) {
         doCallback(CONSUME_ON_RECEIVE_METHOD_NAME, context)
     }
 
@@ -615,7 +501,7 @@ class ConsumerContextImpl implements ConsumerContext {
      *
      * @param context
      */
-    private void onSuccess(MessageContext context) {
+    protected void onSuccess(MessageContext context) {
         doCallback(CONSUME_ON_SUCCESS_METHOD_NAME, context)
     }
 
@@ -624,7 +510,7 @@ class ConsumerContextImpl implements ConsumerContext {
      *
      * @param context
      */
-    private void onComplete(MessageContext context) {
+    protected void onComplete(MessageContext context) {
         doCallback(CONSUME_ON_COMPLETE_METHOD_NAME, context)
     }
 
@@ -633,7 +519,7 @@ class ConsumerContextImpl implements ConsumerContext {
      *
      * @param context
      */
-    private void onFailure(MessageContext context) {
+    protected void onFailure(MessageContext context) {
         doCallback(CONSUME_ON_FAILURE_METHOD_NAME, context)
     }
 
@@ -681,5 +567,93 @@ class ConsumerContextImpl implements ConsumerContext {
         }
 
         return RunningState.RUNNING
+    }
+
+    /**
+     * Returns all methods, both declared and inherited, from the given class.
+     *
+     * @param clazz
+     * @return
+     */
+    protected List<Method> getAllMethods(Class<?> clazz) {
+        if (clazz == Object.class) {
+            return []
+        }
+
+        return clazz.getDeclaredMethods() + getAllMethods(clazz.getSuperclass())
+    }
+
+    /**
+     * Inspect all methods of the given object and return a descriptor for any
+     * method that is a candidate as a message handler.
+     *
+     * @param consumer
+     * @return
+     */
+    protected void loadValidHandlerTargets() {
+        List<Method> matching = getAllMethods(consumer.getClass()).findAll {
+            return isValidHandlerMethod(it)
+        }
+
+        validHandlerTargets = matching.collect { it.getParameterTypes()[0] }
+    }
+
+    /**
+     * Determines whether the given method meets the criteria for serving as a consumer handler.
+     *
+     * @param method
+     * @return
+     */
+    protected boolean isValidHandlerMethod(Method method) {
+        if (method.getName() != RABBIT_HANDLER_NAME) {
+            return false
+        }
+
+        if (!Modifier.isPublic(method.getModifiers())) {
+            return false
+        }
+
+        if (!(method.getParameterTypes().size() in [1, 2])) {
+            return false
+        }
+
+        return true
+    }
+
+    /**
+     * Find a handler method for the given object type.
+     *
+     * Preference will be first given to strongly typed handlers, and Object (def) will
+     * be tried last.
+     *
+     * @param clazz Object type to deliver to the consumer.
+     * @return An appropriate handler method for the given type, or null if none are found.
+     */
+    protected Method findHandlerForClass(Class<?> clazz) {
+        List<Method> handlers = getAllMethods(consumer.getClass()).findAll { isValidHandlerMethod(it) }
+
+        Method method = handlers.find {
+            if (it.getParameterTypes()[0] == Object.class) {
+                return false
+            }
+
+            if (!it.getParameterTypes()[0].isAssignableFrom(clazz)) {
+                return false
+            }
+
+            return true
+        }
+
+        if (!method) {
+            method = handlers.find {
+                if (it.getParameterTypes()[0] != Object.class) {
+                    return false
+                }
+
+                return true
+            }
+        }
+
+        return method
     }
 }

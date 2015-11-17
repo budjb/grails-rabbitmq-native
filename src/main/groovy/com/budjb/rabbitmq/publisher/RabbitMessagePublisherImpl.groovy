@@ -146,7 +146,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
         try {
             messageConverterManager.convertFromBytes(input)
         }
-        catch (MessageConvertException e) {
+        catch (MessageConvertException ignore) {
             return input
         }
     }
@@ -220,7 +220,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
                     try {
                         replyHandoff.put(context)
                     }
-                    catch (InterruptedException e) {
+                    catch (InterruptedException ignore) {
                         Thread.currentThread().interrupt()
                     }
                 }

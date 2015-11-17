@@ -22,9 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired
 class MessageMarshallSpec extends MessageConsumerIntegrationTest {
     @Autowired
     ReportingConsumer reportingConsumer
+    StringConsumer stringConsumer
 
     def setup() {
         reportingConsumer.lastMessage = null
+        stringConsumer.lastMessage = null
     }
 
     def 'If a String is sent to the consumer, ensure the correct handler is called'() {
@@ -129,5 +131,19 @@ class MessageMarshallSpec extends MessageConsumerIntegrationTest {
 
         then:
         response == ["foo": "bar"]
+    }
+
+    def 'If a Map is sent to a consumer but it only has a String handler, the proper conversion and handoff occurs'() {
+        when:
+        rabbitMessagePublisher.send {
+            routingKey = 'string-test'
+            body = '{"hi":"there"}'
+        }
+        Map received = waitUntilMessageReceived(30000) { stringConsumer.lastMessage }
+
+        then:
+        received
+        received.type == 'String'
+        received.body == '{"hi":"there"}'
     }
 }

@@ -71,14 +71,14 @@ class ConsumerContextImplSpec extends Specification {
 
         UnitTestConsumer consumer = Mock(UnitTestConsumer)
 
-        ConsumerContextImpl consumerContext = Spy(ConsumerContextImpl, constructorArgs: [
+        ConsumerContextImpl consumerContext = new ConsumerContextImpl(
             configuration,
             consumer,
             connectionManager,
             messageConverterManager,
             persistenceInterceptor,
             rabbitMessagePublisher
-        ])
+        )
 
         MessageContext messageContext = new MessageContext(
             channel: Mock(Channel),
@@ -107,14 +107,14 @@ class ConsumerContextImplSpec extends Specification {
         UnitTestConsumer consumer = Mock(UnitTestConsumer)
         consumer.handleMessage(*_) >> { throw new RuntimeException() }
 
-        ConsumerContextImpl consumerContext = Spy(ConsumerContextImpl, constructorArgs: [
+        ConsumerContextImpl consumerContext = new ConsumerContextImpl(
             configuration,
             consumer,
             connectionManager,
             messageConverterManager,
             persistenceInterceptor,
             rabbitMessagePublisher
-        ])
+        )
 
         MessageContext messageContext = new MessageContext(
             channel: Mock(Channel),
