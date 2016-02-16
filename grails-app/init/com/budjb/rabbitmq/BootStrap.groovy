@@ -1,3 +1,5 @@
+package com.budjb.rabbitmq
+
 /*
  * Copyright 2013-2015 Bud Byrd
  *
@@ -13,8 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.budjb.rabbitmq
 
+import com.budjb.rabbitmq.RabbitContext
 import grails.core.GrailsApplication
 
 class BootStrap {
@@ -33,7 +35,7 @@ class BootStrap {
      */
     def init = { servletContext ->
         def autoStartup = grailsApplication.config.rabbitmq.autoStart
-        if (!(autoStartup instanceof Boolean) || autoStartup == true) {
+        if (!(autoStartup instanceof Boolean) || autoStartup) {
             rabbitContext.startConsumers()
         }
     }
