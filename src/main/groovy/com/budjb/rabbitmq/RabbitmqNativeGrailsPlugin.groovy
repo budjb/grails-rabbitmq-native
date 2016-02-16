@@ -168,7 +168,7 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
             // Load and start the rabbit service, without starting consumers.
             RabbitContext rabbitContext = (RabbitContext) applicationContext.getBean('rabbitContext')
             rabbitContext.load()
-            rabbitContext.start(true)
+            rabbitContext.start()
         }
     }
 
@@ -225,7 +225,7 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
      * Handle configuration changes.
      */
     void onConfigChange(Map<String, Object> event) {
-        if (grailsApplication.config.rabbitmq.enabled != falseFixup) {
+        if (grailsApplication.config.rabbitmq.enabled != false) {
 
             RabbitContext context = event.ctx.getBean('rabbitContext')
             context.reload()
@@ -233,6 +233,10 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
     }
 
     void onShutdown(Map<String, Object> event) {
-        // TODO Implement code that is executed when the application shuts down (optional)
+        if (grailsApplication.config.rabbitmq.enabled != false) {
+
+            RabbitContext context = event.ctx.getBean('rabbitContext')
+            context.stop()
+        }
     }
 }
