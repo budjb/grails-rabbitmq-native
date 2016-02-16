@@ -139,24 +139,46 @@ class ConnectionManagerImpl implements ConnectionManager {
      */
     @Override
     void load() {
-        // Grab the configuration
-        Object configuration = grailsApplication.config.rabbitmq?.connection
 
-        // Check for the configuration
-        if (!configuration) {
+        // Grail 3 format multiple connections
+        if(grailsApplication.config.rabbitmq?.connections){
+
+            // Grab the configuration. yml or groovy format
+            Map<String,Map> configurations = grailsApplication.config.rabbitmq?.connections
+
+            // Make sure name element in config
+            configurations = configurations.collectEntries {k,v ->
+                v['name'] = v.name?:k
+                [k,v]
+            }
+            // Load connections
+            connectionBuilder.loadConnectionContexts(configurations).each {register(it)}
+
+        }else if(grailsApplication.config.rabbitmq?.connection) {
+            // Groovy format or single connection in map format
+
+            // Grab the configuration. yml or groovy format
+            Object configuration = grailsApplication.config.rabbitmq?.connection
+
+            // Make sure we have a supported configuration type
+            if (!(configuration instanceof Map || configuration instanceof Closure)) {
+                throw new InvalidConfigurationException('RabbitMQ connection configuration is not a Map or a Closure')
+            }
+            if(configuration instanceof Map){
+                configuration = ['connection':configuration]
+            }
+
+            // Load connections
+            connectionBuilder.loadConnectionContexts(configuration).each {register(it)}
+
+        }else{
             if (grailsApplication.config.rabbitmq?.connectionFactory) {
-                log.warn("An unsupported legacy config was found. Please refer to the documentation for proper configuration (http://budjb.github.io/grails-rabbitmq-native/doc/manual/)")
+                log.warn("An unsupported legacy config was found. Please refer to the documentation for proper configuration " +
+                         "(http://budjb.github.io/grails-rabbitmq-native/doc/manual/)")
+
             }
             throw new MissingConfigurationException("unable to start application because the RabbitMQ connection configuration was not found")
         }
-
-        // Make sure we have a supported configuration type
-        if (!(configuration instanceof Map || configuration instanceof Closure)) {
-            throw new InvalidConfigurationException('RabbitMQ connection configuration is not a Map or a Closure')
-        }
-
-        // Load connections
-        connectionBuilder.loadConnectionContexts(grailsApplication.config.rabbitmq.connection).each { register(it) }
     }
 
     /**

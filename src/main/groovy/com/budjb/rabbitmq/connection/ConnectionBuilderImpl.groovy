@@ -76,7 +76,9 @@ class ConnectionBuilderImpl implements ConnectionBuilder {
      * @return
      */
     @Override
-    List<ConnectionContext> loadConnectionContexts(Map configuration) {
-        return [connectionManager.createContext(configuration)]
+    List<ConnectionContext> loadConnectionContexts(Map configurations) {
+        return configurations.values().collect {configuration ->
+            connectionManager.createContext(configuration)
+        }
     }
 }

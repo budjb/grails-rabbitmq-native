@@ -17,10 +17,15 @@ package com.budjb.rabbitmq
 
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
+import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.rabbitmq.client.Channel
 import grails.core.GrailsApplication
 import org.apache.log4j.Logger
+import org.codehaus.groovy.control.ConfigurationException
 import org.springframework.beans.factory.annotation.Autowired
+
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 /**
  * This class is based off of the queue builder present in the official Grails RabbitMQ plugin.
@@ -42,22 +47,23 @@ class QueueBuilderImpl implements QueueBuilder {
      * Configure any defined exchanges and queues.
      */
     void configureQueues() {
-        // Skip if the config isn't defined
-        if (!(grailsApplication.config.rabbitmq?.queues instanceof Closure)) {
-            return
-        }
+        configureQueues(grailsApplication.config.rabbitmq.queues)
 
-        // Grab the config closure
-        Closure config = grailsApplication.config.rabbitmq.queues
+    }
 
+    void configureQueues(Map config){
+        QueueBuilderDelegate queueBuilderDelegate = new QueueBuilderDelegate()
+        queueBuilderDelegate.configureFromMap(config)
+    }
+
+    void configureQueues(@DelegatesTo(QueueBuilderDelegate) Closure closure){
         // Create the queue builder
         QueueBuilderDelegate queueBuilderDelegate = new QueueBuilderDelegate()
 
         // Run the config
-        config = config.clone()
-        config.delegate = queueBuilderDelegate
-        config.resolveStrategy = Closure.DELEGATE_FIRST
-        config()
+        closure.delegate = queueBuilderDelegate
+        closure.resolveStrategy = Closure.DELEGATE_FIRST
+        closure()
     }
 
     /**
@@ -84,6 +90,11 @@ class QueueBuilderImpl implements QueueBuilder {
          */
         private RabbitContext rabbitContext = null
 
+        void queue(String name, Map config){
+            config.name = config.name?:name
+            queue(config)
+        }
+
         /**
          * Handles queue definitions
          *
@@ -94,9 +105,9 @@ class QueueBuilderImpl implements QueueBuilder {
             // Grab required parameters
             String name = parameters['name']
             String exchange = parameters['exchange']
-            boolean autoDelete = Boolean.valueOf(parameters['autoDelete'])
-            boolean exclusive = Boolean.valueOf(parameters['exclusive'])
-            boolean durable = Boolean.valueOf(parameters['durable'])
+            boolean autoDelete = Boolean.valueOf(parameters['autoDelete']?:false)
+            boolean exclusive = Boolean.valueOf(parameters['exclusive']?:false)
+            boolean durable = Boolean.valueOf(parameters['durable']?:false)
             Map arguments = (parameters['arguments'] instanceof Map) ? parameters['arguments'] : [:]
 
             // Ensure we have a name
@@ -164,13 +175,18 @@ class QueueBuilderImpl implements QueueBuilder {
             }
         }
 
+        void exchange(String name, Map parameters, @DelegatesTo(QueueBuilderDelegate) Closure closure = null) {
+            parameters.name = parameters.name?:name
+            exchange(parameters,closure)
+        }
+
         /**
          * Defines a new exchange.
          *
          * @param args The properties of the exchange.
          * @param closure An optional closure that includes queue definitions that will be bound to this exchange.
          */
-        void exchange(Map parameters, Closure closure = null) {
+        void exchange(Map parameters, @DelegatesTo(QueueBuilderDelegate) Closure closure = null) {
             // Make sure we're not already in an exchange call
             if (currentExchange) {
                 throw new RuntimeException("cannot declare an exchange within another exchange")
@@ -179,8 +195,8 @@ class QueueBuilderImpl implements QueueBuilder {
             // Get parameters
             String name = parameters['name']
             String type = parameters['type']
-            boolean autoDelete = Boolean.valueOf(parameters['autoDelete'])
-            boolean durable = Boolean.valueOf(parameters['durable'])
+            boolean autoDelete = Boolean.valueOf(parameters['autoDelete']?:false)
+            boolean durable = Boolean.valueOf(parameters['durable']?:false)
 
             // Grab the extra arguments
             Map arguments = (parameters['arguments'] instanceof Map) ? parameters['arguments'] : [:]
@@ -246,7 +262,7 @@ class QueueBuilderImpl implements QueueBuilder {
          * @param name
          * @param closure
          */
-        void connection(String name, Closure closure) {
+        void connection(String name, @DelegatesTo(QueueBuilderDelegate) Closure closure) {
             // Sanity check
             if (currentConnection != null) {
                 throw new RuntimeException("unexpected connection in the queue configuration; there is a current connection already open")
@@ -268,6 +284,39 @@ class QueueBuilderImpl implements QueueBuilder {
 
             // Clear the context
             currentConnection = null
+        }
+
+        void configureFromMap(Map<String, Object> config){
+            Pattern namingPattern =  Pattern.compile(/(?<type>\w+)_(?<name>[-\w]+)/)
+
+            config.each{k,v ->
+                Matcher matcher = namingPattern.matcher(k)
+
+                if(matcher.matches()) {
+
+                    switch(matcher.group('type')) {
+                        case 'queue':
+                            queue(matcher.group('name'), v)
+                            break
+                        case 'connection':
+                            connection(matcher.group('name')){
+                                configureFromMap(v.findAll{k2,v2 -> k2.startsWith('queue') || k2.startsWith('exchange')})
+                            }
+                            break
+                        case 'exchange':
+                            exchange(matcher.group('name'),v){
+                                if(v.queues) configureFromMap(v.queues)
+                                else configureFromMap(v.findAll{k2,v2 -> k2.startsWith('queue')})
+                            }
+                            break
+                        default:
+                            throw new InvalidConfigurationException("Queue Configuration key $k is not recognised")
+                    }
+
+                }else{
+                    throw new InvalidConfigurationException("Queue Configuration key $k does not match pattern ${namingPattern.toString()}")
+                }
+            }
         }
 
         /**

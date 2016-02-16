@@ -15,3 +15,44 @@ spring:
     groovy:
         template:
             check-template-location: false
+---
+rabbitmq:
+    connections:
+        connection1:
+            host: 'localhost'
+            username: 'guest'
+            password: 'guest'
+            virtualHost: 'test1.rabbitmq.budjb.com'
+            isDefault: true
+            name: 'connection1'
+
+        connection2:
+            host: 'localhost'
+            username: 'guest'
+            password: 'guest'
+            virtualHost: 'test2.rabbitmq.budjb.com'
+            name: 'connection2'
+    queues:
+        connection_connection1:
+            queue_reporting:
+                autoDelete: true
+            queue_sleeping:
+                autoDelete: true
+            queue_string-test:
+                autoDelete: true
+            exchange_topic-exchange:
+                type: 'topic'
+                autoDelete: true
+                queues:
+                    queue_topic-queue-all:
+                        autoDelete: true
+                        binding: '#'
+                    queue_topic-queue-subset:
+                        autoDelete: true
+                        binding: 'com.budjb.#'
+                    queue_topic-queue-specific:
+                        autoDelete: true
+                        binding: 'com.budjb.rabbitmq'
+        connection_connection2:
+            queue_connection2-queue:
+                autoDelete: true
