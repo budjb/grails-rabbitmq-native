@@ -36,7 +36,7 @@ interface RabbitMessagePublisher {
      * @param closure
      * @throws IllegalArgumentException
      */
-    void send(Closure closure) throws IllegalArgumentException
+    void send(@DelegatesTo(RabbitMessageProperties) Closure closure) throws IllegalArgumentException
 
     /**
      * Sends a Rabbit message with a given routing key and payload.
@@ -86,7 +86,8 @@ interface RabbitMessagePublisher {
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    Object rpc(Closure closure) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException
+    Object rpc(@DelegatesTo(RabbitMessageProperties) Closure closure)
+            throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException
 
     /**
      * Sends a message to the bus and waits for a reply, up to the "timeout" property.
@@ -119,7 +120,8 @@ interface RabbitMessagePublisher {
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    Object rpc(String exchange, String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException
+    Object rpc(String exchange, String routingKey, Object body)
+            throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException
 
     /**
      * Creates and returns a synchronous queue for use in the RPC consumer.
@@ -133,7 +135,7 @@ interface RabbitMessagePublisher {
      *
      * @param Closure
      */
-    void withChannel(Closure closure)
+    void withChannel(@DelegatesTo(RabbitMessagePublisher) Closure closure)
 
     /**
      * Performs a series of operations with the same channel created from the given connection.
@@ -141,14 +143,14 @@ interface RabbitMessagePublisher {
      * @param connection
      * @param closure
      */
-    void withChannel(String connection, Closure closure)
+    void withChannel(String connection, @DelegatesTo(RabbitMessagePublisher) Closure closure)
 
     /**
      * Performs a series of operations with the same channel and with confirms enabled.
      *
      * @param closure
      */
-    void withConfirms(Closure closure)
+    void withConfirms(@DelegatesTo(RabbitMessagePublisher) Closure closure)
 
     /**
      * Performs a series of operations with the same channel created from the given connection
@@ -157,7 +159,7 @@ interface RabbitMessagePublisher {
      * @param connection
      * @param closure
      */
-    void withConfirms(String connection, Closure closure)
+    void withConfirms(String connection, @DelegatesTo(RabbitMessagePublisher) Closure closure)
 
     /**
      * Performs a series of operations with the same channel and with confirms enabled.
@@ -165,7 +167,7 @@ interface RabbitMessagePublisher {
      * @param timeout
      * @param closure
      */
-    void withConfirms(long timeout, Closure closure)
+    void withConfirms(long timeout, @DelegatesTo(RabbitMessagePublisher) Closure closure)
 
     /**
      * Performs a series of operations with the same channel created from the given connection
@@ -174,7 +176,7 @@ interface RabbitMessagePublisher {
      * @param timeout
      * @param closure
      */
-    void withConfirms(String connection, long timeout, Closure closure)
+    void withConfirms(String connection, long timeout, @DelegatesTo(RabbitMessagePublisher) Closure closure)
 
     /**
      * Performs a series of operations with the same channel and with confirms enabled.
@@ -182,7 +184,7 @@ interface RabbitMessagePublisher {
      *
      * @param closure
      */
-    void withConfirmsOrDie(Closure closure)
+    void withConfirmsOrDie(@DelegatesTo(RabbitMessagePublisher) Closure closure)
 
     /**
      * Performs a series of operations with the same channel created from the given connection
@@ -191,7 +193,7 @@ interface RabbitMessagePublisher {
      * @param connection
      * @param closure
      */
-    void withConfirmsOrDie(String connection, Closure closure)
+    void withConfirmsOrDie(String connection, @DelegatesTo(RabbitMessagePublisher) Closure closure)
 
     /**
      * Performs a series of operations with the same channel and with confirms.
@@ -200,7 +202,7 @@ interface RabbitMessagePublisher {
      * @param timeout
      * @param closure
      */
-    void withConfirmsOrDie(long timeout, Closure closure)
+    void withConfirmsOrDie(long timeout, @DelegatesTo(RabbitMessagePublisher) Closure closure)
 
     /**
      * Performs a series of operations with the same channel created from the given connection
@@ -210,5 +212,5 @@ interface RabbitMessagePublisher {
      * @param timeout
      * @param closure
      */
-    void withConfirmsOrDie(String connection, long timeout, Closure closure)
+    void withConfirmsOrDie(String connection, long timeout, @DelegatesTo(RabbitMessagePublisher) Closure closure)
 }

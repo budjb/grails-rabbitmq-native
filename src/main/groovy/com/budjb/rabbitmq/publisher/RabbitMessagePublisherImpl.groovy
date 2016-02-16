@@ -92,7 +92,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @param closure Closure to configure the message properties.
      * @throws IllegalArgumentException
      */
-    void send(Closure closure) throws IllegalArgumentException {
+    void send(@DelegatesTo(RabbitMessageProperties) Closure closure) throws IllegalArgumentException {
         send(createRabbitMessageProperties().build(closure))
     }
 
@@ -209,13 +209,14 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
             // Define the response consumer handler
             DefaultConsumer consumer = new DefaultConsumer(channel) {
                 @Override
-                void handleDelivery(String replyConsumerTag, Envelope replyEnvelope, BasicProperties replyProperties, byte[] replyBody) throws IOException {
+                void handleDelivery(String replyConsumerTag, Envelope replyEnvelope, BasicProperties replyProperties, byte[] replyBody)
+                        throws IOException {
                     MessageContext context = new MessageContext(
-                        channel: null,
-                        consumerTag: replyConsumerTag,
-                        envelope: replyEnvelope,
-                        properties: replyProperties,
-                        body: replyBody
+                            channel: null,
+                            consumerTag: replyConsumerTag,
+                            envelope: replyEnvelope,
+                            properties: replyProperties,
+                            body: replyBody
                     )
                     try {
                         replyHandoff.put(context)
@@ -238,7 +239,9 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
 
             // If the reply is null, assume the timeout was reached
             if (reply == null) {
-                throw new TimeoutException("timeout of ${properties.timeout} milliseconds reached while waiting for a response in an RPC message to exchange '${properties.exchange}' and routingKey '${properties.routingKey}'")
+                throw new TimeoutException(
+                        "timeout of ${properties.timeout} milliseconds reached while waiting for a response in an RPC message to exchange " +
+                        "'${properties.exchange}' and routingKey '${properties.routingKey}'")
             }
 
             // If auto convert is disabled, return the MessageContext
@@ -277,7 +280,8 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    Object rpc(Closure closure) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+    Object rpc(@DelegatesTo(RabbitMessageProperties) Closure closure)
+            throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         RabbitMessageProperties properties = createRabbitMessageProperties()
         properties.build(closure)
         return rpc(properties)
@@ -319,7 +323,8 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    Object rpc(String exchange, String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+    Object rpc(String exchange, String routingKey, Object body)
+            throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         return rpc(createRabbitMessageProperties().build {
             delegate.exchange = exchange
             delegate.routingKey = routingKey
@@ -361,7 +366,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @param Closure
      */
     @Override
-    void withChannel(Closure closure) {
+    void withChannel(@DelegatesTo(RabbitMessagePublisher) Closure closure) {
         Channel channel = connectionManager.createChannel()
 
         try {
@@ -381,7 +386,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @param closure
      */
     @Override
-    void withChannel(String connection, Closure closure) {
+    void withChannel(String connection, @DelegatesTo(RabbitMessagePublisher) Closure closure) {
         Channel channel = connectionManager.createChannel(connection)
 
         try {
@@ -400,7 +405,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @param closure
      */
     @Override
-    void withConfirms(Closure closure) {
+    void withConfirms(@DelegatesTo(RabbitMessagePublisher) Closure closure) {
         Channel channel = connectionManager.createChannel()
 
         try {
@@ -425,7 +430,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @param closure
      */
     @Override
-    void withConfirms(String connection, Closure closure) {
+    void withConfirms(String connection, @DelegatesTo(RabbitMessagePublisher) Closure closure) {
         Channel channel = connectionManager.createChannel(connection)
 
         try {
@@ -449,7 +454,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @param closure
      */
     @Override
-    void withConfirms(long timeout, Closure closure) {
+    void withConfirms(long timeout, @DelegatesTo(RabbitMessagePublisher) Closure closure) {
         Channel channel = connectionManager.createChannel()
 
         try {
@@ -475,7 +480,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @param closure
      */
     @Override
-    void withConfirms(String connection, long timeout, Closure closure) {
+    void withConfirms(String connection, long timeout, @DelegatesTo(RabbitMessagePublisher) Closure closure) {
         Channel channel = connectionManager.createChannel(connection)
 
         try {
@@ -499,7 +504,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @param closure
      */
     @Override
-    void withConfirmsOrDie(Closure closure) {
+    void withConfirmsOrDie(@DelegatesTo(RabbitMessagePublisher) Closure closure) {
         Channel channel = connectionManager.createChannel()
 
         try {
@@ -524,7 +529,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @param closure
      */
     @Override
-    void withConfirmsOrDie(String connection, Closure closure) {
+    void withConfirmsOrDie(String connection, @DelegatesTo(RabbitMessagePublisher) Closure closure) {
         Channel channel = connectionManager.createChannel(connection)
 
         try {
@@ -549,7 +554,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @param closure
      */
     @Override
-    void withConfirmsOrDie(long timeout, Closure closure) {
+    void withConfirmsOrDie(long timeout, @DelegatesTo(RabbitMessagePublisher) Closure closure) {
         Channel channel = connectionManager.createChannel()
 
         try {
@@ -575,7 +580,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @param closure
      */
     @Override
-    void withConfirmsOrDie(String connection, long timeout, Closure closure) {
+    void withConfirmsOrDie(String connection, long timeout, @DelegatesTo(RabbitMessagePublisher) Closure closure) {
         Channel channel = connectionManager.createChannel(connection)
 
         try {

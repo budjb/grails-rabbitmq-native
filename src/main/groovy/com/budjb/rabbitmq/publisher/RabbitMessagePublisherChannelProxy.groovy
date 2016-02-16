@@ -52,7 +52,7 @@ class RabbitMessagePublisherChannelProxy implements RabbitMessagePublisher {
     }
 
     @Override
-    void send(Closure closure) throws IllegalArgumentException {
+    void send(@DelegatesTo(RabbitMessageProperties) Closure closure) throws IllegalArgumentException {
         send(createRabbitMessageProperties().build(closure))
     }
 
@@ -81,7 +81,8 @@ class RabbitMessagePublisherChannelProxy implements RabbitMessagePublisher {
     }
 
     @Override
-    Object rpc(Closure closure) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+    Object rpc(@DelegatesTo(RabbitMessageProperties) Closure closure)
+            throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         return rpc(createRabbitMessageProperties().build(closure))
     }
 
@@ -94,7 +95,8 @@ class RabbitMessagePublisherChannelProxy implements RabbitMessagePublisher {
     }
 
     @Override
-    Object rpc(String exchange, String routingKey, Object body) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+    Object rpc(String exchange, String routingKey, Object body)
+            throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         return rpc(createRabbitMessageProperties().build {
             delegate.exchange = exchange
             delegate.routingKey = routingKey
@@ -108,52 +110,52 @@ class RabbitMessagePublisherChannelProxy implements RabbitMessagePublisher {
     }
 
     @Override
-    void withConfirms(Closure closure) {
+    void withConfirms(@DelegatesTo(RabbitMessagePublisher) Closure closure) {
         throw new UnsupportedOperationException()
     }
 
     @Override
-    void withConfirms(long timeout, Closure closure) {
+    void withConfirms(long timeout, @DelegatesTo(RabbitMessagePublisher) Closure closure) {
         throw new UnsupportedOperationException()
     }
 
     @Override
-    void withConfirmsOrDie(Closure closure) {
+    void withConfirmsOrDie(@DelegatesTo(RabbitMessagePublisher) Closure closure) {
         throw new UnsupportedOperationException()
     }
 
     @Override
-    void withConfirmsOrDie(long timeout, Closure closure) {
+    void withConfirmsOrDie(long timeout, @DelegatesTo(RabbitMessagePublisher) Closure closure) {
         throw new UnsupportedOperationException()
     }
 
     @Override
-    void withChannel(Closure closure) {
+    void withChannel(@DelegatesTo(RabbitMessagePublisher) Closure closure) {
         throw new UnsupportedOperationException()
     }
 
     @Override
-    void withChannel(String connection, Closure closure) {
+    void withChannel(String connection, @DelegatesTo(RabbitMessagePublisher) Closure closure) {
         throw new UnsupportedOperationException()
     }
 
     @Override
-    void withConfirms(String connection, Closure closure) {
+    void withConfirms(String connection, @DelegatesTo(RabbitMessagePublisher) Closure closure) {
         throw new UnsupportedOperationException()
     }
 
     @Override
-    void withConfirms(String connection, long timeout, Closure closure) {
+    void withConfirms(String connection, long timeout, @DelegatesTo(RabbitMessagePublisher) Closure closure) {
         throw new UnsupportedOperationException()
     }
 
     @Override
-    void withConfirmsOrDie(String connection, Closure closure) {
+    void withConfirmsOrDie(String connection, @DelegatesTo(RabbitMessagePublisher) Closure closure) {
         throw new UnsupportedOperationException()
     }
 
     @Override
-    void withConfirmsOrDie(String connection, long timeout, Closure closure) {
+    void withConfirmsOrDie(String connection, long timeout, @DelegatesTo(RabbitMessagePublisher) Closure closure) {
         throw new UnsupportedOperationException()
     }
 
@@ -161,7 +163,7 @@ class RabbitMessagePublisherChannelProxy implements RabbitMessagePublisher {
         return new RabbitMessageProperties()
     }
 
-    void run(Closure closure) {
+    void run(@DelegatesTo(RabbitMessagePublisherChannelProxy) Closure closure) {
         closure = closure.clone()
         closure.resolveStrategy = Closure.DELEGATE_FIRST
         closure.delegate = this

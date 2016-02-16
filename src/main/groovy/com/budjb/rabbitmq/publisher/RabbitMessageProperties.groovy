@@ -130,7 +130,7 @@ class RabbitMessageProperties {
      * @param closure
      * @return This object.
      */
-    RabbitMessageProperties build(Closure closure) {
+    RabbitMessageProperties build(@DelegatesTo(RabbitMessageProperties)Closure closure) {
         run(closure)
         return this
     }
@@ -140,7 +140,7 @@ class RabbitMessageProperties {
      *
      * @param closure
      */
-    protected void run(Closure closure) {
+    protected void run(@DelegatesTo(RabbitMessageProperties)Closure closure) {
         closure.delegate = this
         closure.resolveStrategy = Closure.DELEGATE_FIRST
         closure()
