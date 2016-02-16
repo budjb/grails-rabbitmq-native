@@ -16,7 +16,6 @@ package com.budjb.rabbitmq
  * limitations under the License.
  */
 
-import com.budjb.rabbitmq.RabbitContext
 import grails.core.GrailsApplication
 
 class BootStrap {

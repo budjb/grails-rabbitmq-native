@@ -37,7 +37,9 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp",
+            "grails-app/conf/application.groovy",
             '**/com/budjb/rabbitmq/test/**'
+
     ]
 
     /**
@@ -100,6 +102,8 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
      */
     Logger log = Logger.getLogger(RabbitmqNativeGrailsPlugin)
 
+    def artefacts = [MessageConsumerArtefactHandler, MessageConverterArtefactHandler]
+
     /**
      * Spring actions.
      */
@@ -159,7 +163,7 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
      */
     void doWithApplicationContext() {
         // Do nothing if the plugin's disabled.
-        if (grailsApplication.config.rabbitmq.enabled) {
+        if (grailsApplication.config.rabbitmq.enabled != false) {
 
             // Load and start the rabbit service, without starting consumers.
             RabbitContext rabbitContext = (RabbitContext) applicationContext.getBean('rabbitContext')
@@ -173,7 +177,7 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
      */
     void onChange(Map<String, Object> event) {
         // Do nothing if the plugin's disabled.
-        if (grailsApplication.config.rabbitmq.enabled) {
+        if (grailsApplication.config.rabbitmq.enabled != false) {
 
             // Bail if no context
             if (!event.ctx) {
@@ -221,7 +225,7 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
      * Handle configuration changes.
      */
     void onConfigChange(Map<String, Object> event) {
-        if (grailsApplication.config.rabbitmq.enabled) {
+        if (grailsApplication.config.rabbitmq.enabled != falseFixup) {
 
             RabbitContext context = event.ctx.getBean('rabbitContext')
             context.reload()
