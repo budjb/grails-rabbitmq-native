@@ -16,6 +16,7 @@
 grails.doc.images = new File('src/docs/images')
 
 rabbitmq {
+    enabled = true
     connection = {
         connection(
             host: 'localhost',
