@@ -20,6 +20,8 @@ import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
 import spock.lang.Specification
 
+import java.time.OffsetDateTime
+
 class RabbitMessagePropertiesSpec extends Specification {
     RabbitMessageProperties rabbitMessageProperties
 
@@ -85,7 +87,7 @@ class RabbitMessagePropertiesSpec extends Specification {
     def 'Ensure properties are set correctly when overridden'() {
         setup:
         Channel channel = Mock(Channel)
-        Calendar calendar = Mock(Calendar)
+        OffsetDateTime calendar = OffsetDateTime.now()
 
         when:
         rabbitMessageProperties.build {
@@ -156,9 +158,7 @@ class RabbitMessagePropertiesSpec extends Specification {
 
     def 'Ensure a basic properties object reflects the correct values when an overridden message properties object is used'() {
         setup:
-        Date date = Mock(Date)
-        Calendar calendar = Mock(Calendar)
-        calendar.getTime() >> date
+        OffsetDateTime calendar = OffsetDateTime.now()
 
         rabbitMessageProperties.build {
             appId = 'test-appId'
@@ -197,7 +197,7 @@ class RabbitMessagePropertiesSpec extends Specification {
         properties.getMessageId() == 'test-messageId'
         properties.getPriority() == 2
         properties.getReplyTo() == 'test-replyTo'
-        properties.getTimestamp() == date
+        properties.getTimestamp() == Date.from(calendar.toInstant())
         properties.getType() == 'test-type'
         properties.getUserId() == 'test-userId'
 
