@@ -12,9 +12,6 @@ before_script:
 - sudo rabbitmqctl set_permissions -p test1.rabbitmq.budjb.com guest ".*" ".*" ".*"
 - sudo rabbitmqctl set_permissions -p test2.rabbitmq.budjb.com guest ".*" ".*" ".*"
 
-script:
-- ./gradlew --refresh-dependencies test integrationTest
-
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 cache:
