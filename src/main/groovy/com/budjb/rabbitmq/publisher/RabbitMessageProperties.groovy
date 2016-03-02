@@ -24,7 +24,7 @@ class RabbitMessageProperties {
     /**
      * Default timeout for RPC calls (5 seconds).
      */
-    static final int DEFAULT_TIMEOUT = 5000
+    static final Integer DEFAULT_TIMEOUT = 5000
 
     /**
      * Routing key to send the message to.
@@ -39,7 +39,7 @@ class RabbitMessageProperties {
     /**
      * RPC timeout, in milliseconds.
      */
-    int timeout = DEFAULT_TIMEOUT
+    Integer timeout = DEFAULT_TIMEOUT
 
     /**
      * Message body.
@@ -64,12 +64,12 @@ class RabbitMessageProperties {
     /**
      * Delivery mode (1 == non-persistent, 2 == persistent)
      */
-    int deliveryMode
+    Integer deliveryMode
 
     /**
      * Priority.
      */
-    int priority
+    Integer priority
 
     /**
      * Correlation id.
@@ -114,7 +114,7 @@ class RabbitMessageProperties {
     /**
      * Whether to auto-convert the reply payload.
      */
-    boolean autoConvert = true
+    Boolean autoConvert = true
 
     /**
      * Connection name.
