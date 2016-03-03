@@ -19,6 +19,7 @@ import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.rabbitmq.client.Channel
+import com.rabbitmq.client.Connection
 import grails.core.GrailsApplication
 import org.apache.log4j.Logger
 import org.codehaus.groovy.control.ConfigurationException
@@ -84,6 +85,10 @@ class QueueBuilderImpl implements QueueBuilder {
          * Current connection to create exchanges/queues against
          */
         private ConnectionContext currentConnection = null
+
+        private List<ExchangeBinding> exchangeBindings = []
+
+        private Pattern namingPattern =  Pattern.compile(/(?<type>[-\w]+)_(?<name>[-\w]+)/)
 
         /**
          * RabbitMQ context bean
@@ -239,6 +244,30 @@ class QueueBuilderImpl implements QueueBuilder {
                 }
             }
 
+            Map<String,?> bindings = parameters.findAll {it.key.startsWith('bind-to_')}
+            bindings.each{k,v ->
+                Matcher matcher = namingPattern.matcher(k)
+                if(matcher.matches()){
+
+                    if(v instanceof Map) {
+
+                        if (!v.binding) throw new InvalidConfigurationException("Exchange $name 'bind-to' parameter supplied but no binding provided")
+                        switch (v.as) {
+                            case 'source':
+                                exchangeBindings += new ExchangeBinding(name, matcher.group('name'), v.binding, connection)
+                                break
+                            case 'destination': default:
+                                exchangeBindings += new ExchangeBinding(matcher.group('name'), name, v.binding, connection)
+                                break
+                        }
+                    }else if(v instanceof String){
+                        exchangeBindings += new ExchangeBinding(matcher.group('name'), name, v, connection)
+                    }else throw new InvalidConfigurationException("Exchange $name 'bind-to' parameter supplied but config is not map or string")
+                }else{
+                    throw new InvalidConfigurationException("Exchange $name 'bind-to' parameter supplied but $k does not match naming pattern")
+                }
+            }
+
             // Run the closure if given
             if (closure) {
                 boolean resetConnection = (currentConnection == null)
@@ -287,7 +316,6 @@ class QueueBuilderImpl implements QueueBuilder {
         }
 
         void configureFromMap(Map<String, Object> config){
-            Pattern namingPattern =  Pattern.compile(/(?<type>\w+)_(?<name>[-\w]+)/)
 
             config.each{k,v ->
                 Matcher matcher = namingPattern.matcher(k)
@@ -315,6 +343,31 @@ class QueueBuilderImpl implements QueueBuilder {
 
                 }else{
                     throw new InvalidConfigurationException("Queue Configuration key $k does not match pattern ${namingPattern.toString()}")
+                }
+            }
+            setupExchangeBindings()
+
+        }
+
+        /**
+         * This must be done after all exchanges have been configured otherwise there is the posssibility
+         * the binding will fail if the exchange does not exist
+         */
+        void setupExchangeBindings(){
+            exchangeBindings.each { binding ->
+                // Grab a channel
+                Channel channel = binding.connection.createChannel()
+
+                // Declare the exchange
+                try {
+                   channel.exchangeBind(binding.destination, binding.source, binding.binding)
+                }catch(Exception ex){
+                    log.warn("Could not setup exchange binding $binding because ${ex.message}", ex)
+                }
+                finally {
+                    if (channel.isOpen()) {
+                        channel.close()
+                    }
                 }
             }
         }
@@ -378,6 +431,24 @@ class QueueBuilderImpl implements QueueBuilder {
          */
         private ConnectionContext getConnection(String name) {
             return QueueBuilderImpl.this.connectionManager.getContext(name)
+        }
+    }
+
+    class ExchangeBinding{
+        String source
+        String destination
+        String binding
+        ConnectionContext connection
+
+        ExchangeBinding(String source, String destination, String binding, ConnectionContext connection){
+            this.source = source
+            this.destination = destination
+            this.binding = binding
+            this.connection = connection
+        }
+
+        String toString(){
+            "$source to $destination: $binding"
         }
     }
 }
