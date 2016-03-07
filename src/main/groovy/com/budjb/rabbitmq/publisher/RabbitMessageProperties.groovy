@@ -64,12 +64,12 @@ class RabbitMessageProperties {
     /**
      * Delivery mode (1 == non-persistent, 2 == persistent)
      */
-    Integer deliveryMode
+    Integer deliveryMode = 0
 
     /**
      * Priority.
      */
-    Integer priority
+    Integer priority = 0
 
     /**
      * Correlation id.
