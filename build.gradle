@@ -8,11 +8,8 @@ buildscript {
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsVersion"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
     }
-}
-
-plugins {
-    id "com.jfrog.bintray" version "1.2"
 }
 
 version "3.2.3"
@@ -21,7 +18,9 @@ group "org.grails.plugins"
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: "org.grails.grails-plugin"
-apply plugin: "org.grails.grails-plugin-publish"
+//apply plugin: "org.grails.grails-plugin-publish"
+apply plugin: 'maven'
+apply plugin: 'com.jfrog.bintray'
 
 ext {
     grailsVersion = project.grailsVersion
@@ -72,33 +71,43 @@ task wrapper(type: Wrapper) {
 }
 
 bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
     pkg {
-        repo = 'grails-plugins'
-        userOrg = ''
-        name = "$project.name"
-        issueTrackerUrl = "https://github.com/budjb/grails-$project.name/issues"
-        vcsUrl = "https://github.com/budjb/grails-$project.name"
+        repo = 'maven'
+        name = project.name
+        userOrg = 'olliefreeman'
+        licenses = ['Apache-2.0']
+        websiteUrl = 'https://github.com/olliefreeman/grails-rabbitmq-native'
+        vcsUrl = 'https://github.com/olliefreeman/grails-rabbitmq-native.git'
+        githubRepo = 'olliefreeman/grails-rabbitmq-native'
+        githubReleaseNotesFile = 'README.md'
         version {
-            attributes = ['grails-plugin': "$project.group:$project.name"]
             name = project.version
+            desc = "Grails RabbitMq Native Plugin For Grails 3.1.x - ${project.name} ${project.version}"
+            released = new Date()
+            vcsTag = "v${project.version}-rabbitmq-native3"
         }
     }
+    configurations = ['archives']
+    dryRun = false //Whether to run this as dry-run, without deploying
+    publish = true //If version should be auto published after an upload
 }
-
-grailsPublish {
-    // TODO: Provide values here
-    user = 'user'
-    key = 'key'
-    githubSlug = 'foo/bar'
-    license {
-        name = 'Apache-2.0'
-    }
-    title = "My Plugin"
-    desc = "Full plugin description"
-    developers = [johndoe:"John Doe"]
-    portalUser = ""
-    portalPassword = ""
-}
+//
+//grailsPublish {
+//    // TODO: Provide values here
+//    user = 'user'
+//    key = 'key'
+//    githubSlug = 'foo/bar'
+//    license {
+//        name = 'Apache-2.0'
+//    }
+//    title = "My Plugin"
+//    desc = "Full plugin description"
+//    developers = [johndoe:"John Doe"]
+//    portalUser = ""
+//    portalPassword = ""
+//}
 
 List excludedFiles = [
         "application.groovy",
