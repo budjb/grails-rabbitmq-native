@@ -55,6 +55,7 @@ class QueueBuilderImpl implements QueueBuilder {
     void configureQueues(Map config){
         QueueBuilderDelegate queueBuilderDelegate = new QueueBuilderDelegate()
         queueBuilderDelegate.configureFromMap(config)
+        queueBuilderDelegate.setupExchangeBindings()
     }
 
     void configureQueues(@DelegatesTo(QueueBuilderDelegate) Closure closure){
@@ -345,8 +346,6 @@ class QueueBuilderImpl implements QueueBuilder {
                     throw new InvalidConfigurationException("Queue Configuration key $k does not match pattern ${namingPattern.toString()}")
                 }
             }
-            setupExchangeBindings()
-
         }
 
         /**
