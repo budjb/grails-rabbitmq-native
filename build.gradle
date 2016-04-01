@@ -110,8 +110,8 @@ bintray {
 //}
 
 List excludedFiles = [
-        "application.groovy",
-        "com/budjb/rabbitmq/test/**"
+        "**/application.groovy",
+        "**/com/budjb/rabbitmq/test/**"
 ]
 
 jar {
