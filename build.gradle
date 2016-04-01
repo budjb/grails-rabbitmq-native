@@ -132,3 +132,7 @@ javadocJar {
     }
 }
 
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
