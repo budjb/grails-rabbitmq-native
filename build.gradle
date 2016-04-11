@@ -12,7 +12,7 @@ buildscript {
     }
 }
 
-version "3.2.3"
+version "3.2.4"
 group "org.grails.plugins"
 
 apply plugin: 'eclipse'
@@ -60,9 +60,9 @@ dependencies {
     compile "org.grails:grails-web-mvc"
 
     // Extra plugin deps
-    compile 'org.codehaus.groovy:groovy-all:2.4.5'
+    compile 'org.codehaus.groovy:groovy-all:2.4.6'
     compile "commons-lang:commons-lang:2.0"
-    compile 'com.rabbitmq:amqp-client:3.6.0'
+    compile 'com.rabbitmq:amqp-client:3.6.1'
     provided 'javax.servlet:javax.servlet-api:3.1.0'
 }
 
