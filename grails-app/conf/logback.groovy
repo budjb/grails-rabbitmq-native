@@ -27,4 +27,4 @@ if(Environment.current == Environment.DEVELOPMENT) {
     }
 }
 
-logger 'com.budjb.rabbitmq', ALL
+logger 'com.budjb.rabbitmq', DEBUG

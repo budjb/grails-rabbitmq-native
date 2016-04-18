@@ -186,13 +186,11 @@ class ConnectionManagerImpl implements ConnectionManager {
      */
     @Override
     void start() {
-        // Ensure we have at least one connection
         if (connections.size() == 0) {
             log.warn("not starting connections because no RabbitMQ connections were configured")
             return
         }
 
-        // If only one connection was configured, force it as default
         if (connections.size() == 1) {
             connections[0].isDefault = true
         }
@@ -202,7 +200,7 @@ class ConnectionManagerImpl implements ConnectionManager {
                 start(it)
             }
             catch (IllegalStateException e) {
-                // Continue...
+                log.trace("error starting a connection; this is probably not a problem", e)
             }
         }
     }
@@ -283,7 +281,7 @@ class ConnectionManagerImpl implements ConnectionManager {
                 }
             }
             catch (ContextNotFoundException e) {
-                // Continue...
+                log.trace("no default connection context was found; this is ok", e)
             }
         }
 
@@ -291,7 +289,7 @@ class ConnectionManagerImpl implements ConnectionManager {
             unregister(getContext(context.id))
         }
         catch (ContextNotFoundException e) {
-            // Continue...
+            log.trace("no connection context with id ${context.id} found; this is ok", e)
         }
 
         connections << context

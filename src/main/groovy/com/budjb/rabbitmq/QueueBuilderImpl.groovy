@@ -19,10 +19,8 @@ import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.rabbitmq.client.Channel
-import com.rabbitmq.client.Connection
 import grails.core.GrailsApplication
-import org.apache.log4j.Logger
-import org.codehaus.groovy.control.ConfigurationException
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
 import java.util.regex.Matcher
@@ -52,13 +50,13 @@ class QueueBuilderImpl implements QueueBuilder {
 
     }
 
-    void configureQueues(Map config){
+    void configureQueues(Map config) {
         QueueBuilderDelegate queueBuilderDelegate = new QueueBuilderDelegate()
         queueBuilderDelegate.configureFromMap(config)
         queueBuilderDelegate.setupExchangeBindings()
     }
 
-    void configureQueues(@DelegatesTo(QueueBuilderDelegate) Closure closure){
+    void configureQueues(@DelegatesTo(QueueBuilderDelegate) Closure closure) {
         // Create the queue builder
         QueueBuilderDelegate queueBuilderDelegate = new QueueBuilderDelegate()
 
@@ -71,12 +69,8 @@ class QueueBuilderImpl implements QueueBuilder {
     /**
      * Class that does the work of building exchanges and queues.
      */
+    @Slf4j
     private class QueueBuilderDelegate {
-        /**
-         * Logger
-         */
-        private static Logger log = Logger.getLogger(QueueBuilderDelegate)
-
         /**
          * Current exchange marker
          */
@@ -89,15 +83,15 @@ class QueueBuilderImpl implements QueueBuilder {
 
         private List<ExchangeBinding> exchangeBindings = []
 
-        private Pattern namingPattern =  Pattern.compile(/(?<type>[-\w]+)_(?<name>[-\w]+)/)
+        private Pattern namingPattern = Pattern.compile(/(?<type>[-\w]+)_(?<name>[-\w]+)/)
 
         /**
          * RabbitMQ context bean
          */
         private RabbitContext rabbitContext = null
 
-        void queue(String name, Map config){
-            config.name = config.name?:name
+        void queue(String name, Map config) {
+            config.name = config.name ?: name
             queue(config)
         }
 
@@ -111,9 +105,9 @@ class QueueBuilderImpl implements QueueBuilder {
             // Grab required parameters
             String name = parameters['name']
             String exchange = parameters['exchange']
-            boolean autoDelete = Boolean.valueOf(parameters['autoDelete']?:false)
-            boolean exclusive = Boolean.valueOf(parameters['exclusive']?:false)
-            boolean durable = Boolean.valueOf(parameters['durable']?:false)
+            boolean autoDelete = Boolean.valueOf(parameters['autoDelete'] ?: false)
+            boolean exclusive = Boolean.valueOf(parameters['exclusive'] ?: false)
+            boolean durable = Boolean.valueOf(parameters['durable'] ?: false)
             Map arguments = (parameters['arguments'] instanceof Map) ? parameters['arguments'] : [:]
 
             // Ensure we have a name
@@ -182,8 +176,8 @@ class QueueBuilderImpl implements QueueBuilder {
         }
 
         void exchange(String name, Map parameters, @DelegatesTo(QueueBuilderDelegate) Closure closure = null) {
-            parameters.name = parameters.name?:name
-            exchange(parameters,closure)
+            parameters.name = parameters.name ?: name
+            exchange(parameters, closure)
         }
 
         /**
@@ -201,8 +195,8 @@ class QueueBuilderImpl implements QueueBuilder {
             // Get parameters
             String name = parameters['name']
             String type = parameters['type']
-            boolean autoDelete = Boolean.valueOf(parameters['autoDelete']?:false)
-            boolean durable = Boolean.valueOf(parameters['durable']?:false)
+            boolean autoDelete = Boolean.valueOf(parameters['autoDelete'] ?: false)
+            boolean durable = Boolean.valueOf(parameters['durable'] ?: false)
 
             // Grab the extra arguments
             Map arguments = (parameters['arguments'] instanceof Map) ? parameters['arguments'] : [:]
@@ -245,14 +239,16 @@ class QueueBuilderImpl implements QueueBuilder {
                 }
             }
 
-            Map<String,?> bindings = parameters.findAll {it.key.startsWith('bind-to_')}
-            bindings.each{k,v ->
+            Map<String, ?> bindings = parameters.findAll { it.key.startsWith('bind-to_') }
+            bindings.each { k, v ->
                 Matcher matcher = namingPattern.matcher(k)
-                if(matcher.matches()){
+                if (matcher.matches()) {
 
-                    if(v instanceof Map) {
+                    if (v instanceof Map) {
 
-                        if (!v.binding) throw new InvalidConfigurationException("Exchange $name 'bind-to' parameter supplied but no binding provided")
+                        if (!v.binding) {
+                            throw new InvalidConfigurationException("Exchange $name 'bind-to' parameter supplied but no binding provided")
+                        }
                         switch (v.as) {
                             case 'source':
                                 exchangeBindings += new ExchangeBinding(name, matcher.group('name'), v.binding, connection)
@@ -261,10 +257,15 @@ class QueueBuilderImpl implements QueueBuilder {
                                 exchangeBindings += new ExchangeBinding(matcher.group('name'), name, v.binding, connection)
                                 break
                         }
-                    }else if(v instanceof String){
+                    }
+                    else if (v instanceof String) {
                         exchangeBindings += new ExchangeBinding(matcher.group('name'), name, v, connection)
-                    }else throw new InvalidConfigurationException("Exchange $name 'bind-to' parameter supplied but config is not map or string")
-                }else{
+                    }
+                    else {
+                        throw new InvalidConfigurationException("Exchange $name 'bind-to' parameter supplied but config is not map or string")
+                    }
+                }
+                else {
                     throw new InvalidConfigurationException("Exchange $name 'bind-to' parameter supplied but $k does not match naming pattern")
                 }
             }
@@ -316,33 +317,38 @@ class QueueBuilderImpl implements QueueBuilder {
             currentConnection = null
         }
 
-        void configureFromMap(Map<String, Object> config){
+        void configureFromMap(Map<String, Object> config) {
 
-            config.each{k,v ->
+            config.each { k, v ->
                 Matcher matcher = namingPattern.matcher(k)
 
-                if(matcher.matches()) {
+                if (matcher.matches()) {
 
-                    switch(matcher.group('type')) {
+                    switch (matcher.group('type')) {
                         case 'queue':
                             queue(matcher.group('name'), v)
                             break
                         case 'connection':
-                            connection(matcher.group('name')){
-                                configureFromMap(v.findAll{k2,v2 -> k2.startsWith('queue') || k2.startsWith('exchange')})
+                            connection(matcher.group('name')) {
+                                configureFromMap(v.findAll { k2, v2 -> k2.startsWith('queue') || k2.startsWith('exchange') })
                             }
                             break
                         case 'exchange':
-                            exchange(matcher.group('name'),v){
-                                if(v.queues) configureFromMap(v.queues)
-                                else configureFromMap(v.findAll{k2,v2 -> k2.startsWith('queue')})
+                            exchange(matcher.group('name'), v) {
+                                if (v.queues) {
+                                    configureFromMap(v.queues)
+                                }
+                                else {
+                                    configureFromMap(v.findAll { k2, v2 -> k2.startsWith('queue') })
+                                }
                             }
                             break
                         default:
                             throw new InvalidConfigurationException("Queue Configuration key $k is not recognised")
                     }
 
-                }else{
+                }
+                else {
                     throw new InvalidConfigurationException("Queue Configuration key $k does not match pattern ${namingPattern.toString()}")
                 }
             }
@@ -352,15 +358,16 @@ class QueueBuilderImpl implements QueueBuilder {
          * This must be done after all exchanges have been configured otherwise there is the posssibility
          * the binding will fail if the exchange does not exist
          */
-        void setupExchangeBindings(){
+        void setupExchangeBindings() {
             exchangeBindings.each { binding ->
                 // Grab a channel
                 Channel channel = binding.connection.createChannel()
 
                 // Declare the exchange
                 try {
-                   channel.exchangeBind(binding.destination, binding.source, binding.binding)
-                }catch(Exception ex){
+                    channel.exchangeBind(binding.destination, binding.source, binding.binding)
+                }
+                catch (Exception ex) {
                     log.warn("Could not setup exchange binding $binding because ${ex.message}", ex)
                 }
                 finally {
@@ -433,20 +440,20 @@ class QueueBuilderImpl implements QueueBuilder {
         }
     }
 
-    class ExchangeBinding{
+    class ExchangeBinding {
         String source
         String destination
         String binding
         ConnectionContext connection
 
-        ExchangeBinding(String source, String destination, String binding, ConnectionContext connection){
+        ExchangeBinding(String source, String destination, String binding, ConnectionContext connection) {
             this.source = source
             this.destination = destination
             this.binding = binding
             this.connection = connection
         }
 
-        String toString(){
+        String toString() {
             "$source to $destination: $binding"
         }
     }

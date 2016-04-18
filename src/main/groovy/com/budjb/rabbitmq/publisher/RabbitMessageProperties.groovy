@@ -94,7 +94,7 @@ class RabbitMessageProperties {
     /**
      * Message timestamp.
      */
-    OffsetDateTime timestamp
+    Calendar timestamp
 
     /**
      * Message type name.

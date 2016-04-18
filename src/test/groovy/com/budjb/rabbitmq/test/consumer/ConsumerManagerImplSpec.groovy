@@ -28,8 +28,8 @@ import com.budjb.rabbitmq.test.UnitTestConsumer
 import grails.config.Config
 import grails.core.GrailsApplication
 import grails.core.GrailsClass
-import org.apache.log4j.Logger
 import org.grails.config.PropertySourcesConfig
+import org.slf4j.Logger
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 

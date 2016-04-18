@@ -24,13 +24,14 @@ import com.rabbitmq.client.Channel
 import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
 import com.rabbitmq.client.ShutdownSignalException
-import org.apache.log4j.Logger
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
+@Slf4j
 class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
     /**
      * Connection manager.
@@ -43,11 +44,6 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      */
     @Autowired
     MessageConverterManager messageConverterManager
-
-    /**
-     * Logger
-     */
-    Logger log = Logger.getLogger(RabbitMessagePublisherImpl)
 
     /**
      * Sends a Rabbit message with a given set of message properties.
@@ -210,13 +206,13 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
             DefaultConsumer consumer = new DefaultConsumer(channel) {
                 @Override
                 void handleDelivery(String replyConsumerTag, Envelope replyEnvelope, BasicProperties replyProperties, byte[] replyBody)
-                        throws IOException {
+                    throws IOException {
                     MessageContext context = new MessageContext(
-                            channel: null,
-                            consumerTag: replyConsumerTag,
-                            envelope: replyEnvelope,
-                            properties: replyProperties,
-                            body: replyBody
+                        channel: null,
+                        consumerTag: replyConsumerTag,
+                        envelope: replyEnvelope,
+                        properties: replyProperties,
+                        body: replyBody
                     )
                     try {
                         replyHandoff.put(context)
@@ -240,7 +236,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
             // If the reply is null, assume the timeout was reached
             if (reply == null) {
                 throw new TimeoutException(
-                        "timeout of ${properties.timeout} milliseconds reached while waiting for a response in an RPC message to exchange " +
+                    "timeout of ${properties.timeout} milliseconds reached while waiting for a response in an RPC message to exchange " +
                         "'${properties.exchange}' and routingKey '${properties.routingKey}'")
             }
 
@@ -281,7 +277,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @throws IllegalArgumentException
      */
     Object rpc(@DelegatesTo(RabbitMessageProperties) Closure closure)
-            throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+        throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         RabbitMessageProperties properties = createRabbitMessageProperties()
         properties.build(closure)
         return rpc(properties)
@@ -324,7 +320,7 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @throws IllegalArgumentException
      */
     Object rpc(String exchange, String routingKey, Object body)
-            throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+        throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         return rpc(createRabbitMessageProperties().build {
             delegate.exchange = exchange
             delegate.routingKey = routingKey

@@ -20,8 +20,6 @@ import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
 import spock.lang.Specification
 
-import java.time.OffsetDateTime
-
 class RabbitMessagePropertiesSpec extends Specification {
     RabbitMessageProperties rabbitMessageProperties
 
@@ -35,7 +33,7 @@ class RabbitMessagePropertiesSpec extends Specification {
 
         then:
         rabbitMessageProperties.appId == null
-        rabbitMessageProperties.autoConvert == true
+        rabbitMessageProperties.autoConvert
         rabbitMessageProperties.body == null
         rabbitMessageProperties.channel == null
         rabbitMessageProperties.connection == null
@@ -63,7 +61,7 @@ class RabbitMessagePropertiesSpec extends Specification {
 
         then:
         rabbitMessageProperties.appId == null
-        rabbitMessageProperties.autoConvert == true
+        rabbitMessageProperties.autoConvert
         rabbitMessageProperties.body == null
         rabbitMessageProperties.channel == null
         rabbitMessageProperties.connection == null
@@ -87,7 +85,7 @@ class RabbitMessagePropertiesSpec extends Specification {
     def 'Ensure properties are set correctly when overridden'() {
         setup:
         Channel channel = Mock(Channel)
-        OffsetDateTime calendar = OffsetDateTime.now()
+        Calendar calendar = Mock(Calendar)
 
         when:
         rabbitMessageProperties.build {
@@ -115,7 +113,7 @@ class RabbitMessagePropertiesSpec extends Specification {
 
         then:
         rabbitMessageProperties.appId == 'test-appId'
-        rabbitMessageProperties.autoConvert == false
+        !rabbitMessageProperties.autoConvert
         rabbitMessageProperties.body == 'test-body'
         rabbitMessageProperties.channel == channel
         rabbitMessageProperties.connection == 'test-connection'
@@ -158,7 +156,9 @@ class RabbitMessagePropertiesSpec extends Specification {
 
     def 'Ensure a basic properties object reflects the correct values when an overridden message properties object is used'() {
         setup:
-        OffsetDateTime calendar = OffsetDateTime.now()
+        Date date = Mock(Date)
+        Calendar calendar = Mock(Calendar)
+        calendar.getTime() >> date
 
         rabbitMessageProperties.build {
             appId = 'test-appId'

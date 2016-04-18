@@ -17,18 +17,15 @@ package com.budjb.rabbitmq.consumer
 
 import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.connection.ConnectionContext
-import com.rabbitmq.client.AMQP
-import com.rabbitmq.client.Channel
-import com.rabbitmq.client.DefaultConsumer
-import com.rabbitmq.client.Envelope
-import com.rabbitmq.client.ShutdownSignalException
-import org.apache.log4j.Logger
+import com.rabbitmq.client.*
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class RabbitMessageHandler extends DefaultConsumer {
     /**
      * Logger.
      */
-    Logger log = Logger.getLogger(RabbitMessageHandler)
+    Logger log = LoggerFactory.getLogger(RabbitMessageHandler)
 
     /**
      * Consumer context containing the context for this consumer.
