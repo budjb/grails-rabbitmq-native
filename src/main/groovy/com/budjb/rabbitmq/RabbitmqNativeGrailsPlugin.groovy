@@ -106,7 +106,7 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
 
             // Create the proxy rabbit context bean
             'rabbitContext'(RabbitContextProxy) {
-                if (!isEnabled()) {
+                if (!isRabbitEnabled()) {
                     log.warn("The rabbitmq-native plugin has been disabled by the application's configuration.")
                     target = ref('nullRabbitContext')
                 }
@@ -114,6 +114,8 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
                     target = ref('rabbitContextImpl')
                 }
             }
+
+            'onStartupListener'(OnStartupListener)
 
             "connectionManager"(ConnectionManagerImpl)
 
@@ -142,27 +144,13 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
     }
 
     /**
-     * Application context actions.
-     *
-     * @param event
-     */
-    @Override
-    void onStartup(Map<String, Object> event) {
-        if (isEnabled()) {
-            RabbitContext rabbitContext = getRabbitContextBean()
-            rabbitContext.load()
-            rabbitContext.start()
-        }
-    }
-
-    /**
      * Handle Grails service reloads.
      *
      * @param event
      */
     @Override
     void onChange(Map<String, Object> event) {
-        if (!isEnabled()) {
+        if (!isRabbitEnabled()) {
             return
         }
 
@@ -185,7 +173,7 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
      */
     @Override
     void onConfigChange(Map<String, Object> event) {
-        if (isEnabled()) {
+        if (isRabbitEnabled()) {
             getRabbitContextBean().reload()
         }
     }
@@ -197,7 +185,7 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
      */
     @Override
     void onShutdown(Map<String, Object> event) {
-        if (isEnabled()) {
+        if (isRabbitEnabled()) {
             getRabbitContextBean().stop()
         }
     }
@@ -216,7 +204,7 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
      *
      * @return
      */
-    boolean isEnabled() {
+    boolean isRabbitEnabled() {
         def val = grailsApplication.config.rabbitmq.enabled
 
         if (!(val instanceof Boolean)) {

@@ -52,6 +52,7 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
      */
     @Override
     void register(MessageConverter<?> messageConverter) {
+        log.debug("Registering message consumer: ${messageConverter.getClass().getSimpleName()}")
         messageConverters << messageConverter
     }
 

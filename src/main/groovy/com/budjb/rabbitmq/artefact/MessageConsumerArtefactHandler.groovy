@@ -58,4 +58,14 @@ public class MessageConsumerArtefactHandler extends ArtefactHandlerAdapter {
     static boolean isConsumer(@SuppressWarnings("rawtypes") Class clazz) {
         return clazz.getName().endsWith(SUFFIX)
     }
+
+    /**
+     * Returns the name of the plugin responsible for this artefact type.
+     *
+     * @return
+     */
+    @Override
+    String getPluginName() {
+        return 'rabbitmq-native'
+    }
 }

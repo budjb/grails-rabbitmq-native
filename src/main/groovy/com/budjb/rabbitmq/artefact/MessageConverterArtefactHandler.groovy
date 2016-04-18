@@ -59,4 +59,14 @@ public class MessageConverterArtefactHandler extends ArtefactHandlerAdapter {
     static boolean isMessageConverter(@SuppressWarnings("rawtypes") Class clazz) {
         return clazz.getName().endsWith(SUFFIX) && MessageConverter.class.isAssignableFrom(clazz)
     }
+
+    /**
+     * Returns the name of the plugin responsible for this artefact type.
+     *
+     * @return
+     */
+    @Override
+    String getPluginName() {
+        return 'rabbitmq-native'
+    }
 }
