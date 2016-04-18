@@ -23,8 +23,8 @@ import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
-import com.budjb.rabbitmq.test.MissingConfigurationConsumer
-import com.budjb.rabbitmq.test.UnitTestConsumer
+import com.budjb.rabbitmq.test.support.MissingConfigurationConsumer
+import com.budjb.rabbitmq.test.support.UnitTestConsumer
 import grails.config.Config
 import grails.core.GrailsApplication
 import grails.core.GrailsClass
