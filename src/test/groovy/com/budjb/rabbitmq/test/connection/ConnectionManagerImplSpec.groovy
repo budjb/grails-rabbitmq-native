@@ -23,8 +23,8 @@ import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
 import grails.config.Config
 import grails.core.GrailsApplication
-import org.apache.log4j.Logger
 import org.grails.config.PropertySourcesConfig
+import org.slf4j.Logger
 import spock.lang.Specification
 
 class ConnectionManagerImplSpec extends Specification {
@@ -75,6 +75,7 @@ class ConnectionManagerImplSpec extends Specification {
         config.putAll([
             'rabbitmq': [
                 'connection': [
+                    'name'    : 'myConnection',
                     'host'    : 'test.budjb.com',
                     'username': 'test-user',
                     'password': 'test-password'
@@ -87,7 +88,8 @@ class ConnectionManagerImplSpec extends Specification {
         connectionManager.load()
 
         then:
-        1 * connectionBuilder.loadConnectionContexts(_)
+        connectionManager.getContexts().size() == 1
+        connectionManager.getContext('myConnection') != null
     }
 
     def 'Closure configuration test'() {

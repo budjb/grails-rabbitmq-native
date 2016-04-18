@@ -16,14 +16,15 @@
 package com.budjb.rabbitmq.connection
 
 import com.rabbitmq.client.ConnectionFactory
-import org.apache.log4j.Logger
 import org.grails.config.NavigableMap
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class ConnectionConfigurationImpl implements ConnectionConfiguration {
     /**
      * Logger.
      */
-    Logger log = Logger.getLogger(ConnectionConfigurationImpl)
+    Logger log = LoggerFactory.getLogger(ConnectionConfigurationImpl)
 
     /**
      * RabbitMQ host.
@@ -92,8 +93,7 @@ class ConnectionConfigurationImpl implements ConnectionConfiguration {
      *
      * @param configuration
      */
-    ConnectionConfigurationImpl(Map<String,Object> configuration) {
-        // Assign values
+    ConnectionConfigurationImpl(Map<String, Object> configuration) {
         setAutomaticReconnect(parseConfigOption(Boolean, configuration['automaticReconnect'], automaticReconnect))
         setHost(parseConfigOption(String, configuration['host'], host))
         setIsDefault(parseConfigOption(Boolean, configuration['isDefault'], isDefault))
@@ -114,21 +114,18 @@ class ConnectionConfigurationImpl implements ConnectionConfiguration {
      * @param values
      * @return
      */
-    private Object parseConfigOption(Class clazz, Object... values) {
+    protected <T> T parseConfigOption(Class<T> clazz, Object... values) {
         for (Object value : values) {
             if (value == null || value instanceof NavigableMap.NullSafeNavigator || value instanceof ConfigObject) {
                 continue
             }
 
-            try {
-                return value.asType(clazz)
-            }
-            catch (Exception e) {
-                // Continue...
+            if (clazz.isAssignableFrom(value.getClass())) {
+                return value as T
             }
         }
 
-        null
+        return null
     }
 
     /**
