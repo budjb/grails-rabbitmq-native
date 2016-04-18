@@ -18,11 +18,13 @@ package com.budjb.rabbitmq.publisher
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.Channel
 
+import java.time.OffsetDateTime
+
 class RabbitMessageProperties {
     /**
      * Default timeout for RPC calls (5 seconds).
      */
-    static final int DEFAULT_TIMEOUT = 5000
+    static final Integer DEFAULT_TIMEOUT = 5000
 
     /**
      * Routing key to send the message to.
@@ -37,7 +39,7 @@ class RabbitMessageProperties {
     /**
      * RPC timeout, in milliseconds.
      */
-    int timeout = DEFAULT_TIMEOUT
+    Integer timeout = DEFAULT_TIMEOUT
 
     /**
      * Message body.
@@ -62,12 +64,12 @@ class RabbitMessageProperties {
     /**
      * Delivery mode (1 == non-persistent, 2 == persistent)
      */
-    int deliveryMode
+    Integer deliveryMode = 0
 
     /**
      * Priority.
      */
-    int priority
+    Integer priority = 0
 
     /**
      * Correlation id.
@@ -92,7 +94,7 @@ class RabbitMessageProperties {
     /**
      * Message timestamp.
      */
-    Calendar timestamp
+    OffsetDateTime timestamp
 
     /**
      * Message type name.
@@ -112,7 +114,7 @@ class RabbitMessageProperties {
     /**
      * Whether to auto-convert the reply payload.
      */
-    boolean autoConvert = true
+    Boolean autoConvert = true
 
     /**
      * Connection name.
@@ -130,7 +132,7 @@ class RabbitMessageProperties {
      * @param closure
      * @return This object.
      */
-    RabbitMessageProperties build(Closure closure) {
+    RabbitMessageProperties build(@DelegatesTo(RabbitMessageProperties)Closure closure) {
         run(closure)
         return this
     }
@@ -140,7 +142,7 @@ class RabbitMessageProperties {
      *
      * @param closure
      */
-    protected void run(Closure closure) {
+    protected void run(@DelegatesTo(RabbitMessageProperties)Closure closure) {
         closure.delegate = this
         closure.resolveStrategy = Closure.DELEGATE_FIRST
         closure()
@@ -200,7 +202,7 @@ class RabbitMessageProperties {
 
         // Timestamp
         if (timestamp) {
-            builder.timestamp(timestamp.getTime())
+            builder.timestamp(Date.from(timestamp.toInstant()))
         }
 
         // Type

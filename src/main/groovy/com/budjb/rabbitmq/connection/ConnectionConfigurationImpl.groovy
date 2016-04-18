@@ -17,6 +17,7 @@ package com.budjb.rabbitmq.connection
 
 import com.rabbitmq.client.ConnectionFactory
 import org.apache.log4j.Logger
+import org.grails.config.NavigableMap
 
 class ConnectionConfigurationImpl implements ConnectionConfiguration {
     /**
@@ -91,7 +92,7 @@ class ConnectionConfigurationImpl implements ConnectionConfiguration {
      *
      * @param configuration
      */
-    ConnectionConfigurationImpl(Map configuration) {
+    ConnectionConfigurationImpl(Map<String,Object> configuration) {
         // Assign values
         setAutomaticReconnect(parseConfigOption(Boolean, configuration['automaticReconnect'], automaticReconnect))
         setHost(parseConfigOption(String, configuration['host'], host))
@@ -115,11 +116,7 @@ class ConnectionConfigurationImpl implements ConnectionConfiguration {
      */
     private Object parseConfigOption(Class clazz, Object... values) {
         for (Object value : values) {
-            if (value == null) {
-                continue
-            }
-
-            if (value instanceof ConfigObject) {
+            if (value == null || value instanceof NavigableMap.NullSafeNavigator || value instanceof ConfigObject) {
                 continue
             }
 
@@ -131,7 +128,7 @@ class ConnectionConfigurationImpl implements ConnectionConfiguration {
             }
         }
 
-        return null
+        null
     }
 
     /**

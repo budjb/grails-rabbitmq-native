@@ -154,7 +154,7 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
             }
         }
 
-        throw new MessageConvertException('no message converter found to convert class ${source.getClass().name} to a byte array')
+        throw new MessageConvertException("no message converter found to convert class ${source.getClass().name} to a byte array")
     }
 
     /**
