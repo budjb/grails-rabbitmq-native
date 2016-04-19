@@ -24,13 +24,13 @@ import com.budjb.rabbitmq.consumer.ConsumerContextImpl
 import com.budjb.rabbitmq.consumer.MessageContext
 import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
-import com.budjb.rabbitmq.test.UnitTestConsumer
+import com.budjb.rabbitmq.test.support.UnitTestConsumer
 import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope
 import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk
 import grails.persistence.support.PersistenceContextInterceptor
-import org.apache.log4j.Logger
+import org.slf4j.Logger
 import spock.lang.Specification
 
 class ConsumerContextImplSpec extends Specification {

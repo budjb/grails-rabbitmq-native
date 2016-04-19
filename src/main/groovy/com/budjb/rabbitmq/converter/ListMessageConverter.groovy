@@ -18,7 +18,9 @@ package com.budjb.rabbitmq.converter
 import groovy.json.JsonBuilder
 import groovy.json.JsonException
 import groovy.json.JsonSlurper
+import groovy.util.logging.Slf4j
 
+@Slf4j
 class ListMessageConverter extends MessageConverter<List> {
     @Override
     boolean canConvertFrom() {
@@ -33,9 +35,16 @@ class ListMessageConverter extends MessageConverter<List> {
     @Override
     List convertTo(byte[] input) {
         try {
-            return new JsonSlurper().parseText(new String(input))
+            def parsed = new JsonSlurper().parseText(new String(input))
+
+            if (parsed instanceof List) {
+                return parsed
+            }
+
+            return null
         }
         catch (Exception e) {
+            log.trace("error parsing JSON", e)
             return null
         }
     }
@@ -46,6 +55,7 @@ class ListMessageConverter extends MessageConverter<List> {
             return new JsonBuilder(input).toString().getBytes()
         }
         catch (JsonException e) {
+            log.trace("error creating JSON", e)
             return null
         }
     }

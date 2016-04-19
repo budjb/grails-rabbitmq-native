@@ -33,7 +33,7 @@ class RabbitMessagePropertiesSpec extends Specification {
 
         then:
         rabbitMessageProperties.appId == null
-        rabbitMessageProperties.autoConvert == true
+        rabbitMessageProperties.autoConvert
         rabbitMessageProperties.body == null
         rabbitMessageProperties.channel == null
         rabbitMessageProperties.connection == null
@@ -61,7 +61,7 @@ class RabbitMessagePropertiesSpec extends Specification {
 
         then:
         rabbitMessageProperties.appId == null
-        rabbitMessageProperties.autoConvert == true
+        rabbitMessageProperties.autoConvert
         rabbitMessageProperties.body == null
         rabbitMessageProperties.channel == null
         rabbitMessageProperties.connection == null
@@ -113,7 +113,7 @@ class RabbitMessagePropertiesSpec extends Specification {
 
         then:
         rabbitMessageProperties.appId == 'test-appId'
-        rabbitMessageProperties.autoConvert == false
+        !rabbitMessageProperties.autoConvert
         rabbitMessageProperties.body == 'test-body'
         rabbitMessageProperties.channel == channel
         rabbitMessageProperties.connection == 'test-connection'
@@ -197,7 +197,7 @@ class RabbitMessagePropertiesSpec extends Specification {
         properties.getMessageId() == 'test-messageId'
         properties.getPriority() == 2
         properties.getReplyTo() == 'test-replyTo'
-        properties.getTimestamp() == date
+        properties.getTimestamp() == Date.from(calendar.toInstant())
         properties.getType() == 'test-type'
         properties.getUserId() == 'test-userId'
 

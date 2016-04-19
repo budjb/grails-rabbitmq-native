@@ -27,7 +27,8 @@ import com.budjb.rabbitmq.report.ConsumerReport
 import com.rabbitmq.client.Channel
 import grails.persistence.support.PersistenceContextInterceptor
 import groovyx.gpars.GParsPool
-import org.apache.log4j.Logger
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
@@ -61,7 +62,7 @@ class ConsumerContextImpl implements ConsumerContext {
     /**
      * Logger.
      */
-    private Logger log = Logger.getLogger(ConsumerContextImpl)
+    private Logger log = LoggerFactory.getLogger(ConsumerContextImpl)
 
     /**
      * Consumer bean.

@@ -40,5 +40,4 @@ class StringMessageConverter extends MessageConverter<String> {
     String getContentType() {
         return 'text/plain'
     }
-
 }

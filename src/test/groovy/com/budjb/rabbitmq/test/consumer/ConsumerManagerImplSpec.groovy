@@ -23,13 +23,13 @@ import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
-import com.budjb.rabbitmq.test.MissingConfigurationConsumer
-import com.budjb.rabbitmq.test.UnitTestConsumer
+import com.budjb.rabbitmq.test.support.MissingConfigurationConsumer
+import com.budjb.rabbitmq.test.support.UnitTestConsumer
 import grails.config.Config
 import grails.core.GrailsApplication
 import grails.core.GrailsClass
-import org.apache.log4j.Logger
 import org.grails.config.PropertySourcesConfig
+import org.slf4j.Logger
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 

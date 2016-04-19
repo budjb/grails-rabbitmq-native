@@ -4,30 +4,21 @@ buildscript {
     }
     repositories {
         mavenLocal()
-        maven { url "https://repo.grails.org/grails/core" }
+        maven {url "https://repo.grails.org/grails/core"}
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsVersion"
     }
 }
 
-plugins {
-    id "io.spring.dependency-management" version "0.5.2.RELEASE"
-    id "com.jfrog.bintray" version "1.2"
-}
-
-version "3.1.2-beta1"
+version "3.2.0"
 group "org.grails.plugins"
 
-apply plugin: 'maven-publish'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: "spring-boot"
 apply plugin: "org.grails.grails-plugin"
-apply plugin: "org.grails.grails-gsp"
-// Used for publishing to central repository, remove if not needed
-apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/grailsCentralPublishing.gradle'
-apply from:'https://raw.githubusercontent.com/grails/grails-profile-repository/master/profiles/plugin/templates/bintrayPublishing.gradle'
+apply plugin: "org.grails.grails-plugin-publish"
+apply plugin:"org.grails.grails-gsp"
 
 ext {
     grailsVersion = project.grailsVersion
@@ -37,24 +28,9 @@ ext {
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
-bintray {
-    pkg {
-        repo = 'grails-plugins'
-        userOrg = ''
-        name = "$project.name"
-        issueTrackerUrl = "https://github.com/budjb/grails-$project.name/issues"
-        vcsUrl = "https://github.com/budjb/grails-$project.name"
-        version {
-            attributes = ['grails-plugin': "$project.group:$project.name"]
-            name = project.version
-        }
-    }
-}
-
 repositories {
     mavenLocal()
-    mavenCentral()
-    maven { url "https://repo.grails.org/grails/core" }
+    maven {url "https://repo.grails.org/grails/core"}
 }
 
 dependencyManagement {
@@ -65,45 +41,40 @@ dependencyManagement {
 }
 
 dependencies {
-    provided 'org.springframework.boot:spring-boot-starter-logging'
-    provided "org.springframework.boot:spring-boot-starter-actuator"
-    provided "org.springframework.boot:spring-boot-autoconfigure"
-    provided "org.springframework.boot:spring-boot-starter-tomcat"
-
-    provided "org.grails:grails-web-boot"
-    provided "org.grails:grails-dependencies"
-    provided 'javax.servlet:javax.servlet-api:3.1.0'
-
-    testCompile "org.grails:grails-plugin-testing"
-
+    compile "org.springframework.boot:spring-boot-starter-logging"
+    compile "org.springframework.boot:spring-boot-autoconfigure"
+    compile "org.grails:grails-core"
+    compile "org.springframework.boot:spring-boot-starter-actuator"
+    compile "org.springframework.boot:spring-boot-starter-tomcat"
+    compile "org.grails:grails-dependencies"
+    compile "org.grails:grails-web-boot"
+    compile "org.grails.plugins:cache"
+    compile "org.grails.plugins:scaffolding"
     console "org.grails:grails-console"
+    profile "org.grails.profiles:web-plugin:3.1.5"
+    provided "org.grails:grails-plugin-services"
+    provided "org.grails:grails-plugin-domain-class"
+    testCompile "org.grails:grails-plugin-testing"
+    testCompile "org.grails.plugins:geb"
+    testRuntime "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.1"
+    testRuntime "net.sourceforge.htmlunit:htmlunit:2.18"
 
-    compile 'com.rabbitmq:amqp-client:3.5.4'
+    compile 'com.rabbitmq:amqp-client:3.6.1'
 }
 
 task wrapper(type: Wrapper) {
     gradleVersion = gradleWrapperVersion
 }
 
-List excludedFiles = [
-    "application.groovy",
-    "com/budjb/rabbitmq/test/**"
-]
-
-jar {
-    excludedFiles.each {
-        exclude it
+// TODO: fill all this in
+grailsPublish {
+    githubSlug = 'budjb/grails-rabbitmq-native'
+    license {
+        name = 'Apache-2.0'
     }
-}
-
-sourcesJar {
-    excludedFiles.each {
-        exclude it
-    }
-}
-
-javadocJar {
-    excludedFiles.each {
-        exclude it
-    }
+    title = "My Plugin"
+    desc = "Full plugin description"
+    developers = [johndoe:"John Doe"]
+    portalUser = ""
+    portalPassword = ""
 }

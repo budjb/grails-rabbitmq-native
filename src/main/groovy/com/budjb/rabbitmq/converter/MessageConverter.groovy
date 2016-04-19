@@ -24,6 +24,7 @@ abstract class MessageConverter<T> {
      * @return
      */
     Class getType() {
+        // TODO: may need to do this better...
         return ((ParameterizedType)getClass().getGenericSuperclass()).actualTypeArguments[0]
     }
 

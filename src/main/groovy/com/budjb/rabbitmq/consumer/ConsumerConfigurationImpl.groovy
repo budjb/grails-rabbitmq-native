@@ -15,13 +15,14 @@
  */
 package com.budjb.rabbitmq.consumer
 
-import org.apache.log4j.Logger
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class ConsumerConfigurationImpl implements ConsumerConfiguration {
     /**
      * Logger
      */
-    private Logger log = Logger.getLogger(ConsumerConfigurationImpl)
+    private Logger log = LoggerFactory.getLogger(ConsumerConfigurationImpl)
 
     /**
      * Queue to listen on.
@@ -116,7 +117,7 @@ class ConsumerConfigurationImpl implements ConsumerConfiguration {
      * @param values
      * @return
      */
-    private <T> T parseConfigOption(Class<T> clazz, Object... values) {
+    protected <T> T parseConfigOption(Class<T> clazz, Object... values) {
         for (Object value : values) {
             if (value == null) {
                 continue
@@ -126,11 +127,9 @@ class ConsumerConfigurationImpl implements ConsumerConfiguration {
                 continue
             }
 
-            if (!clazz.isAssignableFrom(value.getClass())) {
-                continue
+            if (clazz.isAssignableFrom(value.getClass())) {
+                return value as T
             }
-
-            return value as T
         }
 
         return null

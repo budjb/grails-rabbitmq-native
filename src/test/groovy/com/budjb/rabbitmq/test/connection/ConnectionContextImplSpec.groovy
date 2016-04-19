@@ -21,7 +21,7 @@ import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionContextImpl
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
-import org.apache.log4j.Logger
+import org.slf4j.Logger
 import spock.lang.Specification
 
 class ConnectionContextImplSpec extends Specification {

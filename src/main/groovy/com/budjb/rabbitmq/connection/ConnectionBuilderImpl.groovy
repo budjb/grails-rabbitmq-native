@@ -32,11 +32,7 @@ class ConnectionBuilderImpl implements ConnectionBuilder {
          * @return
          */
         void connection(Map parameters) {
-            // Build the context
-            ConnectionContext context = ConnectionBuilderImpl.this.connectionManager.createContext(parameters)
-
-            // Store the context
-            ConnectionBuilderImpl.this.connectionContexts << context
+            ConnectionBuilderImpl.this.connectionContexts << ConnectionBuilderImpl.this.connectionManager.createContext(parameters)
         }
     }
 
@@ -67,16 +63,5 @@ class ConnectionBuilderImpl implements ConnectionBuilder {
         closure()
 
         return connectionContexts
-    }
-
-    /**
-     * Loads connection contexts from a configuration based on a map.
-     *
-     * @param configuration
-     * @return
-     */
-    @Override
-    List<ConnectionContext> loadConnectionContexts(Map configuration) {
-        return [connectionManager.createContext(configuration)]
     }
 }

@@ -27,7 +27,8 @@ import grails.core.GrailsClass
 import grails.persistence.support.PersistenceContextInterceptor
 import grails.util.GrailsClassUtils
 import groovyx.gpars.GParsPool
-import org.apache.log4j.Logger
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
@@ -78,7 +79,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
     /**
      * Logger.
      */
-    private Logger log = Logger.getLogger(ConsumerManagerImpl)
+    Logger log = LoggerFactory.getLogger(ConsumerManagerImpl)
 
     /**
      * Registered consumers.
@@ -189,7 +190,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
             unregister(getContext(context.id))
         }
         catch (ContextNotFoundException e) {
-            // Continue...
+            log.trace("context with id ${context.id} not found; this is ok", e)
         }
 
         consumers << context
@@ -310,7 +311,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
                 it.start()
             }
             catch (IllegalStateException e) {
-                // Continue...
+                log.trace("problem starting consumer ${it.id}; this is ok", e)
             }
         }
     }

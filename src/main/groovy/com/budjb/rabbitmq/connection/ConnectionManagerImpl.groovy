@@ -22,10 +22,16 @@ import com.budjb.rabbitmq.exception.MissingConfigurationException
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import grails.core.GrailsApplication
-import org.apache.log4j.Logger
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 
 class ConnectionManagerImpl implements ConnectionManager {
+    /**
+     * Logger.
+     */
+    Logger log = LoggerFactory.getLogger(ConnectionManagerImpl)
+
     /**
      * Grails application bean.
      */
@@ -42,11 +48,6 @@ class ConnectionManagerImpl implements ConnectionManager {
      * Registered connection contexts.
      */
     private List<ConnectionContext> connections = []
-
-    /**
-     * Logger.
-     */
-    private Logger log = Logger.getLogger(ConnectionManagerImpl)
 
     /**
      * Returns the default connection context.
@@ -139,24 +140,45 @@ class ConnectionManagerImpl implements ConnectionManager {
      */
     @Override
     void load() {
-        // Grab the configuration
-        Object configuration = grailsApplication.config.rabbitmq?.connection
+        if (grailsApplication.config.rabbitmq?.connections) {
+            // Grail 3 format suitable for YAML configuration. Groovy ConfigSlurper-style
+            // configurations will also follow this format going forward.
+            def configurations = grailsApplication.config.rabbitmq.connections
 
-        // Check for the configuration
-        if (!configuration) {
-            if (grailsApplication.config.rabbitmq?.connectionFactory) {
-                log.warn("An unsupported legacy config was found. Please refer to the documentation for proper configuration (http://budjb.github.io/grails-rabbitmq-native/doc/manual/)")
+            if (!(configurations instanceof Map)) {
+                throw new InvalidConfigurationException("RabbitMQ configuration is invalid; expected a Map but got ${configurations.getClass().getSimpleName()} instead")
             }
+
+            configurations.each { k, v ->
+                if (!(v instanceof Map)) {
+                    throw new InvalidConfigurationException("RabbitMQ configuration is invalid; expected a Map but got ${configurations.getClass().getSimpleName()} instead")
+                }
+                v.put('name', k)
+
+                register(createContext(v))
+            }
+        }
+        else if (grailsApplication.config.rabbitmq?.connection) {
+            // Legacy configuration format that supports closures. This functionality
+            // is deprecated and will be removed at some point in the future.
+            log.warn("Configuration via rabbitmq.connection is deprecated and will be removed in the future.")
+
+            def configuration = grailsApplication.config.rabbitmq?.connection
+
+            if (!(configuration instanceof Map || configuration instanceof Closure)) {
+                throw new InvalidConfigurationException('RabbitMQ connection configuration is not a Map or a Closure')
+            }
+
+            if (configuration instanceof Map) {
+                register(createContext(configuration))
+            }
+            else {
+                connectionBuilder.loadConnectionContexts(configuration as Closure).each { register(it) }
+            }
+        }
+        else {
             throw new MissingConfigurationException("unable to start application because the RabbitMQ connection configuration was not found")
         }
-
-        // Make sure we have a supported configuration type
-        if (!(configuration instanceof Map || configuration instanceof Closure)) {
-            throw new InvalidConfigurationException('RabbitMQ connection configuration is not a Map or a Closure')
-        }
-
-        // Load connections
-        connectionBuilder.loadConnectionContexts(grailsApplication.config.rabbitmq.connection).each { register(it) }
     }
 
     /**
@@ -164,13 +186,11 @@ class ConnectionManagerImpl implements ConnectionManager {
      */
     @Override
     void start() {
-        // Ensure we have at least one connection
         if (connections.size() == 0) {
             log.warn("not starting connections because no RabbitMQ connections were configured")
             return
         }
 
-        // If only one connection was configured, force it as default
         if (connections.size() == 1) {
             connections[0].isDefault = true
         }
@@ -180,7 +200,7 @@ class ConnectionManagerImpl implements ConnectionManager {
                 start(it)
             }
             catch (IllegalStateException e) {
-                // Continue...
+                log.trace("error starting a connection; this is probably not a problem", e)
             }
         }
     }
@@ -261,7 +281,7 @@ class ConnectionManagerImpl implements ConnectionManager {
                 }
             }
             catch (ContextNotFoundException e) {
-                // Continue...
+                log.trace("no default connection context was found; this is ok", e)
             }
         }
 
@@ -269,7 +289,7 @@ class ConnectionManagerImpl implements ConnectionManager {
             unregister(getContext(context.id))
         }
         catch (ContextNotFoundException e) {
-            // Continue...
+            log.trace("no connection context with id ${context.id} found; this is ok", e)
         }
 
         connections << context
@@ -325,6 +345,8 @@ class ConnectionManagerImpl implements ConnectionManager {
      */
     @Override
     RunningState getRunningState() {
-        return connections.every { it.getRunningState() == RunningState.RUNNING } ? RunningState.RUNNING : RunningState.STOPPED
+        return connections.every {
+            it.getRunningState() == RunningState.RUNNING
+        } ? RunningState.RUNNING : RunningState.STOPPED
     }
 }

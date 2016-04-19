@@ -16,7 +16,7 @@
 package com.budjb.rabbitmq.test
 
 import com.budjb.rabbitmq.RunningState
-import com.budjb.rabbitmq.QueueBuilder
+import com.budjb.rabbitmq.queuebuilder.QueueBuilder
 import com.budjb.rabbitmq.RabbitContextImpl
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionContext
@@ -134,7 +134,7 @@ class RabbitContextImplSpec extends Specification {
 
         then:
         1 * connectionManager.start()
-        1 * queueBuilder.configureQueues()
+        1 * queueBuilder.configure()
         1 * consumerManager.start()
     }
 
@@ -144,7 +144,7 @@ class RabbitContextImplSpec extends Specification {
 
         then:
         1 * connectionManager.start()
-        1 * queueBuilder.configureQueues()
+        1 * queueBuilder.configure()
         0 * consumerManager.start()
     }
 
@@ -163,7 +163,7 @@ class RabbitContextImplSpec extends Specification {
 
         then:
         1 * connectionManager.start()
-        1 * queueBuilder.configureQueues()
+        1 * queueBuilder.configure()
         1 * consumerManager.start()
     }
 
@@ -277,7 +277,7 @@ class RabbitContextImplSpec extends Specification {
         rabbitContext.createExchangesAndQueues()
 
         then:
-        1 * queueBuilder.configureQueues()
+        1 * queueBuilder.configure()
     }
 
     def 'Ensure all managers are reset when reset() is called'() {

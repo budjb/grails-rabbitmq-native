@@ -20,7 +20,8 @@ import com.budjb.rabbitmq.report.ConnectionReport
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
-import org.apache.log4j.Logger
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -46,7 +47,7 @@ class ConnectionContextImpl implements ConnectionContext {
     /**
      * Logger.
      */
-    private Logger log = Logger.getLogger(ConnectionContextImpl)
+    Logger log = LoggerFactory.getLogger(ConnectionContextImpl)
 
     /**
      * Constructor.

@@ -18,7 +18,8 @@ package com.budjb.rabbitmq.converter
 import com.budjb.rabbitmq.exception.MessageConvertException
 import grails.core.GrailsApplication
 import grails.core.GrailsClass
-import org.apache.log4j.Logger
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
@@ -27,7 +28,7 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
     /**
      * Logger.
      */
-    Logger log = Logger.getLogger(MessageConverterManager)
+    Logger log = LoggerFactory.getLogger(MessageConverterManager)
 
     /**
      * Registered message converters.
@@ -52,6 +53,7 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
      */
     @Override
     void register(MessageConverter<?> messageConverter) {
+        log.debug("Registering message consumer: ${messageConverter.getClass().getSimpleName()}")
         messageConverters << messageConverter
     }
 
@@ -154,7 +156,7 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
             }
         }
 
-        throw new MessageConvertException('no message converter found to convert class ${source.getClass().name} to a byte array')
+        throw new MessageConvertException("no message converter found to convert class ${source.getClass().name} to a byte array")
     }
 
     /**

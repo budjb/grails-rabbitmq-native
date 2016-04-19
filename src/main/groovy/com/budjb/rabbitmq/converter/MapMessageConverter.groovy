@@ -16,8 +16,11 @@
 package com.budjb.rabbitmq.converter
 
 import groovy.json.JsonBuilder
+import groovy.json.JsonException
 import groovy.json.JsonSlurper
+import groovy.util.logging.Slf4j
 
+@Slf4j
 class MapMessageConverter extends MessageConverter<Map> {
     @Override
     boolean canConvertFrom() {
@@ -32,16 +35,29 @@ class MapMessageConverter extends MessageConverter<Map> {
     @Override
     Map convertTo(byte[] input) {
         try {
-            return new JsonSlurper().parseText(new String(input))
+            def parsed = new JsonSlurper().parseText(new String(input))
+
+            if (parsed instanceof Map) {
+                return parsed
+            }
+
+            return null
         }
         catch (Exception e) {
+            log.trace("error parsing JSON", e)
             return null
         }
     }
 
     @Override
     byte[] convertFrom(Map input) {
-        return new JsonBuilder(input).toString().getBytes()
+        try {
+            return new JsonBuilder(input).toString().getBytes()
+        }
+        catch (JsonException e) {
+            log.trace("error creating JSON", e)
+            return null
+        }
     }
 
     @Override

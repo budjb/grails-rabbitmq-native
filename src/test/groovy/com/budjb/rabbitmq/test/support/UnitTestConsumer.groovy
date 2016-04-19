@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 Bud Byrd
+ * Copyright 2015 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.budjb.rabbitmq.exception
+package com.budjb.rabbitmq.test.support
 
-class InvalidConfigurationException extends IllegalArgumentException {
-    InvalidConfigurationException(String message) {
-        super(message)
+class UnitTestConsumer {
+    static rabbitConfig = [
+        queue: 'test-queue',
+        consumers: 5
+    ]
+
+    def handleMessage(def body, def context) {
+        return body
+    }
+
+    void onReceive(def context) {
+
+    }
+
+    def onSuccess(def context) {
+
+    }
+
+    def onComplete(def context) {
+
+    }
+
+    def onFailure(def context) {
+
     }
 }
