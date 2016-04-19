@@ -25,6 +25,9 @@ ext {
     gradleWrapperVersion = project.gradleWrapperVersion
 }
 
+sourceCompatibility = jdkCompatibility
+targetCompatibility = jdkCompatibility
+
 repositories {
     mavenLocal()
     maven { url "https://repo.grails.org/grails/core" }

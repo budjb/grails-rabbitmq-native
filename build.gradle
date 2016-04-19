@@ -5,6 +5,7 @@ subprojects {
     version = rootProject.version
     group = rootProject.group
 
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+    ext {
+        jdkCompatibility = 1.7
+    }
 }
