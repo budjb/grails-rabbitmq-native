@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.budjb.rabbitmq
+package com.budjb.rabbitmq.queuebuilder
 
 interface QueueBuilder {
     /**
      * Creates any configured exchanges and/or queues.
      */
-    void configureQueues()
+    void configure()
 }

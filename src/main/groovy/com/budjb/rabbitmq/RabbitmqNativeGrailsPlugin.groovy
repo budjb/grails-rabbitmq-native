@@ -22,6 +22,7 @@ import com.budjb.rabbitmq.connection.ConnectionManagerImpl
 import com.budjb.rabbitmq.consumer.ConsumerManagerImpl
 import com.budjb.rabbitmq.converter.MessageConverterManagerImpl
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisherImpl
+import com.budjb.rabbitmq.queuebuilder.QueueBuilderImpl
 import grails.core.GrailsClass
 import grails.plugins.Plugin
 import groovy.util.logging.Slf4j
@@ -77,18 +78,6 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
      * Load order.
      */
     def loadAfter = ['controllers', 'services', 'domains', 'hibernate', 'spring-security-core']
-
-    /**
-     * Resources this plugin should monitor changes for.
-     *
-     * TODO: this can probably be removed
-     */
-    def watchedResources = [
-        'file:./grails-app/rabbit-converters/**Converter.groovy',
-        'file:./grails-app/rabbit-consumers/**Consumer.groovy',
-        'file:./plugins/*/grails-app/rabbit-converters/**Converter.groovy',
-        'file:./plugins/*/grails-app/rabbit-consumers/**Consumer.groovy'
-    ]
 
     /**
      * Spring actions.

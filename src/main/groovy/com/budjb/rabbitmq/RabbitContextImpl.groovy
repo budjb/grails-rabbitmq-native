@@ -20,6 +20,7 @@ import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
+import com.budjb.rabbitmq.queuebuilder.QueueBuilder
 import com.budjb.rabbitmq.report.ConnectionReport
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
@@ -289,7 +290,7 @@ class RabbitContextImpl implements RabbitContext {
      */
     @Override
     void createExchangesAndQueues() {
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
     }
 
     /**

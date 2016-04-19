@@ -25,27 +25,37 @@ rabbitmq:
             password: 'guest'
             virtualHost: 'test2.rabbitmq.budjb.com'
             name: 'connection2'
+
+    exchanges:
+        topic-exchange:
+            type: topic
+            autoDelete: true
+
     queues:
-        connection_connection1:
-            queue_reporting:
-                autoDelete: true
-            queue_sleeping:
-                autoDelete: true
-            queue_string-test:
-                autoDelete: true
-            exchange_topic-exchange:
-                type: 'topic'
-                autoDelete: true
-                queues:
-                    queue_topic-queue-all:
-                        autoDelete: true
-                        binding: '#'
-                    queue_topic-queue-subset:
-                        autoDelete: true
-                        binding: 'com.budjb.#'
-                    queue_topic-queue-specific:
-                        autoDelete: true
-                        binding: 'com.budjb.rabbitmq'
-        connection_connection2:
-            queue_connection2-queue:
-                autoDelete: true
+        reporting:
+            autoDelete: true
+            connection: connection1
+        sleeping:
+            autoDelete: true
+            connection: connection1
+        string-test:
+            autoDelete: true
+            connection: connection1
+        topic-queue-all:
+            autoDelete: true
+            binding: '#'
+            connection: connection1
+            exchange: topic-exchange
+        topic-queue-subset:
+            autoDelete: true
+            binding: 'com.budjb.#'
+            connection: connection1
+            exchange: topic-exchange
+        topic-queue-specific:
+            autoDelete: true
+            binding: 'com.budjb.rabbitmq'
+            connection: connection1
+            exchange: topic-exchange
+        connection2-queue:
+            autoDelete: true
+            connection: connection2

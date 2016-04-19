@@ -15,8 +15,10 @@
  */
 package com.budjb.rabbitmq.test
 
-import com.budjb.rabbitmq.QueueBuilder
-import com.budjb.rabbitmq.QueueBuilderImpl
+import com.budjb.rabbitmq.exception.ContextNotFoundException
+import com.budjb.rabbitmq.exception.InvalidConfigurationException
+import com.budjb.rabbitmq.queuebuilder.QueueBuilder
+import com.budjb.rabbitmq.queuebuilder.QueueBuilderImpl
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.rabbitmq.client.Channel
@@ -40,15 +42,6 @@ class QueueBuilderSpec extends Specification {
         queueBuilder.connectionManager = connectionManager
     }
 
-    def 'Ensure no further interactions if the configuration is not a closure'() {
-        when:
-        queueBuilder.configureQueues()
-
-        then:
-        1 * grailsApplication.getConfig() >> new PropertySourcesConfig()
-        0 * _
-    }
-
     def 'If a queue is missing a name, an exception is thrown'() {
         setup:
         Config configuration = new PropertySourcesConfig()
@@ -67,11 +60,11 @@ class QueueBuilderSpec extends Specification {
         connectionManager.getConnection(_) >> connectionContext
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
         RuntimeException e = thrown()
-        e.message == 'name is required to declare a queue'
+        e.message == 'queue name is required'
     }
 
     def 'If a queue\'s named connection is not found, an exception is thrown'() {
@@ -85,14 +78,14 @@ class QueueBuilderSpec extends Specification {
             ]
         ])
         grailsApplication.getConfig() >> configuration
-        connectionManager.getConnection(_) >> null
+        connectionManager.getContext('test-connection') >> { throw new ContextNotFoundException("no connection context with name 'test-connection' is configured") }
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
-        RuntimeException e = thrown()
-        e.message == 'no connection with name \'test-connection\' found'
+        ContextNotFoundException e = thrown()
+        e.message == "no connection context with name 'test-connection' is configured".toString()
     }
 
     def 'If the default connection is not found, an exception is thrown'() {
@@ -106,14 +99,14 @@ class QueueBuilderSpec extends Specification {
             ]
         ])
         grailsApplication.getConfig() >> configuration
-        connectionManager.getConnection(_) >> null
+        connectionManager.getContext() >> { throw new ContextNotFoundException("no default connection context is configured") }
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
-        RuntimeException e = thrown()
-        e.message == 'no default connection found'
+        ContextNotFoundException e = thrown()
+        e.message == 'no default connection context is configured'
     }
 
     def 'Ensure setConnectionManager(ConnectionManager) sets the property correctly'() {
@@ -156,18 +149,16 @@ class QueueBuilderSpec extends Specification {
         channel.isOpen() >> true
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getContext(_) >> connectionContext
+        connectionManager.getContext() >> connectionContext
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
-        3 * connectionContext.createChannel() >> channel
         1 * channel.queueDeclare('test-queue-1', true, false, false, [:])
         1 * channel.exchangeDeclare('test-exchange-1', 'topic', true, false, [:])
         1 * channel.queueDeclare('test-queue-2', true, false, false, [:])
         1 * channel.queueBind('test-queue-2', 'test-exchange-1', 'test.binding.#')
-        3 * channel.close()
     }
 
     def 'Test configuration containing a connection'() {
@@ -193,21 +184,20 @@ class QueueBuilderSpec extends Specification {
         connectionContext1.createChannel() >> channel1
         ConnectionContext connectionContext2 = Mock(ConnectionContext)
         connectionContext2.createChannel() >> channel2
-        connectionManager.getContext(null) >> connectionContext1
+        connectionManager.getContext() >> connectionContext1
         connectionManager.getContext('secondaryConnection') >> connectionContext2
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
-        2 * connectionContext2.createChannel() >> channel2
         1 * channel2.exchangeDeclare('test-exchange', 'topic', true, false, [:])
         1 * channel2.queueDeclare('test-queue', true, false, false, [:])
         1 * channel2.queueBind('test-queue', 'test-exchange', 'test.binding.#')
-        2 * channel2.close()
 
         0 * connectionContext1.createChannel() >> channel1
-        0 * channel2.close()
+        0 * channel1.close()
+        3 * channel2.close()
     }
 
     def 'Validate all queue options are respected'() {
@@ -237,13 +227,13 @@ class QueueBuilderSpec extends Specification {
         connectionManager.getContext('test-connection') >> connectionContext
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
-        1 * connectionContext.createChannel() >> channel
+        2 * connectionContext.createChannel() >> channel
         1 * channel.queueDeclare('test-queue', true, true, true, ['foo': 'bar'])
         1 * channel.queueBind('test-queue', 'test-exchange', 'test-binding')
-        1 * channel.close()
+        2 * channel.close()
     }
 
     def 'If a queue binding is empty or null, test the proper binding is defined'() {
@@ -271,7 +261,7 @@ class QueueBuilderSpec extends Specification {
         connectionManager.getContext('test-connection') >> connectionContext
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
         1 * channel.queueBind('test-queue', 'test-exchange', '')
@@ -305,13 +295,13 @@ class QueueBuilderSpec extends Specification {
         connectionManager.getContext('test-connection') >> connectionContext
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
-        1 * connectionContext.createChannel() >> channel
+        2 * connectionContext.createChannel() >> channel
         1 * channel.queueDeclare('test-queue', true, true, true, ['foo': 'bar'])
         1 * channel.queueBind('test-queue', 'test-exchange', '', ['foo': 'bar', 'x-match': 'all'])
-        1 * channel.close()
+        2 * channel.close()
     }
 
     def 'If a queue binding is a Map but the match is incorrect, the queue binding is not created'() {
@@ -334,12 +324,13 @@ class QueueBuilderSpec extends Specification {
         channel.isOpen() >> true
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getContext(_) >> connectionContext
+        connectionManager.getContext() >> connectionContext
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
+        thrown InvalidConfigurationException
         0 * channel.queueBind(*_)
     }
 
@@ -368,7 +359,7 @@ class QueueBuilderSpec extends Specification {
         connectionManager.getContext('test-connection') >> connectionContext
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
         1 * connectionContext.createChannel() >> channel
@@ -395,10 +386,10 @@ class QueueBuilderSpec extends Specification {
         channel.queueDeclare(*_) >> { throw new IOException() }
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getContext(_) >> connectionContext
+        connectionManager.getContext() >> connectionContext
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
         thrown IOException
@@ -425,7 +416,7 @@ class QueueBuilderSpec extends Specification {
         connectionManager.getContext(_) >> connectionContext
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
         Throwable e = thrown()
@@ -450,11 +441,11 @@ class QueueBuilderSpec extends Specification {
         connectionManager.getContext(_) >> connectionContext
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
-        Throwable e = thrown()
-        e.message == 'an exchange name must be provided'
+        InvalidConfigurationException e = thrown()
+        e.message == 'exchange name is required'
     }
 
     def 'If an exchange is declared without a type, a RuntimeException is thrown'() {
@@ -475,11 +466,11 @@ class QueueBuilderSpec extends Specification {
         connectionManager.getContext(_) >> connectionContext
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
         RuntimeException e = thrown()
-        e.message == 'a type must be provided for the exchange \'test-exchange\''
+        e.message == 'exchange type is required'
     }
 
     def 'If an exchange\'s named connection is not found, a RunTime exception is thrown'() {
@@ -493,14 +484,14 @@ class QueueBuilderSpec extends Specification {
             ]
         ])
         grailsApplication.getConfig() >> configuration
-        connectionManager.getContext(_) >> null
+        connectionManager.getContext(_) >> { throw new ContextNotFoundException("no connection context with name 'test-connection' is configured") }
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
-        Throwable e = thrown()
-        e.message == 'no connection with name \'test-connection\' found'
+        ContextNotFoundException e = thrown()
+        e.message == "no connection context with name 'test-connection' is configured"
     }
 
     def 'If an exchange\'s default connection is not found, a RunTime exception is thrown'() {
@@ -514,17 +505,17 @@ class QueueBuilderSpec extends Specification {
             ]
         ])
         grailsApplication.getConfig() >> configuration
-        connectionManager.getContext(_) >> null
+        connectionManager.getContext() >> { throw new ContextNotFoundException("no default connection context is configured") }
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
         Throwable e = thrown()
-        e.message == 'no default connection found'
+        e.message == "no default connection context is configured"
     }
 
-    def 'If an exchange declaration fails, the channel should close and not be closed'() {
+    def 'If an exchange declaration fails, the channel should already be closed'() {
         setup:
         Config configuration = new PropertySourcesConfig()
         configuration.putAll([
@@ -540,10 +531,10 @@ class QueueBuilderSpec extends Specification {
         channel.exchangeDeclare(*_) >> { throw new IOException() }
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getContext(_) >> connectionContext
+        connectionManager.getContext() >> connectionContext
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
         thrown IOException
@@ -572,32 +563,11 @@ class QueueBuilderSpec extends Specification {
         connectionManager.getContext(_) >> connectionContext
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
         Throwable e = thrown()
-        e.message == 'unexpected connection in the queue configuration; there is a current connection already open'
-    }
-
-    def 'If a connection\'s named connection is not found, a RunTime exception is thrown'() {
-        setup:
-        Config configuration = new PropertySourcesConfig()
-        configuration.putAll([
-            'rabbitmq': [
-                'queues': {
-                    connection('test-connection') {}
-                }
-            ]
-        ])
-        grailsApplication.getConfig() >> configuration
-        connectionManager.getContext(_) >> null
-
-        when:
-        queueBuilder.configureQueues()
-
-        then:
-        Throwable e = thrown()
-        e.message == 'no connection with name \'test-connection\' found'
+        e.message == 'unexpected connection in the queue configuration; the connection test-connection is already open'
     }
 
     def 'Ensure the type aliases work correctly'() {
@@ -619,10 +589,10 @@ class QueueBuilderSpec extends Specification {
         channel.isOpen() >> true
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel() >> channel
-        connectionManager.getContext(_) >> connectionContext
+        connectionManager.getContext() >> connectionContext
 
         when:
-        queueBuilder.configureQueues()
+        queueBuilder.configure()
 
         then:
         notThrown Throwable

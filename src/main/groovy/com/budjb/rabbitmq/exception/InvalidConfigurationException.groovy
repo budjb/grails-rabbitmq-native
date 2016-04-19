@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq.exception
 
-class InvalidConfigurationException extends Exception {
+class InvalidConfigurationException extends IllegalArgumentException {
     InvalidConfigurationException(String message) {
         super(message)
     }
