@@ -1,0 +1,8 @@
+grails:
+    profile: plugin
+
+info:
+    app:
+        name: '@info.app.name@'
+        version: '@info.app.version@'
+        grailsVersion: '@info.app.grailsVersion@'

@@ -1,2 +1,2 @@
-rootProject.name = 'rabbitmq-native'
-
+include 'rabbitmq-native'
+include 'rabbitmq-native-test'
