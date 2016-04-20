@@ -1,11 +1,13 @@
 package com.budjb.rabbitmq.test
 
 import com.budjb.rabbitmq.RabbitContext
-import grails.test.spock.IntegrationSpec
+import grails.test.mixin.integration.Integration
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
+import spock.lang.Specification
 
-class ReportSpec extends IntegrationSpec {
+@Integration
+class ReportSpec extends Specification {
     RabbitContext rabbitContext
 
     def 'Verify that the status report contains the expected information'() {
