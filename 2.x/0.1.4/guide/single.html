@@ -1,0 +1,713 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+    <head>
+        <title>Rabbitmq Native Plugin 0.1.4</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8" />
+        <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8" />
+    <script type="text/javascript">
+function addJsClass(el) {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+    </head>
+
+    <body class="body" onload="addJsClass();">
+        <div id="navigation">
+            <ul>
+                <li>
+                    <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                        <a href="../guide/index.html" class="button">Table of contents</a>
+                        <div id="nav-summary-childs" style="display:none;">
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#introduction"><strong>1</strong><span>Introduction</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#quickstart"><strong>2</strong><span>Quick Start</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#configuration"><strong>3</strong><span>Configuration</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#consuming"><strong>4</strong><span>Consuming Messages</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#publishing"><strong>5</strong><span>Publishing Messages</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#converters"><strong>6</strong><span>Message Converters</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#advanced"><strong>7</strong><span>Advanced Usage</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#changelog"><strong>8</strong><span>Changelog</span></a></div>
+                            
+                        </div>
+                    </div>
+                </li>
+                <li class="separator selected">
+                    <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+                </li>
+            </ul>
+        </div>
+        <div id="header">
+            <div class="images clearfix">
+                
+                
+            </div>
+            <p>The native RabbitMQ Grails plugin provides easily consumable messaging functionality.</p>
+        </div>
+
+
+        <table id="colset" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td id="col1">
+                    <div id="main" class="corner-all">
+
+                        <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                        <div class="project">
+                            <h1>Rabbitmq Native Plugin - Reference Documentation</h1>
+                            <p><strong>Authors:</strong> Bud Byrd</p>
+                            <p><strong>Version:</strong> 0.1.4</p>
+                            
+                        </div>
+
+                        
+                        <div id="table-of-content">
+                            <h2>Table of Contents</h2>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#introduction"><strong>1</strong><span>Introduction</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#quickstart"><strong>2</strong><span>Quick Start</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#configuration"><strong>3</strong><span>Configuration</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#connection"><strong>3.1</strong><span>Server Connection</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#queuesconf"><strong>3.2</strong><span>Defining Queues</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#exchangesconf"><strong>3.3</strong><span>Defining Exchanges</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#consuming"><strong>4</strong><span>Consuming Messages</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#handlers"><strong>4.1</strong><span>Message Handlers</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:20px"><a href="#basic"><strong>4.1.1</strong><span>Basic Usage</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:20px"><a href="#typed"><strong>4.1.2</strong><span>Typed Message Handlers</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:20px"><a href="#messagecontext"><strong>4.1.3</strong><span>MessageContext Object</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:20px"><a href="#rpc"><strong>4.1.4</strong><span>RPC-Style Messages</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#queues"><strong>4.2</strong><span>Subscribing To Queues</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#exchanges"><strong>4.3</strong><span>Subscribing To Exchanges</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:20px"><a href="#fanout"><strong>4.3.1</strong><span>Fanout Exchanges</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:20px"><a href="#topic"><strong>4.3.2</strong><span>Topic Exchanges</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#publishing"><strong>5</strong><span>Publishing Messages</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#send"><strong>5.1</strong><span>Sending Messages</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#rpcsend"><strong>5.2</strong><span>RPC Messages</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#converters"><strong>6</strong><span>Message Converters</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#custom"><strong>6.1</strong><span>Custom Message Converters</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#advanced"><strong>7</strong><span>Advanced Usage</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#rabbitcontext"><strong>7.1</strong><span>The Rabbit Context</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#channels"><strong>7.2</strong><span>Channels</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#transactions"><strong>7.3</strong><span>Transactions</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#changelog"><strong>8</strong><span>Changelog</span></a></div>
+                            
+                            <div style="clear:both" ></div>
+                        </div>
+                        
+                        
+
+<h1 id="introduction">1 Introduction</h1>
+The RabbitMQ Native plugin for Grails provides RabbitMQ integration using the Java libraries provided by the RabbitMQ project.
+It provides easy configuration of exchanges and queues via a project's configuration, simple configuration of consumers, and
+a convenience class to easily publish messages.<p class="paragraph"/>This plugin strives to provide an easy convention to follow to quickly begin consuming messages, but still provide easy
+access to the underlying layer to allow users of this plugin to do whatever they need to do outside of those conventions.
+It also provides a powerful message body converter system that allows the user to quickly write and plug in converters for
+custom data types.<p class="paragraph"/>This guide details the configuration of the plugin, and may not fully explain the use and conventions of the RabbitMQ services
+or its Java library.  More information can be found in their <a href="http://www.rabbitmq.com/api-guide.html" target="blank">Java API guide</a> and
+<a href="http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.1.5/rabbitmq-java-client-javadoc-3.1.5" target="blank">JavaDoc</a>.<p class="paragraph"/>
+
+
+<h1 id="quickstart">2 Quick Start</h1>
+This is a quick and dirty how-to detailing how to quickly begin using the plugin. While there is a lot of configurability offered by this plugin, this is a very basic demonstration of its usage.<p class="paragraph"/><h3>Create The Application</h3>
+Create a project named <strong class="bold">RabbitExample</strong>. You can do this by entering:
+<div class="code"><pre>grails create&#45;app RabbitExample</pre></div><p class="paragraph"/><h3>Configuring</h3>
+In <code>grails-app/conf/Config.groovy</code>, add:
+<div class="code"><pre>rabbitmq &#123;
+    connection &#123;
+        host = <span class="java&#45;quote">"changeme"</span>
+        username = <span class="java&#45;quote">"changeme"</span>
+        password = <span class="java&#45;quote">"changeme"</span>
+    &#125;
+    queues = &#123;
+        queue name: <span class="java&#45;quote">"testqueue"</span>
+    &#125;
+&#125;</pre></div><p class="paragraph"/><h3>Consumer</h3>
+Create the a consumer by using the following command:
+<div class="code"><pre>grails create&#45;consumer com.example.Test</pre></div><p class="paragraph"/>Update the consumer to reflect the following:
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.MessageContext<p class="paragraph"/>class TestConsumer &#123;
+    /&#42;&#42;
+     &#42; Consumer configuration.
+     &#42;/
+    <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
+        queue: <span class="java&#45;quote">"testqueue"</span>
+    &#93;<p class="paragraph"/>    /&#42;&#42;
+     &#42; Handle an incoming RabbitMQ message.
+     &#42;
+     &#42; @param body    The converted body of the incoming message.
+     &#42; @param context Properties of the incoming message.
+     &#42; @<span class="java&#45;keyword">return</span>
+     &#42;/
+    def handleMessage(def body, MessageContext context) &#123;
+        println body
+        <span class="java&#45;keyword">return</span> <span class="java&#45;quote">"Hello to you, too!"</span>
+    &#125;
+&#125;</pre></div><p class="paragraph"/><h3>Controller</h3>
+Create a controller by using the following command:
+<div class="code"><pre>grails create&#45;controller com.example.Test</pre></div><p class="paragraph"/>Update the controller to reflect the following:
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.RabbitMessageBuilder<p class="paragraph"/>class TestController &#123;
+    def index = &#123;
+        render <span class="java&#45;keyword">new</span> RabbitMessageBuilder().rpc &#123;
+            queue = <span class="java&#45;quote">"testqueue"</span>
+            body = <span class="java&#45;quote">"Hello!"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/><h4>Run it!</h4>
+Run the grails application.
+<div class="code"><pre>grails run&#45;app</pre></div><p class="paragraph"/>You can see the application in action by hitting the test controller. If you're running this on your localhost, your URL may be similar to <code>http://localhost:8080/RabbitExample/test/index</code>.
+You should see the message "Hello!" printed the application's output console, and your web browser should dispay the message "Hello to you, too!"
+
+
+
+<h1 id="configuration">3 Configuration</h1>
+Configuration of the connection to the RabbitMQ server is done in your project's <code>grails-app/conf/Config.groovy</code> file.
+
+
+
+<h2 id="connection">3.1 Server Connection</h2>
+The plugin expects the connection configuration to the RabbitMQ server to be defined. A bare minimum configuration example looks like:<p class="paragraph"/><div class="code"><pre>rabbitmq &#123;
+    connection &#123;
+        host = <span class="java&#45;quote">"example.com"</span>
+        username = <span class="java&#45;quote">"foo"</span>
+        password = <span class="java&#45;quote">"bar"</span>
+    &#125;
+&#125;</pre></div><p class="paragraph"/>The following table enumerates all the configuration options available to the connection configuration:
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Configuration Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>host</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Hostname or IP address of the RabbitMQ server to connect to.</td><td>String</td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>username</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Username to log into the RabbitMQ server with.</td><td>String</td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>password</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Password to log into the RabbitMQ server with.</td><td>String</td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>port</code></td><td>&#160;</td><td>Port to connect to the RabbitMQ server with.</td><td>Integer</td><td>5672</td></tr><tr class="table-odd"><td><code>virtualHost</code></td><td>&#160;</td><td>Name of the virtual host to connect to the RabbitMQ server with.</td><td>String</td><td> <em class="italic">none</em> </td></tr></table>
+
+
+
+<h2 id="queuesconf">3.2 Defining Queues</h2>
+The plugin allows authors to define the exchanges and queues programatically inside the configuration. This allows the application to configure its own queues without someone
+having to manually create the exchanges and queues prior to running the application.<p class="paragraph"/>Queue configuration is also done in the <code>Config.groovy</code> file under the rabbitmq block, much as the server connection is configured. Usage is best illustrated with an example:
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        queue name: <span class="java&#45;quote">"example.queue"</span>, durable: <span class="java&#45;keyword">true</span>
+    &#125;
+&#125;</pre></div><p class="paragraph"/>The above code will define a queue named <strong class="bold">example.queue</strong>, and its durable flag will be set.<p class="paragraph"/><blockquote class="warning">
+Be sure to note that the queues property is a closure. You must ensure that the <strong class="bold"><code>=</code></strong> is present for this feature to function properly.
+</blockquote><p class="paragraph"/>Below is a table of all of the options available when defining queues:
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>arguments</code></td><td>&#160;</td><td>Extra arguments used to create the queue. See the <a href="http://www.rabbitmq.com/documentation.html" target="blank">RabbitMQ documentation</a> for more information.</td><td><code>Map</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>autoDelete</code></td><td>&#160;</td><td>Whether to automatically delete the queue once there are no more consumers listening to it.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>binding</code></td><td>&#160;</td><td>Used in conjunction with exchanges. See the exchanges section for more information.</td><td> <em class="italic">Mixed</em> </td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>durable</code></td><td>&#160;</td><td>Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>match</code></td><td>&#160;</td><td>Used in conjunction when the headers exchange type. Either "any" or "all".</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>name</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Name of the queue.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr></table>
+
+
+
+<h2 id="exchangesconf">3.3 Defining Exchanges</h2>
+Defining exchanges is very similar to defining queues. The following code illustrates how to define an exchange:
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: <span class="java&#45;quote">"example.exchange"</span>, type: <span class="java&#45;quote">"topic"</span>
+    &#125;
+&#125;</pre></div><p class="paragraph"/>The above example will create an exchange with the name <strong class="bold">example.exchange</strong> and of the type <strong class="bold">topic</strong>. Below is a list of all the options availble when creating exchanges:
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>arguments</code></td><td>&#160;</td><td>Extra arguments used to create the exchange. See the <a href="http://www.rabbitmq.com/documentation.html" target="blank">RabbitMQ documentation</a> for more information.</td><td><code>Map</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>autoDelete</code></td><td>&#160;</td><td>Whether to automatically delete the exchange once there are no longer any queues bound to it.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>durable</code></td><td>&#160;</td><td>Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-even"><td><code>name</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Name of the exchange.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>type</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>One of "fanout", "topic", "direct", or "headers".</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr></table><p class="paragraph"/>Queues can also be automatically bound to exchanges. The last parameter of the exchange function takes a closure to define queues inside the exchange. See the following example:
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: <span class="java&#45;quote">"example.exchange"</span>, type: <span class="java&#45;quote">"topic"</span>, &#123;
+            queue name: <span class="java&#45;quote">"example.queue"</span>, binding: <span class="java&#45;quote">"sample.binding.&#35;"</span>
+        &#125;
+    &#125;
+&#125;</pre></div>
+This example will create a <strong class="bold">topic</strong> exchange named <strong class="bold">example.exchange</strong>, as well as create a queue named <strong class="bold">example.queue</strong>. The queue will be bound to the exchange with the topic or
+routing key of "sample.binding.#".<p class="paragraph"/>Queues need to have their binding defined specifically for the type of exchange they are bound to.<p class="paragraph"/><h3>Fanout Exchanges</h3>
+Fanout exchanges are the easiest to configure bindings for, since they require none. Fanout exchanges simply send every message it received to every queue bound to it.
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: <span class="java&#45;quote">"example.exchange"</span>, type: <span class="java&#45;quote">"fanout"</span>, &#123;
+            queue name: <span class="java&#45;quote">"example.queue"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/><h3>Topic Exchanges</h3>
+Topic exchanges require queues to define a topic. Topics can be an exact match, but their strength is in their partial matching ability. See the <a href="http://www.rabbitmq.com/documentation.html" target="blank">RabbitMQ documentation</a>
+for details about this kind of exchange.
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: <span class="java&#45;quote">"example.exchange"</span>, type: <span class="java&#45;quote">"topic"</span>, &#123;
+            queue name: <span class="java&#45;quote">"example.queue"</span>, binding: <span class="java&#45;quote">"exmaple.binding.&#35;"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/><h3>Direct Exchanges</h3>
+Direct exchanges are similar to topic exchanges, except that their "topics" only function with direct name matching. The appropriate name for the binding in this case is "routing key". Queues must define a
+routing key when binding to this type of exchange.
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: <span class="java&#45;quote">"example.exchange"</span>, type: <span class="java&#45;quote">"direct"</span>, &#123;
+            queue name: <span class="java&#45;quote">"example.queue"</span>, binding: <span class="java&#45;quote">"exmapleRoutingKey"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/><h3>Header Exchanges</h3>
+Header exchanges are like topic exchanges, but with the ability to define multiple match keywords. The binding for queues allows the queue to match on all or one of multiple header values. The queue must also
+set the <code>match</code> property for this exchange type, and the value must be one of "any" or "all".
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#123;
+        exchange name: <span class="java&#45;quote">"example.exchange"</span>, type: <span class="java&#45;quote">"headers"</span>, &#123;
+            queue name: <span class="java&#45;quote">"example.queue"</span>, match: <span class="java&#45;quote">"any"</span>, binding: &#91;
+                <span class="java&#45;quote">"header1"</span>: <span class="java&#45;quote">"header&#45;value&#45;1"</span>,
+                <span class="java&#45;quote">"header2"</span>: <span class="java&#45;quote">"header&#45;value&#45;2"</span>
+            &#93;
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/>
+
+
+<h1 id="consuming">4 Consuming Messages</h1>
+Consuming messages is accomplished by creating a message consumer class. Consumer classes are placed into the
+<code>grails-app/rabbit-consumers</code>, and must end with <code>Consumer.groovy</code>. These classes are Spring beans, meaning
+that they can inject other Spring beans such as services, the <code>grailsApplication</code> instance, etc. Each consumer
+class must be configured in a certain way. If there is a misconfiguration in a consumer, the plugin will log
+an error stating so and not register the consumer to any queues.
+
+
+
+<h2 id="handlers">4.1 Message Handlers</h2>
+One of the requirements for a consumer to be registered to the RabbitMQ server is that a message handler be declared
+in the consumer class. The message handler is the mechanism by which messages are consumed.
+
+
+
+<h2 id="basic">4.1.1 Basic Usage</h2>
+In its most basic form, a message handler method takes in the body of the received message, and a <code>MessageContext</code>
+object that contains the message parameters received from the RabbitMQ server, along with the consumer's channel
+that the handler should publish messages through.<p class="paragraph"/>This is the most generic form of a message handler:
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    // ...<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // Do work
+    &#125;
+&#125;</pre></div>
+
+
+
+<h2 id="typed">4.1.2 Typed Message Handlers</h2>
+The logic surrounding the message consumer classes will by default attempt to intelligently convert the body of
+the received message from a byte array to a converted type, such as a String. Before routing the message to the
+consumer and handler, the plugin will run through a list of <a href="../guide/single.html#converters" class="guide">converters</a> that will attempt to convert the message,
+and if the conversion was successful, determine if an appropriate handler has been defined.<p class="paragraph"/>For example, consider this JSON blob:
+<div class="code"><pre>&#123;<span class="java&#45;quote">"foo"</span>:<span class="java&#45;quote">"bar"</span>,<span class="java&#45;quote">"hi"</span>:<span class="java&#45;quote">"there"</span>&#125;</pre></div><p class="paragraph"/>If the above message is received, the converter for the Map class type will convert the byte array to a Map
+of the JSON data. If a valid handler for the Map type is defined, the handler will receive the converted JSON
+so that the handler does not need to handle the conversion.<p class="paragraph"/>The following handlers would accept the converted Map:
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    // ...<p class="paragraph"/>    def handleMessage(Map body, MessageContext context) &#123;
+        // Do work
+    &#125;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // Since def is a <span class="java&#45;keyword">generic</span> type (<span class="java&#45;object">Object</span>)
+    &#125;
+&#125;</pre></div><p class="paragraph"/><blockquote class="note">
+If a converter was successfully able to convert the message body, but no handler was defined to handle the
+class type, other converters will get a chance to convert the message body. In the above example, if only
+a handler for the String type was defined, the handler will receive the JSON blob as a String.<p class="paragraph"/>If no converter is able to convert the message body, the plugin will fall back to passing the handler the raw
+byte array received from the RabbitMQ server.
+</blockquote>
+<blockquote class="warning">
+If no handler is defined that can handle the received message (including the raw byte array), an error will
+be logged and the message will be rejected.
+</blockquote><p class="paragraph"/>The plugin has built-in <a href="../guide/single.html#converters" class="guide">converters</a> for <code>Integer</code>, <code>Map</code>, <code>List</code>, and <code>String</code> types. The plugin allows users
+to define their own converters to convert other object types, which will be discussed later in this guide.
+
+
+
+<h2 id="messagecontext">4.1.3 MessageContext Object</h2>
+The message context is just an object that encapsulates the data relevant to the received message.  Below
+is a list of properties of the class.
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Description</strong></th></tr><tr class="table-odd"><td><code>body</code></td><td>Incoming message in its raw <code>byte</code> format.</td></tr><tr class="table-even"><td><code>channel</code></td><td>The RabbitMQ channel the message handler should use to publish messages. This is especially important when using transactions.</td></tr><tr class="table-odd"><td><code>consumerTag</code></td><td>Consumer tag</td></tr><tr class="table-even"><td><code>envelope</code></td><td>Properties of the message's delivery (see RabbitMQ's <a href="http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.1.5/rabbitmq-java-client-javadoc-3.1.5/com/rabbitmq/client/Envelope.html" target="blank">documentation</a>)</td></tr><tr class="table-odd"><td><code>properties</code></td><td>Properties of the message (see RabbitMQ's <a href="http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.1.5/rabbitmq-java-client-javadoc-3.1.5/com/rabbitmq/client/BasicProperties.html" target="blank">documentation</a>)</td></tr></table>
+
+
+
+<h2 id="rpc">4.1.4 RPC-Style Messages</h2>
+When a client publishes a message and waits for a return reply, this is considered an RPC-style operation. Typically, the server-side of the operation (in this case, a message consumer/handler) must
+respond to the client on a queue that the client requested manually. This plugin provides a very convenient method to respond to the client without having to manually construct a response message.<p class="paragraph"/>The client will provide a response queue to the server to reply to. This queue name is stored in the <code>MessageContext.properties.replyTo</code> variable. If a client publishes this variable, and the handler returns
+some data, the plugin will convert the data returned from the message handler and build a response message for you.<p class="paragraph"/><blockquote class="note">
+Allowing the plugin to build a reply message only converts the data returned from the message handler and publishes it to the reply queue. If you need to set any of the other message properties,
+like headers, content-types, etc, you must manually build the response message, and refrain from returning data from the message handler.
+</blockquote><p class="paragraph"/>
+
+
+<h2 id="queues">4.2 Subscribing To Queues</h2>
+Message consumers can subscribe to either queues or exchanges. When a consumer is registered to a queue, the consumer will receive messages from the queue as
+the RabbitMQ server determines that it's the consumer's turn to receive a message, since there may be multiple listeners on the same queue.<p class="paragraph"/>Each message consumer class must have a configuration defined.  The configuration should be a Map, assigned to a static variable named <code>rabbitConfig</code>. To
+subscribe to queues, the only required configuration option is the <code>queue</code> variable, which is the name of the queue to subscribe to.<p class="paragraph"/>Here is a simple example of a consumer subscribing to a queue.
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
+        <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"test.queue"</span>
+    &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // <span class="java&#45;object">Process</span> message
+    &#125;
+&#125;</pre></div><p class="paragraph"/>There are many options available to influence how the consumer works, which can be found in the reference.
+
+
+
+<h2 id="exchanges">4.3 Subscribing To Exchanges</h2>
+Subscribing to a exchanges is different from subscribing to queues, as there are different types of exchanges with different behavior.
+RabbitMQ's libraries do not provide a direct way to subscribe to an exchange, however the plugin provides a way to subscribe to exchanges directly by creating
+a temporary queue that is bound to an exchange. The binding requirements differ between the different types of exchanges.<p class="paragraph"/>There are 2 types of exchanges that consumers can subscribe to via this plugin:
+<ul class="star">
+<li>Fanout</li>
+<li>Topic</li>
+</ul><p class="paragraph"/>
+
+
+<h2 id="fanout">4.3.1 Fanout Exchanges</h2>
+A fanout exchange will forward a received message to every queue bound to it. There is no binding criteria for this kind of exchange.
+This is the simplest type of exchange, and is also the easiest to configure.<p class="paragraph"/><h4>Fanout Example</h4>
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
+        <span class="java&#45;quote">"exchange"</span>: <span class="java&#45;quote">"fanout.exchange"</span>
+    &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // <span class="java&#45;object">Process</span> message
+    &#125;
+&#125;</pre></div>
+
+
+
+<h2 id="topic">4.3.2 Topic Exchanges</h2>
+A topic exchange will forward messages to queues based on the binding criteria the queue used to register to the exchange. In RabbitMQ terms,
+this is called a routing key. If a routing key is omitted, the queue will receive all messages submitted to the topic exchange. The routing
+key can be either a direct match, or utilize wildcards to do a partial topic match. More information can be found in the RabbitMQ documentation.<p class="paragraph"/><h4>Topic Example</h4>
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
+        <span class="java&#45;quote">"exchange"</span>: <span class="java&#45;quote">"topic.exchange"</span>,
+        <span class="java&#45;quote">"routingKey"</span>: <span class="java&#45;quote">"foo.bar"</span>
+    &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // <span class="java&#45;object">Process</span> message
+    &#125;
+&#125;</pre></div>
+
+
+
+<h1 id="publishing">5 Publishing Messages</h1>
+Publishing messages through the plugin is achieved by using the <code>RabbitMessageBuilder</code> class. This class utilizes a closure-based configuration method to both send messages
+without waiting for a response, and sending rpc-style messages. There are many options available to the <code>RabbitMessageBuilder</code> which are documented in the reference, but
+this guide will only demonstrate basic usage.
+
+
+
+<h2 id="send">5.1 Sending Messages</h2>
+Sending a message means publishing a message to an exchange or queue and not waiting for a response (fire and forget). The only required parameters to the builder
+are a queue or exchange to publish the message to, and the body of the message.<p class="paragraph"/><h4>Send Example</h4>
+<div class="code"><pre>// Send a message
+<span class="java&#45;keyword">new</span> RabbitMessageBuilder().send &#123;
+    queue = <span class="java&#45;quote">"some.queue"</span>
+    body = <span class="java&#45;quote">"hi!"</span>
+&#125;</pre></div><p class="paragraph"/>RabbitMQ expects the body of a message to be a byte array. Message converters will also work when publishing messages, so if an object type other than <code>byte</code> is
+encountered, a suitable message converter will be found and run against the message body, if one exists.
+
+
+
+<h2 id="rpcsend">5.2 RPC Messages</h2>
+Publishing an RPC message is as easy as sending messages, except the returned message is returned from the function.<p class="paragraph"/><h4>RPC Example</h4>
+<div class="code"><pre>// Send a message
+def result = <span class="java&#45;keyword">new</span> RabbitMessageBuilder().rpc &#123;
+    queue = <span class="java&#45;quote">"some.queue"</span>
+    body = <span class="java&#45;quote">"hi!"</span>
+    timeout = RabbitMessageBuilder.DEFAULT_TIMEOUT
+&#125;</pre></div><p class="paragraph"/>While this documentation will not deep-dive into the configuration options for the builder, the <a href="../ref/Rabbit Message Builder/timeout.html" class="Rabbit Message Builder">timeout</a> option is especially important for RPC-style messages. The
+timeout property is the amount of time (in milliseconds) the client will wait for the server to respond. If the timeout is reached, a <code>TimeoutException</code>
+will be thrown. If the timeout is set to 0, the client will wait indefinitely for a response. The default value of the timeout, if not passed, is 5 seconds.
+
+
+
+<h1 id="converters">6 Message Converters</h1>
+Message converters are classes that are responsible for converting objects to and from byte arrays. The plugin provides 4 built-in converters that cover basic types:
+<ul class="star">
+<li><code>Integer</code></li>
+<li><code>Map</code></li>
+<li><code>List</code></li>
+<li><code>String</code></li>
+</ul><p class="paragraph"/>These converters allow message handlers to consume and return data without having to convert that data themselves. They are also used with the <code>RabbitMessageBuilder</code> class.
+
+
+
+<h2 id="custom">6.1 Custom Message Converters</h2>
+The plugin provides a way for authors to create their own message converters. A custom message converter must be placed in the <code>grails-app/rabbit-converters</code> path, and must end with <code>Converter.groovy</code>.<p class="paragraph"/>Message converters should extend the <code>MessageConverter</code> abstract class. <code>MessageConverter</code> is a generic class, meaning when extending it, you need to pass it the object class type the message
+converter will be responsible for converting.<p class="paragraph"/>A message converter can notify the plugin just what abilities it has. Specifically, there are methods that return whether it can convert an object to or from a byte array. A message converter need
+not provide two-way conversion.<p class="paragraph"/>Message converters may also provide the plugin with a MIME-type that is typically indicative of the object type it is responsible for. It does not make sense for all object types to have a MIME-type
+associated with it, but this is useful to give the plugin hints if the conversion mode is set to attempt conversion only based on the content-type property a message contains.<p class="paragraph"/>Below is an example converter for the String object type. Custom converters should follow the same format.<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">package</span> com.budjb.rabbitmq.converter<p class="paragraph"/><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.MessageConverter<p class="paragraph"/>/&#42;&#42;
+ &#42; Provides a message converter <span class="java&#45;keyword">for</span> java.lang.<span class="java&#45;object">String</span> objects.
+ &#42;/
+class StringMessageConverter <span class="java&#45;keyword">extends</span> MessageConverter&#60;<span class="java&#45;object">String</span>&#62; &#123;
+    /&#42;&#42;
+     &#42; Returns whether the message converter can convert a value from a <span class="java&#45;object">String</span> to a <span class="java&#45;object">byte</span> array.
+     &#42;
+     &#42; @<span class="java&#45;keyword">return</span> <span class="java&#45;object">boolean</span>
+     &#42;/
+    @Override
+    <span class="java&#45;keyword">public</span> <span class="java&#45;object">boolean</span> canConvertFrom() &#123;
+        <span class="java&#45;keyword">return</span> <span class="java&#45;keyword">true</span>
+    &#125;<p class="paragraph"/>    /&#42;&#42;
+     &#42; Returns whether the message converter can convert a value from a <span class="java&#45;object">byte</span> array to a <span class="java&#45;object">String</span>.
+     &#42;
+     &#42; @<span class="java&#45;keyword">return</span> <span class="java&#45;object">boolean</span>
+     &#42;/
+    @Override
+    <span class="java&#45;keyword">public</span> <span class="java&#45;object">boolean</span> canConvertTo() &#123;
+        <span class="java&#45;keyword">return</span> <span class="java&#45;keyword">true</span>
+    &#125;<p class="paragraph"/>    /&#42;&#42;
+     &#42; Converts a value from a <span class="java&#45;object">byte</span> array to a <span class="java&#45;object">String</span>.
+     &#42;
+     &#42; @param input Value to convert.
+     &#42; @<span class="java&#45;keyword">return</span> Value converted to a <span class="java&#45;object">String</span>, or <span class="java&#45;keyword">null</span> <span class="java&#45;keyword">if</span> the conversion failed.
+     &#42;/
+    @Override
+    <span class="java&#45;keyword">public</span> <span class="java&#45;object">String</span> convertTo(<span class="java&#45;object">byte</span>&#91;&#93; input) &#123;
+        <span class="java&#45;keyword">return</span> <span class="java&#45;keyword">new</span> <span class="java&#45;object">String</span>(input)
+    &#125;<p class="paragraph"/>    /&#42;&#42;
+     &#42; Converts a value from a <span class="java&#45;object">String</span> to a <span class="java&#45;object">byte</span> array.
+     &#42;
+     &#42; @param input Value to convert.
+     &#42; @<span class="java&#45;keyword">return</span> Value converted to a <span class="java&#45;object">byte</span> array, or <span class="java&#45;keyword">null</span> <span class="java&#45;keyword">if</span> the conversion failed..
+     &#42;/
+    @Override
+    <span class="java&#45;keyword">public</span> <span class="java&#45;object">byte</span>&#91;&#93; convertFrom(<span class="java&#45;object">String</span> input) &#123;
+        <span class="java&#45;keyword">return</span> input.getBytes()
+    &#125;<p class="paragraph"/>    /&#42;&#42;
+     &#42; The MIME&#45;type typically associated with the object type, <span class="java&#45;keyword">if</span> one exists.
+     &#42;
+     &#42; @<span class="java&#45;keyword">return</span> MIME&#45;type typically associated with <span class="java&#45;keyword">this</span> object type, or <span class="java&#45;keyword">null</span> <span class="java&#45;keyword">if</span> one does not exist.
+     &#42;/
+    @Override
+    <span class="java&#45;keyword">public</span> <span class="java&#45;object">String</span> getContentType() &#123;
+        <span class="java&#45;keyword">return</span> 'text/plain'
+    &#125;
+&#125;</pre></div>
+
+
+
+<h1 id="advanced">7 Advanced Usage</h1>
+While the plugin effectively wraps the functionality of the RabbitMQ library, the end user has direct access to all of the underlying library objects and connection instances.
+
+
+
+<h2 id="rabbitcontext">7.1 The Rabbit Context</h2>
+The bean responsible for connecting to the RabbitMQ server and keeping track of the connection and channel objects is the <code>RabbitContext</code>. While you may never need to use this bean, it can be useful.<p class="paragraph"/>The <code>RabbitContext</code> bean can be injected as follows:
+<div class="code"><pre>class TestService &#123;
+    def rabbitContext
+&#125;</pre></div><p class="paragraph"/>The bean can also be retrieved from the <code>ApplicationContext</code>, as follows:
+<div class="code"><pre><span class="java&#45;keyword">import</span> grails.util.Holders<p class="paragraph"/>class TestObject &#123;
+    def testMethod() &#123;
+        RabbitContext context = Holders.applicationContext.getBean('rabbitContext')
+    &#125;
+&#125;</pre></div><p class="paragraph"/>Of particular importance is the <code>connection</code> property of the <code>RabbitContext</code> bean, which is an instance of RabbitMQ's <code>Connection</code> object.
+
+
+
+<h2 id="channels">7.2 Channels</h2>
+<code>RabbitContext</code> contains a method <code>createChannel</code>, which simply calls the same function within the <code>Connection</code> instance. This method returns a new <code>Channel</code> that can be used
+to publish messages or even consume messages, if you prefer to set up your own consumers.<p class="paragraph"/><blockquote class="warning">
+If the <code>createChannel</code> method is used, the author <strong class="bold">must</strong> ensure that the channel is closed when it is no longer needed. The <code>RabbitContext</code> does not track these <code>Channel</code> instances
+as it does with those channels it automatically creates for consumers, and it can be easy to create channel "leaks". Simply call <code>Channel.close()</code> to terminate a channel when it
+is no longer needed.
+</blockquote><p class="paragraph"/><h4>Channel Efficiency</h4>
+Creating channels takes time. If a <code>RabbitMessageBuilder</code> instance is not passed a <code>Channel</code> instance when it is constructed, the builder will create a temporary channel to publish
+the message. While this is convenient, it also slows down publishing messages considerably (for example, 65ms per message published). When a bulk publish job is required, the job
+can be sped up by creating a channel before building the <code>RabbitMessageBuilder</code> and passing that channel into its constructor. In tests, this has brought down the publish time
+per message from 65ms to 1ms or less per message. Be sure to close the channel when the bulk publish job is completed.
+
+
+
+<h2 id="transactions">7.3 Transactions</h2>
+The plugin provides a bit of automation around channel transactions. When a consumer is defined with the <code>transacted</code> property set to <code>true</code>, a transaction is automatically started on
+the channel passed to the message handler. When the message handler completes successfully, the transaction is automatically committed. If an unhandled exception is thrown from the message
+handler, the transaction is automatically rolled back.<p class="paragraph"/>It is <strong class="bold">especially important</strong> that any messages published from a message handler use the <code>Channel</code> instance passed in the <code>MessageContext</code> for this functionality to work.<p class="paragraph"/>Since the <code>Channel</code> is passed in the <code>MessageContext</code>, the author has full control over committing and rolling back transactions.
+
+
+
+<h1 id="changelog">8 Changelog</h1>
+<h3>Version 0.1.4 - 10/28/2013</h3>
+<ul class="star">
+<li>Fix a class visibility issue in the artefact handlers for this plugin.</li>
+</ul><p class="paragraph"/><h3>Version 0.1.3 - 10/23/2013</h3>
+<ul class="star">
+<li>Touch up the consumer template.</li>
+</ul><p class="paragraph"/><h3>Version 0.1.2 - 10/22/2013</h3>
+<ul class="star">
+<li>Add the ability to create multiple consumers at the same time with the <code>create-consumer</code> script (thanks Aaron Brown!).</li>
+<li>Also create a unit test when creating consumers (thanks Michael Rice!).</li>
+</ul><p class="paragraph"/><h3>Version 0.1.1 - 10/22/2013</h3>
+<ul class="star">
+<li>Throw an exception if the connection configuration is missing on application start (thanks Michael Rice!).</li>
+<li>Add the <code>create-consumer</code> script (thanks Aaron Brown!).</li>
+</ul><p class="paragraph"/><h3>Version 0.1 - 10/17/2013</h3>
+<ul class="star">
+<li>Code complete/experimental release.</li>
+</ul><p class="paragraph"/>
+
+                    </div>
+                </td>
+                <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Command Line</h1><div class="menu-sub">
+                        
+                        
+                        <div class="menu-item"><a href="../ref/Command%20Line/create-consumer.html">create-consumer</a>
+                        </div>
+                        
+                        </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Connection Configuration</h1><div class="menu-sub">
+                        
+                        
+                        <div class="menu-item"><a href="../ref/Connection%20Configuration/host.html">host</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Connection%20Configuration/password.html">password</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Connection%20Configuration/port.html">port</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Connection%20Configuration/username.html">username</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Connection%20Configuration/virtualHost.html">virtualHost</a>
+                        </div>
+                        
+                        </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Consumer Configuration</h1><div class="menu-sub">
+                        
+                        
+                        <div class="menu-item"><a href="../ref/Consumer%20Configuration/autoAck.html">autoAck</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Consumer%20Configuration/consumers.html">consumers</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Consumer%20Configuration/convert.html">convert</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Consumer%20Configuration/exchange.html">exchange</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Consumer%20Configuration/queue.html">queue</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Consumer%20Configuration/retry.html">retry</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Consumer%20Configuration/routingKey.html">routingKey</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Consumer%20Configuration/transacted.html">transacted</a>
+                        </div>
+                        
+                        </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Builder</h1><div class="menu-sub">
+                        
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/appId.html">appId</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/autoConvert.html">autoConvert</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/body.html">body</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/contentEncoding.html">contentEncoding</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/contentType.html">contentType</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/correlationId.html">correlationId</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/deliveryMode.html">deliveryMode</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/exchange.html">exchange</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/expiration.html">expiration</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/header.html">header</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/messageId.html">messageId</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/queue.html">queue</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/routingKey.html">routingKey</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/timeout.html">timeout</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/timestamp.html">timestamp</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/type.html">type</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/userId.html">userId</a>
+                        </div>
+                        
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+            </tr>
+        </table>
+
+        <div id="footer">
+            
+            
+        </div>
+
+
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+    </body>
+</html>
