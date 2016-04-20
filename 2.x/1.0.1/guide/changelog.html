@@ -1,0 +1,306 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>8 Changelog 1.0.1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/quickstart.html"><strong>2</strong><span>Quick Start</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/configuration.html"><strong>3</strong><span>Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/converters.html"><strong>6</strong><span>Message Converters</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/advanced.html"><strong>7</strong><span>Advanced Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/changelog.html"><strong>8</strong><span>Changelog</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>The native RabbitMQ Grails plugin provides easily consumable messaging functionality.</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/advanced.html">&lt;&lt; <strong>7</strong><span>Advanced Usage</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+
+
+                <div class="project">
+                    <h1>8 Changelog - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Bud Byrd</p>
+
+                    <p><strong>Version:</strong> 1.0.1</p>
+
+                    
+                </div>
+
+                
+
+                
+
+<h1 id="changelog">8 Changelog</h1>
+<h3>Version 1.0.1 - 11/28/2013</h3>
+<ul class="star">
+<li>Remove the maven group from the plugin definition class.</li>
+</ul><p class="paragraph"/><h3>Version 1.0.0 - 11/27/2013</h3>
+<ul class="star">
+<li>Version bump for general release.</li>
+</ul><p class="paragraph"/><h3>Version 0.2.1 - 11/27/2013</h3>
+<ul class="star">
+<li>Fixed a bug with the message handler discovery method that caused generically-typed handlers to get called incorrectly.</li>
+</ul><p class="paragraph"/><h3>Version 0.2.0 - 11/27/2013</h3>
+<ul class="star">
+<li>Refactored queue/exchange configuration. It is now possible configure queue binding without having to also configure the exchange being bound to.</li>
+<li>Added the <code>match</code> property to queue configuration to support headers exchange binding. <strong class="bold">This breaks backwards compatibility.</strong></li>
+<li>Renaming the <code>routingKey</code> property of the consumer configuration to <code>binding</code> to match queue configuration. <strong class="bold">This breaks backwards compatibility.</strong></li>
+</ul><p class="paragraph"/><h3>Version 0.1.8 - 10/31/2013</h3>
+<ul class="star">
+<li>Moved the trigger to start consumers on application launch to the bootstrap.</li>
+</ul><p class="paragraph"/><h3>Version 0.1.7 - 10/30/2013</h3>
+<ul class="star">
+<li>Added the <code>prefetchCount</code> option to the consumer configuration. Defaults to 1.</li>
+<li>Added the <code>threads</code> option to the connection configuration. Defaults to 5.</li>
+</ul><p class="paragraph"/><h3>Version 0.1.6 - 10/29/2013</h3>
+<ul class="star">
+<li>Fixed logic to determine if a consumer is valid.</li>
+<li>Added support for short-form handlers that only take a single parameter.</li>
+</ul><p class="paragraph"/><h3>Version 0.1.5 - 10/28/2013</h3>
+<ul class="star">
+<li><code>body</code> parameter to the <code>RabbitMessageBuilder</code> is no longer required. It now defaults to an empty byte array.</li>
+</ul><p class="paragraph"/><h3>Version 0.1.4 - 10/28/2013</h3>
+<ul class="star">
+<li>Fix a class visibility issue in the artefact handlers for this plugin.</li>
+</ul><p class="paragraph"/><h3>Version 0.1.3 - 10/23/2013</h3>
+<ul class="star">
+<li>Touch up the consumer template.</li>
+</ul><p class="paragraph"/><h3>Version 0.1.2 - 10/22/2013</h3>
+<ul class="star">
+<li>Add the ability to create multiple consumers at the same time with the <code>create-consumer</code> script (thanks Aaron Brown!).</li>
+<li>Also create a unit test when creating consumers (thanks Michael Rice!).</li>
+</ul><p class="paragraph"/><h3>Version 0.1.1 - 10/22/2013</h3>
+<ul class="star">
+<li>Throw an exception if the connection configuration is missing on application start (thanks Michael Rice!).</li>
+<li>Add the <code>create-consumer</code> script (thanks Aaron Brown!).</li>
+</ul><p class="paragraph"/><h3>Version 0.1 - 10/17/2013</h3>
+<ul class="star">
+<li>Code complete/experimental release.</li>
+</ul><p class="paragraph"/>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/advanced.html">&lt;&lt; <strong>7</strong><span>Advanced Usage</span></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Command Line</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Command%20Line/create-consumer.html">create-consumer</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Connection Configuration</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/host.html">host</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/password.html">password</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/port.html">port</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/threads.html">threads</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/username.html">username</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/virtualHost.html">virtualHost</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Consumer Configuration</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/autoAck.html">autoAck</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/binding.html">binding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/consumers.html">consumers</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/convert.html">convert</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/match.html">match</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/prefetchCount.html">prefetchCount</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/queue.html">queue</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/retry.html">retry</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/transacted.html">transacted</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Builder</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/appId.html">appId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/autoConvert.html">autoConvert</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/body.html">body</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/contentEncoding.html">contentEncoding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/contentType.html">contentType</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/correlationId.html">correlationId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/deliveryMode.html">deliveryMode</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/expiration.html">expiration</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/header.html">header</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/messageId.html">messageId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/queue.html">queue</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/routingKey.html">routingKey</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/timeout.html">timeout</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/timestamp.html">timestamp</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/type.html">type</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/userId.html">userId</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>
