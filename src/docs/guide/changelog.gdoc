@@ -1,3 +1,9 @@
+h3. Version 3.1.3 - 4/20/2016
+* Add status reports that provides information about all connections and their consumers, including load statistics.
+* Upgrade project to Grails 2.5.4.
+* Final release of the Grails 2.x version of the plugin with this versioning scheme. Future releases of the Grails 2.x\
+  version of the plugin will be appended with _.GRAILS2_.
+
 h3. Version 3.1.2 - 8/6/2015
 * Added graceful shutdown support. See @rabbitContext.shutdown()@.
 * Added methods to check running state on most managers and contexts.
