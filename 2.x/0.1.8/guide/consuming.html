@@ -1,0 +1,436 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>4 Consuming Messages 0.1.8</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/quickstart.html"><strong>2</strong><span>Quick Start</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/configuration.html"><strong>3</strong><span>Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/converters.html"><strong>6</strong><span>Message Converters</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/advanced.html"><strong>7</strong><span>Advanced Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/changelog.html"><strong>8</strong><span>Changelog</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>The native RabbitMQ Grails plugin provides easily consumable messaging functionality.</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/configuration.html">&lt;&lt; <strong>3</strong><span>Configuration</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>4 Consuming Messages - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Bud Byrd</p>
+
+                    <p><strong>Version:</strong> 0.1.8</p>
+
+                    
+                </div>
+
+                
+                <div id="table-of-content">
+                    <h2>Table of Contents</h2>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#handlers"><strong>4.1</strong><span>Message Handlers</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:10px"><a href="#basic"><strong>4.1.1</strong><span>Basic Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:10px"><a href="#typed"><strong>4.1.2</strong><span>Typed Message Handlers</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:10px"><a href="#short"><strong>4.1.3</strong><span>Short-Form Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:10px"><a href="#messagecontext"><strong>4.1.4</strong><span>MessageContext Object</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:10px"><a href="#rpc"><strong>4.1.5</strong><span>RPC-Style Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#queues"><strong>4.2</strong><span>Subscribing To Queues</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#exchanges"><strong>4.3</strong><span>Subscribing To Exchanges</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:10px"><a href="#fanout"><strong>4.3.1</strong><span>Fanout Exchanges</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:10px"><a href="#topic"><strong>4.3.2</strong><span>Topic Exchanges</span></a>
+                    </div>
+                    
+                </div>
+                
+
+                
+
+<h1 id="consuming">4 Consuming Messages</h1>
+Consuming messages is accomplished by creating a message consumer class. Consumer classes are placed into the
+<code>grails-app/rabbit-consumers</code>, and must end with <code>Consumer.groovy</code>. These classes are Spring beans, meaning
+that they can inject other Spring beans such as services, the <code>grailsApplication</code> instance, etc. Each consumer
+class must be configured in a certain way. If there is a misconfiguration in a consumer, the plugin will log
+an error stating so and not register the consumer to any queues.
+
+
+
+<h2 id="handlers">4.1 Message Handlers</h2>
+One of the requirements for a consumer to be registered to the RabbitMQ server is that a message handler be declared
+in the consumer class. The message handler is the mechanism by which messages are consumed.
+
+
+
+<h2 id="basic">4.1.1 Basic Usage</h2>
+In its most basic form, a message handler method takes in the body of the received message, and a <code>MessageContext</code>
+object that contains the message parameters received from the RabbitMQ server, along with the consumer's channel
+that the handler should publish messages through.<p class="paragraph"/>This is the most generic form of a message handler:
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    // ...<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // Do work
+    &#125;
+&#125;</pre></div>
+
+
+
+<h2 id="typed">4.1.2 Typed Message Handlers</h2>
+The logic surrounding the message consumer classes will by default attempt to intelligently convert the body of
+the received message from a byte array to a converted type, such as a String. Before routing the message to the
+consumer and handler, the plugin will run through a list of <a href="../guide/single.html#converters" class="guide">converters</a> that will attempt to convert the message,
+and if the conversion was successful, determine if an appropriate handler has been defined.<p class="paragraph"/>For example, consider this JSON blob:
+<div class="code"><pre>&#123;<span class="java&#45;quote">"foo"</span>:<span class="java&#45;quote">"bar"</span>,<span class="java&#45;quote">"hi"</span>:<span class="java&#45;quote">"there"</span>&#125;</pre></div><p class="paragraph"/>If the above message is received, the converter for the Map class type will convert the byte array to a Map
+of the JSON data. If a valid handler for the Map type is defined, the handler will receive the converted JSON
+so that the handler does not need to handle the conversion.<p class="paragraph"/>The following handlers would accept the converted Map:
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    // ...<p class="paragraph"/>    def handleMessage(Map body, MessageContext context) &#123;
+        // Do work
+    &#125;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // Since def is a <span class="java&#45;keyword">generic</span> type (<span class="java&#45;object">Object</span>)
+    &#125;
+&#125;</pre></div><p class="paragraph"/><blockquote class="note">
+If a converter was successfully able to convert the message body, but no handler was defined to handle the
+class type, other converters will get a chance to convert the message body. In the above example, if only
+a handler for the String type was defined, the handler will receive the JSON blob as a String.<p class="paragraph"/>If no converter is able to convert the message body, the plugin will fall back to passing the handler the raw
+byte array received from the RabbitMQ server.
+</blockquote>
+<blockquote class="warning">
+If no handler is defined that can handle the received message (including the raw byte array), an error will
+be logged and the message will be rejected.
+</blockquote><p class="paragraph"/>The plugin has built-in <a href="../guide/single.html#converters" class="guide">converters</a> for <code>Integer</code>, <code>Map</code>, <code>List</code>, and <code>String</code> types. The plugin allows users
+to define their own converters to convert other object types, which will be discussed later in this guide.
+
+
+
+<h2 id="short">4.1.3 Short-Form Usage</h2>
+In addition to the 2-parameter handler method signature, there are 2 shortcut versions available for use. One form only takes the converted message body, and the other only
+takes the <code>MessageContext</code> object. The order of preference when multiple valid handlers are defined is:
+<ol>
+<li>Long form (body, context)</li>
+<li>Short form (body)</li>
+<li><code>MessageContext</code> form</li>
+</ol><p class="paragraph"/>The short-form handlers are shown below:
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    // ...<p class="paragraph"/>    def handleMessage(<span class="java&#45;object">String</span> message) &#123;
+        // Do work
+    &#125;<p class="paragraph"/>    def handleMessage(MessageContext context) &#123;
+        // Do work
+    &#125;
+&#125;</pre></div><p class="paragraph"/><blockquote class="note">
+The <code>MessageContext</code>-only handler will only be called if there is no other handler defined that can possibly handle any conversion of the message body.
+</blockquote>
+
+
+
+<h2 id="messagecontext">4.1.4 MessageContext Object</h2>
+The message context is just an object that encapsulates the data relevant to the received message.  Below
+is a list of properties of the class.
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Description</strong></th></tr><tr class="table-odd"><td><code>body</code></td><td>Incoming message in its raw <code>byte</code> format.</td></tr><tr class="table-even"><td><code>channel</code></td><td>The RabbitMQ channel the message handler should use to publish messages. This is especially important when using transactions.</td></tr><tr class="table-odd"><td><code>consumerTag</code></td><td>Consumer tag</td></tr><tr class="table-even"><td><code>envelope</code></td><td>Properties of the message's delivery (see RabbitMQ's <a href="http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.1.5/rabbitmq-java-client-javadoc-3.1.5/com/rabbitmq/client/Envelope.html" target="blank">documentation</a>)</td></tr><tr class="table-odd"><td><code>properties</code></td><td>Properties of the message (see RabbitMQ's <a href="http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.1.5/rabbitmq-java-client-javadoc-3.1.5/com/rabbitmq/client/BasicProperties.html" target="blank">documentation</a>)</td></tr></table>
+
+
+
+<h2 id="rpc">4.1.5 RPC-Style Messages</h2>
+When a client publishes a message and waits for a return reply, this is considered an RPC-style operation. Typically, the server-side of the operation (in this case, a message consumer/handler) must
+respond to the client on a queue that the client requested manually. This plugin provides a very convenient method to respond to the client without having to manually construct a response message.<p class="paragraph"/>The client will provide a response queue to the server to reply to. This queue name is stored in the <code>MessageContext.properties.replyTo</code> variable. If a client publishes this variable, and the handler returns
+some data, the plugin will convert the data returned from the message handler and build a response message for you.<p class="paragraph"/><blockquote class="note">
+Allowing the plugin to build a reply message only converts the data returned from the message handler and publishes it to the reply queue. If you need to set any of the other message properties,
+like headers, content-types, etc, you must manually build the response message, and refrain from returning data from the message handler.
+</blockquote><p class="paragraph"/>
+
+
+<h2 id="queues">4.2 Subscribing To Queues</h2>
+Message consumers can subscribe to either queues or exchanges. When a consumer is registered to a queue, the consumer will receive messages from the queue as
+the RabbitMQ server determines that it's the consumer's turn to receive a message, since there may be multiple listeners on the same queue.<p class="paragraph"/>Each message consumer class must have a configuration defined.  The configuration should be a Map, assigned to a static variable named <code>rabbitConfig</code>. To
+subscribe to queues, the only required configuration option is the <code>queue</code> variable, which is the name of the queue to subscribe to.<p class="paragraph"/>Here is a simple example of a consumer subscribing to a queue.
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
+        <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"test.queue"</span>
+    &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // <span class="java&#45;object">Process</span> message
+    &#125;
+&#125;</pre></div><p class="paragraph"/>There are many options available to influence how the consumer works, which can be found in the reference.
+
+
+
+<h2 id="exchanges">4.3 Subscribing To Exchanges</h2>
+Subscribing to a exchanges is different from subscribing to queues, as there are different types of exchanges with different behavior.
+RabbitMQ's libraries do not provide a direct way to subscribe to an exchange, however the plugin provides a way to subscribe to exchanges directly by creating
+a temporary queue that is bound to an exchange. The binding requirements differ between the different types of exchanges.<p class="paragraph"/>There are 2 types of exchanges that consumers can subscribe to via this plugin:
+<ul class="star">
+<li>Fanout</li>
+<li>Topic</li>
+</ul><p class="paragraph"/>
+
+
+<h2 id="fanout">4.3.1 Fanout Exchanges</h2>
+A fanout exchange will forward a received message to every queue bound to it. There is no binding criteria for this kind of exchange.
+This is the simplest type of exchange, and is also the easiest to configure.<p class="paragraph"/><h4>Fanout Example</h4>
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
+        <span class="java&#45;quote">"exchange"</span>: <span class="java&#45;quote">"fanout.exchange"</span>
+    &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // <span class="java&#45;object">Process</span> message
+    &#125;
+&#125;</pre></div>
+
+
+
+<h2 id="topic">4.3.2 Topic Exchanges</h2>
+A topic exchange will forward messages to queues based on the binding criteria the queue used to register to the exchange. In RabbitMQ terms,
+this is called a routing key. If a routing key is omitted, the queue will receive all messages submitted to the topic exchange. The routing
+key can be either a direct match, or utilize wildcards to do a partial topic match. More information can be found in the RabbitMQ documentation.<p class="paragraph"/><h4>Topic Example</h4>
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
+        <span class="java&#45;quote">"exchange"</span>: <span class="java&#45;quote">"topic.exchange"</span>,
+        <span class="java&#45;quote">"routingKey"</span>: <span class="java&#45;quote">"foo.bar"</span>
+    &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // <span class="java&#45;object">Process</span> message
+    &#125;
+&#125;</pre></div>
+
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/configuration.html">&lt;&lt; <strong>3</strong><span>Configuration</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Command Line</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Command%20Line/create-consumer.html">create-consumer</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Connection Configuration</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/host.html">host</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/password.html">password</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/port.html">port</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/threads.html">threads</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/username.html">username</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/virtualHost.html">virtualHost</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Consumer Configuration</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/autoAck.html">autoAck</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/consumers.html">consumers</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/convert.html">convert</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/prefetchCount.html">prefetchCount</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/queue.html">queue</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/retry.html">retry</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/routingKey.html">routingKey</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/transacted.html">transacted</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Builder</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/appId.html">appId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/autoConvert.html">autoConvert</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/body.html">body</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/contentEncoding.html">contentEncoding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/contentType.html">contentType</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/correlationId.html">correlationId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/deliveryMode.html">deliveryMode</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/expiration.html">expiration</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/header.html">header</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/messageId.html">messageId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/priority.html">priority</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/queue.html">queue</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/replyTo.html">replyTo</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/routingKey.html">routingKey</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/timeout.html">timeout</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/timestamp.html">timestamp</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/type.html">type</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Builder/userId.html">userId</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>
