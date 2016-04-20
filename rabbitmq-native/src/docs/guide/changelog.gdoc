@@ -3,6 +3,7 @@ h3. Version 3.2.0
 * First non-beta release of the plugin for Grails 3.
 * Deprecate closure-based queue/exchange configuration.
 * Add new map-based configuration that works well with YAML.
+* Removed @RabbitMessageBuilder@.
 
 {note}
 All versions below refer to the Grails 2.x plugin. The Grails 3.x plugin forked from the Grails 2.x version after
