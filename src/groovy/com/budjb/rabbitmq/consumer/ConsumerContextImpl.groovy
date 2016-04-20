@@ -309,7 +309,7 @@ class ConsumerContextImpl implements ConsumerContext {
         ConsumerConfiguration configuration = getConfiguration()
 
         report.name = getId()
-        report.fullName = this.getClass().name
+        report.fullName = consumer.getClass().getName()
 
         report.runningState = getRunningState()
 
