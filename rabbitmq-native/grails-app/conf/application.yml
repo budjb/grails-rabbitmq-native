@@ -1,6 +1,8 @@
 grails:
     profile: plugin
-
+    doc:
+        title: RabbitMQ Native Plugin
+        authors: Bud Byrd
 info:
     app:
         name: '@info.app.name@'
