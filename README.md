@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/budjb/grails-rabbitmq-native.svg?branch=master)](https://travis-ci.org/budjb/grails-rabbitmq-native)
+[![Build Status](https://travis-ci.org/budjb/grails-rabbitmq-native.svg?branch=grails-2.x)](https://travis-ci.org/budjb/grails-rabbitmq-native)
 
 RabbitMQ Native plugin for Grails
 ---------------------------------
