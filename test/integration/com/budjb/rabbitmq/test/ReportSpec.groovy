@@ -103,6 +103,9 @@ class ReportSpec extends IntegrationSpec {
 
         when:
         def report = new JsonSlurper().parseText(new JsonBuilder(rabbitContext.getStatusReport()).toString())
+        report.each {
+            it.consumers = it.consumers.sort { it.name }
+        }
 
         then:
         report == expected
