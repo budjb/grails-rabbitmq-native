@@ -5,4 +5,5 @@ com.budjb.rabbitmq.consumer
 com.budjb.rabbitmq.converter
 com.budjb.rabbitmq.exception
 com.budjb.rabbitmq.publisher
+com.budjb.rabbitmq.report
 com.budjb.rabbitmq.test

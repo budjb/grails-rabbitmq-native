@@ -41,6 +41,7 @@ advanced:
         native: Native Objects
         connection_lifecycle: Starting and Stopping Connections
         consumer_lifecycle: Starting and Stopping Consumers
+        report: Status Report
     transactions: Transactions
 upgrading:
     title: Upgrading

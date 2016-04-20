@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>7 Advanced Usage 3.1.2</title>
+    <title>7 Advanced Usage 3.1.3</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -89,7 +89,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 3.1.2</p>
+                    <p><strong>Version:</strong> 3.1.3</p>
 
                     
                 </div>
@@ -111,6 +111,9 @@ function addJsClass() {
                     </div>
                     
                     <div class="toc-item" style="margin-left:10px"><a href="#consumer_lifecycle"><strong>7.2.3</strong><span>Starting and Stopping Consumers</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:10px"><a href="#report"><strong>7.2.4</strong><span>Status Report</span></a>
                     </div>
                     
                     <div class="toc-item" style="margin-left:0px"><a href="#transactions"><strong>7.3</strong><span>Transactions</span></a>
@@ -168,6 +171,103 @@ sometimes applications may need to manually stop connections based on certain co
 
 <h2 id="consumer_lifecycle">7.2.3 Starting and Stopping Consumers</h2>
 Much like connections, the <code>rabbitContext</code> provides several methods to start and stop consumers if necessary.<p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th>Method</th><th>Description</th></tr><tr class="table-odd"><td><code>startConsumers</code></td><td>Starts all registered consumers.  If some consumers are already started, the remainder&#10;                              will also be started.</td></tr><tr class="table-even"><td><code>stopConsumers</code></td><td>Stops all consumers.</td></tr><tr class="table-odd"><td><code>startConsumer</code></td><td>Starts a connection based on its class name.</td></tr><tr class="table-even"><td><code>stopConsumer</code></td><td>Stops a connection based on its class name.</td></tr><tr class="table-odd"><td><code>startConsumers(String)</code></td><td>Starts all consumers on a specific connection, based on the connection name.</td></tr><tr class="table-even"><td><code>stopConsumers(String)</code></td><td>Stops all consumers on a specific connection, based on the connection name.</td></tr></table>
+
+
+<h2 id="report">7.2.4 Status Report</h2>
+The <code>RabbitContext</code> contains a method <code>getStatusReport()</code>, which will build an object structure
+containing information about all RabbitMQ connections and all consumers. This information is useful
+to monitor the status of the RabbitMQ application system, as it contains running states and statistics including
+how many concurrent threads a consumer is configured for, how many are actually active, and how many are actively
+processing messages.  Below is an example of its output gathered from one of the plugin's tests, serialized as JSON.<p class="paragraph"/><div class="code"><pre>&#91;
+    &#123;
+        <span class="java&#45;quote">"consumers"</span>: &#91;
+            &#123;
+                <span class="java&#45;quote">"fullName"</span>: <span class="java&#45;quote">"com.budjb.rabbitmq.test.AllTopicConsumer"</span>,
+                <span class="java&#45;quote">"load"</span>: 0,
+                <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"AllTopicConsumer"</span>,
+                <span class="java&#45;quote">"numConfigured"</span>: 1,
+                <span class="java&#45;quote">"numConsuming"</span>: 1,
+                <span class="java&#45;quote">"numProcessing"</span>: 0,
+                <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"topic&#45;queue&#45;all"</span>,
+                <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>
+            &#125;,
+            &#123;
+                <span class="java&#45;quote">"fullName"</span>: <span class="java&#45;quote">"com.budjb.rabbitmq.test.ReportingConsumer"</span>,
+                <span class="java&#45;quote">"load"</span>: 0,
+                <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"ReportingConsumer"</span>,
+                <span class="java&#45;quote">"numConfigured"</span>: 1,
+                <span class="java&#45;quote">"numConsuming"</span>: 1,
+                <span class="java&#45;quote">"numProcessing"</span>: 0,
+                <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"reporting"</span>,
+                <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>
+            &#125;,
+            &#123;
+                <span class="java&#45;quote">"fullName"</span>: <span class="java&#45;quote">"com.budjb.rabbitmq.test.SleepingConsumer"</span>,
+                <span class="java&#45;quote">"load"</span>: 0,
+                <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"SleepingConsumer"</span>,
+                <span class="java&#45;quote">"numConfigured"</span>: 1,
+                <span class="java&#45;quote">"numConsuming"</span>: 1,
+                <span class="java&#45;quote">"numProcessing"</span>: 0,
+                <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"sleeping"</span>,
+                <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>
+            &#125;,
+            &#123;
+                <span class="java&#45;quote">"fullName"</span>: <span class="java&#45;quote">"com.budjb.rabbitmq.test.SpecificTopicConsumer"</span>,
+                <span class="java&#45;quote">"load"</span>: 0,
+                <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"SpecificTopicConsumer"</span>,
+                <span class="java&#45;quote">"numConfigured"</span>: 1,
+                <span class="java&#45;quote">"numConsuming"</span>: 1,
+                <span class="java&#45;quote">"numProcessing"</span>: 0,
+                <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"topic&#45;queue&#45;specific"</span>,
+                <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>
+            &#125;,
+            &#123;
+                <span class="java&#45;quote">"fullName"</span>: <span class="java&#45;quote">"com.budjb.rabbitmq.test.StringConsumer"</span>,
+                <span class="java&#45;quote">"load"</span>: 0,
+                <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"StringConsumer"</span>,
+                <span class="java&#45;quote">"numConfigured"</span>: 1,
+                <span class="java&#45;quote">"numConsuming"</span>: 1,
+                <span class="java&#45;quote">"numProcessing"</span>: 0,
+                <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"string&#45;test"</span>,
+                <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>
+            &#125;,
+            &#123;
+                <span class="java&#45;quote">"fullName"</span>: <span class="java&#45;quote">"com.budjb.rabbitmq.test.SubsetTopicConsumer"</span>,
+                <span class="java&#45;quote">"load"</span>: 0,
+                <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"SubsetTopicConsumer"</span>,
+                <span class="java&#45;quote">"numConfigured"</span>: 1,
+                <span class="java&#45;quote">"numConsuming"</span>: 1,
+                <span class="java&#45;quote">"numProcessing"</span>: 0,
+                <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"topic&#45;queue&#45;subset"</span>,
+                <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>
+            &#125;
+        &#93;,
+        <span class="java&#45;quote">"host"</span>: <span class="java&#45;quote">"localhost"</span>,
+        <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"connection1"</span>,
+        <span class="java&#45;quote">"port"</span>: 5672,
+        <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>,
+        <span class="java&#45;quote">"virtualHost"</span>: <span class="java&#45;quote">"test1.rabbitmq.budjb.com"</span>
+    &#125;,
+    &#123;
+        <span class="java&#45;quote">"consumers"</span>: &#91;
+            &#123;
+                <span class="java&#45;quote">"fullName"</span>: <span class="java&#45;quote">"com.budjb.rabbitmq.test.Connection2Consumer"</span>,
+                <span class="java&#45;quote">"load"</span>: 0,
+                <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"Connection2Consumer"</span>,
+                <span class="java&#45;quote">"numConfigured"</span>: 1,
+                <span class="java&#45;quote">"numConsuming"</span>: 1,
+                <span class="java&#45;quote">"numProcessing"</span>: 0,
+                <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"connection2&#45;queue"</span>,
+                <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>
+            &#125;
+        &#93;,
+        <span class="java&#45;quote">"host"</span>: <span class="java&#45;quote">"localhost"</span>,
+        <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"connection2"</span>,
+        <span class="java&#45;quote">"port"</span>: 5672,
+        <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>,
+        <span class="java&#45;quote">"virtualHost"</span>: <span class="java&#45;quote">"test2.rabbitmq.budjb.com"</span>
+    &#125;
+&#93;</pre></div>
 
 
 <h2 id="transactions">7.3 Transactions</h2>

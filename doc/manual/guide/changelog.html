@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>9 Changelog 3.1.2</title>
+    <title>9 Changelog 3.1.3</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -87,7 +87,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Bud Byrd</p>
 
-                    <p><strong>Version:</strong> 3.1.2</p>
+                    <p><strong>Version:</strong> 3.1.3</p>
 
                     
                 </div>
@@ -97,7 +97,15 @@ function addJsClass() {
                 
 
 <h1 id="changelog">9 Changelog</h1>
-<h3>Version 3.1.2 - 8/6/2015</h3>
+<h3>Version 3.1.3 - 4/20/2016</h3>
+<ul class="star">
+<li>Add status reports that provides information about all connections and their consumers, including load statistics.</li>
+<li>Upgrade project to Grails 2.5.4.</li>
+<li>Remove gpars dependency.</li>
+<li>Make Grails 2.3 the minimum version of Grails this plugin is intended for.</li>
+<li>Fix consumer configuration from application config parsing issue (#73).</li>
+<li>Refactor message conversion for incoming messages so that conversion to a type only happens if an appropriate handler exists.</li>
+</ul><p class="paragraph"/><h3>Version 3.1.2 - 8/6/2015</h3>
 <ul class="star">
 <li>Added graceful shutdown support. See <code>rabbitContext.shutdown()</code>.</li>
 <li>Added methods to check running state on most managers and contexts.</li>
