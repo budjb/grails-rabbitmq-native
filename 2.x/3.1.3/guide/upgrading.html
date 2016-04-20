@@ -1,0 +1,343 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>8 Upgrading 3.1.3</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/quickstart.html"><strong>2</strong><span>Quick Start</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/configuration.html"><strong>3</strong><span>Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/converters.html"><strong>6</strong><span>Message Converters</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/advanced.html"><strong>7</strong><span>Advanced Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/upgrading.html"><strong>8</strong><span>Upgrading</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/changelog.html"><strong>9</strong><span>Changelog</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>The native RabbitMQ Grails plugin provides easily consumable messaging functionality.</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/advanced.html">&lt;&lt; <strong>7</strong><span>Advanced Usage</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/changelog.html"><strong>9</strong><span>Changelog</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>8 Upgrading - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Bud Byrd</p>
+
+                    <p><strong>Version:</strong> 3.1.3</p>
+
+                    
+                </div>
+
+                
+                <div id="table-of-content">
+                    <h2>Table of Contents</h2>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#from_3_0_x"><strong>8.1</strong><span>From 3.0.X</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#from_2_0_x"><strong>8.2</strong><span>From 2.0.X</span></a>
+                    </div>
+                    
+                </div>
+                
+
+                
+
+<h1 id="upgrading">8 Upgrading</h1>
+When an update to the plugin is made that has incompatibility considerations, this document will help identify the
+various impact considerations when upgrading to a new version.
+
+
+
+<h2 id="from_3_0_x">8.1 From 3.0.X</h2>
+The upgrade from 3.0.X to 3.1.X includes a refactor of how the consumer and connection managers work.
+The storage of consumer handlers was moved from the connection classes into the consumer manager in order
+to support the new start/stop functionality, and it made sense for consumer handlers to reside with
+the appropriately named manager.<p class="paragraph"/>Both of the managers also now have underlying interfaces that define how a manager should behave. In addition,
+the objects being managed are now called <strong class="bold">Contexts</strong>, which also have interfaces that define their general
+behavior.  It is the intention that with these changes the plugin becomes more stable with less backwards-
+compatibility breaking changes being introduced moving forward.<p class="paragraph"/>Here are the items authors may need to address when upgrading to this version of the plugin.
+<ul class="star">
+<li>The <code>rabbitContext.getConnection()</code> methods now return the RabbitMQ <code>Connection</code> object instead of&#10;  the <code>ConnectionContext</code> instance.  This was done to make the methods more consistent with the&#10;  <code>createChannel</code> methods and to encapsulate the <code>ConnectionContext</code> objects inside the manager.&#10;  The <code>ConnectionContext</code> objects can now be retrieved from the <code>consumerManager</code> bean.</li>
+<li>Many of the methods inside of the <code>ConsumerManager</code> and <code>ConnectionManager</code> have been renamed to adhere&#10;  to a common interface.  This should only affect projects that use these beans directly.</li>
+<li>Some of the methods inside of the <code>RabbitContext</code> have been renamed to match the interface used by&#10;  the various managers.</li>
+</ul><p class="paragraph"/>Overall, users of the plugin should see no impact if the <code>rabbitContext</code> or any of the other beans are
+not used in their projects.<p class="paragraph"/>If the use of the plugin's beans is limited to the <code>rabbitContext</code>, the impact should be minimal,
+with some minor changes need to method names and some refactored code if retrieving a <code>ConnectionContext</code>.
+Users that use the other manager beans will need to account for the changed interface implemented by
+those beans.
+
+
+<h2 id="from_2_0_x">8.2 From 2.0.X</h2>
+The upgrade from any version in the 2.0.X range to 3.0.X includes a massive refactoring of the internals of the plugin.  If users did not extend or override
+the <code>RabbitContext</code>, <code>RabbitMessageBuilder</code>, or any of the other helper classes, the amount of impact is limited to a couple package name changes.<p class="paragraph"/>Below are the changes that were made, at a high level:
+<ul class="star">
+<li><code>RabbitMessageBuilder</code> is deprecated.  The class still exists and its interface is the same, however, the code in the class has been ripped out and now proxies requests to the <code>rabbitMessagePublisher</code> bean.  The builder will be removed at some point in the near future.</li>
+<li><code>RabbitContext</code> used to contain a significant amount of code related to management of message converters, consumers, and connections.  That functionality has been broken out into their own respective classes.  The <code>RabbitContext</code> now serves only as a class to aggregate functionality useful to users of the plugin, and should still be used to simplify interfacing with the plugin rather than using the underlying beans directly.</li>
+<li>Introduced the <code>rabbitMessagePublisher</code> as a replacement for the <code>RabbitMessageBuilder</code>.  This bean can be injected into other spring managed beans, such as services, controllers, and rabbit consumers.  Its functionality follows the builder closely, and users may send messages based on configurations made through closures or through the new <code>RabbitMessageProperties</code> object.  The short-hand convenience methods are still available as well.</li>
+<li>Introduced the <code>messageConverterManager</code> bean to handle all operations pertaining to message converters.</li>
+<li>Introduced the <code>consumerManager</code> bean to handle all operations pertaining to message consumers.</li>
+<li>Introduced the <code>connectionManager</code> bean to handle all operations pertaining to RabbitMQ connections and channels.</li>
+<li>Introduced the <code>queueBuilder</code> bean to handle creating configured exchanges and queues.</li>
+<li>The <code>MessageContext</code> class has been moved into a new package: <code>com.budjb.rabbitmq.consumer</code>.</li>
+<li>The <code>AutoAck</code> enum has been moved into a new package: <code>com.budjb.rabbitmq.consumer</code>.</li>
+<li>The <code>ConsumerConfiguration</code> class has been moved into a new package: <code>com.budjb.rabbitmq.consumer</code>.</li>
+<li>The <code>MessageConvertMethod</code> class has been moved into a new package: <code>com.budjb.rabbitmq.consumer</code>.</li>
+<li>The <code>ConnectionContext</code> class has been moved into a new package: <code>com.budjb.rabbitmq.connection</code>.</li>
+<li>The <code>ConnectionConfiguration</code> class has been moved into a new package: <code>com.budjb.rabbitmq.connection</code>.</li>
+<li>The <code>MessageConverter</code> abstract class has been moved into a new package: <code>com.budjb.rabbitmq.converter</code>.</li>
+<li>All of the bundles message converters have been moved into a new package: <code>com.budjb.rabbitmq.converter</code>.</li>
+<li>The <code>RabbitMessageBuilder</code> class has been moved into a new package: <code>com.budjb.rabbitmq.publisher</code>.</li>
+<li>A large amount of unit tests and some integration tests have been added to the project.  These tests rely on the Spock mocking framework, but the test files and dependencies are not exported with the plugin so that a new plugin dependency on Spock is not created.</li>
+<li>The closures used for publishing messages have had their resolving strategy changed from <code>OWNER_FIRST</code> to <code>DELEGATE_FIRST</code>. This should not have much of an impact, but in some cases closures may need to explicity qualify some properties in the closures with <code>delegate</code>.</li>
+</ul><p class="paragraph"/>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/advanced.html">&lt;&lt; <strong>7</strong><span>Advanced Usage</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/changelog.html"><strong>9</strong><span>Changelog</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Command Line</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Command%20Line/create-consumer.html">create-consumer</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Connection Configuration</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/automaticReconnect.html">automaticReconnect</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/host.html">host</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/isDefault.html">isDefault</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/name.html">name</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/password.html">password</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/port.html">port</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/requestedHeartbeat.html">requestedHeartbeat</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/ssl.html">ssl</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/threads.html">threads</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/username.html">username</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/virtualHost.html">virtualHost</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Consumer Configuration</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/autoAck.html">autoAck</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/binding.html">binding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/connection.html">connection</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/consumers.html">consumers</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/convert.html">convert</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/match.html">match</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/prefetchCount.html">prefetchCount</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/queue.html">queue</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/retry.html">retry</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/transacted.html">transacted</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Publisher</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/appId.html">appId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/autoConvert.html">autoConvert</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/body.html">body</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/connection.html">connection</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/contentEncoding.html">contentEncoding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/contentType.html">contentType</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/correlationId.html">correlationId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/deliveryMode.html">deliveryMode</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/expiration.html">expiration</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/header.html">header</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/messageId.html">messageId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/priority.html">priority</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/replyTo.html">replyTo</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/routingKey.html">routingKey</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/timeout.html">timeout</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/timestamp.html">timestamp</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/type.html">type</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/userId.html">userId</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,461 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>7 Advanced Usage 3.1.3</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/quickstart.html"><strong>2</strong><span>Quick Start</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/configuration.html"><strong>3</strong><span>Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/converters.html"><strong>6</strong><span>Message Converters</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/advanced.html"><strong>7</strong><span>Advanced Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/upgrading.html"><strong>8</strong><span>Upgrading</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/changelog.html"><strong>9</strong><span>Changelog</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>The native RabbitMQ Grails plugin provides easily consumable messaging functionality.</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/converters.html">&lt;&lt; <strong>6</strong><span>Message Converters</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/upgrading.html"><strong>8</strong><span>Upgrading</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>7 Advanced Usage - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Bud Byrd</p>
+
+                    <p><strong>Version:</strong> 3.1.3</p>
+
+                    
+                </div>
+
+                
+                <div id="table-of-content">
+                    <h2>Table of Contents</h2>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#beans"><strong>7.1</strong><span>Spring Beans</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#rabbitcontext"><strong>7.2</strong><span>Rabbit Context</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:10px"><a href="#native"><strong>7.2.1</strong><span>Native Objects</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:10px"><a href="#connection_lifecycle"><strong>7.2.2</strong><span>Starting and Stopping Connections</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:10px"><a href="#consumer_lifecycle"><strong>7.2.3</strong><span>Starting and Stopping Consumers</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:10px"><a href="#report"><strong>7.2.4</strong><span>Status Report</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#transactions"><strong>7.3</strong><span>Transactions</span></a>
+                    </div>
+                    
+                </div>
+                
+
+                
+
+<h1 id="advanced">7 Advanced Usage</h1>
+While the plugin effectively wraps the functionality of the RabbitMQ library, the end user has direct access to all of the underlying library objects and connection instances.
+
+
+
+<h2 id="beans">7.1 Spring Beans</h2>
+The are several beans defined by the plugin to perform its various operations.<p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Bean Name</strong></th><th><strong class="bold">Purpose</strong></th></tr><tr class="table-odd"><td><code>rabbitContext</code></td><td>A front-end class to the plugin that aggregates useful functionality for users of the&#10;                              plugin.  Besides the <code>rabbitMessagePublisher</code>, this is likely the only bean users will&#10;                              need to access, if at all.</td></tr><tr class="table-even"><td><code>connectionManager</code></td><td>Manages the lifecycle of connection instances, including loading, starting, stopping,&#10;                              unloading, and retrieval.</td></tr><tr class="table-odd"><td><code>messageConverterManager</code></td><td>Handles loading message converters and acts as the entry point when message conversion&#10;                              is required.</td></tr><tr class="table-even"><td><code>consumerManager</code></td><td>Manages the lifecycle of consumer instances, including loading, starting, stopping,&#10;                              unloading, and retrieval.</td></tr><tr class="table-odd"><td><code>queueBuilder</code></td><td>Responsible for creating exchanges and queues defined in the application's configuration.</td></tr><tr class="table-even"><td><code>rabbitMessagePublisher</code></td><td>Used to send messages to a RabbitMQ broker.</td></tr></table>
+
+
+
+<h2 id="rabbitcontext">7.2 Rabbit Context</h2>
+Besides the <code>rabbitMessagePublisher</code>, the <code>rabbitContext</code> is the bean users will most likely interact with.
+While you may never need to use this bean, it can be useful.  As with any Spring bean, the <code>rabbitContext</code> can be
+injected into any Spring managed bean, such as services, controllers, and rabbit consumers.<p class="paragraph"/>The <code>rabbitContext</code> is intended to be used as a front-end to all of the other beans defined by the plugin to hide
+some of the complexity of interacting with the system. As such, in most cases the <code>rabbitContext</code> proxies requests
+to the appropriate manager bean to accomplish the requested task.<p class="paragraph"/><blockquote class="warning">
+In some cases, interactions with multiple managers are necessary to safely carry out the action. Therefore, unless
+the <code>rabbitContext</code> does not provide the required functionality, it should be considered best-practice to use
+the <code>rabbitContext</code> instead of the other beans directly.  If you find that you are frequently resorting to using
+one of the other beans, I encourage you to post an issue on the GitHub project.
+</blockquote><p class="paragraph"/>The follow subsections describe some of the more useful functionality the <code>rabbitContext</code> provides.
+
+
+<h2 id="native">7.2.1 Native Objects</h2>
+The main goal of the plugin is to effectively wrap the RabbitMQ library to hide the complexity of its usage and
+make using it more inline with the conventions of Grails applications, but also allow users to gain access to the
+underlying RabbitMQ objects if needed.  <code>rabbitContext</code> provides several methods to gain direct access to the
+RabbitMQ Java library <code>Connection</code> and <code>Channel</code> objects.<p class="paragraph"/>To create a new <code>Channel</code>, use the <code>createChannel</code> methods.<p class="paragraph"/><div class="code"><pre>// This creates a <span class="java&#45;keyword">new</span> channel with the <span class="java&#45;keyword">default</span> connection
+Channel channel = rabbitContext.createChannel()<p class="paragraph"/>// The same using a different connection based on its name
+Channel channel = rabbitContext.createChannel(<span class="java&#45;quote">"connection1"</span>)</pre></div><p class="paragraph"/><blockquote class="warning">
+If the <code>createChannel</code> methods are used, it is important that these channels are closed. The plugin handles opening
+and closing channels that it manages as part of publishing or consuming messages, but channels created with the
+<code>createChannel</code> methods are not managed by the plugin.  It is the author's responsibility to close them, or connection
+leaks may and memory leaks most likely will occur.
+</blockquote><p class="paragraph"/>Use the <code>getConnection</code> methods to gain access to the <code>Connection</code> objects.<p class="paragraph"/><div class="code"><pre>// To retrieve the Connection from the <span class="java&#45;keyword">default</span> connection
+Connection connection = rabbitContext.getConnection()<p class="paragraph"/>// To retrieve the Connection from a specific connection based on its name
+Connection connection = rabbitContext.getConnection(<span class="java&#45;quote">"connection1"</span>)</pre></div>
+
+
+<h2 id="connection_lifecycle">7.2.2 Starting and Stopping Connections</h2>
+The plugin handles starting and stopping connections automatically when the application is started or shut down, but
+sometimes applications may need to manually stop connections based on certain conditions or business logic. The
+<code>rabbitContext</code> contains several methods to manage the life cycle of connections.<p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th>Method</th><th>Description</th></tr><tr class="table-odd"><td><code>startConnections</code></td><td>Starts all registered connections.  If some connections are already started, the remainder&#10;                      will also be started.</td></tr><tr class="table-even"><td><code>stopConnections</code></td><td>Stops all connections and all consumers.</td></tr><tr class="table-odd"><td><code>startConnection</code></td><td>Starts a connection based on its name.</td></tr><tr class="table-even"><td><code>stopConnection</code></td><td>Stops a connection based on its name, and stops any consumers on the connection.</td></tr></table>
+
+
+<h2 id="consumer_lifecycle">7.2.3 Starting and Stopping Consumers</h2>
+Much like connections, the <code>rabbitContext</code> provides several methods to start and stop consumers if necessary.<p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th>Method</th><th>Description</th></tr><tr class="table-odd"><td><code>startConsumers</code></td><td>Starts all registered consumers.  If some consumers are already started, the remainder&#10;                              will also be started.</td></tr><tr class="table-even"><td><code>stopConsumers</code></td><td>Stops all consumers.</td></tr><tr class="table-odd"><td><code>startConsumer</code></td><td>Starts a connection based on its class name.</td></tr><tr class="table-even"><td><code>stopConsumer</code></td><td>Stops a connection based on its class name.</td></tr><tr class="table-odd"><td><code>startConsumers(String)</code></td><td>Starts all consumers on a specific connection, based on the connection name.</td></tr><tr class="table-even"><td><code>stopConsumers(String)</code></td><td>Stops all consumers on a specific connection, based on the connection name.</td></tr></table>
+
+
+<h2 id="report">7.2.4 Status Report</h2>
+The <code>RabbitContext</code> contains a method <code>getStatusReport()</code>, which will build an object structure
+containing information about all RabbitMQ connections and all consumers. This information is useful
+to monitor the status of the RabbitMQ application system, as it contains running states and statistics including
+how many concurrent threads a consumer is configured for, how many are actually active, and how many are actively
+processing messages.  Below is an example of its output gathered from one of the plugin's tests, serialized as JSON.<p class="paragraph"/><div class="code"><pre>&#91;
+    &#123;
+        <span class="java&#45;quote">"consumers"</span>: &#91;
+            &#123;
+                <span class="java&#45;quote">"fullName"</span>: <span class="java&#45;quote">"com.budjb.rabbitmq.test.AllTopicConsumer"</span>,
+                <span class="java&#45;quote">"load"</span>: 0,
+                <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"AllTopicConsumer"</span>,
+                <span class="java&#45;quote">"numConfigured"</span>: 1,
+                <span class="java&#45;quote">"numConsuming"</span>: 1,
+                <span class="java&#45;quote">"numProcessing"</span>: 0,
+                <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"topic&#45;queue&#45;all"</span>,
+                <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>
+            &#125;,
+            &#123;
+                <span class="java&#45;quote">"fullName"</span>: <span class="java&#45;quote">"com.budjb.rabbitmq.test.ReportingConsumer"</span>,
+                <span class="java&#45;quote">"load"</span>: 0,
+                <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"ReportingConsumer"</span>,
+                <span class="java&#45;quote">"numConfigured"</span>: 1,
+                <span class="java&#45;quote">"numConsuming"</span>: 1,
+                <span class="java&#45;quote">"numProcessing"</span>: 0,
+                <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"reporting"</span>,
+                <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>
+            &#125;,
+            &#123;
+                <span class="java&#45;quote">"fullName"</span>: <span class="java&#45;quote">"com.budjb.rabbitmq.test.SleepingConsumer"</span>,
+                <span class="java&#45;quote">"load"</span>: 0,
+                <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"SleepingConsumer"</span>,
+                <span class="java&#45;quote">"numConfigured"</span>: 1,
+                <span class="java&#45;quote">"numConsuming"</span>: 1,
+                <span class="java&#45;quote">"numProcessing"</span>: 0,
+                <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"sleeping"</span>,
+                <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>
+            &#125;,
+            &#123;
+                <span class="java&#45;quote">"fullName"</span>: <span class="java&#45;quote">"com.budjb.rabbitmq.test.SpecificTopicConsumer"</span>,
+                <span class="java&#45;quote">"load"</span>: 0,
+                <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"SpecificTopicConsumer"</span>,
+                <span class="java&#45;quote">"numConfigured"</span>: 1,
+                <span class="java&#45;quote">"numConsuming"</span>: 1,
+                <span class="java&#45;quote">"numProcessing"</span>: 0,
+                <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"topic&#45;queue&#45;specific"</span>,
+                <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>
+            &#125;,
+            &#123;
+                <span class="java&#45;quote">"fullName"</span>: <span class="java&#45;quote">"com.budjb.rabbitmq.test.StringConsumer"</span>,
+                <span class="java&#45;quote">"load"</span>: 0,
+                <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"StringConsumer"</span>,
+                <span class="java&#45;quote">"numConfigured"</span>: 1,
+                <span class="java&#45;quote">"numConsuming"</span>: 1,
+                <span class="java&#45;quote">"numProcessing"</span>: 0,
+                <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"string&#45;test"</span>,
+                <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>
+            &#125;,
+            &#123;
+                <span class="java&#45;quote">"fullName"</span>: <span class="java&#45;quote">"com.budjb.rabbitmq.test.SubsetTopicConsumer"</span>,
+                <span class="java&#45;quote">"load"</span>: 0,
+                <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"SubsetTopicConsumer"</span>,
+                <span class="java&#45;quote">"numConfigured"</span>: 1,
+                <span class="java&#45;quote">"numConsuming"</span>: 1,
+                <span class="java&#45;quote">"numProcessing"</span>: 0,
+                <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"topic&#45;queue&#45;subset"</span>,
+                <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>
+            &#125;
+        &#93;,
+        <span class="java&#45;quote">"host"</span>: <span class="java&#45;quote">"localhost"</span>,
+        <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"connection1"</span>,
+        <span class="java&#45;quote">"port"</span>: 5672,
+        <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>,
+        <span class="java&#45;quote">"virtualHost"</span>: <span class="java&#45;quote">"test1.rabbitmq.budjb.com"</span>
+    &#125;,
+    &#123;
+        <span class="java&#45;quote">"consumers"</span>: &#91;
+            &#123;
+                <span class="java&#45;quote">"fullName"</span>: <span class="java&#45;quote">"com.budjb.rabbitmq.test.Connection2Consumer"</span>,
+                <span class="java&#45;quote">"load"</span>: 0,
+                <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"Connection2Consumer"</span>,
+                <span class="java&#45;quote">"numConfigured"</span>: 1,
+                <span class="java&#45;quote">"numConsuming"</span>: 1,
+                <span class="java&#45;quote">"numProcessing"</span>: 0,
+                <span class="java&#45;quote">"queue"</span>: <span class="java&#45;quote">"connection2&#45;queue"</span>,
+                <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>
+            &#125;
+        &#93;,
+        <span class="java&#45;quote">"host"</span>: <span class="java&#45;quote">"localhost"</span>,
+        <span class="java&#45;quote">"name"</span>: <span class="java&#45;quote">"connection2"</span>,
+        <span class="java&#45;quote">"port"</span>: 5672,
+        <span class="java&#45;quote">"runningState"</span>: <span class="java&#45;quote">"RUNNING"</span>,
+        <span class="java&#45;quote">"virtualHost"</span>: <span class="java&#45;quote">"test2.rabbitmq.budjb.com"</span>
+    &#125;
+&#93;</pre></div>
+
+
+<h2 id="transactions">7.3 Transactions</h2>
+The plugin provides a bit of automation around channel transactions. When a consumer is defined with the <code>transacted</code> property set to <code>true</code>, a transaction is automatically started on
+the channel passed to the message handler. When the message handler completes successfully, the transaction is automatically committed. If an unhandled exception is thrown from the message
+handler, the transaction is automatically rolled back.<p class="paragraph"/>It is <strong class="bold">especially important</strong> that any messages published from a message handler use the <code>Channel</code> instance passed in the <code>MessageContext</code> for this functionality to work.<p class="paragraph"/>Since the <code>Channel</code> is passed in the <code>MessageContext</code>, the author has full control over committing and rolling back transactions.
+
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/converters.html">&lt;&lt; <strong>6</strong><span>Message Converters</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/upgrading.html"><strong>8</strong><span>Upgrading</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Command Line</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Command%20Line/create-consumer.html">create-consumer</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Connection Configuration</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/automaticReconnect.html">automaticReconnect</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/host.html">host</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/isDefault.html">isDefault</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/name.html">name</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/password.html">password</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/port.html">port</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/requestedHeartbeat.html">requestedHeartbeat</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/ssl.html">ssl</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/threads.html">threads</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/username.html">username</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Connection%20Configuration/virtualHost.html">virtualHost</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Consumer Configuration</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/autoAck.html">autoAck</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/binding.html">binding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/connection.html">connection</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/consumers.html">consumers</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/convert.html">convert</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/match.html">match</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/prefetchCount.html">prefetchCount</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/queue.html">queue</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/retry.html">retry</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/transacted.html">transacted</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Publisher</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/appId.html">appId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/autoConvert.html">autoConvert</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/body.html">body</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/connection.html">connection</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/contentEncoding.html">contentEncoding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/contentType.html">contentType</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/correlationId.html">correlationId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/deliveryMode.html">deliveryMode</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/expiration.html">expiration</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/header.html">header</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/messageId.html">messageId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/priority.html">priority</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/replyTo.html">replyTo</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/routingKey.html">routingKey</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/timeout.html">timeout</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/timestamp.html">timestamp</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/type.html">type</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/userId.html">userId</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>
