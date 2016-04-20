@@ -1,0 +1,4 @@
+DefaultPackage
+com.budjb.rabbitmq
+com.budjb.rabbitmq.converter
+com.budjb.rabbitmq.exception
