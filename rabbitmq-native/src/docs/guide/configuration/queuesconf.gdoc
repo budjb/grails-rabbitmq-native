@@ -71,3 +71,8 @@ Below is a table of all of the options available when defining queues:
 @match@ | | Required when binding to a headers exchange. Either "any" or "all". | @String@ | _none_
 @connection@ | | Name of the connection to create the queue with.  Uses the default connection if omitted. | @String@ | _none_
 {table}
+
+{note}
+If configuring a queue with no additional properties and using the @application.groovy@ file, the queue must be defined
+with a @null@ value or an empty @Map@. For example, @"example.queue" = null@ or @"example.queue" { }@.
+{note}
