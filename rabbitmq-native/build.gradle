@@ -64,15 +64,12 @@ task wrapper(type: Wrapper) {
     gradleVersion = gradleWrapperVersion
 }
 
-// TODO: fill all this in
 grailsPublish {
     githubSlug = 'budjb/grails-rabbitmq-native'
     license {
         name = 'Apache-2.0'
     }
-    title = "My Plugin"
-    desc = "Full plugin description"
-    developers = [johndoe:"John Doe"]
-    portalUser = ""
-    portalPassword = ""
+    title = "RabbitMQ Native Plugin"
+    developers = [budjb: "Bud Byrd"]
+    repo = "grails-plugins"
 }
