@@ -1,4 +1,5 @@
-Configuration of the connection to the RabbitMQ server is done in your project's @grails-app/conf/Config.groovy@ file.
+Configuration of the connection to the RabbitMQ server is done in your project's @grails-app/conf/application.groovy@ or
+@grails-app/conf/application.yml@ file.
 
 Below is the list of general configuration properties.
 

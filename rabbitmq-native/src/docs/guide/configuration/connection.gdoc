@@ -1,22 +1,64 @@
-The plugin expects the connection configuration to the RabbitMQ server to be defined. A bare minimum configuration example looks like:
+The plugin expects the connection configuration to the RabbitMQ server to be defined. A bare minimum configuration
+example looks like:
 
-{code}
+*@application.groovy@*
+{code:groovy}
 rabbitmq {
-    connection = {
-        connection host: "example.com", username: "foo", password: "bar"
+    connections {
+        defaultConnection {
+            host = "example.com"
+            username = "foo"
+            password = "bar"
+        }
     }
 }
 {code}
+
+*@application.yml@*
+{code}
+rabbitmq:
+    connections:
+        defaultConnection:
+            host: example.com
+            username: foo
+            password: bar
+{code}
+
+Under @connections@, the key is the name of the connection being configured, which will be used during the configuration
+of queues and exchanges.
 
 Connections to many different RabbitMQ servers can be configured.  A multi-server configuration looks like:
 
-{code}
+*@application.groovy@*
+{code:groovy}
 rabbitmq {
-    connection = {
-        connection host: "rabbit1.example.com", username: "foo", password: "bar"
-        connection host: "rabbit2.example.com", username: "foo", password: "bar"
+    connections {
+        connection1 {
+            host = "rabbit1.example.com"
+            username = "foo"
+            password = "bar"
+        }
+        connection2 {
+            host = "rabbit2.example.com"
+            username = "foo"
+            password = "bar"
+        }
     }
 }
+{code}
+
+*@application.yml@*
+{code}
+rabbitmq:
+    connections:
+        connection1:
+            host: rabbit1.example.com
+            username: foo
+            password: bar
+        connection2:
+            host: rabbit2.example.com
+            username: foo
+            password: bar
 {code}
 
 The following table enumerates all the configuration options available to the connection configuration:
@@ -25,8 +67,7 @@ The following table enumerates all the configuration options available to the co
 @host@ | !/bullet_red.png! | Hostname or IP address of the RabbitMQ server to connect to. | @String@ | _none_
 @username@ | !/bullet_red.png! | Username to log into the RabbitMQ server with. | @String@ | _none_
 @password@ | !/bullet_red.png! | Password to log into the RabbitMQ server with. | @String@ | _none_
-@name@ | | Name of the connection. This is used while sending messages to a specific RabbitMQ server when using multiple servers. | @String@ | _none_
-@isDefault@ | | A connection with this set to true will be the server messages are sent to if no specific connection is specified when sending the message. | @booleang@ | @false@
+@isDefault@ | | A connection with this set to true will be the server messages are sent to if no specific connection is specified when sending the message. | @boolean@ | @false@
 @port@ | | Port to connect to the RabbitMQ server with. | @Integer@ | 5672
 @virtualHost@ | | Name of the virtual host to connect to the RabbitMQ server with. | @String@ | _none_
 @ssl@ | | Whether to use SSL when connecting to a RabbitMQ server. | @boolean@ | @false@
