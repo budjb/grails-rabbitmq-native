@@ -1,4 +1,5 @@
-This is a quick and dirty how-to detailing how to quickly begin using the plugin. While there is a lot of configurability offered by this plugin, this is a very basic demonstration of its usage.
+This is a quick and dirty how-to detailing how to quickly begin using the plugin. While the plugin is very configurable,
+this is a very basic demonstration of its usage.
 
 h3. Create The Application
 Create a project named *RabbitExample*. You can do this by entering:
@@ -7,34 +8,30 @@ grails create-app RabbitExample
 {code}
 
 h3. Add The Plugin
-In @grails-app/conf/BuildConfig.groovy@, under the @plugins@ section, add:
+In the application's @build.gradle@ file, under the @dependencies@ section, add:
 {code}
-    plugins {
+    dependencies {
         // ...
 
-        compile name: "rabbitmq-native", version: "latest.release"
+        compile "org.grails.plugins:rabbitmq-native:<insert version number here>"
 
         // ...
     }
-{code}
-
-Then, refresh the project's dependencies:
-{code}
-grails refresh-dependencies
 {code}
 
 h3. Configuring
-In @grails-app/conf/Config.groovy@, add:
+In @grails-app/conf/application.yml@, add to the bottom:
 {code}
-rabbitmq {
-    connection = {
-        connection host: "changeme", username: "changeme", password: "changeme"
-    }
-    queues = {
-        queue name: "testqueue"
-    }
-}
+rabbitmq:
+    connection:
+        main:
+            host: changeme
+            username: changeme
+            password: changeme
+    queues:
+        testqueue:
 {code}
+
 {note}
 Be sure to replace the appropriate values for your RabbitMQ server and user credentials.
 {note}
@@ -100,8 +97,9 @@ class TestController {
 h4. Run it!
 Run the grails application.
 {code}
-grails run-app
+./gradlew bootRun
 {code}
 
-You can see the application in action by hitting the test controller. If you're running this on your localhost, your URL may be similar to @http://localhost:8080/RabbitExample/test/index@.
-You should see the message "Hello!" printed the application's output console, and your web browser should dispay the message "Hello to you, too!"
+You can see the application in action by hitting the test controller. If you're running this on your localhost, your URL
+may be similar to @http://localhost:8080/RabbitExample/test/index@. You should see the message "Hello!" printed the
+application's output console, and your web browser should display the message "Hello to you, too!".
