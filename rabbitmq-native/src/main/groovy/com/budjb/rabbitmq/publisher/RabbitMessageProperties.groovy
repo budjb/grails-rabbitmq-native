@@ -18,8 +18,6 @@ package com.budjb.rabbitmq.publisher
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.Channel
 
-import java.time.OffsetDateTime
-
 class RabbitMessageProperties {
     /**
      * Default timeout for RPC calls (5 seconds).
@@ -132,7 +130,7 @@ class RabbitMessageProperties {
      * @param closure
      * @return This object.
      */
-    RabbitMessageProperties build(@DelegatesTo(RabbitMessageProperties)Closure closure) {
+    RabbitMessageProperties build(@DelegatesTo(RabbitMessageProperties) Closure closure) {
         run(closure)
         return this
     }
@@ -142,7 +140,7 @@ class RabbitMessageProperties {
      *
      * @param closure
      */
-    protected void run(@DelegatesTo(RabbitMessageProperties)Closure closure) {
+    protected void run(@DelegatesTo(RabbitMessageProperties) Closure closure) {
         closure.delegate = this
         closure.resolveStrategy = Closure.DELEGATE_FIRST
         closure()

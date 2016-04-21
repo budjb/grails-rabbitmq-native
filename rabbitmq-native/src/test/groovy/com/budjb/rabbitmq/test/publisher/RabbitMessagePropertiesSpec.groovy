@@ -156,10 +156,6 @@ class RabbitMessagePropertiesSpec extends Specification {
 
     def 'Ensure a basic properties object reflects the correct values when an overridden message properties object is used'() {
         setup:
-        Date date = Mock(Date)
-        Calendar calendar = Mock(Calendar)
-        calendar.getTime() >> date
-
         rabbitMessageProperties.build {
             appId = 'test-appId'
             autoConvert = false
@@ -178,7 +174,6 @@ class RabbitMessagePropertiesSpec extends Specification {
             replyTo = 'test-replyTo'
             routingKey = 'test-routingKey'
             timeout = 10000
-            timestamp = calendar
             type = 'test-type'
             userId = 'test-userId'
         }
@@ -197,9 +192,7 @@ class RabbitMessagePropertiesSpec extends Specification {
         properties.getMessageId() == 'test-messageId'
         properties.getPriority() == 2
         properties.getReplyTo() == 'test-replyTo'
-        properties.getTimestamp() == Date.from(calendar.toInstant())
         properties.getType() == 'test-type'
         properties.getUserId() == 'test-userId'
-
     }
 }

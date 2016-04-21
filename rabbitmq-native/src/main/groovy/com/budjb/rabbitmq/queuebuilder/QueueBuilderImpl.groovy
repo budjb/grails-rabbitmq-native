@@ -117,10 +117,15 @@ class QueueBuilderImpl implements QueueBuilder {
             if (!(k instanceof String)) {
                 return
             }
-            if (!(v instanceof Map)) {
+
+            if (v == null) {
+                v = [:]
+            }
+            else if (!(v instanceof Map)) {
                 return
             }
-            this.queues << new QueueProperties(k, v)
+
+            this.queues << new QueueProperties(k, v as Map)
         }
     }
 

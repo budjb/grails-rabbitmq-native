@@ -15,15 +15,16 @@
  */
 package com.budjb.rabbitmq.test
 
+import com.budjb.rabbitmq.connection.ConnectionContext
+import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.queuebuilder.QueueBuilder
 import com.budjb.rabbitmq.queuebuilder.QueueBuilderImpl
-import com.budjb.rabbitmq.connection.ConnectionContext
-import com.budjb.rabbitmq.connection.ConnectionManager
 import com.rabbitmq.client.Channel
 import grails.config.Config
 import grails.core.GrailsApplication
+import org.grails.config.CodeGenConfig
 import org.grails.config.PropertySourcesConfig
 import spock.lang.Specification
 
@@ -78,7 +79,9 @@ class QueueBuilderSpec extends Specification {
             ]
         ])
         grailsApplication.getConfig() >> configuration
-        connectionManager.getContext('test-connection') >> { throw new ContextNotFoundException("no connection context with name 'test-connection' is configured") }
+        connectionManager.getContext('test-connection') >> {
+            throw new ContextNotFoundException("no connection context with name 'test-connection' is configured")
+        }
 
         when:
         queueBuilder.configure()
@@ -99,7 +102,9 @@ class QueueBuilderSpec extends Specification {
             ]
         ])
         grailsApplication.getConfig() >> configuration
-        connectionManager.getContext() >> { throw new ContextNotFoundException("no default connection context is configured") }
+        connectionManager.getContext() >> {
+            throw new ContextNotFoundException("no default connection context is configured")
+        }
 
         when:
         queueBuilder.configure()
@@ -484,7 +489,9 @@ class QueueBuilderSpec extends Specification {
             ]
         ])
         grailsApplication.getConfig() >> configuration
-        connectionManager.getContext(_) >> { throw new ContextNotFoundException("no connection context with name 'test-connection' is configured") }
+        connectionManager.getContext(_) >> {
+            throw new ContextNotFoundException("no connection context with name 'test-connection' is configured")
+        }
 
         when:
         queueBuilder.configure()
@@ -505,7 +512,9 @@ class QueueBuilderSpec extends Specification {
             ]
         ])
         grailsApplication.getConfig() >> configuration
-        connectionManager.getContext() >> { throw new ContextNotFoundException("no default connection context is configured") }
+        connectionManager.getContext() >> {
+            throw new ContextNotFoundException("no default connection context is configured")
+        }
 
         when:
         queueBuilder.configure()
@@ -596,5 +605,29 @@ class QueueBuilderSpec extends Specification {
 
         then:
         notThrown Throwable
+    }
+
+    def 'When a YAML configuration is used and a queue has no properties, the queue is created'() {
+        setup:
+        def input = new ByteArrayInputStream('''
+rabbitmq:
+    queues:
+        testqueue:
+        '''.getBytes())
+        CodeGenConfig config = new CodeGenConfig()
+        config.loadYml(input)
+
+        grailsApplication.getConfig() >> new PropertySourcesConfig(config)
+        Channel channel = Mock(Channel)
+        channel.isOpen() >> true
+        ConnectionContext connectionContext = Mock(ConnectionContext)
+        connectionContext.createChannel() >> channel
+        connectionManager.getContext() >> connectionContext
+
+        when:
+        queueBuilder.configure()
+
+        then:
+        1 * channel.queueDeclare('testqueue', false, false, false, [:])
     }
 }
