@@ -8,17 +8,17 @@ This basic example will create a *topic* exchange named *example.exchange*, as w
 {code}
 rabbitmq {
     queues = [
-        {
+        [
             name: "example.queue",
             exchange: "example.exchange",
             binding: "sample.binding.#"
-        }
+        ]
     ]
     exchanges = [
-        {
+        [
             name: "example.exchange",
             type: "topic"
-        }
+        ]
     ]
 }
 {code}
@@ -50,16 +50,16 @@ message it receives to every queue bound to it.
 {code}
 rabbitmq {
     queues = [
-        {
+        [
             name: "example.queue",
             exchange: "example.exchange"
-        }
+        ]
     ]
     exchanges = [
-        {
+        [
             name: "example.exchange",
             type: "fanout"
-        }
+        ]
     ]
 }
 {code}
@@ -84,17 +84,17 @@ kind of exchange.
 {code}
 rabbitmq {
     queues = [
-        {
+        [
             name: "example.queue",
             exchange: "example.exchange",
             binding: "example.binding.#"
-        }
+        ]
     ]
     exchanges = [
-        {
+        [
             name: "example.exchange",
             type: "topic"
-        }
+        ]
     ]
 }
 {code}
@@ -120,17 +120,17 @@ this type of exchange.
 {code}
 rabbitmq {
     queues = [
-        {
+        [
             name: "example.queue",
             exchange: "example.exchange",
             binding: "exampleRoutingKey"
-        }
+        ]
     ]
     exchanges = [
-        {
+        [
             name: "example.exchange",
             type: "direct"
-        }
+        ]
     ]
 }
 {code}
@@ -156,20 +156,20 @@ for this exchange type, and the value must be one of "any" or "all".
 {code}
 rabbitmq {
     queues = [
-        {
+        [
             name: "example.queue",
             match: "any",
             binding: [
                 "header1": "header-value-1",
                 "header2": "header-value-2"
             ]
-        }
+        ]
     ]
     exchanges = [
-        {
+        [
             name: "example.exchange",
             type: "headers"
-        }
+        ]
     ]
 }
 {code}

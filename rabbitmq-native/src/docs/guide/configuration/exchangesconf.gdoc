@@ -4,10 +4,10 @@ Defining exchanges is very similar to defining queues. The following code illust
 {code}
 rabbitmq {
     exchanges = [
-        {
+        [
             name: "example.exchange",
             type: "topic"
-        }
+        ]
     ]
 }
 {code}
