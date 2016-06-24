@@ -5,12 +5,12 @@ example looks like:
 {code:groovy}
 rabbitmq {
     connections = [
-        {
+        [
             name: "defaultConnection",
             host: "example.com",
             username: "foo",
             password: "bar"
-        }
+        ]
     ]
 }
 {code}
@@ -34,18 +34,18 @@ Connections to many different RabbitMQ servers can be configured.  A multi-serve
 {code:groovy}
 rabbitmq {
     connections = [
-        {
+        [
             name: "connection1",
             host: "rabbit1.example.com",
             username: "foo",
             password: "bar"
-        },
-        {
+        ],
+        [
             name: "connection2",
             host: "rabbit2.example.com",
             username: "foo",
             password: "bar"
-        }
+        ]
     ]
 }
 {code}

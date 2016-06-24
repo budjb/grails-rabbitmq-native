@@ -12,11 +12,11 @@ rabbitmq {
         // ...
     ]
     queues = [
-        {
+        [
             name: "example.queue",
             durable: true,
             exchange: "example.exchange"
-        }
+        ]
     ]
 }
 {code}
@@ -42,11 +42,11 @@ The @connection@ property specifies which server to create the queue in, illustr
 rabbitmq {
     queues = [
         // Assume there is a connection with the name "server1"...
-        {
+        [
             name: "example.queue",
             connection: "server1",
             durable: true
-        }
+        ]
     ]
 }
 {code}
