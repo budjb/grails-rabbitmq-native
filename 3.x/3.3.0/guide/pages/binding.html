@@ -1,0 +1,381 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>3.4 Binding Queues and Exchanges 3.3.0</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/quickstart.html"><strong>2</strong><span>Quick Start</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/configuration.html"><strong>3</strong><span>Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/converters.html"><strong>6</strong><span>Message Converters</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/advanced.html"><strong>7</strong><span>Advanced Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/upgrading.html"><strong>8</strong><span>Upgrading</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/changelog.html"><strong>9</strong><span>Changelog</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p></p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../../guide/quickstart.html">&lt;&lt; <strong>2</strong><span>Quick Start</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>3.4 Binding Queues and Exchanges - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Bud Byrd</p>
+
+                    <p><strong>Version:</strong> 3.3.0</p>
+
+                    
+                </div>
+
+                
+
+                
+
+<h2 id="binding">3.4 Binding Queues and Exchanges</h2>
+Queues can be bound to an exchange by setting the <code>exchange</code> and <code>binding</code> properties in the queue's configuration. The
+value of the binding depends on the type of exchange the queue is being bound to. Each exchange type is explained below.<p class="paragraph"/>This basic example will create a <strong class="bold">topic</strong> exchange named <strong class="bold">example.exchange</strong>, as well as create a queue named
+<strong class="bold">example.queue</strong>. The queue will be bound to the exchange with the topic, or routing key, of "sample.binding.#".<p class="paragraph"/><strong class="bold"><code>application.groovy</code></strong>
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.queue"</span>,
+            exchange: <span class="java&#45;quote">"example.exchange"</span>,
+            binding: <span class="java&#45;quote">"sample.binding.&#35;"</span>
+        &#93;
+    &#93;
+    exchanges = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.exchange"</span>,
+            type: <span class="java&#45;quote">"topic"</span>
+        &#93;
+    &#93;
+&#125;</pre></div><p class="paragraph"/><strong class="bold"><code>application.yml</code></strong>
+<div class="code"><pre>rabbitmq:
+    queues:
+      &#45; name: example.queue
+        exchange: example.exchange
+        binding: 'sample.binding.&#35;'
+    exchanges:
+      &#45; name: example.exchange
+        type: topic</pre></div><p class="paragraph"/><blockquote class="warning">
+The <code>#</code> character is used frequently with RabbitMQ bindings. The <code>#</code> character is also special in YAML, so it is
+important that strings using the <code>#</code> character are quoted so that the YAML engine will treat it as plain text.
+</blockquote><p class="paragraph"/>Queues need to have their binding defined specifically for the type of exchange they are bound to.<p class="paragraph"/><h3>Fanout Exchanges</h3>
+Fanout exchanges are the easiest to configure bindings for, since they require none. Fanout exchanges simply send every
+message it receives to every queue bound to it.<p class="paragraph"/><strong class="bold"><code>application.groovy</code></strong>
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.queue"</span>,
+            exchange: <span class="java&#45;quote">"example.exchange"</span>
+        &#93;
+    &#93;
+    exchanges = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.exchange"</span>,
+            type: <span class="java&#45;quote">"fanout"</span>
+        &#93;
+    &#93;
+&#125;</pre></div><p class="paragraph"/><strong class="bold"><code>application.yml</code></strong>
+<div class="code"><pre>rabbitmq:
+    queues:
+      &#45; name: example.queue
+        exchange: example.exchange
+    exchanges:
+      &#45; name: example.exchange
+        type: fanout</pre></div><p class="paragraph"/><h3>Topic Exchanges</h3>
+Topic exchanges require queues to define a topic. Topics can be an exact match, but their strength is in their partial
+matching ability. See the <a href="http://www.rabbitmq.com/documentation.html" target="blank">RabbitMQ documentation</a> for details about this
+kind of exchange.<p class="paragraph"/><strong class="bold"><code>application.groovy</code></strong>
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.queue"</span>,
+            exchange: <span class="java&#45;quote">"example.exchange"</span>,
+            binding: <span class="java&#45;quote">"example.binding.&#35;"</span>
+        &#93;
+    &#93;
+    exchanges = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.exchange"</span>,
+            type: <span class="java&#45;quote">"topic"</span>
+        &#93;
+    &#93;
+&#125;</pre></div><p class="paragraph"/><strong class="bold"><code>application.yml</code></strong>
+<div class="code"><pre>rabbitmq:
+    queues:
+      &#45; name: example.queue
+        exchange: example.exchange
+        binding: 'example.binding.&#35;'
+    exchanges:
+      &#45; name: example.exchange
+        type: topic</pre></div><p class="paragraph"/><h3>Direct Exchanges</h3>
+Direct exchanges are similar to topic exchanges, except that their "topics" only function with direct name matching.
+The appropriate name for the binding in this case is "routing key". Queues must define a routing key when binding to
+this type of exchange.<p class="paragraph"/><strong class="bold"><code>application.groovy</code></strong>
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.queue"</span>,
+            exchange: <span class="java&#45;quote">"example.exchange"</span>,
+            binding: <span class="java&#45;quote">"exampleRoutingKey"</span>
+        &#93;
+    &#93;
+    exchanges = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.exchange"</span>,
+            type: <span class="java&#45;quote">"direct"</span>
+        &#93;
+    &#93;
+&#125;</pre></div><p class="paragraph"/><strong class="bold"><code>application.yml</code></strong>
+<div class="code"><pre>rabbitmq:
+    queues:
+      &#45; name: example.queue
+        exchange: example.exchange
+        binding: exampleRoutingKey
+    exchanges:
+      &#45; name: example.exchange
+        type: direct</pre></div><p class="paragraph"/><h3>Header Exchanges</h3>
+Header exchanges are like topic exchanges, but with the ability to define multiple match keywords. The binding for
+queues allows the queue to match on all or one of multiple header values. The queue must also set the <code>match</code> property
+for this exchange type, and the value must be one of "any" or "all".<p class="paragraph"/><strong class="bold"><code>application.groovy</code></strong>
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.queue"</span>,
+            match: <span class="java&#45;quote">"any"</span>,
+            binding: &#91;
+                <span class="java&#45;quote">"header1"</span>: <span class="java&#45;quote">"header&#45;value&#45;1"</span>,
+                <span class="java&#45;quote">"header2"</span>: <span class="java&#45;quote">"header&#45;value&#45;2"</span>
+            &#93;
+        &#93;
+    &#93;
+    exchanges = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.exchange"</span>,
+            type: <span class="java&#45;quote">"headers"</span>
+        &#93;
+    &#93;
+&#125;</pre></div><p class="paragraph"/><strong class="bold"><code>application.yml</code></strong>
+<div class="code"><pre>rabbitmq:
+    queues:
+      &#45; name: example.queue
+        match: any
+        binding:
+            header1: header&#45;value&#45;1
+            header2: header&#45;value&#45;2
+    exchanges:
+      &#45; name: example.exchange
+        type: headers</pre></div>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../../guide/quickstart.html">&lt;&lt; <strong>2</strong><span>Quick Start</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Command Line</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../../ref/Command%20Line/create-consumer.html">create-consumer</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Consumer Configuration</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/autoAck.html">autoAck</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/binding.html">binding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/connection.html">connection</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/consumers.html">consumers</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/convert.html">convert</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/match.html">match</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/prefetchCount.html">prefetchCount</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/queue.html">queue</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/retry.html">retry</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/transacted.html">transacted</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Publisher</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/appId.html">appId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/autoConvert.html">autoConvert</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/body.html">body</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/connection.html">connection</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/contentEncoding.html">contentEncoding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/contentType.html">contentType</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/correlationId.html">correlationId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/deliveryMode.html">deliveryMode</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/expiration.html">expiration</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/header.html">header</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/messageId.html">messageId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/priority.html">priority</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/replyTo.html">replyTo</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/routingKey.html">routingKey</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/timeout.html">timeout</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/timestamp.html">timestamp</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/type.html">type</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/userId.html">userId</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>

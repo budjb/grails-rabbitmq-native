@@ -1,0 +1,333 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>4.3 Subscribing To Exchanges 3.3.0</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/quickstart.html"><strong>2</strong><span>Quick Start</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/configuration.html"><strong>3</strong><span>Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/converters.html"><strong>6</strong><span>Message Converters</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/advanced.html"><strong>7</strong><span>Advanced Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/upgrading.html"><strong>8</strong><span>Upgrading</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/changelog.html"><strong>9</strong><span>Changelog</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p></p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../../guide/configuration.html">&lt;&lt; <strong>3</strong><span>Configuration</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>4.3 Subscribing To Exchanges - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Bud Byrd</p>
+
+                    <p><strong>Version:</strong> 3.3.0</p>
+
+                    
+                </div>
+
+                
+                <div id="table-of-content">
+                    <h2>Table of Contents</h2>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#fanout"><strong>4.1</strong><span>Fanout Exchanges</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#topic"><strong>4.2</strong><span>Topic Exchanges</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#direct"><strong>4.3</strong><span>Direct Exchanges</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#headers"><strong>4.4</strong><span>Headers Exchanges</span></a>
+                    </div>
+                    
+                </div>
+                
+
+                
+
+<h2 id="exchanges">4.3 Subscribing To Exchanges</h2>
+Subscribing to a exchanges is different from subscribing to queues, as there are different types of exchanges with different behavior.
+RabbitMQ's libraries do not provide a direct way to subscribe to an exchange, however the plugin provides a way to subscribe to exchanges directly by creating
+a temporary queue that is bound to an exchange. The binding requirements differ between the different types of exchanges.<p class="paragraph"/><blockquote class="warning">
+Using the functionality to subscribe to an exchange works by creating a temporary queue at runtime that is bound to the exchange and consumed from by
+the message consumer.  It is important to note that these queues are randomly named and are exclusive and auto delete, so this feature is not
+suitable if messages that are left on this queue should persist if the application shuts down.
+</blockquote>
+
+
+
+<h2 id="fanout">4.3.1 Fanout Exchanges</h2>
+A fanout exchange will forward a received message to every queue bound to it. There is no binding criteria for this kind of exchange.
+This is the simplest type of exchange, and is also the easiest to configure.<p class="paragraph"/><h4>Fanout Example</h4>
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
+        <span class="java&#45;quote">"exchange"</span>: <span class="java&#45;quote">"fanout.exchange"</span>
+    &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // <span class="java&#45;object">Process</span> message
+    &#125;
+&#125;</pre></div>
+
+
+
+<h2 id="topic">4.3.2 Topic Exchanges</h2>
+A topic exchange will forward messages to queues based on the binding criteria the queue used to register to the exchange. In RabbitMQ terms,
+this is called a routing key. The routing key can be either a direct match, or utilize wildcards to do a partial topic match. If a routing key
+is omitted, the queue will receive no messages. Use <code>"#"</code> to receive all messages from an exchange.
+More information can be found in the RabbitMQ documentation.<p class="paragraph"/><h4>Topic Example</h4>
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
+        <span class="java&#45;quote">"exchange"</span>: <span class="java&#45;quote">"topic.exchange"</span>,
+        <span class="java&#45;quote">"binding"</span>: <span class="java&#45;quote">"foo.bar.&#35;"</span>
+    &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // <span class="java&#45;object">Process</span> message
+    &#125;
+&#125;</pre></div>
+
+
+
+<h2 id="direct">4.3.3 Direct Exchanges</h2>
+A direct exchange will forward messages to queues based on binding criteria configured similarly to topic exchanges. 
+The difference in this case is that direct routing does not utilize wildcards in their routing keys.<p class="paragraph"/><h4>Direct Example</h4>
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
+        <span class="java&#45;quote">"exchange"</span>: <span class="java&#45;quote">"direct.exchange"</span>,
+        <span class="java&#45;quote">"binding"</span>: <span class="java&#45;quote">"example"</span>
+    &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // <span class="java&#45;object">Process</span> message
+    &#125;
+&#125;</pre></div>
+
+
+
+<h2 id="headers">4.3.4 Headers Exchanges</h2>
+Header exchanges work similarly to topic exchanges. A headers exchange will forward messages to queues based on header values contained
+in messages. Additionally, a queue can be bound on multiple header values, along with an option to require one or all of the headers
+to match.<p class="paragraph"/><h4>Headers Example</h4>
+<div class="code"><pre><span class="java&#45;keyword">package</span> com.example<p class="paragraph"/>class ExampleConsumer &#123;
+    <span class="java&#45;keyword">static</span> rabbitConfig = &#91;
+        <span class="java&#45;quote">"exchange"</span>: <span class="java&#45;quote">"headers.exchange"</span>,
+        <span class="java&#45;quote">"binding"</span>: &#91;
+            <span class="java&#45;quote">"foo"</span>: <span class="java&#45;quote">"bar"</span>,
+            <span class="java&#45;quote">"hi"</span>: <span class="java&#45;quote">"there"</span>
+        &#93;,
+        <span class="java&#45;quote">"match"</span>: <span class="java&#45;quote">"any"</span>
+    &#93;<p class="paragraph"/>    def handleMessage(def body, MessageContext context) &#123;
+        // <span class="java&#45;object">Process</span> message
+    &#125;
+&#125;</pre></div>
+
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../../guide/configuration.html">&lt;&lt; <strong>3</strong><span>Configuration</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Command Line</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../../ref/Command%20Line/create-consumer.html">create-consumer</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Consumer Configuration</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/autoAck.html">autoAck</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/binding.html">binding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/connection.html">connection</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/consumers.html">consumers</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/convert.html">convert</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/match.html">match</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/prefetchCount.html">prefetchCount</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/queue.html">queue</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/retry.html">retry</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Consumer%20Configuration/transacted.html">transacted</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Publisher</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/appId.html">appId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/autoConvert.html">autoConvert</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/body.html">body</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/connection.html">connection</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/contentEncoding.html">contentEncoding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/contentType.html">contentType</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/correlationId.html">correlationId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/deliveryMode.html">deliveryMode</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/expiration.html">expiration</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/header.html">header</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/messageId.html">messageId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/priority.html">priority</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/replyTo.html">replyTo</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/routingKey.html">routingKey</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/timeout.html">timeout</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/timestamp.html">timestamp</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/type.html">type</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Rabbit%20Message%20Publisher/userId.html">userId</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>

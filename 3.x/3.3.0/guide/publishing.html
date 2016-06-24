@@ -1,0 +1,360 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>5 Publishing Messages 3.3.0</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/quickstart.html"><strong>2</strong><span>Quick Start</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/configuration.html"><strong>3</strong><span>Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/converters.html"><strong>6</strong><span>Message Converters</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/advanced.html"><strong>7</strong><span>Advanced Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/upgrading.html"><strong>8</strong><span>Upgrading</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/changelog.html"><strong>9</strong><span>Changelog</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p></p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/consuming.html">&lt;&lt; <strong>4</strong><span>Consuming Messages</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/converters.html"><strong>6</strong><span>Message Converters</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>5 Publishing Messages - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Bud Byrd</p>
+
+                    <p><strong>Version:</strong> 3.3.0</p>
+
+                    
+                </div>
+
+                
+                <div id="table-of-content">
+                    <h2>Table of Contents</h2>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#send"><strong>5.1</strong><span>Sending Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#rpcsend"><strong>5.2</strong><span>RPC Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#bulk"><strong>5.3</strong><span>Bulk Publishing</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#confirms"><strong>5.4</strong><span>Publisher Confirms</span></a>
+                    </div>
+                    
+                </div>
+                
+
+                
+
+<h1 id="publishing">5 Publishing Messages</h1>
+Publishing messages through the plugin is achieved by using the <code>rabbitMessagePublisher</code> bean. This Spring bean utilizes a closure-based configuration method to
+both send messages without waiting for a response, and sending rpc-style messages. There are many options available to the <code>rabbitMessagePublisher</code> which are
+documented in the reference, but this guide will only demonstrate basic usage.<p class="paragraph"/><blockquote class="note">
+In a multi-server setup, it is important to consider what server to send a message to. Like configuration and consumers, the <code>connection</code> property
+is used to route the message to the proper server connection.
+</blockquote>
+
+
+
+<h2 id="send">5.1 Sending Messages</h2>
+Sending a message means publishing a message to an exchange or queue and not waiting for a response (fire and forget). The only required parameters to the publisher 
+are a queue or exchange to publish the message to, and the body of the message.<p class="paragraph"/><h4>Send Example</h4>
+<div class="code"><pre><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.publisher.RabbitMessagePublisher<p class="paragraph"/>class ExampleService &#123;
+    RabbitMessagePublisher rabbitMessagePublisher<p class="paragraph"/>    def sendSomeMessage() &#123;
+        rabbitMessagePublisher.send &#123;
+            exchange = <span class="java&#45;quote">"some.exchange"</span>
+            routingKey = <span class="java&#45;quote">"some.routingKey"</span>
+            body = <span class="java&#45;quote">"hi!"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/>RabbitMQ expects the body of a message to be a byte array. Message converters will also work when publishing messages, so if an object type other than <code>byte</code> is
+encountered, a suitable message converter will be found and run against the message body, if one exists.
+
+
+
+<h2 id="rpcsend">5.2 RPC Messages</h2>
+Publishing an RPC message is as easy as sending messages, except the returned message is returned from the function.<p class="paragraph"/><h4>RPC Example</h4>
+<div class="code"><pre><span class="java&#45;keyword">import</span> com.budjb.rabbitmq.publisher.RabbitMessagePublisher<p class="paragraph"/>class ExampleService &#123;
+    RabbitMessagePublisher rabbitMessagePublisher<p class="paragraph"/>    def sendSomeMessage() &#123;
+        def result = rabbitMessagePublisher.rpc &#123;
+            exchange = <span class="java&#45;quote">"some.exchange"</span>
+            routingKey = <span class="java&#45;quote">"some.routingKey"</span>
+            body = <span class="java&#45;quote">"hi!"</span>
+            timeout = 5000
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/><blockquote class="warning">
+The <a href="../ref/Rabbit Message Publisher/timeout.html" class="Rabbit Message Publisher">timeout</a> option is especially important for RPC-style messages. The timeout property is the amount of time (in milliseconds)
+the client will wait for the server to respond. If the timeout is reached, a <code>TimeoutException</code> will be thrown. If the timeout is set to 0, the client
+will wait indefinitely for a response. The default value of the timeout, if not passed, is 5 seconds.
+</blockquote><p class="paragraph"/><blockquote class="note">
+More options for the <code>RabbitMessagePublisher</code> can be found in the <strong class="bold">Quick Reference</strong>.
+</blockquote>
+
+
+
+<h2 id="bulk">5.3 Bulk Publishing</h2>
+By default, the publisher opens a new channel for each message it publishes. This is acceptable when sending
+individual messages, but when bulk publishing is required, it is much more efficient to open a single channel
+and use it for batches of messages.<p class="paragraph"/><blockquote class="note">
+As an example, during testing it took about 65 milliseconds to send one message.  If 1000 messages are sent,
+the total time to publish is about 65 seconds! Using a single channel for the same operation takes about
+1 millisecond per message, cutting the time down to 1 second for all 1000 messages.<p class="paragraph"/>These times are just an example based on testing, but they will differ based on network latency and server load.
+</blockquote><p class="paragraph"/>While a channel may be manually created by authors using the <code>rabbitContext</code>, the publisher provides an easy way
+to send many messages with a single channel.  See the example below.<p class="paragraph"/><div class="code"><pre>rabbitMessagePublisher.withChannel &#123; channel &#45;&#62;
+    1000.times &#123; i &#45;&#62;
+        send &#123;
+            routingKey = <span class="java&#45;quote">"foobar"</span>
+            body = <span class="java&#45;quote">"Bulk message $i"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/>There is also a <code>withChannel</code> method that takes in a connection name for multi-server setups.<p class="paragraph"/><div class="code"><pre>rabbitMessagePublisher.withChannel(<span class="java&#45;quote">"connection1"</span>) &#123; channel &#45;&#62;
+    1000.times &#123; i &#45;&#62;
+        send &#123;
+            routingKey = <span class="java&#45;quote">"foobar"</span>
+            body = <span class="java&#45;quote">"Bulk message $i on connection1"</span>
+        &#125;
+    &#125;
+&#125;</pre></div><p class="paragraph"/>All of the <code>send</code> and <code>rpc</code> methods available with the publisher can be used with <code>withChannel</code>.
+
+
+<h2 id="confirms">5.4 Publisher Confirms</h2>
+The publisher allows authors to enable publisher confirms for a batch of messages using a similar mechanism as
+<code>withChannel</code>.  These methods use RabbitMQ's <code>waitForConfirms</code> and <code>waitForConfirmsOrDie</code> methods.  See
+RabbitMQ's documentation for more information about how publisher confirms work.<p class="paragraph"/>The reference details all of the various methods that the publisher contains to support confirms, but
+below are a couple of basic examples.<p class="paragraph"/>The <code>withConfirms</code> methods utilize the <code>waitForConfirms</code> methods from the RabbitMQ Java library.  <code>withConfirms</code> will
+block until all messages sent in the provided closure have been acked or n'acked by the server.  If a timeout
+is specified, it will only wait for the amount of time specified before throwing a <code>TimeoutException</code>.<p class="paragraph"/><div class="code"><pre>rabbitMessagePublisher.withConfirms &#123; channel &#45;&#62;
+    send &#123;
+        routingKey = <span class="java&#45;quote">"foobar"</span>
+        body = <span class="java&#45;quote">"I am a test message"</span>
+    &#125;<p class="paragraph"/>    send &#123;
+        routingKey = <span class="java&#45;quote">"barbaz"</span>
+        body = <span class="java&#45;quote">"I am also a test message"</span>
+    &#125;
+&#125;</pre></div><p class="paragraph"/>The <code>withConfirmsOrDie</code> methods utilize the <code>waitForConfirmsOrDie</code> methods from the RabbitMQ Java library.
+<code>withConfirmsOrDie</code> will block until all messages sent in the provided closure have been acked or n'acked by the
+server.  The difference with this method is that if any n'ack is received, an exception is thrown.
+As with <code>withConfirms</code>, a timeout can be used.<p class="paragraph"/><div class="code"><pre>rabbitMessagePublisher.withConfirmsOrDie &#123; channel &#45;&#62;
+    send &#123;
+        routingKey = <span class="java&#45;quote">"foobar"</span>
+        body = <span class="java&#45;quote">"I am a test message"</span>
+    &#125;<p class="paragraph"/>    send &#123;
+        routingKey = <span class="java&#45;quote">"barbaz"</span>
+        body = <span class="java&#45;quote">"I am also a test message"</span>
+    &#125;
+&#125;</pre></div><p class="paragraph"/>There are versions of both of these types of methods that take a connection name and/or a timeout.
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/consuming.html">&lt;&lt; <strong>4</strong><span>Consuming Messages</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/converters.html"><strong>6</strong><span>Message Converters</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Command Line</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Command%20Line/create-consumer.html">create-consumer</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Consumer Configuration</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/autoAck.html">autoAck</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/binding.html">binding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/connection.html">connection</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/consumers.html">consumers</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/convert.html">convert</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/match.html">match</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/prefetchCount.html">prefetchCount</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/queue.html">queue</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/retry.html">retry</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/transacted.html">transacted</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Publisher</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/appId.html">appId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/autoConvert.html">autoConvert</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/body.html">body</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/connection.html">connection</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/contentEncoding.html">contentEncoding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/contentType.html">contentType</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/correlationId.html">correlationId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/deliveryMode.html">deliveryMode</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/expiration.html">expiration</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/header.html">header</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/messageId.html">messageId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/priority.html">priority</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/replyTo.html">replyTo</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/routingKey.html">routingKey</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/timeout.html">timeout</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/timestamp.html">timestamp</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/type.html">type</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/userId.html">userId</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>
