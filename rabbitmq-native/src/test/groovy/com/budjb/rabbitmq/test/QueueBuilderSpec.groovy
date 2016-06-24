@@ -750,4 +750,56 @@ rabbitmq:
         1 * channel.queueBind('test.queue', 'test.exchange', '#')
         1 * channel.queueBind('test.queue.2', 'test.exchange.2', 'route')
     }
+
+    def 'When a groovy configuration is used, queues and exchanges are created and bound properly'() {
+        setup:
+        Config configuration = new PropertySourcesConfig()
+        configuration.putAll([
+            'rabbitmq': [
+                'queues': [
+                    [
+                        name: 'test.queue',
+                        durable: true,
+                        exchange: 'test.exchange',
+                        binding: '#'
+                    ],
+                    [
+                        name: 'test.queue.2',
+                        exclusive: true,
+                        exchange: 'test.exchange.2',
+                        binding: 'route'
+                    ]
+                ],
+                'exchanges': [
+                    [
+                        name: 'test.exchange',
+                        type: 'topic',
+                        durable: true
+                    ],
+                    [
+                        name: 'test.exchange.2',
+                        type: 'direct',
+                        autoDelete: true
+                    ]
+                ]
+            ]
+        ])
+        grailsApplication.getConfig() >> configuration
+        Channel channel = Mock(Channel)
+        channel.isOpen() >> true
+        ConnectionContext connectionContext = Mock(ConnectionContext)
+        connectionContext.createChannel() >> channel
+        connectionManager.getContext() >> connectionContext
+
+        when:
+        queueBuilder.configure()
+
+        then:
+        1 * channel.exchangeDeclare('test.exchange', 'topic', true, false, [:])
+        1 * channel.exchangeDeclare('test.exchange.2', 'direct', false, true, [:])
+        1 * channel.queueDeclare('test.queue', true, false, false, [:])
+        1 * channel.queueDeclare('test.queue.2', false, true, false, [:])
+        1 * channel.queueBind('test.queue', 'test.exchange', '#')
+        1 * channel.queueBind('test.queue.2', 'test.exchange.2', 'route')
+    }
 }
