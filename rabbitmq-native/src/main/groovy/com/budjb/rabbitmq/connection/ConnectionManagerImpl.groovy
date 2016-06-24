@@ -145,17 +145,16 @@ class ConnectionManagerImpl implements ConnectionManager {
             // configurations will also follow this format going forward.
             def configurations = grailsApplication.config.rabbitmq.connections
 
-            if (!(configurations instanceof Map)) {
-                throw new InvalidConfigurationException("RabbitMQ configuration is invalid; expected a Map but got ${configurations.getClass().getSimpleName()} instead")
+            if (!(configurations instanceof List)) {
+                throw new InvalidConfigurationException("RabbitMQ configuration is invalid; expected a List but got ${configurations.getClass().getSimpleName()} instead")
             }
 
-            configurations.each { k, v ->
-                if (!(v instanceof Map)) {
+            configurations.each { item ->
+                if (!(item instanceof Map)) {
                     throw new InvalidConfigurationException("RabbitMQ configuration is invalid; expected a Map but got ${configurations.getClass().getSimpleName()} instead")
                 }
-                v.put('name', k)
 
-                register(createContext(v))
+                register(createContext(item))
             }
         }
         else if (grailsApplication.config.rabbitmq?.connection) {

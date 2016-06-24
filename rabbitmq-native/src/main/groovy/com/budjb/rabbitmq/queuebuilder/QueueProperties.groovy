@@ -56,9 +56,8 @@ class QueueProperties extends ConfigurationProperties {
      * @param name
      * @param properties
      */
-    QueueProperties(String name, Map<String, Object> properties) {
-        this.name = name
-
+    QueueProperties(Map<String, Object> properties) {
+        name = parseConfigOption(String, properties.name)
         arguments = parseConfigOption(Map, properties.arguments, arguments)
         autoDelete = parseConfigOption(Boolean, properties.autoDelete, autoDelete)
         binding = parseConfigOption(Object, properties.binding, binding)

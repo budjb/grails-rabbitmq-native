@@ -31,51 +31,55 @@ environments:
 
 rabbitmq:
     connections:
-        connection1:
-            host: 'localhost'
-            username: 'guest'
-            password: 'guest'
-            virtualHost: 'test1.rabbitmq.budjb.com'
-            isDefault: true
-            name: 'connection1'
+      - name: connection1
+        host: localhost
+        username: guest
+        password: guest
+        virtualHost: test1.rabbitmq.budjb.com
+        isDefault: true
 
-        connection2:
-            host: 'localhost'
-            username: 'guest'
-            password: 'guest'
-            virtualHost: 'test2.rabbitmq.budjb.com'
-            name: 'connection2'
+      - name: connection2
+        host: localhost
+        username: guest
+        password: guest
+        virtualHost: test2.rabbitmq.budjb.com
 
     exchanges:
-        topic-exchange:
-            type: topic
-            autoDelete: true
+      - name: topic-exchange
+        type: topic
+        autoDelete: true
 
     queues:
-        reporting:
-            autoDelete: true
-            connection: connection1
-        sleeping:
-            autoDelete: true
-            connection: connection1
-        string-test:
-            autoDelete: true
-            connection: connection1
-        topic-queue-all:
-            autoDelete: true
-            binding: '#'
-            connection: connection1
-            exchange: topic-exchange
-        topic-queue-subset:
-            autoDelete: true
-            binding: 'com.budjb.#'
-            connection: connection1
-            exchange: topic-exchange
-        topic-queue-specific:
-            autoDelete: true
-            binding: 'com.budjb.rabbitmq'
-            connection: connection1
-            exchange: topic-exchange
-        connection2-queue:
-            autoDelete: true
-            connection: connection2
+      - name: reporting
+        autoDelete: true
+        connection: connection1
+
+      - name: sleeping
+        autoDelete: true
+        connection: connection1
+
+      - name: string-test
+        autoDelete: true
+        connection: connection1
+
+      - name: topic-queue-all
+        autoDelete: true
+        binding: '#'
+        connection: connection1
+        exchange: topic-exchange
+
+      - name: topic-queue-subset
+        autoDelete: true
+        binding: 'com.budjb.#'
+        connection: connection1
+        exchange: topic-exchange
+
+      - name: topic-queue-specific
+        autoDelete: true
+        binding: com.budjb.rabbitmq
+        connection: connection1
+        exchange: topic-exchange
+
+      - name: connection2-queue
+        autoDelete: true
+        connection: connection2

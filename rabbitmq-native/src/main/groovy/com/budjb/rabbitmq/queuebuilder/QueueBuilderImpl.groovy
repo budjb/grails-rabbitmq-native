@@ -57,14 +57,15 @@ class QueueBuilderImpl implements QueueBuilder {
         queues.clear()
         exchanges.clear()
 
-        def configuration = grailsApplication.config.rabbitmq.queues
+        def topConfig = grailsApplication.config.rabbitmq
+        def queueConfig = topConfig.queues
 
-        if (configuration instanceof Closure) {
+        if (queueConfig instanceof Closure) {
             log.warn("closure-based configuration for queues and exchanges is deprecated")
-            call(configuration, new ClosureDelegate())
+            call(queueConfig, new ClosureDelegate())
         }
-        else if (configuration instanceof Map) {
-            parse(grailsApplication.config.rabbitmq as Map)
+        else if (topConfig instanceof Map) {
+            parse(topConfig as Map)
         }
         else {
             throw new InvalidConfigurationException("queue/exchanges configuration is invalid")
@@ -98,12 +99,18 @@ class QueueBuilderImpl implements QueueBuilder {
      * @param configuration
      */
     void parse(Map configuration) {
-        if (configuration.containsKey('queues') && configuration.queues instanceof Map) {
-            parseQueues(configuration.queues as Map)
+        if (configuration.containsKey('queues')) {
+            if (!(configuration.queues instanceof List)) {
+                throw new IllegalArgumentException("Queue configuration must be a list of maps")
+            }
+            parseQueues(configuration.queues as List)
         }
 
-        if (configuration.containsKey('exchanges') && configuration.exchanges instanceof Map) {
-            parseExchanges(configuration.exchanges as Map)
+        if (configuration.containsKey('exchanges')) {
+            if (!(configuration.exchanges instanceof List)) {
+                throw new IllegalArgumentException("Exchange configuration must be a list of maps")
+            }
+            parseExchanges(configuration.exchanges as List)
         }
     }
 
@@ -112,20 +119,13 @@ class QueueBuilderImpl implements QueueBuilder {
      *
      * @param queues
      */
-    void parseQueues(Map queues) {
-        queues.each { k, v ->
-            if (!(k instanceof String)) {
-                return
+    void parseQueues(List queues) {
+        queues.each { item ->
+            if (!(item instanceof Map)) {
+                throw new IllegalArgumentException("Queue configuration must be a list of maps")
             }
 
-            if (v == null) {
-                v = [:]
-            }
-            else if (!(v instanceof Map)) {
-                return
-            }
-
-            this.queues << new QueueProperties(k, v as Map)
+            this.queues << new QueueProperties(item)
         }
     }
 
@@ -134,15 +134,13 @@ class QueueBuilderImpl implements QueueBuilder {
      *
      * @param exchanges
      */
-    void parseExchanges(Map exchanges) {
-        exchanges.each { k, v ->
-            if (!(k instanceof String)) {
-                return
+    void parseExchanges(List exchanges) {
+        exchanges.each { item ->
+            if (!(item instanceof Map)) {
+                throw new IllegalArgumentException("Exchange configuration must be a list of maps")
             }
-            if (!(v instanceof Map)) {
-                return
-            }
-            this.exchanges << new ExchangeProperties(k, v)
+
+            this.exchanges << new ExchangeProperties(item)
         }
     }
 
@@ -306,7 +304,7 @@ class QueueBuilderImpl implements QueueBuilder {
             if (currentExchange) {
                 config.exchange = currentExchange
             }
-            QueueBuilderImpl.this.queues << new QueueProperties(config.name?.toString(), config)
+            QueueBuilderImpl.this.queues << new QueueProperties(config)
         }
 
         /**
@@ -338,7 +336,7 @@ class QueueBuilderImpl implements QueueBuilder {
 
             String name = parameters.name
 
-            QueueBuilderImpl.this.exchanges << new ExchangeProperties(name, parameters)
+            QueueBuilderImpl.this.exchanges << new ExchangeProperties(parameters)
 
             if (closure) {
                 boolean resetConnection = (currentConnection == null)

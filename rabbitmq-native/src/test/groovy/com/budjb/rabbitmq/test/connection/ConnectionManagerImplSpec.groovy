@@ -69,7 +69,7 @@ class ConnectionManagerImplSpec extends Specification {
         thrown InvalidConfigurationException
     }
 
-    def 'Map configuration test'() {
+    def 'Legacy map configuration test'() {
         setup:
         Config config = new PropertySourcesConfig()
         config.putAll([
@@ -92,7 +92,7 @@ class ConnectionManagerImplSpec extends Specification {
         connectionManager.getContext('myConnection') != null
     }
 
-    def 'Closure configuration test'() {
+    def 'Legacy closure configuration test'() {
         setup:
         Config config = new PropertySourcesConfig()
         config.putAll([

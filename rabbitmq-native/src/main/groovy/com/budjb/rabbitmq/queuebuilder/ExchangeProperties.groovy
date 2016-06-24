@@ -39,9 +39,8 @@ class ExchangeProperties extends ConfigurationProperties {
      * @param name
      * @param configuration
      */
-    ExchangeProperties(String name, Map configuration) {
-        this.name = name
-
+    ExchangeProperties(Map configuration) {
+        name = parseConfigOption(String, configuration.name)
         arguments = parseConfigOption(Map, configuration.arguments, arguments)
         autoDelete = parseConfigOption(Boolean, configuration.autoDelete, autoDelete)
         durable = parseConfigOption(Boolean, configuration.durable, durable)
