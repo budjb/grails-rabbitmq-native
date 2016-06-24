@@ -4,13 +4,14 @@ example looks like:
 *@application.groovy@*
 {code:groovy}
 rabbitmq {
-    connections {
-        defaultConnection {
-            host = "example.com"
-            username = "foo"
-            password = "bar"
+    connections = [
+        {
+            name: "defaultConnection",
+            host: "example.com",
+            username: "foo",
+            password: "bar"
         }
-    }
+    ]
 }
 {code}
 
@@ -18,32 +19,34 @@ rabbitmq {
 {code}
 rabbitmq:
     connections:
-        defaultConnection:
-            host: example.com
-            username: foo
-            password: bar
+      - name: defaultConnection
+        host: example.com
+        username: foo
+        password: bar
 {code}
 
-Under @connections@, the key is the name of the connection being configured, which will be used during the configuration
-of queues and exchanges.
+The @connections@ section should contains a list of maps, where each entry in the list represents an individual
+connection.
 
 Connections to many different RabbitMQ servers can be configured.  A multi-server configuration looks like:
 
 *@application.groovy@*
 {code:groovy}
 rabbitmq {
-    connections {
-        connection1 {
-            host = "rabbit1.example.com"
-            username = "foo"
-            password = "bar"
+    connections = [
+        {
+            name: "connection1",
+            host: "rabbit1.example.com",
+            username: "foo",
+            password: "bar"
+        },
+        {
+            name: "connection2",
+            host: "rabbit2.example.com",
+            username: "foo",
+            password: "bar"
         }
-        connection2 {
-            host = "rabbit2.example.com"
-            username = "foo"
-            password = "bar"
-        }
-    }
+    ]
 }
 {code}
 
@@ -51,19 +54,21 @@ rabbitmq {
 {code}
 rabbitmq:
     connections:
-        connection1:
-            host: rabbit1.example.com
-            username: foo
-            password: bar
-        connection2:
-            host: rabbit2.example.com
-            username: foo
-            password: bar
+      - name: connection1
+        host: rabbit1.example.com
+        username: foo
+        password: bar
+
+      - name: connection2
+        host: rabbit2.example.com
+        username: foo
+        password: bar
 {code}
 
 The following table enumerates all the configuration options available to the connection configuration:
 {table}
 *Configuration Property* | *Required* | *Description* | *Type* | *Default*
+@name@ | | Name of the connection, which can be used to tie queues and exchanges to a particular connection. | @String@ | _none_
 @host@ | !/bullet_red.png! | Hostname or IP address of the RabbitMQ server to connect to. | @String@ | _none_
 @username@ | !/bullet_red.png! | Username to log into the RabbitMQ server with. | @String@ | _none_
 @password@ | !/bullet_red.png! | Password to log into the RabbitMQ server with. | @String@ | _none_

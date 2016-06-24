@@ -23,13 +23,13 @@ h3. Configuring
 In @grails-app/conf/application.yml@, add to the bottom:
 {code}
 rabbitmq:
-    connection:
-        main:
-            host: changeme
-            username: changeme
-            password: changeme
+    connections:
+      - name: main
+        host: changeme
+        username: changeme
+        password: changeme
     queues:
-        testqueue:
+      - name: testqueue
 {code}
 
 {note}

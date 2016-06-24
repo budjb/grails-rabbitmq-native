@@ -3,11 +3,12 @@ Defining exchanges is very similar to defining queues. The following code illust
 *@application.groovy@*
 {code}
 rabbitmq {
-    exchanges {
-        "example.exchange" {
-            type = "topic"
+    exchanges = [
+        {
+            name: "example.exchange",
+            type: "topic"
         }
-    }
+    ]
 }
 {code}
 
@@ -15,14 +16,15 @@ rabbitmq {
 {code}
 rabbitmq:
     exchanges:
-        example.exchange:
-            type: topic
+      - name: example.exchange
+        type: topic
 {code}
 
 The above example will create an exchange with the name *example.exchange* and of the type *topic*. Below is a list of
 all the options available when creating exchanges:
 {table}
 *Property* | *Required* | *Description* | *Type* | *Default*
+@name@ | !/bullet_red.png! | Name of the exchange. | @String@ | _none_
 @arguments@ | | Extra arguments used to create the exchange. See the [RabbitMQ documentation|http://www.rabbitmq.com/documentation.html] for more information. | @Map@ | _none_
 @autoDelete@ | | Whether to automatically delete the exchange once there are no longer any queues bound to it. | @boolean@ | @false@
 @durable@ | | Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts. | @boolean@ | @false@

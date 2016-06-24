@@ -7,17 +7,19 @@ This basic example will create a *topic* exchange named *example.exchange*, as w
 *@application.groovy@*
 {code}
 rabbitmq {
-    queues {
-        "example.queue" {
-            exchange = "example.exchange"
-            binding = "sample.binding.#"
+    queues = [
+        {
+            name: "example.queue",
+            exchange: "example.exchange",
+            binding: "sample.binding.#"
         }
-    }
-    exchanges {
-        "example.exchange" {
+    ]
+    exchanges = [
+        {
+            name: "example.exchange",
             type: "topic"
         }
-    }
+    ]
 }
 {code}
 
@@ -25,12 +27,12 @@ rabbitmq {
 {code}
 rabbitmq:
     queues:
-        example.queue:
-            exchange: example.exchange
-            binding: 'sample.binding.#'
+      - name: example.queue
+        exchange: example.exchange
+        binding: 'sample.binding.#'
     exchanges:
-        example.exchange:
-            type: topic
+      - name: example.exchange
+        type: topic
 {code}
 
 {warning}
@@ -47,16 +49,18 @@ message it receives to every queue bound to it.
 *@application.groovy@*
 {code}
 rabbitmq {
-    queues {
-        "example.queue" {
-            exchange = "example.exchange"
+    queues = [
+        {
+            name: "example.queue",
+            exchange: "example.exchange"
         }
-    }
-    exchanges {
-        "example.exchange" {
-            type = "fanout"
+    ]
+    exchanges = [
+        {
+            name: "example.exchange",
+            type: "fanout"
         }
-    }
+    ]
 }
 {code}
 
@@ -64,11 +68,11 @@ rabbitmq {
 {code}
 rabbitmq:
     queues:
-        example.queue:
-            exchange: example.exchange
+      - name: example.queue
+        exchange: example.exchange
     exchanges:
-        example.exchange:
-            type: fanout
+      - name: example.exchange
+        type: fanout
 {code}
 
 h3. Topic Exchanges
@@ -79,17 +83,19 @@ kind of exchange.
 *@application.groovy@*
 {code}
 rabbitmq {
-    queues {
-        "example.queue" {
-            exchange = "example.exchange"
-            binding = "example.binding.#"
+    queues = [
+        {
+            name: "example.queue",
+            exchange: "example.exchange",
+            binding: "example.binding.#"
         }
-    }
-    exchanges {
-        "example.exchange" {
-            type = "topic"
+    ]
+    exchanges = [
+        {
+            name: "example.exchange",
+            type: "topic"
         }
-    }
+    ]
 }
 {code}
 
@@ -97,12 +103,12 @@ rabbitmq {
 {code}
 rabbitmq:
     queues:
-        example.queue:
-            exchange: example.exchange
-            binding: 'example.binding.#'
+      - name: example.queue
+        exchange: example.exchange
+        binding: 'example.binding.#'
     exchanges:
-        example.exchange:
-            type: topic
+      - name: example.exchange
+        type: topic
 {code}
 
 h3. Direct Exchanges
@@ -113,17 +119,19 @@ this type of exchange.
 *@application.groovy@*
 {code}
 rabbitmq {
-    queues {
-        "example.queue" {
-            exchange = "example.exchange"
-            binding = "exampleRoutingKey"
+    queues = [
+        {
+            name: "example.queue",
+            exchange: "example.exchange",
+            binding: "exampleRoutingKey"
         }
-    }
-    exchanges {
-        "example.exchange" {
-            type = "direct"
+    ]
+    exchanges = [
+        {
+            name: "example.exchange",
+            type: "direct"
         }
-    }
+    ]
 }
 {code}
 
@@ -131,12 +139,12 @@ rabbitmq {
 {code}
 rabbitmq:
     queues:
-        example.queue:
-            exchange: example.exchange
-            binding: exampleRoutingKey
+      - name: example.queue
+        exchange: example.exchange
+        binding: exampleRoutingKey
     exchanges:
-        example.exchange:
-            type: direct
+      - name: example.exchange
+        type: direct
 {code}
 
 h3. Header Exchanges
@@ -147,20 +155,22 @@ for this exchange type, and the value must be one of "any" or "all".
 *@application.groovy@*
 {code}
 rabbitmq {
-    queues {
-        "example.queue" {
-            match = "any"
-            binding = [
+    queues = [
+        {
+            name: "example.queue",
+            match: "any",
+            binding: [
                 "header1": "header-value-1",
                 "header2": "header-value-2"
             ]
         }
-    }
-    exchanges {
-        "example.exchange" {
-            type = "headers"
+    ]
+    exchanges = [
+        {
+            name: "example.exchange",
+            type: "headers"
         }
-    }
+    ]
 }
 {code}
 
@@ -168,12 +178,12 @@ rabbitmq {
 {code}
 rabbitmq:
     queues:
-        example.queue:
-            match: any
-            binding:
-                header1: header-value-1
-                header2: header-value-2
+      - name: example.queue
+        match: any
+        binding:
+            header1: header-value-1
+            header2: header-value-2
     exchanges:
-        example.exchange:
-            type: headers
+      - name: example.exchange
+        type: headers
 {code}
