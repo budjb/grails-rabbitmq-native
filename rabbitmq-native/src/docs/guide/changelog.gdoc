@@ -1,3 +1,12 @@
+h3. Version 3.3.0
+{warning}
+This version includes changes to the configuration format introduced in 3.2.0. There were issues with YAML configuration
+and using the keys as the names of connection, queues, or exchanges where those names had periods in them. There was
+no way to escape them, and it broke the configuration parsing code. Due to this, the format had to change. This
+decision was not made lightly and I intend on this being the last change to the configuration format.
+{warning}
+* Changed the configuration format introduced in 3.2.0. This breaks backward compatibility with that version.
+
 h3. Version 3.2.0
 {note}A huge thanks to [Ollie Freeman|https://github.com/olliefreeman] for his work on this release.{note}
 * First non-beta release of the plugin for Grails 3.
