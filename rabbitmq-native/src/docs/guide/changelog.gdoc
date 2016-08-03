@@ -1,3 +1,6 @@
+h3. Version 3.3.1
+* Reintroduce support for consumer handler methods taking only the @MessageContext@ as a parameter.
+
 h3. Version 3.3.0
 {warning}
 This version includes changes to the configuration format introduced in 3.2.0. There were issues with YAML configuration
