@@ -26,6 +26,16 @@ class ReportSpec extends Specification {
                         runningState : 'RUNNING'
                     ],
                     [
+                        fullName     : 'com.budjb.rabbitmq.test.MessageContextConsumer',
+                        load         : 0,
+                        name         : 'MessageContextConsumer',
+                        numConfigured: 1,
+                        numConsuming : 1,
+                        numProcessing: 0,
+                        queue        : 'message-context',
+                        runningState : 'RUNNING'
+                    ],
+                    [
                         fullName     : 'com.budjb.rabbitmq.test.ReportingConsumer',
                         load         : 0,
                         name         : 'ReportingConsumer',

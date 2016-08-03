@@ -389,8 +389,13 @@ class ConsumerContextImpl implements ConsumerContext {
             }
 
             Object response
-            if (handler.getParameterTypes().size() == 1) {
-                response = handler.invoke(consumer, body)
+            if (handler.getParameterCount() == 1) {
+                if (handler.getParameterTypes()[0].isAssignableFrom(MessageContext)) {
+                    response = handler.invoke(consumer, messageContext)
+                }
+                else {
+                    response = handler.invoke(consumer, body)
+                }
             }
             else {
                 response = handler.invoke(consumer, body, messageContext)
@@ -627,6 +632,9 @@ class ConsumerContextImpl implements ConsumerContext {
      * Preference will be first given to strongly typed handlers, and Object (def) will
      * be tried last.
      *
+     * If no handler taking a body is found, a last-ditch effort to find a {@link MessageContext}
+     * handler will be attempted.
+     *
      * @param clazz Object type to deliver to the consumer.
      * @return An appropriate handler method for the given type, or null if none are found.
      */
@@ -634,6 +642,12 @@ class ConsumerContextImpl implements ConsumerContext {
         List<Method> handlers = getAllMethods(consumer.getClass()).findAll { isValidHandlerMethod(it) }
 
         Method method = handlers.find {
+            int paramCount = it.getParameterCount()
+
+            if (paramCount < 1 || paramCount > 2) {
+                return false
+            }
+
             if (it.getParameterTypes()[0] == Object.class) {
                 return false
             }
@@ -642,16 +656,40 @@ class ConsumerContextImpl implements ConsumerContext {
                 return false
             }
 
+            if (it.getParameterCount() == 2) {
+                if (!it.getParameterTypes()[1].isAssignableFrom(MessageContext)) {
+                    return false
+                }
+            }
+
             return true
         }
 
         if (!method) {
             method = handlers.find {
+                int paramCount = it.getParameterCount()
+
+                if (paramCount < 1 || paramCount > 2) {
+                    return false
+                }
+
                 if (it.getParameterTypes()[0] != Object.class) {
                     return false
                 }
 
+                if (it.getParameterCount() == 2) {
+                    if (!it.getParameterTypes()[1].isAssignableFrom(MessageContext)) {
+                        return false
+                    }
+                }
+
                 return true
+            }
+        }
+
+        if (!method) {
+            method = handlers.find {
+                it.getParameterCount() == 1 && it.getParameterTypes()[0].isAssignableFrom(MessageContext)
             }
         }
 
