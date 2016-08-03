@@ -50,6 +50,10 @@ rabbitmq:
         autoDelete: true
 
     queues:
+      - name: message-context
+        autoDelete: true
+        connection: connection1
+
       - name: reporting
         autoDelete: true
         connection: connection1
