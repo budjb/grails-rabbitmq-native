@@ -1,0 +1,521 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>3 Configuration 3.3.1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/quickstart.html"><strong>2</strong><span>Quick Start</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/configuration.html"><strong>3</strong><span>Configuration</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/publishing.html"><strong>5</strong><span>Publishing Messages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/converters.html"><strong>6</strong><span>Message Converters</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/advanced.html"><strong>7</strong><span>Advanced Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/upgrading.html"><strong>8</strong><span>Upgrading</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/changelog.html"><strong>9</strong><span>Changelog</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p></p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/quickstart.html">&lt;&lt; <strong>2</strong><span>Quick Start</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>3 Configuration - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Bud Byrd</p>
+
+                    <p><strong>Version:</strong> 3.3.1</p>
+
+                    
+                </div>
+
+                
+                <div id="table-of-content">
+                    <h2>Table of Contents</h2>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#connection"><strong>3.1</strong><span>Server Connection</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#queuesconf"><strong>3.2</strong><span>Defining Queues</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#exchangesconf"><strong>3.3</strong><span>Defining Exchanges</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#binding"><strong>3.4</strong><span>Binding Queues and Exchanges</span></a>
+                    </div>
+                    
+                </div>
+                
+
+                
+
+<h1 id="configuration">3 Configuration</h1>
+Configuration of the connection to the RabbitMQ server is done in your project's <code>grails-app/conf/application.groovy</code> or
+<code>grails-app/conf/application.yml</code> file.<p class="paragraph"/>Below is the list of general configuration properties.<p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Configuration Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>autoStart</code></td><td>&#160;</td><td>If true, will start any consumers during the bootstrap phase of the application startup.</td><td><code>Boolean</code></td><td><code>true</code></td></tr><tr class="table-even"><td><code>enabled</code></td><td>&#160;</td><td>If false, will register the plugin's beans, but prevent the plugin connecting to the RabbitMQ broker(s) and consuming messages.</td><td><code>String</code></td><td><code>true</code></td></tr></table><p class="paragraph"/><blockquote class="note">
+If <code>autoStart</code> is set to false, all of the connections to the broker will be initiated, but the message consumers will not
+automatically start consuming messages.  To start consuming, use the <code>rabbitContext</code> bean and call <code>rabbitContext.startConsumers()</code>.
+</blockquote>
+
+
+
+<h2 id="connection">3.1 Server Connection</h2>
+The plugin expects the connection configuration to the RabbitMQ server to be defined. A bare minimum configuration
+example looks like:<p class="paragraph"/><strong class="bold"><code>application.groovy</code></strong>
+<div class="code"><pre>rabbitmq &#123;
+    connections = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"defaultConnection"</span>,
+            host: <span class="java&#45;quote">"example.com"</span>,
+            username: <span class="java&#45;quote">"foo"</span>,
+            password: <span class="java&#45;quote">"bar"</span>
+        &#93;
+    &#93;
+&#125;</pre></div><p class="paragraph"/><strong class="bold"><code>application.yml</code></strong>
+<div class="code"><pre>rabbitmq:
+    connections:
+      &#45; name: defaultConnection
+        host: example.com
+        username: foo
+        password: bar</pre></div><p class="paragraph"/>The <code>connections</code> section should contains a list of maps, where each entry in the list represents an individual
+connection.<p class="paragraph"/>Connections to many different RabbitMQ servers can be configured.  A multi-server configuration looks like:<p class="paragraph"/><strong class="bold"><code>application.groovy</code></strong>
+<div class="code"><pre>rabbitmq &#123;
+    connections = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"connection1"</span>,
+            host: <span class="java&#45;quote">"rabbit1.example.com"</span>,
+            username: <span class="java&#45;quote">"foo"</span>,
+            password: <span class="java&#45;quote">"bar"</span>
+        &#93;,
+        &#91;
+            name: <span class="java&#45;quote">"connection2"</span>,
+            host: <span class="java&#45;quote">"rabbit2.example.com"</span>,
+            username: <span class="java&#45;quote">"foo"</span>,
+            password: <span class="java&#45;quote">"bar"</span>
+        &#93;
+    &#93;
+&#125;</pre></div><p class="paragraph"/><strong class="bold"><code>application.yml</code></strong>
+<div class="code"><pre>rabbitmq:
+    connections:
+      &#45; name: connection1
+        host: rabbit1.example.com
+        username: foo
+        password: bar<p class="paragraph"/>      &#45; name: connection2
+        host: rabbit2.example.com
+        username: foo
+        password: bar</pre></div><p class="paragraph"/>The following table enumerates all the configuration options available to the connection configuration:
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Configuration Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>name</code></td><td>&#160;</td><td>Name of the connection, which can be used to tie queues and exchanges to a particular connection.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>host</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Hostname or IP address of the RabbitMQ server to connect to.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>username</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Username to log into the RabbitMQ server with.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>password</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Password to log into the RabbitMQ server with.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>isDefault</code></td><td>&#160;</td><td>A connection with this set to true will be the server messages are sent to if no specific connection is specified when sending the message.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-even"><td><code>port</code></td><td>&#160;</td><td>Port to connect to the RabbitMQ server with.</td><td><code>Integer</code></td><td>5672</td></tr><tr class="table-odd"><td><code>virtualHost</code></td><td>&#160;</td><td>Name of the virtual host to connect to the RabbitMQ server with.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>ssl</code></td><td>&#160;</td><td>Whether to use SSL when connecting to a RabbitMQ server.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>threads</code></td><td>&#160;</td><td>Threadpool size, if greater than 0, determines how many concurrent messages can be processed at any given time. If set to 0, consumers can consume as many messages as it's configured to.</td><td><code>String</code></td><td><code>0</code></td></tr><tr class="table-even"><td><code>automaticReconnect</code></td><td>&#160;</td><td>If true, will cause the application to automatically reconnect to a server when its connection is dropped.</td><td><code>boolean</code></td><td><code>true</code></td></tr><tr class="table-odd"><td><code>requestedHeartbeat</code></td><td>&#160;</td><td>Heartbeat interval, in seconds. A value of <code>0</code> disables heartbeats.</td><td><code>Integer</code></td><td><code>0</code></td></tr></table>
+
+
+
+<h2 id="queuesconf">3.2 Defining Queues</h2>
+The plugin allows authors to define the exchanges and queues programatically inside the configuration. This allows the
+application to configure its own queues without someone having to manually create the exchanges and queues prior to
+running the application.<p class="paragraph"/>Queue configuration is also done in the rabbitmq block, much as the server connection is configured. Usage is best
+illustrated with an example:<p class="paragraph"/><strong class="bold"><code>application.groovy</code></strong>
+<div class="code"><pre>rabbitmq &#123;
+    connections = &#91;
+        // &#8230;
+    &#93;
+    queues = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.queue"</span>,
+            durable: <span class="java&#45;keyword">true</span>,
+            exchange: <span class="java&#45;quote">"example.exchange"</span>
+        &#93;
+    &#93;
+&#125;</pre></div><p class="paragraph"/><strong class="bold"><code>application.yml</code></strong>
+<div class="code"><pre>rabbitmq:
+    connections:
+        &#35; &#8230;
+    queues:
+      &#45; name: example.queue
+        durable: <span class="java&#45;keyword">true</span>
+        exchange: example.exchange</pre></div><p class="paragraph"/>The above code will define a queue named <strong class="bold">example.queue</strong>, and its durable flag will be set.<p class="paragraph"/>If using the multi-server feature of the plugin, it is important to consider what server the queue should be defined in.
+The <code>connection</code> property specifies which server to create the queue in, illustrated below:<p class="paragraph"/><strong class="bold"><code>application.groovy</code></strong>
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#91;
+        // Assume there is a connection with the name <span class="java&#45;quote">"server1"</span>&#8230;
+        &#91;
+            name: <span class="java&#45;quote">"example.queue"</span>,
+            connection: <span class="java&#45;quote">"server1"</span>,
+            durable: <span class="java&#45;keyword">true</span>
+        &#93;
+    &#93;
+&#125;</pre></div><p class="paragraph"/><strong class="bold"><code>application.yml</code></strong>
+<div class="code"><pre>rabbitmq:
+    queues:
+        &#35; Assume there is a connection with the name <span class="java&#45;quote">"server1"</span>&#8230;
+      &#45; name: example.queue
+        connection: server1
+        durable: <span class="java&#45;keyword">true</span></pre></div><p class="paragraph"/>
+Below is a table of all of the options available when defining queues:
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>name</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Name of the queue.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>arguments</code></td><td>&#160;</td><td>Extra arguments used to create the queue. See the <a href="http://www.rabbitmq.com/documentation.html" target="blank">RabbitMQ documentation</a> for more information.</td><td><code>Map</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>autoDelete</code></td><td>&#160;</td><td>Whether to automatically delete the queue once there are no more consumers listening to it.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-even"><td><code>binding</code></td><td>&#160;</td><td>Used in conjunction with exchanges. See the section below for more information.</td><td> <em class="italic">Mixed</em> </td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>durable</code></td><td>&#160;</td><td>Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-even"><td><code>exchange</code></td><td>&#160;</td><td>Binds a queue to an exchange in conjunction with the <code>binding</code> property. Ignored if used inside an exchange declaration.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>match</code></td><td>&#160;</td><td>Required when binding to a headers exchange. Either "any" or "all".</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>connection</code></td><td>&#160;</td><td>Name of the connection to create the queue with.  Uses the default connection if omitted.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr></table>
+
+
+
+<h2 id="exchangesconf">3.3 Defining Exchanges</h2>
+Defining exchanges is very similar to defining queues. The following code illustrates how to define an exchange:<p class="paragraph"/><strong class="bold"><code>application.groovy</code></strong>
+<div class="code"><pre>rabbitmq &#123;
+    exchanges = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.exchange"</span>,
+            type: <span class="java&#45;quote">"topic"</span>
+        &#93;
+    &#93;
+&#125;</pre></div><p class="paragraph"/><strong class="bold"><code>application.yml</code></strong>
+<div class="code"><pre>rabbitmq:
+    exchanges:
+      &#45; name: example.exchange
+        type: topic</pre></div><p class="paragraph"/>The above example will create an exchange with the name <strong class="bold">example.exchange</strong> and of the type <strong class="bold">topic</strong>. Below is a list of
+all the options available when creating exchanges:
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Property</strong></th><th><strong class="bold">Required</strong></th><th><strong class="bold">Description</strong></th><th><strong class="bold">Type</strong></th><th><strong class="bold">Default</strong></th></tr><tr class="table-odd"><td><code>name</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>Name of the exchange.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>arguments</code></td><td>&#160;</td><td>Extra arguments used to create the exchange. See the <a href="http://www.rabbitmq.com/documentation.html" target="blank">RabbitMQ documentation</a> for more information.</td><td><code>Map</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-odd"><td><code>autoDelete</code></td><td>&#160;</td><td>Whether to automatically delete the exchange once there are no longer any queues bound to it.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-even"><td><code>durable</code></td><td>&#160;</td><td>Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts.</td><td><code>boolean</code></td><td><code>false</code></td></tr><tr class="table-odd"><td><code>type</code></td><td><img border="0" class="center" src="../img//bullet_red.png"></img></td><td>One of "fanout", "topic", "direct", or "headers".</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr><tr class="table-even"><td><code>connection</code></td><td>&#160;</td><td>Name of the connection to create the exchange with.  Uses the default connection if omitted.</td><td><code>String</code></td><td> <em class="italic">none</em> </td></tr></table>
+
+
+
+<h2 id="binding">3.4 Binding Queues and Exchanges</h2>
+Queues can be bound to an exchange by setting the <code>exchange</code> and <code>binding</code> properties in the queue's configuration. The
+value of the binding depends on the type of exchange the queue is being bound to. Each exchange type is explained below.<p class="paragraph"/>This basic example will create a <strong class="bold">topic</strong> exchange named <strong class="bold">example.exchange</strong>, as well as create a queue named
+<strong class="bold">example.queue</strong>. The queue will be bound to the exchange with the topic, or routing key, of "sample.binding.#".<p class="paragraph"/><strong class="bold"><code>application.groovy</code></strong>
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.queue"</span>,
+            exchange: <span class="java&#45;quote">"example.exchange"</span>,
+            binding: <span class="java&#45;quote">"sample.binding.&#35;"</span>
+        &#93;
+    &#93;
+    exchanges = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.exchange"</span>,
+            type: <span class="java&#45;quote">"topic"</span>
+        &#93;
+    &#93;
+&#125;</pre></div><p class="paragraph"/><strong class="bold"><code>application.yml</code></strong>
+<div class="code"><pre>rabbitmq:
+    queues:
+      &#45; name: example.queue
+        exchange: example.exchange
+        binding: 'sample.binding.&#35;'
+    exchanges:
+      &#45; name: example.exchange
+        type: topic</pre></div><p class="paragraph"/><blockquote class="warning">
+The <code>#</code> character is used frequently with RabbitMQ bindings. The <code>#</code> character is also special in YAML, so it is
+important that strings using the <code>#</code> character are quoted so that the YAML engine will treat it as plain text.
+</blockquote><p class="paragraph"/>Queues need to have their binding defined specifically for the type of exchange they are bound to.<p class="paragraph"/><h3>Fanout Exchanges</h3>
+Fanout exchanges are the easiest to configure bindings for, since they require none. Fanout exchanges simply send every
+message it receives to every queue bound to it.<p class="paragraph"/><strong class="bold"><code>application.groovy</code></strong>
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.queue"</span>,
+            exchange: <span class="java&#45;quote">"example.exchange"</span>
+        &#93;
+    &#93;
+    exchanges = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.exchange"</span>,
+            type: <span class="java&#45;quote">"fanout"</span>
+        &#93;
+    &#93;
+&#125;</pre></div><p class="paragraph"/><strong class="bold"><code>application.yml</code></strong>
+<div class="code"><pre>rabbitmq:
+    queues:
+      &#45; name: example.queue
+        exchange: example.exchange
+    exchanges:
+      &#45; name: example.exchange
+        type: fanout</pre></div><p class="paragraph"/><h3>Topic Exchanges</h3>
+Topic exchanges require queues to define a topic. Topics can be an exact match, but their strength is in their partial
+matching ability. See the <a href="http://www.rabbitmq.com/documentation.html" target="blank">RabbitMQ documentation</a> for details about this
+kind of exchange.<p class="paragraph"/><strong class="bold"><code>application.groovy</code></strong>
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.queue"</span>,
+            exchange: <span class="java&#45;quote">"example.exchange"</span>,
+            binding: <span class="java&#45;quote">"example.binding.&#35;"</span>
+        &#93;
+    &#93;
+    exchanges = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.exchange"</span>,
+            type: <span class="java&#45;quote">"topic"</span>
+        &#93;
+    &#93;
+&#125;</pre></div><p class="paragraph"/><strong class="bold"><code>application.yml</code></strong>
+<div class="code"><pre>rabbitmq:
+    queues:
+      &#45; name: example.queue
+        exchange: example.exchange
+        binding: 'example.binding.&#35;'
+    exchanges:
+      &#45; name: example.exchange
+        type: topic</pre></div><p class="paragraph"/><h3>Direct Exchanges</h3>
+Direct exchanges are similar to topic exchanges, except that their "topics" only function with direct name matching.
+The appropriate name for the binding in this case is "routing key". Queues must define a routing key when binding to
+this type of exchange.<p class="paragraph"/><strong class="bold"><code>application.groovy</code></strong>
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.queue"</span>,
+            exchange: <span class="java&#45;quote">"example.exchange"</span>,
+            binding: <span class="java&#45;quote">"exampleRoutingKey"</span>
+        &#93;
+    &#93;
+    exchanges = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.exchange"</span>,
+            type: <span class="java&#45;quote">"direct"</span>
+        &#93;
+    &#93;
+&#125;</pre></div><p class="paragraph"/><strong class="bold"><code>application.yml</code></strong>
+<div class="code"><pre>rabbitmq:
+    queues:
+      &#45; name: example.queue
+        exchange: example.exchange
+        binding: exampleRoutingKey
+    exchanges:
+      &#45; name: example.exchange
+        type: direct</pre></div><p class="paragraph"/><h3>Header Exchanges</h3>
+Header exchanges are like topic exchanges, but with the ability to define multiple match keywords. The binding for
+queues allows the queue to match on all or one of multiple header values. The queue must also set the <code>match</code> property
+for this exchange type, and the value must be one of "any" or "all".<p class="paragraph"/><strong class="bold"><code>application.groovy</code></strong>
+<div class="code"><pre>rabbitmq &#123;
+    queues = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.queue"</span>,
+            match: <span class="java&#45;quote">"any"</span>,
+            binding: &#91;
+                <span class="java&#45;quote">"header1"</span>: <span class="java&#45;quote">"header&#45;value&#45;1"</span>,
+                <span class="java&#45;quote">"header2"</span>: <span class="java&#45;quote">"header&#45;value&#45;2"</span>
+            &#93;
+        &#93;
+    &#93;
+    exchanges = &#91;
+        &#91;
+            name: <span class="java&#45;quote">"example.exchange"</span>,
+            type: <span class="java&#45;quote">"headers"</span>
+        &#93;
+    &#93;
+&#125;</pre></div><p class="paragraph"/><strong class="bold"><code>application.yml</code></strong>
+<div class="code"><pre>rabbitmq:
+    queues:
+      &#45; name: example.queue
+        match: any
+        binding:
+            header1: header&#45;value&#45;1
+            header2: header&#45;value&#45;2
+    exchanges:
+      &#45; name: example.exchange
+        type: headers</pre></div>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/quickstart.html">&lt;&lt; <strong>2</strong><span>Quick Start</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/consuming.html"><strong>4</strong><span>Consuming Messages</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Command Line</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Command%20Line/create-consumer.html">create-consumer</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Consumer Configuration</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/autoAck.html">autoAck</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/binding.html">binding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/connection.html">connection</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/consumers.html">consumers</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/convert.html">convert</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/match.html">match</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/prefetchCount.html">prefetchCount</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/queue.html">queue</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/retry.html">retry</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Consumer%20Configuration/transacted.html">transacted</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Rabbit Message Publisher</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/appId.html">appId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/autoConvert.html">autoConvert</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/body.html">body</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/connection.html">connection</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/contentEncoding.html">contentEncoding</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/contentType.html">contentType</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/correlationId.html">correlationId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/deliveryMode.html">deliveryMode</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/exchange.html">exchange</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/expiration.html">expiration</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/header.html">header</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/messageId.html">messageId</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/priority.html">priority</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/replyTo.html">replyTo</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/routingKey.html">routingKey</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/timeout.html">timeout</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/timestamp.html">timestamp</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/type.html">type</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Rabbit%20Message%20Publisher/userId.html">userId</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>
