@@ -1,3 +1,7 @@
+h3. Version 3.3.2
+* Fix message converter/consumer handler issue where message handler methods with primitive types\
+  (such as @int@) would not accept the equivalent boxed type (such as @Integer@).
+
 h3. Version 3.3.1
 * Reintroduce support for consumer handler methods taking only the @MessageContext@ as a parameter.
 
