@@ -29,6 +29,7 @@ import grails.persistence.support.PersistenceContextInterceptor
 import groovyx.gpars.GParsPool
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.util.ClassUtils
 
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
@@ -390,7 +391,7 @@ class ConsumerContextImpl implements ConsumerContext {
 
             Object response
             if (handler.getParameterCount() == 1) {
-                if (handler.getParameterTypes()[0].isAssignableFrom(MessageContext)) {
+                if (ClassUtils.isAssignable(handler.getParameterTypes()[0], MessageContext)) {
                     response = handler.invoke(consumer, messageContext)
                 }
                 else {
@@ -652,12 +653,12 @@ class ConsumerContextImpl implements ConsumerContext {
                 return false
             }
 
-            if (!it.getParameterTypes()[0].isAssignableFrom(clazz)) {
+            if (!ClassUtils.isAssignable(it.getParameterTypes()[0], clazz)) {
                 return false
             }
 
             if (it.getParameterCount() == 2) {
-                if (!it.getParameterTypes()[1].isAssignableFrom(MessageContext)) {
+                if (!ClassUtils.isAssignable(it.getParameterTypes()[1], MessageContext)) {
                     return false
                 }
             }
@@ -678,7 +679,7 @@ class ConsumerContextImpl implements ConsumerContext {
                 }
 
                 if (it.getParameterCount() == 2) {
-                    if (!it.getParameterTypes()[1].isAssignableFrom(MessageContext)) {
+                    if (!ClassUtils.isAssignable(it.getParameterTypes()[1], MessageContext)) {
                         return false
                     }
                 }
@@ -689,7 +690,7 @@ class ConsumerContextImpl implements ConsumerContext {
 
         if (!method) {
             method = handlers.find {
-                it.getParameterCount() == 1 && it.getParameterTypes()[0].isAssignableFrom(MessageContext)
+                it.getParameterCount() == 1 && ClassUtils.isAssignable(it.getParameterTypes()[0], MessageContext)
             }
         }
 
