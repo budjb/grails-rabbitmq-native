@@ -57,7 +57,7 @@ dependencies {
     testRuntime "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.1"
     testRuntime "net.sourceforge.htmlunit:htmlunit:2.18"
 
-    compile 'com.rabbitmq:amqp-client:3.6.1'
+    compile 'com.rabbitmq:amqp-client:3.6.6'
 }
 
 task wrapper(type: Wrapper) {
