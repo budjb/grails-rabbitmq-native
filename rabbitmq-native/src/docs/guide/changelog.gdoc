@@ -1,3 +1,6 @@
+h3. Version 3.3.3
+* Update amqp-client to version 3.6.6. ([#83|http://github.com/budjb/grails-rabbitmq-native/issues/83])
+
 h3. Version 3.3.2
 * Fix message converter/consumer handler issue where message handler methods with primitive types\
   (such as @int@) would not accept the equivalent boxed type (such as @Integer@).
