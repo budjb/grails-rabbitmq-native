@@ -34,6 +34,11 @@ class ExchangeProperties extends ConfigurationProperties {
     String connection
 
     /**
+     * Name of exchange to bind to
+     */
+    List<ExchangeBinding> exchangeBindings
+
+    /**
      * Constructor.
      *
      * @param name
@@ -46,6 +51,38 @@ class ExchangeProperties extends ConfigurationProperties {
         durable = parseConfigOption(Boolean, configuration.durable, durable)
         type = ExchangeType.lookup(parseConfigOption(String, configuration['type']))
         connection = parseConfigOption(String, configuration.connection, connection)
+
+        /*
+        Handle exchange binding to another exchange
+        Configuration should be a list of maps
+         [
+         as : <source|destination> (default is destination)
+         exchange : <exchange to bind to>
+         binding : <binding key to use>
+          ]
+         */
+        if (configuration.exchangeBindings) {
+            if (!(configuration.exchangeBindings instanceof List)) {
+                throw new IllegalArgumentException("Exchange bindings configuration must be a list of maps")
+            }
+
+            configuration.exchangeBindings.each {bindingMap ->
+                if (!(bindingMap instanceof Map)) {
+                    throw new IllegalArgumentException("Exchange binding configuration must be a list of maps")
+                }
+                String exc = parseConfigOption(String, bindingMap.exchange)
+                String binding = parseConfigOption(String, bindingMap.binding)
+
+                switch (parseConfigOption(String, bindingMap.as)) {
+                    case 'source':
+                        exchangeBindings += new ExchangeBinding(name, exc, binding)
+                        break
+                    case 'destination': default:
+                        exchangeBindings += new ExchangeBinding(exc, name, binding)
+                        break
+                }
+            }
+        }
     }
 
     /**
@@ -60,6 +97,22 @@ class ExchangeProperties extends ConfigurationProperties {
         }
         if (!type) {
             throw new InvalidConfigurationException("exchange type is required")
+        }
+    }
+
+    class ExchangeBinding {
+        String source
+        String destination
+        String binding
+
+        ExchangeBinding(String source, String destination, String binding) {
+            this.source = source
+            this.destination = destination
+            this.binding = binding
+        }
+
+        String toString() {
+            "$source to $destination: $binding"
         }
     }
 }

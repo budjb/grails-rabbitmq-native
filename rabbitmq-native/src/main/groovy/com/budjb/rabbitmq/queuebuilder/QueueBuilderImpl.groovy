@@ -217,6 +217,9 @@ class QueueBuilderImpl implements QueueBuilder {
         queues.each {
             configureBindings(it)
         }
+        exchanges.each {
+            configureBindings(it)
+        }
     }
 
     /**
@@ -247,6 +250,33 @@ class QueueBuilderImpl implements QueueBuilder {
         finally {
             if (channel.isOpen()) {
                 channel.close()
+            }
+        }
+    }
+
+    /**
+     * This must be done after all exchanges have been configured otherwise there is the possibility
+     * the binding will fail if the exchange does not exist.
+     * Adds the binding of exchanges to exchanges
+     */
+    void configureBindings(ExchangeProperties properties){
+        if (!properties.exchangeBindings) {
+            return
+        }
+        properties.exchangeBindings.each { binding ->
+
+            Channel channel = getConnection(properties.getConnection()).createChannel()
+
+            // Declare the exchange
+            try {
+                channel.exchangeBind(binding.destination, binding.source, binding.binding)
+            }catch(Exception ex){
+                log.warn("Could not setup exchange binding $binding because ${ex.message}", ex)
+            }
+            finally {
+                if (channel.isOpen()) {
+                    channel.close()
+                }
             }
         }
     }
