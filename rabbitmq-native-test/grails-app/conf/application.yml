@@ -30,6 +30,12 @@ environments:
             url: jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
 
 rabbitmq:
+    host: localhost
+    port: 5672
+    user: guest
+    password: guest
+    test:
+        host: ${rabbitmq.host}
     connections:
       - name: connection1
         host: localhost
@@ -39,9 +45,9 @@ rabbitmq:
         isDefault: true
 
       - name: connection2
-        host: localhost
-        username: guest
-        password: guest
+        host: ${rabbitmq.host}
+        username: ${rabbitmq.user}
+        password: ${rabbitmq.password}
         virtualHost: test2.rabbitmq.budjb.com
 
     exchanges:
