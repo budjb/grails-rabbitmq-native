@@ -18,6 +18,7 @@ package com.budjb.rabbitmq.queuebuilder
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
+import com.budjb.rabbitmq.utils.ConfigPropertyResolver
 import com.rabbitmq.client.Channel
 import grails.core.GrailsApplication
 import groovy.util.logging.Slf4j
@@ -27,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired
  * This class is based off of the queue builder present in the official Grails RabbitMQ plugin.
  */
 @Slf4j
-class QueueBuilderImpl implements QueueBuilder {
+class QueueBuilderImpl implements QueueBuilder, ConfigPropertyResolver {
     /**
      * Connection manager.
      */
@@ -125,7 +126,7 @@ class QueueBuilderImpl implements QueueBuilder {
                 throw new IllegalArgumentException("Queue configuration must be a list of maps")
             }
 
-            this.queues << new QueueProperties(item)
+            this.queues << new QueueProperties(fixPropertyResolution(item))
         }
     }
 
@@ -140,7 +141,7 @@ class QueueBuilderImpl implements QueueBuilder {
                 throw new IllegalArgumentException("Exchange configuration must be a list of maps")
             }
 
-            this.exchanges << new ExchangeProperties(item)
+            this.exchanges << new ExchangeProperties(fixPropertyResolution(item))
         }
     }
 

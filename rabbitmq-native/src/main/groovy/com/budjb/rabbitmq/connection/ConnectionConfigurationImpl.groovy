@@ -15,12 +15,12 @@
  */
 package com.budjb.rabbitmq.connection
 
+import com.budjb.rabbitmq.utils.ConfigResolver
 import com.rabbitmq.client.ConnectionFactory
-import org.grails.config.NavigableMap
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class ConnectionConfigurationImpl implements ConnectionConfiguration {
+class ConnectionConfigurationImpl implements ConnectionConfiguration, ConfigResolver {
     /**
      * Logger.
      */
@@ -105,27 +105,6 @@ class ConnectionConfigurationImpl implements ConnectionConfiguration {
         setThreads(parseConfigOption(Integer, configuration['threads'], threads))
         setUsername(parseConfigOption(String, configuration['username'], username))
         setVirtualHost(parseConfigOption(String, configuration['virtualHost'], virtualHost))
-    }
-
-    /**
-     * Parses a configuration option given a class type and possible values.
-     *
-     * @param clazz
-     * @param values
-     * @return
-     */
-    protected <T> T parseConfigOption(Class<T> clazz, Object... values) {
-        for (Object value : values) {
-            if (value == null || value instanceof NavigableMap.NullSafeNavigator || value instanceof ConfigObject) {
-                continue
-            }
-
-            if (clazz.isAssignableFrom(value.getClass())) {
-                return value as T
-            }
-        }
-
-        return null
     }
 
     /**

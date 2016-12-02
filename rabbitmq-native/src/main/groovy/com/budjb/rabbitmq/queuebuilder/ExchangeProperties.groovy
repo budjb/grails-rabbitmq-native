@@ -2,7 +2,7 @@ package com.budjb.rabbitmq.queuebuilder
 
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 
-class ExchangeProperties extends ConfigurationProperties {
+class ExchangeProperties implements ConfigurationProperties {
     /**
      * Exchange arguments (see RabbitMQ documentation).
      */
