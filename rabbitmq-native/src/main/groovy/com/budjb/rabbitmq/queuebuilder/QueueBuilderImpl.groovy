@@ -101,17 +101,17 @@ class QueueBuilderImpl implements QueueBuilder, ConfigPropertyResolver {
      */
     void parse(Map configuration) {
         if (configuration.containsKey('queues')) {
-            if (!(configuration.queues instanceof List)) {
+            if (!(configuration.queues instanceof Collection)) {
                 throw new IllegalArgumentException("Queue configuration must be a list of maps")
             }
-            parseQueues(configuration.queues as List)
+            parseQueues(configuration.queues as Collection)
         }
 
         if (configuration.containsKey('exchanges')) {
-            if (!(configuration.exchanges instanceof List)) {
+            if (!(configuration.exchanges instanceof Collection)) {
                 throw new IllegalArgumentException("Exchange configuration must be a list of maps")
             }
-            parseExchanges(configuration.exchanges as List)
+            parseExchanges(configuration.exchanges as Collection)
         }
     }
 
@@ -120,7 +120,7 @@ class QueueBuilderImpl implements QueueBuilder, ConfigPropertyResolver {
      *
      * @param queues
      */
-    void parseQueues(List queues) {
+    void parseQueues(Collection queues) {
         queues.each { item ->
             if (!(item instanceof Map)) {
                 throw new IllegalArgumentException("Queue configuration must be a list of maps")
@@ -135,7 +135,7 @@ class QueueBuilderImpl implements QueueBuilder, ConfigPropertyResolver {
      *
      * @param exchanges
      */
-    void parseExchanges(List exchanges) {
+    void parseExchanges(Collection exchanges) {
         exchanges.each { item ->
             if (!(item instanceof Map)) {
                 throw new IllegalArgumentException("Exchange configuration must be a list of maps")

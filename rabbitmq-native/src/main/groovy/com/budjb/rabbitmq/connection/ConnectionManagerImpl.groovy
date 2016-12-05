@@ -150,7 +150,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
             // configurations will also follow this format going forward.
             def configurations = grailsApplication.config.rabbitmq.connections
 
-            if (!(configurations instanceof List)) {
+            if (!(configurations instanceof Collection)) {
                 throw new InvalidConfigurationException("RabbitMQ configuration is invalid; expected a List but got ${configurations.getClass().getSimpleName()} instead")
             }
 

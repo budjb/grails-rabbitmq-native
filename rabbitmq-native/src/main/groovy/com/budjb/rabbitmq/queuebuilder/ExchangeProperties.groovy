@@ -62,7 +62,7 @@ class ExchangeProperties implements ConfigurationProperties {
           ]
          */
         if (configuration.exchangeBindings) {
-            if (!(configuration.exchangeBindings instanceof List)) {
+            if (!(configuration.exchangeBindings instanceof Collection)) {
                 throw new IllegalArgumentException("Exchange bindings configuration must be a list of maps")
             }
 
