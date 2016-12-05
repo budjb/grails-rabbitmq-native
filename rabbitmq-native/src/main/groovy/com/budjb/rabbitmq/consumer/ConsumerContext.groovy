@@ -58,4 +58,10 @@ interface ConsumerContext extends RabbitManagedContext {
      * @param context
      */
     void deliverMessage(MessageContext context)
+
+    /**
+     * Add a short name to the consumer context to replace that the id is now the fullname
+     * @return
+     */
+    String getShortName()
 }

@@ -177,7 +177,7 @@ class ConsumerContextImpl implements ConsumerContext {
      */
     @Override
     String getId() {
-        return consumer.getClass().getSimpleName()
+        return consumer.getClass().getName()
     }
 
     /**
@@ -310,8 +310,8 @@ class ConsumerContextImpl implements ConsumerContext {
 
         ConsumerConfiguration configuration = getConfiguration()
 
-        report.name = getId()
-        report.fullName = consumer.getClass().getName()
+        report.name = getShortName()
+        report.fullName = getId()
 
         report.runningState = getRunningState()
 
@@ -365,6 +365,11 @@ class ConsumerContextImpl implements ConsumerContext {
                 log.error("unexpected exception ${e.getClass()} encountered while responding from an RPC call with handler ${getId()}", e)
             }
         }
+    }
+
+    @Override
+    String getShortName() {
+        return consumer.getClass().getSimpleName()
     }
 
     /**
