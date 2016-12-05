@@ -33,7 +33,6 @@ dependencyManagement {
     applyMavenExclusions false
 }
 
-
 dependencies {
     compile "org.springframework.boot:spring-boot-starter-logging"
     compile "org.springframework.boot:spring-boot-autoconfigure"
@@ -50,13 +49,29 @@ dependencies {
 }
 
 grailsPublish {
-    githubSlug = 'budjb/grails-rabbitmq-native'
+    githubSlug = 'ofreeman/grails-rabbitmq-native'
     license {
         name = 'Apache-2.0'
     }
     title = "RabbitMQ Native Plugin"
-    developers = [budjb: "Bud Byrd"]
-    repo = "grails-plugins"
+    developers = [budjb: "Bud Byrd",olliefreeman:'Oliver Freeman']
+//    repo = "grails-plugins"
+
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+
+    repo = 'maven'
+    userOrg = 'olliefreeman'
+
+    websiteUrl = 'https://github.com/olliefreeman/grails-rabbitmq-native'
+    vcsUrl = 'https://github.com/olliefreeman/grails-rabbitmq-native.git'
+    version {
+        name = project.version
+        desc = "Grails RabbitMq Native Plugin For Grails 3.1.x - ${project.name} ${project.version}"
+        released = new Date()
+        vcsTag = "v${project.version}-rabbitmq-native3"
+    }
+
 }
 
 publishing {
@@ -72,4 +87,3 @@ publishing {
         }
     }
 }
-
