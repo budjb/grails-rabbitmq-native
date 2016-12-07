@@ -65,12 +65,7 @@ grailsPublish {
 
     websiteUrl = 'https://github.com/olliefreeman/grails-rabbitmq-native'
     vcsUrl = 'https://github.com/olliefreeman/grails-rabbitmq-native.git'
-    version {
-        name = project.version
-        desc = "Grails RabbitMq Native Plugin For Grails 3.1.x - ${project.name} ${project.version}"
-        released = new Date()
-        vcsTag = "v${project.version}-rabbitmq-native3"
-    }
+
 
 }
 
