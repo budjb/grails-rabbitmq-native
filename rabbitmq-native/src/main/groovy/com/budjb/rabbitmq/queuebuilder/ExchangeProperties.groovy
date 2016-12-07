@@ -36,7 +36,7 @@ class ExchangeProperties implements ConfigurationProperties {
     /**
      * Name of exchange to bind to
      */
-    List<ExchangeBinding> exchangeBindings
+    List<ExchangeBinding> exchangeBindings = []
 
     /**
      * Constructor.
