@@ -87,7 +87,7 @@ class RabbitMessagePropertiesSpec extends Specification {
     def 'Ensure properties are set correctly when overridden'() {
         setup:
         Channel channel = Mock(Channel)
-        OffsetDateTime offsetDateTime = Mock(OffsetDateTime)
+        OffsetDateTime offsetDateTime = OffsetDateTime.now()
 
         when:
         rabbitMessageProperties.build {

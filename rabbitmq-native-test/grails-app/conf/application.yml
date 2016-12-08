@@ -34,8 +34,6 @@ rabbitmq:
     port: 5672
     user: guest
     password: guest
-    test:
-        host: ${rabbitmq.host}
     connections:
       - name: connection1
         host: localhost
