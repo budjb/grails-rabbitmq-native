@@ -52,6 +52,12 @@ rabbitmq:
       - name: topic-exchange
         type: topic
         autoDelete: true
+      - name: sub-topic-exchange
+        type: topic
+        autoDelete: true
+        exchangeBindings:
+            - exchange: topic-exchange
+              binding: 'com.budjb.exchange.#'
 
     queues:
       - name: message-context
@@ -91,3 +97,9 @@ rabbitmq:
       - name: connection2-queue
         autoDelete: true
         connection: connection2
+
+      - name: topic-queue-sub-exchange-set
+        autoDelete: true
+        binding: 'com.budjb.exchange.queue'
+        connection: connection1
+        exchange: sub-topic-exchange

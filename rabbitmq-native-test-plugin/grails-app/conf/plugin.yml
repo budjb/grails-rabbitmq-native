@@ -1,0 +1,42 @@
+rabbitmq:
+    connections:
+      - name: connection1
+        host: localhost
+        username: guest
+        password: guest
+        virtualHost: test1.rabbitmq.budjb.com
+        isDefault: true
+    exchanges:
+      - name: topic-exchange
+        type: topic
+        autoDelete: true
+      - name: sub-topic-exchange
+        type: topic
+        autoDelete: true
+        exchangeBindings:
+            - exchange: topic-exchange
+              binding: 'com.budjb.exchange.#'
+    queues:
+      - name: topic-queue-all
+        autoDelete: true
+        binding: '#'
+        connection: connection1
+        exchange: topic-exchange
+
+      - name: topic-queue-subset
+        autoDelete: true
+        binding: 'com.budjb.#'
+        connection: connection1
+        exchange: topic-exchange
+
+      - name: topic-queue-sub-exchange-set
+        autoDelete: true
+        binding: 'com.budjb.exchange.queue'
+        connection: connection1
+        exchange: sub-topic-exchange
+
+      - name: topic-queue-sub-exchange-unused
+        autoDelete: true
+        binding: 'com.budjb.exchange.unused'
+        connection: connection1
+        exchange: sub-topic-exchange

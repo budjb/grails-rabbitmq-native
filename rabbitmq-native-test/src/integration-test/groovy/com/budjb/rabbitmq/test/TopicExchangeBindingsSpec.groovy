@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.util.concurrent.TimeoutException
 
 @Integration
-class TopicExchangeSpec extends MessageConsumerIntegrationTest {
+class TopicExchangeBindingsSpec extends MessageConsumerIntegrationTest {
     @Autowired
     AllTopicConsumer allTopicConsumer
 
@@ -42,44 +42,11 @@ class TopicExchangeSpec extends MessageConsumerIntegrationTest {
         exchangeBindingTopicConsumer.lastMessage = null
     }
 
-    def 'Test topic bindings work by sending a non-matching topic'() {
+    def 'Test topic exchange bindings work by sending a partial-matching topic'() {
         setup:
         rabbitMessagePublisher.send {
             exchange = 'topic-exchange'
-            routingKey = 'com.example'
-            body = 'test'
-        }
-
-        when:
-        waitUntilMessageReceived(30000) { allTopicConsumer.lastMessage }
-
-        then:
-        allTopicConsumer.lastMessage != null
-
-        when:
-        waitUntilMessageReceived(1000) { subsetTopicConsumer.lastMessage }
-
-        then:
-        thrown TimeoutException
-
-        when:
-        waitUntilMessageReceived(1000) { specificTopicConsumer.lastMessage }
-
-        then:
-        thrown TimeoutException
-
-        when:
-        waitUntilMessageReceived(1000) { exchangeBindingTopicConsumer.lastMessage }
-
-        then:
-        thrown TimeoutException
-    }
-
-    def 'Test topic bindings work by sending a partial-matching topic'() {
-        setup:
-        rabbitMessagePublisher.send {
-            exchange = 'topic-exchange'
-            routingKey = 'com.budjb.test'
+            routingKey = 'com.budjb.exchange'
             body = 'test'
         }
 
@@ -112,7 +79,7 @@ class TopicExchangeSpec extends MessageConsumerIntegrationTest {
         setup:
         rabbitMessagePublisher.send {
             exchange = 'topic-exchange'
-            routingKey = 'com.budjb.rabbitmq'
+            routingKey = 'com.budjb.exchange.queue'
             body = 'test'
         }
 
@@ -132,12 +99,12 @@ class TopicExchangeSpec extends MessageConsumerIntegrationTest {
         waitUntilMessageReceived(5000) { specificTopicConsumer.lastMessage }
 
         then:
-        specificTopicConsumer.lastMessage != null
+        thrown TimeoutException
 
         when:
         waitUntilMessageReceived(5000) { exchangeBindingTopicConsumer.lastMessage }
 
         then:
-        thrown TimeoutException
+        exchangeBindingTopicConsumer.lastMessage != null
     }
 }

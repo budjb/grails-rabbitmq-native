@@ -26,6 +26,16 @@ class ReportSpec extends Specification {
                         runningState : 'RUNNING'
                     ],
                     [
+                            fullName     : 'com.budjb.rabbitmq.test.plugin.ExchangeBindingTopicConsumer',
+                            load         : 0,
+                            name         : 'ExchangeBindingTopicConsumer',
+                            numConfigured: 1,
+                            numConsuming : 1,
+                            numProcessing: 0,
+                            queue        : 'topic-queue-sub-exchange-set',
+                            runningState : 'RUNNING'
+                    ],
+                    [
                         fullName     : 'com.budjb.rabbitmq.test.MessageContextConsumer',
                         load         : 0,
                         name         : 'MessageContextConsumer',
@@ -120,6 +130,28 @@ class ReportSpec extends Specification {
         }
 
         then:
-        report == expected
+        assertList(expected, report)
+    }
+
+    void assertList(List expected, List actual){
+        assert expected
+        assert actual
+        assert expected.size() == actual.size()
+        expected.eachWithIndex{ v, i ->
+            if(v instanceof Map) assertMap(v, actual[i])
+            else if(v instanceof List) assertList(v,actual[i])
+            else assert v == actual[i]
+        }
+    }
+
+    void assertMap(Map expected, Map actual){
+        assert expected
+        assert actual
+        assert expected.size() == actual.size()
+        expected.each {k,v ->
+            if(v instanceof Map) assertMap(v, actual.get(k))
+                else if(v instanceof List) assertList(v,actual.get(k))
+            else assert v == actual.get(k)
+        }
     }
 }

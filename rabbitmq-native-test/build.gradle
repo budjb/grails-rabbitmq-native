@@ -57,11 +57,16 @@ dependencies {
     testCompile "org.grails.plugins:geb"
     testRuntime "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.1"
     testRuntime "net.sourceforge.htmlunit:htmlunit:2.18"
-
-    compile project(':rabbitmq-native3')
 }
 
 assets {
     minifyJs = true
     minifyCss = true
+}
+
+grails {
+    exploded = true
+    plugins {
+        compile project(':rabbitmq-native-test-plugin')
+    }
 }
