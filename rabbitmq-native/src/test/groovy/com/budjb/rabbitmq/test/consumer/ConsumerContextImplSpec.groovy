@@ -61,7 +61,7 @@ class ConsumerContextImplSpec extends Specification {
         ConsumerContextImpl context = new ConsumerContextImpl(configuration, consumer, null, null, null, null)
 
         then:
-        context.getId() == 'UnitTestConsumer'
+        context.getId() == 'com.budjb.rabbitmq.test.support.UnitTestConsumer'
     }
 
     def 'Verify that the proper consumer callbacks are invoked for a successful message'() {
@@ -305,6 +305,6 @@ class ConsumerContextImplSpec extends Specification {
 
         then:
         notThrown StackOverflowError
-        1 * log.error('unexpected exception class java.lang.StackOverflowError encountered while responding from an RPC call with handler UnitTestConsumer', _)
+        1 * log.error('unexpected exception class java.lang.StackOverflowError encountered while responding from an RPC call with handler com.budjb.rabbitmq.test.support.UnitTestConsumer', _)
     }
 }
