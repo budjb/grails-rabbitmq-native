@@ -18,6 +18,7 @@ package com.budjb.rabbitmq.queuebuilder
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
+import com.budjb.rabbitmq.utils.ConfigPropertyResolver
 import com.rabbitmq.client.Channel
 import grails.core.GrailsApplication
 import groovy.util.logging.Slf4j
@@ -27,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired
  * This class is based off of the queue builder present in the official Grails RabbitMQ plugin.
  */
 @Slf4j
-class QueueBuilderImpl implements QueueBuilder {
+class QueueBuilderImpl implements QueueBuilder, ConfigPropertyResolver {
     /**
      * Connection manager.
      */
@@ -125,7 +126,7 @@ class QueueBuilderImpl implements QueueBuilder {
                 throw new IllegalArgumentException("Queue configuration must be a list of maps")
             }
 
-            this.queues << new QueueProperties(item)
+            this.queues << new QueueProperties(fixPropertyResolution(item))
         }
     }
 
@@ -140,7 +141,7 @@ class QueueBuilderImpl implements QueueBuilder {
                 throw new IllegalArgumentException("Exchange configuration must be a list of maps")
             }
 
-            this.exchanges << new ExchangeProperties(item)
+            this.exchanges << new ExchangeProperties(fixPropertyResolution(item))
         }
     }
 
@@ -217,6 +218,9 @@ class QueueBuilderImpl implements QueueBuilder {
         queues.each {
             configureBindings(it)
         }
+        exchanges.each {
+            configureBindings(it)
+        }
     }
 
     /**
@@ -247,6 +251,33 @@ class QueueBuilderImpl implements QueueBuilder {
         finally {
             if (channel.isOpen()) {
                 channel.close()
+            }
+        }
+    }
+
+    /**
+     * This must be done after all exchanges have been configured otherwise there is the possibility
+     * the binding will fail if the exchange does not exist.
+     * Adds the binding of exchanges to exchanges
+     */
+    void configureBindings(ExchangeProperties properties){
+        if (!properties.exchangeBindings) {
+            return
+        }
+        properties.exchangeBindings.each { binding ->
+
+            Channel channel = getConnection(properties.getConnection()).createChannel()
+
+            // Declare the exchange
+            try {
+                channel.exchangeBind(binding.destination, binding.source, binding.binding)
+            }catch(Exception ex){
+                log.warn("Could not setup exchange binding $binding because ${ex.message}", ex)
+            }
+            finally {
+                if (channel.isOpen()) {
+                    channel.close()
+                }
             }
         }
     }
