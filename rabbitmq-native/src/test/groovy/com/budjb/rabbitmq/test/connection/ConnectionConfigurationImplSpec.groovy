@@ -116,7 +116,7 @@ class ConnectionConfigurationImplSpec extends Specification {
             'ssl': true,
             'threads': 10,
             'virtualHost': 'test-virtual-host',
-            'clientProperties' : ['applicationName': 'jUnit-Test', 'appVersion': '0.0.1']
+            'clientProperties' : ['applicationName': 'TestApp', 'appVersion': '0.0.1']
         ]
 
         when:
@@ -134,7 +134,7 @@ class ConnectionConfigurationImplSpec extends Specification {
         connectionConfiguration.getSsl() == true
         connectionConfiguration.getThreads() == 10
         connectionConfiguration.getVirtualHost() == 'test-virtual-host'
-        connectionConfiguration.getClientProperties() == ['applicationName': 'jUnit-Test', 'appVersion': '0.0.1']
+        connectionConfiguration.getClientProperties() == ['applicationName': 'TestApp', 'appVersion': '0.0.1']
     }
 
     def 'Test that setters work correctly'() {
