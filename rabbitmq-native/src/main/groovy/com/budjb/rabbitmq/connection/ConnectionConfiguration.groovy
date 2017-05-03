@@ -131,4 +131,14 @@ interface ConnectionConfiguration extends RabbitManagedContextConfiguration {
      * Sets whether to use SSL.
      */
     void setSsl(boolean ssl)
+
+    /**
+     * Sets custom client properties
+     */
+    void setClientProperties(Map<String, Object> clientProperties)
+
+    /**
+     * Returns the client properties
+     */
+    Map<String, Object> getClientProperties()
 }
