@@ -89,6 +89,10 @@ class ConnectionContextImpl implements ConnectionContext {
         factory.setAutomaticRecoveryEnabled(configuration.getAutomaticReconnect())
         factory.setRequestedHeartbeat(configuration.getRequestedHeartbeat())
 
+        if (configuration.getClientProperties()) {
+            factory.setClientProperties(factory.getClientProperties() + configuration.getClientProperties())
+        }
+
         if (configuration.getSsl()) {
             factory.useSslProtocol()
         }

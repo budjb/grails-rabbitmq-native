@@ -115,7 +115,8 @@ class ConnectionConfigurationImplSpec extends Specification {
             'requestedHeartbeat': 1000,
             'ssl': true,
             'threads': 10,
-            'virtualHost': 'test-virtual-host'
+            'virtualHost': 'test-virtual-host',
+            'clientProperties' : ['applicationName': 'TestApp', 'appVersion': '0.0.1']
         ]
 
         when:
@@ -133,6 +134,7 @@ class ConnectionConfigurationImplSpec extends Specification {
         connectionConfiguration.getSsl() == true
         connectionConfiguration.getThreads() == 10
         connectionConfiguration.getVirtualHost() == 'test-virtual-host'
+        connectionConfiguration.getClientProperties() == ['applicationName': 'TestApp', 'appVersion': '0.0.1']
     }
 
     def 'Test that setters work correctly'() {
@@ -151,6 +153,7 @@ class ConnectionConfigurationImplSpec extends Specification {
         configuration.setSsl(true)
         configuration.setThreads(10)
         configuration.setVirtualHost('test-virtual-host')
+        configuration.setClientProperties(['applicationName': 'TestApp', 'appVersion': '0.0.2'])
 
         then:
         configuration.getHost() == 'test-host'
@@ -164,5 +167,6 @@ class ConnectionConfigurationImplSpec extends Specification {
         configuration.getSsl() == true
         configuration.getThreads() == 10
         configuration.getVirtualHost() == 'test-virtual-host'
+        configuration.getClientProperties() == ['applicationName': 'TestApp', 'appVersion': '0.0.2']
     }
 }
