@@ -153,7 +153,7 @@ class ConnectionConfigurationImplSpec extends Specification {
         configuration.setSsl(true)
         configuration.setThreads(10)
         configuration.setVirtualHost('test-virtual-host')
-        configuration.setClientProperties(['applicationName': 'jUnit-Test', 'appVersion': '0.0.2'])
+        configuration.setClientProperties(['applicationName': 'TestApp', 'appVersion': '0.0.2'])
 
         then:
         configuration.getHost() == 'test-host'
@@ -167,6 +167,6 @@ class ConnectionConfigurationImplSpec extends Specification {
         configuration.getSsl() == true
         configuration.getThreads() == 10
         configuration.getVirtualHost() == 'test-virtual-host'
-        configuration.getClientProperties() == ['applicationName': 'jUnit-Test', 'appVersion': '0.0.2']
+        configuration.getClientProperties() == ['applicationName': 'TestApp', 'appVersion': '0.0.2']
     }
 }
