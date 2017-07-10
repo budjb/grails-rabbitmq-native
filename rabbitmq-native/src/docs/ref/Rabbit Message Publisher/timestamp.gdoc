@@ -9,7 +9,7 @@ h2. Examples
 {code}
 rabbitMessagePublisher.send {
     routingKey = "example.queue"
-    messageId = "1234"
+    timestamp = Calendar.getInstance()
     body = "test message"
 }
 {code}
