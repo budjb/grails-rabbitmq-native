@@ -3,8 +3,33 @@ grails:
     doc:
         title: RabbitMQ Native Plugin
         authors: Bud Byrd
+    codegen:
+        defaultPackage: plugin
+    spring:
+        transactionManagement:
+            proxies: false
+    gorm:
+        # Whether to autowire entities.
+        # Disabled by default for performance reasons.
+        autowire: false
+        reactor:
+            # Whether to translate GORM events into Reactor events
+            # Disabled by default for performance reasons
+            events: false
 info:
     app:
         name: '@info.app.name@'
         version: '@info.app.version@'
         grailsVersion: '@info.app.grailsVersion@'
+spring:
+    main:
+        banner-mode: "off"
+    groovy:
+        template:
+            check-template-location: false
+
+# Spring Actuator Endpoints are Disabled by Default
+endpoints:
+    enabled: false
+    jmx:
+        enabled: true

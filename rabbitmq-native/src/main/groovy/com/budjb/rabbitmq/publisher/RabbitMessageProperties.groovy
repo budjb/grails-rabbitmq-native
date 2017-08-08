@@ -18,6 +18,8 @@ package com.budjb.rabbitmq.publisher
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.Channel
 
+import java.time.OffsetDateTime
+
 class RabbitMessageProperties {
     /**
      * Default timeout for RPC calls (5 seconds).
@@ -92,7 +94,7 @@ class RabbitMessageProperties {
     /**
      * Message timestamp.
      */
-    Calendar timestamp
+    OffsetDateTime timestamp
 
     /**
      * Message type name.

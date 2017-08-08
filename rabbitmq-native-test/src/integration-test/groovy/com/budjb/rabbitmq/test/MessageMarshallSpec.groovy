@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class MessageMarshallSpec extends MessageConsumerIntegrationTest {
     @Autowired
     ReportingConsumer reportingConsumer
+    @Autowired
     StringConsumer stringConsumer
 
     def setup() {

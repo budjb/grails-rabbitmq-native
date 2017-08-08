@@ -19,14 +19,19 @@ import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
+import com.budjb.rabbitmq.utils.ConfigPropertyResolver
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
+import grails.config.Config
 import grails.core.GrailsApplication
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 
-class ConnectionManagerImpl implements ConnectionManager {
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
+class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver {
     /**
      * Logger.
      */
@@ -145,7 +150,7 @@ class ConnectionManagerImpl implements ConnectionManager {
             // configurations will also follow this format going forward.
             def configurations = grailsApplication.config.rabbitmq.connections
 
-            if (!(configurations instanceof List)) {
+            if (!(configurations instanceof Collection)) {
                 throw new InvalidConfigurationException("RabbitMQ configuration is invalid; expected a List but got ${configurations.getClass().getSimpleName()} instead")
             }
 
@@ -154,7 +159,7 @@ class ConnectionManagerImpl implements ConnectionManager {
                     throw new InvalidConfigurationException("RabbitMQ configuration is invalid; expected a Map but got ${configurations.getClass().getSimpleName()} instead")
                 }
 
-                register(createContext(item))
+                register(createContext(fixPropertyResolution(item)))
             }
         }
         else if (grailsApplication.config.rabbitmq?.connection) {

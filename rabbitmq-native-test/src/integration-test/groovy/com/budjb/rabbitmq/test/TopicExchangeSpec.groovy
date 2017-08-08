@@ -15,6 +15,7 @@
  */
 package com.budjb.rabbitmq.test
 
+import com.budjb.rabbitmq.test.plugin.ExchangeBindingTopicConsumer
 import grails.test.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -31,10 +32,14 @@ class TopicExchangeSpec extends MessageConsumerIntegrationTest {
     @Autowired
     SpecificTopicConsumer specificTopicConsumer
 
+    @Autowired
+    ExchangeBindingTopicConsumer exchangeBindingTopicConsumer
+
     def setup() {
         allTopicConsumer.lastMessage = null
         subsetTopicConsumer.lastMessage = null
         specificTopicConsumer.lastMessage = null
+        exchangeBindingTopicConsumer.lastMessage = null
     }
 
     def 'Test topic bindings work by sending a non-matching topic'() {
@@ -59,6 +64,12 @@ class TopicExchangeSpec extends MessageConsumerIntegrationTest {
 
         when:
         waitUntilMessageReceived(1000) { specificTopicConsumer.lastMessage }
+
+        then:
+        thrown TimeoutException
+
+        when:
+        waitUntilMessageReceived(1000) { exchangeBindingTopicConsumer.lastMessage }
 
         then:
         thrown TimeoutException
@@ -89,6 +100,12 @@ class TopicExchangeSpec extends MessageConsumerIntegrationTest {
 
         then:
         thrown TimeoutException
+
+        when:
+        waitUntilMessageReceived(5000) { exchangeBindingTopicConsumer.lastMessage }
+
+        then:
+        thrown TimeoutException
     }
 
     def 'Test topic bindings work by sending an exact-matching topic'() {
@@ -116,5 +133,11 @@ class TopicExchangeSpec extends MessageConsumerIntegrationTest {
 
         then:
         specificTopicConsumer.lastMessage != null
+
+        when:
+        waitUntilMessageReceived(5000) { exchangeBindingTopicConsumer.lastMessage }
+
+        then:
+        thrown TimeoutException
     }
 }

@@ -1,11 +1,1 @@
-version "3.3.2"
-group "org.grails.plugins"
 
-subprojects {
-    version = rootProject.version
-    group = rootProject.group
-
-    ext {
-        jdkCompatibility = 1.7
-    }
-}
