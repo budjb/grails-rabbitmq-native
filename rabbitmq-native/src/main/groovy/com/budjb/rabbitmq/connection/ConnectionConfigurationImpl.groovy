@@ -84,6 +84,11 @@ class ConnectionConfigurationImpl implements ConnectionConfiguration, ConfigReso
     int port = ConnectionFactory.DEFAULT_AMQP_PORT
 
     /**
+     * Add custom client properties
+     */
+    Map<String, Object> clientProperties
+
+    /**
      * Basic constructor.
      */
     ConnectionConfigurationImpl() {}
@@ -105,6 +110,7 @@ class ConnectionConfigurationImpl implements ConnectionConfiguration, ConfigReso
         setThreads(parseConfigOption(Integer, configuration['threads'], threads))
         setUsername(parseConfigOption(String, configuration['username'], username))
         setVirtualHost(parseConfigOption(String, configuration['virtualHost'], virtualHost))
+        setClientProperties(parseConfigOption(Map, configuration['clientProperties'], clientProperties))
     }
 
     /**
