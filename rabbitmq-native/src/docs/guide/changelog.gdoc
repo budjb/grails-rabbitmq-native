@@ -1,4 +1,7 @@
 h3. Version 3.3.3
+* Upgrade codebase to Grails 3.2.
+* Add ability to bind exchanges to exchanges.
+* Migrate from `Calendar` to `OffsetDateTime` for message timestamps.
 * Update amqp-client to version 3.6.6. ([#83|http://github.com/budjb/grails-rabbitmq-native/issues/83])
 
 h3. Version 3.3.2
