@@ -22,14 +22,10 @@ import com.budjb.rabbitmq.exception.MissingConfigurationException
 import com.budjb.rabbitmq.utils.ConfigPropertyResolver
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
-import grails.config.Config
 import grails.core.GrailsApplication
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver {
     /**

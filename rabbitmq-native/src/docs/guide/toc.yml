@@ -5,7 +5,8 @@ configuration:
     connection: Server Connection
     queuesconf: Defining Queues
     exchangesconf: Defining Exchanges
-    binding: Binding Queues and Exchanges
+    binding_queues: Binding Queues To Exchanges
+    binding_exchanges: Binding Exchanges to Exchanges
 consuming:
     title: Consuming Messages
     handlers:

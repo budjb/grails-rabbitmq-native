@@ -1,0 +1,37 @@
+Exchanges can also be bound to other exchanges to create richer routing topologies. More information can be found
+[here|https://www.rabbitmq.com/e2e.html].
+
+This basic example will create 2 exchanges, with a binding that will forward messages from @source-exchange@ to
+@target-exchange@ when messages match the routing key @foo.bar.#@.
+
+*@application.groovy@*
+{code}
+rabbitmq {
+    exchanges = [
+        [
+            name: "source-exchange",
+            type: "topic",
+            exchangeBindings: [
+                [ exchange: "target-exchange", binding: "foo.bar.#" ]
+            ]
+        ],
+        [
+            name: "target-exchange",
+            type: "direct"
+        ]
+    ]
+}
+{code}
+
+*@application.yml@*
+{code}
+rabbitmq:
+    exchanges:
+      - name: source-exchange
+        type: topic
+        exchangeBindings:
+          - exchange: target-exchange
+            binding: 'foo.bar.#'
+        name: target-exchange
+        type: direct
+{code}

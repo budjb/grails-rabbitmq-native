@@ -260,7 +260,7 @@ class QueueBuilderImpl implements QueueBuilder, ConfigPropertyResolver {
      * the binding will fail if the exchange does not exist.
      * Adds the binding of exchanges to exchanges
      */
-    void configureBindings(ExchangeProperties properties){
+    void configureBindings(ExchangeProperties properties) {
         if (!properties.exchangeBindings) {
             return
         }
@@ -271,7 +271,8 @@ class QueueBuilderImpl implements QueueBuilder, ConfigPropertyResolver {
             // Declare the exchange
             try {
                 channel.exchangeBind(binding.destination, binding.source, binding.binding)
-            }catch(Exception ex){
+            }
+            catch (Exception ex) {
                 log.warn("Could not setup exchange binding $binding because ${ex.message}", ex)
             }
             finally {

@@ -1,5 +1,3 @@
 include 'rabbitmq-native'
 include 'rabbitmq-native-test'
 include 'rabbitmq-native-test-plugin'
-
-project(':rabbitmq-native').name = 'rabbitmq-native3'

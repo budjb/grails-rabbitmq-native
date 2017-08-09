@@ -87,7 +87,7 @@ interface RabbitMessagePublisher {
      * @throws IllegalArgumentException
      */
     Object rpc(@DelegatesTo(RabbitMessageProperties) Closure closure)
-            throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException
+        throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException
 
     /**
      * Sends a message to the bus and waits for a reply, up to the "timeout" property.
@@ -121,7 +121,7 @@ interface RabbitMessagePublisher {
      * @throws IllegalArgumentException
      */
     Object rpc(String exchange, String routingKey, Object body)
-            throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException
+        throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException
 
     /**
      * Creates and returns a synchronous queue for use in the RPC consumer.
