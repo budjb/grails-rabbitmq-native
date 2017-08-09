@@ -82,7 +82,7 @@ class RabbitMessagePublisherChannelProxy implements RabbitMessagePublisher {
 
     @Override
     Object rpc(@DelegatesTo(RabbitMessageProperties) Closure closure)
-            throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+        throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         return rpc(createRabbitMessageProperties().build(closure))
     }
 
@@ -96,7 +96,7 @@ class RabbitMessagePublisherChannelProxy implements RabbitMessagePublisher {
 
     @Override
     Object rpc(String exchange, String routingKey, Object body)
-            throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
+        throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
         return rpc(createRabbitMessageProperties().build {
             delegate.exchange = exchange
             delegate.routingKey = routingKey

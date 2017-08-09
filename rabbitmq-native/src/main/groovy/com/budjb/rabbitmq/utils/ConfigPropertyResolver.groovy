@@ -22,16 +22,16 @@ trait ConfigPropertyResolver {
      * @param config Grails Application config
      * @return a map with all values remapped where necessary
      */
-     Map fixPropertyResolution(Map map){
-        map.collectEntries {k,v ->
+    Map fixPropertyResolution(Map map) {
+        map.collectEntries { k, v ->
             def val = v
-            if(val instanceof String){
+            if (val instanceof String) {
                 Matcher m = Pattern.compile(/\$\{(.+?)}/).matcher(val)
-                if(m.matches()){
+                if (m.matches()) {
                     val = grailsApplication.config.get(m.group(1))
                 }
             }
-            [k,val]
+            [k, val]
         }
     }
 

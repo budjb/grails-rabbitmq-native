@@ -216,7 +216,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      */
     @Override
     ConsumerContext getContext(String name) throws ContextNotFoundException {
-        ConsumerContext adapter = consumers.find { it.id == name } ?: consumers.find {it.shortName == name}
+        ConsumerContext adapter = consumers.find { it.id == name } ?: consumers.find { it.shortName == name }
 
         if (!adapter) {
             throw new ContextNotFoundException("consumer '${name}' is not registered")
@@ -275,8 +275,8 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      * @return
      */
     protected Map loadConsumerApplicationConfiguration(Object consumer) {
-        def configuration = grailsApplication.config.rabbitmq.consumers."${consumer.getClass().name}"?:
-                            grailsApplication.config.rabbitmq.consumers."${consumer.getClass().simpleName}"
+        def configuration = grailsApplication.config.rabbitmq.consumers."${consumer.getClass().name}" ?:
+            grailsApplication.config.rabbitmq.consumers."${consumer.getClass().simpleName}"
 
 
         if (!configuration || !Map.class.isAssignableFrom(configuration.getClass())) {

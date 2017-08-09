@@ -66,7 +66,7 @@ class ExchangeProperties implements ConfigurationProperties {
                 throw new IllegalArgumentException("Exchange bindings configuration must be a list of maps")
             }
 
-            configuration.exchangeBindings.each {bindingMap ->
+            configuration.exchangeBindings.each { bindingMap ->
                 if (!(bindingMap instanceof Map)) {
                     throw new IllegalArgumentException("Exchange binding configuration must be a list of maps")
                 }
