@@ -15,7 +15,9 @@
  */
 package com.budjb.rabbitmq.test.support
 
-class MissingConfigurationConsumer {
+import com.budjb.rabbitmq.consumer.GrailsMessageConsumer
+
+class MissingConfigurationConsumer extends GrailsMessageConsumer {
     def handleMessage(def body, def context) {
 
     }

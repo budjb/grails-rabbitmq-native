@@ -44,6 +44,7 @@ class ConsumerManagerImplSpec extends Specification {
 
     def setup() {
         grailsApplication = Mock(GrailsApplication)
+        grailsApplication.getConfig() >> new PropertySourcesConfig()
         persistenceInterceptor = null
         connectionManager = Mock(ConnectionManager)
         messageConverterManager = Mock(MessageConverterManager)
@@ -62,6 +63,8 @@ class ConsumerManagerImplSpec extends Specification {
     def 'Ensure proper objects are injected into new contexts'() {
         setup:
         UnitTestConsumer consumer = new UnitTestConsumer()
+        consumer.grailsApplication = grailsApplication
+        consumer.afterPropertiesSet()
 
         when:
         ConsumerContextImpl context = (ConsumerContextImpl) consumerManager.createContext(consumer)
@@ -70,7 +73,6 @@ class ConsumerManagerImplSpec extends Specification {
         context.consumer == consumer
         context.configuration instanceof ConsumerConfiguration
         context.persistenceInterceptor == persistenceInterceptor
-        context.messageConverterManager == messageConverterManager
         context.rabbitMessagePublisher == rabbitMessagePublisher
         context.connectionManager == connectionManager
     }
@@ -266,8 +268,12 @@ class ConsumerManagerImplSpec extends Specification {
             ]
         ])
 
+        grailsApplication = Mock(GrailsApplication)
         grailsApplication.getConfig() >> config
+
         MissingConfigurationConsumer consumer = new MissingConfigurationConsumer()
+        consumer.grailsApplication = grailsApplication
+        consumer.afterPropertiesSet()
 
         when:
         ConsumerContext consumerContext = consumerManager.createContext(consumer)
@@ -281,6 +287,8 @@ class ConsumerManagerImplSpec extends Specification {
     def 'If a consumer has a configuration defined within the object, it is loaded correctly'() {
         setup:
         UnitTestConsumer consumer = new UnitTestConsumer()
+        consumer.grailsApplication = grailsApplication
+        consumer.afterPropertiesSet()
 
         when:
         ConsumerContext consumerContext = consumerManager.createContext(consumer)
@@ -295,43 +303,13 @@ class ConsumerManagerImplSpec extends Specification {
         setup:
         grailsApplication.getConfig() >> new PropertySourcesConfig()
         MissingConfigurationConsumer consumer = new MissingConfigurationConsumer()
+        consumer.grailsApplication = grailsApplication
 
         when:
-        consumerManager.createContext(consumer)
+        consumer.afterPropertiesSet()
 
         then:
         thrown MissingConfigurationException
-    }
-
-    def 'If a consumer is loaded but is missing its configuration, a warning is logged but no exception is thrown'() {
-        setup:
-        grailsApplication.getConfig() >> new PropertySourcesConfig()
-
-        GrailsClass artefact1 = Mock(GrailsClass)
-        artefact1.getFullName() >> 'unitTestConsumer'
-        artefact1.getShortName() >> 'UnitTestConsumer'
-
-        GrailsClass artefact2 = Mock(GrailsClass)
-        artefact2.getFullName() >> 'missingConfigurationConsumer'
-        artefact2.getShortName() >> 'MissingConfigurationConsumer'
-
-        UnitTestConsumer consumer1 = new UnitTestConsumer()
-        MissingConfigurationConsumer consumer2 = new MissingConfigurationConsumer()
-
-        applicationContext.getBean('unitTestConsumer') >> consumer1
-        applicationContext.getBean('missingConfigurationConsumer') >> consumer2
-
-        grailsApplication.getArtefacts('MessageConsumer') >> [artefact1, artefact2]
-
-        Logger log = Mock(Logger)
-        consumerManager.log = log
-
-        when:
-        consumerManager.load()
-
-        then:
-        1 * log.warn("not loading consumer 'MissingConfigurationConsumer' because its configuration is missing")
-        consumerManager.getContexts().size() == 1
     }
 
     def 'If all consumers are started while some of those consumers are already started, the IllegalStateException should be swallowed'() {

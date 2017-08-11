@@ -29,7 +29,11 @@ import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope
 import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk
+import grails.config.Config
+import grails.core.GrailsApplication
 import grails.persistence.support.PersistenceContextInterceptor
+import org.grails.config.NavigableMap
+import org.grails.config.PropertySourcesConfig
 import org.slf4j.Logger
 import spock.lang.Specification
 
@@ -54,11 +58,10 @@ class ConsumerContextImplSpec extends Specification {
 
     def 'Validate retrieving the consumer name'() {
         setup:
-        ConsumerConfiguration configuration = Mock(ConsumerConfiguration)
         UnitTestConsumer consumer = new UnitTestConsumer()
 
         when:
-        ConsumerContextImpl context = new ConsumerContextImpl(configuration, consumer, null, null, null, null)
+        ConsumerContextImpl context = new ConsumerContextImpl(consumer, null, null, null)
 
         then:
         context.getId() == 'com.budjb.rabbitmq.test.support.UnitTestConsumer'
@@ -70,12 +73,11 @@ class ConsumerContextImplSpec extends Specification {
         configuration.queue = 'test-queue'
 
         UnitTestConsumer consumer = Mock(UnitTestConsumer)
+        consumer.getConfiguration() >> configuration
 
         ConsumerContextImpl consumerContext = new ConsumerContextImpl(
-            configuration,
             consumer,
             connectionManager,
-            messageConverterManager,
             persistenceInterceptor,
             rabbitMessagePublisher
         )
@@ -105,13 +107,12 @@ class ConsumerContextImplSpec extends Specification {
         configuration.queue = 'test-queue'
 
         UnitTestConsumer consumer = Mock(UnitTestConsumer)
-        consumer.handleMessage(*_) >> { throw new RuntimeException() }
+        consumer.getConfiguration() >> configuration
+        consumer.process(_) >> { throw new RuntimeException() }
 
         ConsumerContextImpl consumerContext = new ConsumerContextImpl(
-            configuration,
             consumer,
             connectionManager,
-            messageConverterManager,
             persistenceInterceptor,
             rabbitMessagePublisher
         )
@@ -132,11 +133,14 @@ class ConsumerContextImplSpec extends Specification {
         1 * consumer.onReceive(messageContext)
         0 * consumer.onSuccess(_)
         1 * consumer.onComplete(messageContext)
-        1 * consumer.onFailure(messageContext)
+        1 * consumer.onFailure(messageContext, _)
     }
 
     def 'Start a basic consumer'() {
         setup:
+        GrailsApplication grailsApplication = Mock(GrailsApplication)
+        grailsApplication.getConfig() >> new PropertySourcesConfig()
+
         ConsumerConfiguration configuration = new ConsumerConfigurationImpl()
         configuration.queue = 'test-queue'
         configuration.consumers = 5
@@ -150,12 +154,12 @@ class ConsumerContextImplSpec extends Specification {
         connectionManager.getContext(*_) >> connectionContext
 
         UnitTestConsumer consumer = new UnitTestConsumer()
+        consumer.grailsApplication = grailsApplication
+        consumer.afterPropertiesSet()
 
         ConsumerContextImpl context = new ConsumerContextImpl(
-            configuration,
             consumer,
             connectionManager,
-            messageConverterManager,
             persistenceInterceptor,
             rabbitMessagePublisher
         )
@@ -169,8 +173,8 @@ class ConsumerContextImplSpec extends Specification {
 
     def 'If the consumer has already been started and tried to start again, throw an IllegalStateException'() {
         setup:
-        ConsumerConfiguration configuration = new ConsumerConfigurationImpl()
-        configuration.queue = 'test-queue'
+        GrailsApplication grailsApplication = Mock(GrailsApplication)
+        grailsApplication.getConfig() >> new PropertySourcesConfig()
 
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.createChannel(*_) >> {
@@ -180,12 +184,12 @@ class ConsumerContextImplSpec extends Specification {
         connectionManager.getContext(*_) >> connectionContext
 
         UnitTestConsumer consumer = new UnitTestConsumer()
+        consumer.grailsApplication = grailsApplication
+        consumer.afterPropertiesSet()
 
         ConsumerContextImpl context = new ConsumerContextImpl(
-            configuration,
             consumer,
             connectionManager,
-            messageConverterManager,
             persistenceInterceptor,
             rabbitMessagePublisher
         )
@@ -205,7 +209,7 @@ class ConsumerContextImplSpec extends Specification {
         configuration.binding = '#'
 
         Channel channel = Mock(Channel)
-        channel.queueDeclare(*_) >> { new DeclareOk('temp-queue', 0, 0) }
+        channel.queueDeclare(*_) >> { new DeclareOk('test-queue', 0, 0) }
 
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.getRunningState() >> RunningState.RUNNING
@@ -214,12 +218,12 @@ class ConsumerContextImplSpec extends Specification {
         connectionManager.getContext(*_) >> connectionContext
 
         UnitTestConsumer consumer = new UnitTestConsumer()
+        consumer.configuration = configuration
+        consumer.afterPropertiesSet()
 
         ConsumerContextImpl context = new ConsumerContextImpl(
-            configuration,
             consumer,
             connectionManager,
-            messageConverterManager,
             persistenceInterceptor,
             rabbitMessagePublisher
         )
@@ -229,7 +233,7 @@ class ConsumerContextImplSpec extends Specification {
 
         then:
         context.consumers.size() == 1
-        1 * channel.basicConsume('temp-queue', _, _)
+        1 * channel.basicConsume('test-queue', _, _)
     }
 
     def 'If the persistence interceptor is present, validate its interactions'() {
@@ -238,12 +242,11 @@ class ConsumerContextImplSpec extends Specification {
         configuration.queue = 'test-queue'
 
         UnitTestConsumer consumer = new UnitTestConsumer()
+        consumer.configuration = configuration
 
         ConsumerContextImpl consumerContext = new ConsumerContextImpl(
-            configuration,
             consumer,
             connectionManager,
-            messageConverterManager,
             persistenceInterceptor,
             rabbitMessagePublisher
         )
@@ -275,6 +278,9 @@ class ConsumerContextImplSpec extends Specification {
         Logger log = Mock(Logger)
 
         UnitTestConsumer consumer = new UnitTestConsumer()
+        consumer.configuration = configuration
+        consumer.messageConverterManager = messageConverterManager
+        consumer.afterPropertiesSet()
 
         BasicProperties properties = Mock(BasicProperties)
         properties.getReplyTo() >> 'test-queue'
@@ -288,10 +294,8 @@ class ConsumerContextImplSpec extends Specification {
         )
 
         ConsumerContextImpl consumerContext = new ConsumerContextImpl(
-            configuration,
             consumer,
             connectionManager,
-            messageConverterManager,
             persistenceInterceptor,
             rabbitMessagePublisher
         )

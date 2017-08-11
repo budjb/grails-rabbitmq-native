@@ -1,218 +1,59 @@
 package com.budjb.rabbitmq.consumer
 
-import com.budjb.rabbitmq.exception.MissingConfigurationException
-import grails.core.GrailsApplication
-import grails.util.GrailsClassUtils
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.util.ClassUtils
-
-/**
- *
- */
-abstract class MessageConsumer {
+interface MessageConsumer {
     /**
-     * Name of the method that should handle incoming messages.
-     */
-    protected static final String MESSAGE_HANDLER_NAME = 'handleMessage'
-
-    /**
-     * Name of the configuration variable a consumer is expected to define.
-     */
-    protected static final String RABBIT_CONFIG_NAME = 'rabbitConfig'
-
-    /**
-     * Grails application bean.
-     */
-    @Autowired
-    GrailsApplication grailsApplication
-
-    /**
-     * Consumer's configuration.
-     */
-    ConsumerConfiguration configuration
-
-    /**
-     * Called when a message has been received.
+     * Returns the configuration of the consumer.
      *
-     * @param messageContext
+     * @return The configuration of the consumer.
      */
-    void onReceive(MessageContext messageContext) {
-
-    }
+    ConsumerConfiguration getConfiguration()
 
     /**
-     * Called when a message has completed processing successfully.
-     *
-     * @param messageContext
-     */
-    void onSuccess(MessageContext messageContext) {
-
-    }
-
-    /**
-     * Called when an exception has occurred while processing a message.
-     *
-     * @param messageContext
-     * @param throwable
-     */
-    void onFailure(MessageContext messageContext, Throwable throwable) {
-
-    }
-
-    /**
-     * Called when processing of a message is complete. This will happen in
-     * both the success and failure cases in addition to the success or
-     * failure callbacks.
-     *
-     * @param messageContext
-     */
-    void onComplete(MessageContext messageContext) {
-
-    }
-
-    /**
-     * Returns a list of all potential handler methods.
+     * Returns the consumer's ID.
      *
      * @return
      */
-    List<MetaMethod> findHandlers() {
-        Object actualConsumer = getActualConsumer()
-
-        List<MetaMethod> metaMethods = actualConsumer.getMetaClass().getMetaMethods().findAll {
-            it.getName() == MESSAGE_HANDLER_NAME && it.getNativeParameterTypes().size() in [1, 2] && it.isPublic()
-        }
-
-        return metaMethods
-    }
+    String getId()
 
     /**
-     * Finds a message handler method that will accept an incoming message.
-     *
-     * @param clazz Class type of the converted message body.
-     * @return
+     * Returns the consumer's name.
      */
-    MetaMethod findHandler(Class<?> clazz) {
-        List<MetaMethod> metaMethods = findHandlers()
-
-        MetaMethod match = metaMethods.find { isMetaMethodMatch(it, clazz) }
-
-        if (!match) {
-            match = metaMethods.find { isMetaMethodMatch(it, Object) }
-        }
-
-        if (!match) {
-            match = metaMethods.find {
-                it.getNativeParameterTypes().size() == 1 && ClassUtils.isAssignable(it.getNativeParameterTypes()[0], MessageContext)
-            }
-        }
-
-        return match
-    }
+    String getName()
 
     /**
-     * Returns the root consumer object. This is useful when a consumer object
-     * is wrapped and does not directly extend this class.
+     * Processes incoming messages.
      *
-     * @return
+     * @param messageContext Contains the various bits of data associated with the incoming message.
+     * @return If not null and the message contained a reply-to property, the returned object will be published to the reply-to queue.
      */
-    protected Object getActualConsumer() {
-        return this
-    }
+    Object process(MessageContext messageContext)
 
     /**
-     * Determines if the given method is a match for the given message body type.
+     * Called when a message is received but before it is handed to the consumer for processing.
      *
-     * @param method Method to check.
-     * @param clazz Class of the converted message body type.
-     * @return
+     * @param messageContext Contains the various bits of data associated with the incoming message.
      */
-    protected boolean isMetaMethodMatch(MetaMethod method, Class<?> clazz) {
-        Class[] parameters = method.getNativeParameterTypes()
-
-        int parameterCount = parameters.size()
-
-        if (parameterCount < 1 || parameterCount > 2) {
-            return false
-        }
-
-        Class<?> first = parameters[0]
-
-        if (first == Object.class && clazz != Object.class) {
-            return false
-        }
-
-        if (!ClassUtils.isAssignable(first, clazz)) {
-            return false
-        }
-
-        if (parameterCount == 2) {
-            if (!ClassUtils.isAssignable(parameters[1], MessageContext)) {
-                return false
-            }
-        }
-
-        return true
-    }
+    void onReceive(MessageContext messageContext)
 
     /**
-     * Returns the object types the consumer can convert to.
+     * Called when message processing has completed successfully.
      *
-     * @return
+     * @param messageContext Contains the various bits of data associated with the incoming message.
      */
-    List<Class<?>> getSupportedConversionClasses() {
-        return findHandlers().findAll { !MessageContext.isAssignableFrom(it.getNativeParameterTypes()[0]) }.collect {
-            it.getNativeParameterTypes()[0]
-        }
-    }
-
-    ConsumerConfiguration getConfiguration() {
-        if (!this.configuration) {
-            def config = GrailsClassUtils.getStaticPropertyValue(getActualConsumer().getClass(), RABBIT_CONFIG_NAME)
-            if (config != null || Map.isInstance(config)) {
-                this.configuration = new ConsumerConfigurationImpl((Map) config)
-                return this.configuration
-            }
-
-            return config as Map
-
-            Map configuration = loadConsumerLocalConfiguration(consumer) ?: loadConsumerApplicationConfiguration(consumer)
-            if (!configuration) {
-                throw new MissingConfigurationException("consumer has no configuration defined either within either its class or the application configuration")
-            }
-
-            return new ConsumerConfigurationImpl(configuration)
-            getMetaClass().getMetaProperty('rabbitConfig')
-        }
-        return this.configuration
-    }
+    void onSuccess(MessageContext messageContext)
 
     /**
-     * Finds and returns a consumer's central configuration, or null if it isn't defined.
+     * Called when message processing has failed with some uncaught exception.
      *
-     * @return
+     * @param messageContext Contains the various bits of data associated with the incoming message.
+     * @param throwable The exception that occurred.
      */
-    protected Map loadConsumerApplicationConfiguration(Object consumer) {
-        def configuration = grailsApplication.config.rabbitmq.consumers."${consumer.getClass().simpleName}"
-
-        if (!configuration || !Map.class.isAssignableFrom(configuration.getClass())) {
-            return null
-        }
-
-        return configuration
-    }
+    void onFailure(MessageContext messageContext, Throwable throwable)
 
     /**
-     * Finds and returns a consumer's local configuration, or null if it doesn't exist.
+     * Called when message processing has completed, whether with success or failure.
      *
-     * @return
+     * @param messageContext Contains the various bits of data associated with the incoming message.
      */
-    protected Map loadConsumerLocalConfiguration(Object consumer) {
-        def config = GrailsClassUtils.getStaticPropertyValue(consumer.getClass(), RABBIT_CONFIG_NAME)
-
-        if (config == null || !(config instanceof Map)) {
-            return null
-        }
-
-        return config as Map
-    }
+    void onComplete(MessageContext messageContext)
 }

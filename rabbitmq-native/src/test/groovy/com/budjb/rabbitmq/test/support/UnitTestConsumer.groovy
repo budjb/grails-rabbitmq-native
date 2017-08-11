@@ -15,7 +15,9 @@
  */
 package com.budjb.rabbitmq.test.support
 
-class UnitTestConsumer {
+import com.budjb.rabbitmq.consumer.GrailsMessageConsumer
+
+class UnitTestConsumer extends GrailsMessageConsumer {
     static rabbitConfig = [
         queue: 'test-queue',
         consumers: 5
