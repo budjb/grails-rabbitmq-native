@@ -27,12 +27,16 @@ import grails.persistence.support.PersistenceContextInterceptor
 import groovyx.gpars.GParsPool
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 
+/**
+ * Implementation of a container for a consumer and all of its consuming threads.
+ */
 class ConsumerContextImpl implements ConsumerContext {
     /**
      * Logger.
      */
-    private Logger log = LoggerFactory.getLogger(ConsumerContextImpl)
+    protected Logger log = LoggerFactory.getLogger(ConsumerContextImpl)
 
     /**
      * Consumer bean.
@@ -42,16 +46,19 @@ class ConsumerContextImpl implements ConsumerContext {
     /**
      * Connection manager.
      */
+    @Autowired
     ConnectionManager connectionManager
 
     /**
      * Persistence interceptor for Hibernate session handling.
      */
+    @Autowired
     PersistenceContextInterceptor persistenceInterceptor
 
     /**
      * Rabbit message publisher.
      */
+    @Autowired
     RabbitMessagePublisher rabbitMessagePublisher
 
     /**
@@ -82,33 +89,7 @@ class ConsumerContextImpl implements ConsumerContext {
      */
     @Override
     String getConnectionName() {
-        return getConfiguration().getConnection()
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ConsumerConfiguration getConfiguration() {
-        return consumer.getConfiguration()
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    boolean isValid() {
-        ConsumerConfiguration configuration = getConfiguration()
-
-        if (!configuration) {
-            return false
-        }
-
-        if (!configuration.isValid()) {
-            return false
-        }
-
-        return true
+        return consumer.getConfiguration().getConnection()
     }
 
     /**
@@ -123,17 +104,25 @@ class ConsumerContextImpl implements ConsumerContext {
      * {@inheritDoc}
      */
     @Override
+    String getName() {
+        return consumer.getName()
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     void start() throws IllegalStateException {
         if (getRunningState() != RunningState.STOPPED) {
             throw new IllegalStateException("attempted to start consumer '${getId()}' but it is already started")
         }
 
-        if (!isValid()) {
+        if (!consumer.getConfiguration()?.isValid()) {
             log.warn("not starting consumer '${getId()}' because it is not valid")
             return
         }
 
-        ConsumerConfiguration configuration = getConfiguration()
+        ConsumerConfiguration configuration = consumer.getConfiguration()
 
         String connectionName = configuration.getConnection()
 
@@ -219,6 +208,27 @@ class ConsumerContextImpl implements ConsumerContext {
     /**
      * {@inheritDoc}
      */
+    RunningState getRunningState() {
+        if (consumers.size() == 0) {
+            return RunningState.STOPPED
+        }
+
+        List<RunningState> states = consumers*.getRunningState()
+
+        if (states.any { it == RunningState.SHUTTING_DOWN }) {
+            return RunningState.SHUTTING_DOWN
+        }
+
+        if (states.every { it == RunningState.STOPPED }) {
+            return RunningState.STOPPED
+        }
+
+        return RunningState.RUNNING
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void shutdown() {
         if (getRunningState() != RunningState.RUNNING) {
@@ -243,9 +253,9 @@ class ConsumerContextImpl implements ConsumerContext {
     ConsumerReport getStatusReport() {
         ConsumerReport report = new ConsumerReport()
 
-        ConsumerConfiguration configuration = getConfiguration()
+        ConsumerConfiguration configuration = consumer.getConfiguration()
 
-        report.name = getShortName()
+        report.name = consumer.getName()
         report.fullName = getId()
 
         report.runningState = getRunningState()
@@ -266,9 +276,9 @@ class ConsumerContextImpl implements ConsumerContext {
     @Override
     void deliverMessage(MessageContext context) {
         Object response
+        ConsumerConfiguration configuration = consumer.getConfiguration()
 
         openSession()
-
         consumer.onReceive(context)
 
         try {
@@ -332,14 +342,6 @@ class ConsumerContextImpl implements ConsumerContext {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    String getShortName() {
-        return consumer.getName()
-    }
-
-    /**
      * Binds a Hibernate session to the current thread if Hibernate is present.
      */
     protected void openSession() {
@@ -360,26 +362,5 @@ class ConsumerContextImpl implements ConsumerContext {
 
         persistenceInterceptor.flush()
         persistenceInterceptor.destroy()
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    RunningState getRunningState() {
-        if (consumers.size() == 0) {
-            return RunningState.STOPPED
-        }
-
-        List<RunningState> states = consumers*.getRunningState()
-
-        if (states.any { it == RunningState.SHUTTING_DOWN }) {
-            return RunningState.SHUTTING_DOWN
-        }
-
-        if (states.every { it == RunningState.STOPPED }) {
-            return RunningState.STOPPED
-        }
-
-        return RunningState.RUNNING
     }
 }

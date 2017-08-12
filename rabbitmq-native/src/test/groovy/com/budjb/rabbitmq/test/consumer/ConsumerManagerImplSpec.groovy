@@ -18,18 +18,16 @@ package com.budjb.rabbitmq.test.consumer
 import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
-import com.budjb.rabbitmq.consumer.*
+import com.budjb.rabbitmq.consumer.ConsumerContext
+import com.budjb.rabbitmq.consumer.ConsumerContextImpl
+import com.budjb.rabbitmq.consumer.ConsumerManagerImpl
+import com.budjb.rabbitmq.consumer.MessageConsumer
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.ContextNotFoundException
-import com.budjb.rabbitmq.exception.MissingConfigurationException
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
-import com.budjb.rabbitmq.test.support.MissingConfigurationConsumer
-import com.budjb.rabbitmq.test.support.UnitTestConsumer
-import grails.config.Config
 import grails.core.GrailsApplication
 import grails.core.GrailsClass
 import org.grails.config.PropertySourcesConfig
-import org.slf4j.Logger
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
@@ -62,16 +60,13 @@ class ConsumerManagerImplSpec extends Specification {
 
     def 'Ensure proper objects are injected into new contexts'() {
         setup:
-        UnitTestConsumer consumer = new UnitTestConsumer()
-        consumer.grailsApplication = grailsApplication
-        consumer.afterPropertiesSet()
+        MessageConsumer consumer = Mock(MessageConsumer)
 
         when:
         ConsumerContextImpl context = (ConsumerContextImpl) consumerManager.createContext(consumer)
 
         then:
         context.consumer == consumer
-        context.configuration instanceof ConsumerConfiguration
         context.persistenceInterceptor == persistenceInterceptor
         context.rabbitMessagePublisher == rabbitMessagePublisher
         context.connectionManager == connectionManager
@@ -252,64 +247,6 @@ class ConsumerManagerImplSpec extends Specification {
 
         expect:
         consumerManager.getContext('Consumer1') == consumerContext2
-    }
-
-    def 'If a consumer has a configuration defined in the application config, it is loaded correctly'() {
-        setup:
-        Config config = new PropertySourcesConfig()
-        config.putAll([
-            rabbitmq: [
-                consumers: [
-                    'MissingConfigurationConsumer': [
-                        queue    : 'test-queue',
-                        consumers: 10
-                    ]
-                ]
-            ]
-        ])
-
-        grailsApplication = Mock(GrailsApplication)
-        grailsApplication.getConfig() >> config
-
-        MissingConfigurationConsumer consumer = new MissingConfigurationConsumer()
-        consumer.grailsApplication = grailsApplication
-        consumer.afterPropertiesSet()
-
-        when:
-        ConsumerContext consumerContext = consumerManager.createContext(consumer)
-
-        then:
-        consumerContext.id == 'com.budjb.rabbitmq.test.support.MissingConfigurationConsumer'
-        consumerContext.configuration.queue == 'test-queue'
-        consumerContext.configuration.consumers == 10
-    }
-
-    def 'If a consumer has a configuration defined within the object, it is loaded correctly'() {
-        setup:
-        UnitTestConsumer consumer = new UnitTestConsumer()
-        consumer.grailsApplication = grailsApplication
-        consumer.afterPropertiesSet()
-
-        when:
-        ConsumerContext consumerContext = consumerManager.createContext(consumer)
-
-        then:
-        consumerContext.id == 'com.budjb.rabbitmq.test.support.UnitTestConsumer'
-        consumerContext.configuration.queue == 'test-queue'
-        consumerContext.configuration.consumers == 5
-    }
-
-    def 'If a consumer has no configuration defined, a MissingConfigurationException is thrown'() {
-        setup:
-        grailsApplication.getConfig() >> new PropertySourcesConfig()
-        MissingConfigurationConsumer consumer = new MissingConfigurationConsumer()
-        consumer.grailsApplication = grailsApplication
-
-        when:
-        consumer.afterPropertiesSet()
-
-        then:
-        thrown MissingConfigurationException
     }
 
     def 'If all consumers are started while some of those consumers are already started, the IllegalStateException should be swallowed'() {

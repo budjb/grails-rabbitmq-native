@@ -210,7 +210,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      */
     @Override
     ConsumerContext getContext(String name) throws ContextNotFoundException {
-        ConsumerContext adapter = consumers.find { it.id == name } ?: consumers.find { it.shortName == name }
+        ConsumerContext adapter = consumers.find { it.getId() == name } ?: consumers.find { it.getName() == name }
 
         if (!adapter) {
             throw new ContextNotFoundException("consumer '${name}' is not registered")
