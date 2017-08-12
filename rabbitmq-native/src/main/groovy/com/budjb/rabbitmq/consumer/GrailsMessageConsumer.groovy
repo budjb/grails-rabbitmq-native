@@ -28,7 +28,7 @@ import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.util.ClassUtils
 
-class GrailsMessageConsumer extends BaseMessageConsumer implements InitializingBean {
+class GrailsMessageConsumer extends AbstractMessageConsumer implements InitializingBean {
     /**
      * Name of the method that should handle incoming messages.
      */
@@ -87,20 +87,37 @@ class GrailsMessageConsumer extends BaseMessageConsumer implements InitializingB
             handler = findHandler(messageContext)
         }
         if (!handler) {
-            throw new IllegalStateException("could not find a handler method for class type ${body.getClass()}")
+            throw new IllegalArgumentException("could not find a handler method for class type ${body.getClass()}")
         }
 
         if (handler.nativeParameterTypes.size() == 1) {
             if (MessageContext.isAssignableFrom(handler.nativeParameterTypes[0])) {
-                return handler.invoke(getActualConsumer(), messageContext)
+                return handler.invoke(getActualConsumer(), [messageContext] as Object[])
             }
             else {
-                return handler.invoke(getActualConsumer(), body)
+                return handler.invoke(getActualConsumer(), [body] as Object[])
             }
         }
         else {
             return handler.invoke(getActualConsumer(), body, messageContext)
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void init() throws RuntimeException {
+        loadConfiguration()
+        loadHandlers()
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void afterPropertiesSet() throws Exception {
+        init()
     }
 
     /**
@@ -141,12 +158,6 @@ class GrailsMessageConsumer extends BaseMessageConsumer implements InitializingB
         }
 
         return context.getBody()
-    }
-
-    @Override
-    void afterPropertiesSet() throws Exception {
-        loadConfiguration()
-        loadHandlers()
     }
 
     /**

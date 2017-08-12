@@ -15,26 +15,33 @@
  */
 package com.budjb.rabbitmq.test.support
 
+import com.budjb.rabbitmq.consumer.ConsumerConfiguration
+import com.budjb.rabbitmq.consumer.ConsumerConfigurationImpl
 import com.budjb.rabbitmq.consumer.GrailsMessageConsumer
 
-class MissingConfigurationConsumer extends GrailsMessageConsumer {
-    def handleMessage(def body, def context) {
+class MultipleHandlersConsumer extends GrailsMessageConsumer {
+    final ConsumerConfiguration configuration = new ConsumerConfigurationImpl(
+        queue: 'foobar',
+        consumers: 10
+    )
 
+    enum Handler {
+        INTEGER,
+        BYTE,
+        MAP
     }
 
-    void onReceive(def context) {
+    Handler handler
 
+    void handleMessage(Map input) {
+        handler = Handler.MAP
     }
 
-    def onSuccess(def context) {
-
+    void handleMessage(int input) {
+        handler = Handler.INTEGER
     }
 
-    def onComplete(def context) {
-
-    }
-
-    def onFailure(def context) {
-
+    void handleMessage(byte[] input) {
+        handler = Handler.BYTE
     }
 }

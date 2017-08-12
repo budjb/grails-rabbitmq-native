@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Bud Byrd
+ * Copyright 2017 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
+import org.springframework.util.ClassUtils
 
 class MessageConverterManagerImpl implements MessageConverterManager, ApplicationContextAware {
     /**
@@ -99,7 +100,7 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
                 continue
             }
 
-            if (!availableClasses.any { it.isAssignableFrom(converter.getType()) }) {
+            if (!availableClasses.any { ClassUtils.isAssignable(it, converter.getType()) }) {
                 continue
             }
 

@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.budjb.rabbitmq.test
+package com.budjb.rabbitmq.test.support
 
-import grails.boot.GrailsApp
-import grails.boot.config.GrailsAutoConfiguration
+import com.budjb.rabbitmq.consumer.ConsumerConfiguration
+import com.budjb.rabbitmq.consumer.ConsumerConfigurationImpl
+import com.budjb.rabbitmq.consumer.GrailsMessageConsumer
 
-class Application extends GrailsAutoConfiguration {
-    static void main(String[] args) {
-        GrailsApp.run(Application, args)
+class IntegerMessageConsumer extends GrailsMessageConsumer {
+    final ConsumerConfiguration configuration = new ConsumerConfigurationImpl(queue: 'foobar')
+
+    void handleMessage(int message) {
+
     }
 }
