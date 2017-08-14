@@ -48,4 +48,76 @@ class GrailsMessageConsumerWrapper extends GrailsMessageConsumer {
     Object getActualConsumer() {
         return wrapped
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void onReceive(MessageContext messageContext) {
+        MetaMethod method = wrapped.getMetaClass().getMethods().find { it.name == 'onReceive' }
+
+        if (method) {
+            try {
+                method.checkParameters([MessageContext] as Class[])
+                method.invoke(wrapped, messageContext)
+            }
+            catch (IllegalArgumentException ignored) {
+                log.error("consumer ${getId()} has an invalid onReceive method signature")
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void onSuccess(MessageContext messageContext) {
+        MetaMethod method = wrapped.getMetaClass().getMethods().find { it.name == 'onSuccess' }
+
+        if (method) {
+            try {
+                method.checkParameters([MessageContext] as Class[])
+                method.invoke(wrapped, messageContext)
+            }
+            catch (IllegalArgumentException ignored) {
+                log.error("consumer ${getId()} has an invalid onSuccess method signature")
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void onFailure(MessageContext messageContext, Throwable throwable) {
+        MetaMethod method = wrapped.getMetaClass().getMethods().find { it.name == 'onFailure' }
+
+        if (method) {
+            try {
+                method.checkParameters([MessageContext, Throwable] as Class[])
+                method.invoke(wrapped, messageContext, throwable)
+            }
+            catch (IllegalArgumentException ignored) {
+                log.error("consumer ${getId()} has an invalid onFailure method signature")
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void onComplete(MessageContext messageContext) {
+        MetaMethod method = wrapped.getMetaClass().getMethods().find { it.name == 'onComplete' }
+
+        if (method) {
+            try {
+                method.checkParameters([MessageContext] as Class[])
+                method.invoke(wrapped, messageContext)
+            }
+            catch (IllegalArgumentException ignored) {
+                log.error("consumer ${getId()} has an invalid onComplete method signature")
+            }
+        }
+    }
 }
