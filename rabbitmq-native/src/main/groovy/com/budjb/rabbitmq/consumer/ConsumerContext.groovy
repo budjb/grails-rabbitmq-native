@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Bud Byrd
+ * Copyright 2017 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package com.budjb.rabbitmq.consumer
 import com.budjb.rabbitmq.RabbitManagedContext
 import com.budjb.rabbitmq.report.ConsumerReport
 
+/**
+ * A container for a consumer and all of its consuming threads.
+ */
 interface ConsumerContext extends RabbitManagedContext {
     /**
      * Return the name of the connection the consumer belongs to.
@@ -27,18 +30,11 @@ interface ConsumerContext extends RabbitManagedContext {
     String getConnectionName()
 
     /**
-     * Returns the consumer's configuration, or null if one is not defined.
+     * Returns the consumer's name.
      *
      * @return
      */
-    ConsumerConfiguration getConfiguration()
-
-    /**
-     * Returns whether the consumer's configuration is valid.
-     *
-     * @return
-     */
-    boolean isValid()
+    String getName()
 
     /**
      * Performs a graceful shutdown.
@@ -58,10 +54,4 @@ interface ConsumerContext extends RabbitManagedContext {
      * @param context
      */
     void deliverMessage(MessageContext context)
-
-    /**
-     * Add a short name to the consumer context to replace that the id is now the fullname
-     * @return
-     */
-    String getShortName()
 }

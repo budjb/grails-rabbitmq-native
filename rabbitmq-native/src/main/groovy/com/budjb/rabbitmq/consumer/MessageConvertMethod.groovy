@@ -16,7 +16,18 @@
 package com.budjb.rabbitmq.consumer
 
 enum MessageConvertMethod {
+    /**
+     * Disables message conversion entirely.
+     */
     DISABLED,
+
+    /**
+     * Only converts the message body when the message's Content-Type matches the converter.
+     */
     HEADER,
+
+    /**
+     * Always attempt conversion for any handler and converter combination until one succeeds.
+     */
     ALWAYS
 }

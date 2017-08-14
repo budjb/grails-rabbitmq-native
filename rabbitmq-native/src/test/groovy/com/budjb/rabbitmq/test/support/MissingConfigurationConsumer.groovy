@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Bud Byrd
+ * Copyright 2017 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,9 @@
  */
 package com.budjb.rabbitmq.test.support
 
-class MissingConfigurationConsumer {
+import com.budjb.rabbitmq.consumer.GrailsMessageConsumer
+
+class MissingConfigurationConsumer extends GrailsMessageConsumer {
     def handleMessage(def body, def context) {
 
     }
