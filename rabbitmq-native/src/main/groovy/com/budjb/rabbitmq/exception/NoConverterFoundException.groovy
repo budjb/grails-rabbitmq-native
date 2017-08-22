@@ -15,12 +15,16 @@
  */
 package com.budjb.rabbitmq.exception
 
-class MessageConvertException extends Exception {
-    MessageConvertException(String message) {
+/**
+ * An exception that's thrown when no message converter was compatible with a conversion request.
+ */
+class NoConverterFoundException extends Exception {
+    /**
+     * Constructor.
+     *
+     * @param message
+     */
+    NoConverterFoundException(String message) {
         super(message)
-    }
-
-    MessageConvertException(String message, Throwable cause) {
-        super(message, cause)
     }
 }

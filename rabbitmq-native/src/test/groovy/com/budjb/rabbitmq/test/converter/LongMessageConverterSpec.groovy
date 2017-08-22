@@ -16,47 +16,47 @@
 package com.budjb.rabbitmq.test.converter
 
 import com.budjb.rabbitmq.converter.*
-import grails.util.TypeConvertingMap
 import org.springframework.util.MimeType
 import spock.lang.Specification
 
-class TypeConvertingMapMessageConverterSpec extends Specification {
-    TypeConvertingMapMessageConverter messageConverter
+class LongMessageConverterSpec extends Specification {
+    LongMessageConverter messageConverter
 
     def setup() {
-        messageConverter = new TypeConvertingMapMessageConverter()
+        messageConverter = new LongMessageConverter()
     }
 
-    def 'Validate that TypeConvertingMap is supported'() {
+    def 'Validate that the Long data type is supported'() {
         expect:
-        messageConverter.supports(TypeConvertingMap)
+        messageConverter.supports(long)
+        messageConverter.supports(Long)
     }
 
-    def 'Ensure the converter has the correct content type'() {
+    def 'Validate that the proper content type is supported'() {
         expect:
-        messageConverter.supports(MimeType.valueOf('application/json'))
+        messageConverter.supports(MimeType.valueOf('text/plain'))
     }
 
-    def 'Validate conversion from a byte array to a TypeConvertingMap'() {
+    def 'Validate conversion from a byte array to a Long '() {
         setup:
-        ByteToObjectInput input = new ByteToObjectInput([123, 34, 102, 111, 111, 34, 58, 34, 98, 97, 114, 34, 125] as byte[])
+        ByteToObjectInput input = new ByteToObjectInput([49, 50, 51, 52] as byte[])
 
         when:
         ByteToObjectResult result = messageConverter.convert(input)
 
         then:
-        result.getResult() instanceof TypeConvertingMap
-        result.getResult() == ["foo": "bar"] as TypeConvertingMap
+        result.getResult() == 1234
     }
 
-    def 'Validate conversion from a TypeConvertingMap to a byte array'() {
+    def 'Validate conversion fro a Long to a byte array'() {
         setup:
-        ObjectToByteInput input = new ObjectToByteInput(["foo": "bar"])
+        ObjectToByteInput input = new ObjectToByteInput(1234)
 
         when:
         ObjectToByteResult result = messageConverter.convert(input)
 
         then:
-        result.getResult() == [123, 34, 102, 111, 111, 34, 58, 34, 98, 97, 114, 34, 125] as byte[]
+        result.getResult() == [49, 50, 51, 52] as byte[]
+        result.getMimeType().toString() == 'text/plain;charset=UTF-8'
     }
 }

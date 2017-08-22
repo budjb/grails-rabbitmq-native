@@ -16,28 +16,27 @@
 package com.budjb.rabbitmq.test.converter
 
 import com.budjb.rabbitmq.converter.*
-import grails.util.TypeConvertingMap
 import org.springframework.util.MimeType
 import spock.lang.Specification
 
-class TypeConvertingMapMessageConverterSpec extends Specification {
-    TypeConvertingMapMessageConverter messageConverter
+class JsonMessageConverterSpec extends Specification {
+    JsonMessageConverter messageConverter
 
     def setup() {
-        messageConverter = new TypeConvertingMapMessageConverter()
+        messageConverter = new JsonMessageConverter()
     }
 
-    def 'Validate that TypeConvertingMap is supported'() {
+    def 'Validate that the Map and List types are supported'() {
         expect:
-        messageConverter.supports(TypeConvertingMap)
+        messageConverter.supports(List)
+        messageConverter.supports(Map)
     }
 
-    def 'Ensure the converter has the correct content type'() {
-        expect:
+    def 'Ensure the converter handles the correct content type'() {
         messageConverter.supports(MimeType.valueOf('application/json'))
     }
 
-    def 'Validate conversion from a byte array to a TypeConvertingMap'() {
+    def 'Validate conversion from a byte array to a map'() {
         setup:
         ByteToObjectInput input = new ByteToObjectInput([123, 34, 102, 111, 111, 34, 58, 34, 98, 97, 114, 34, 125] as byte[])
 
@@ -45,11 +44,10 @@ class TypeConvertingMapMessageConverterSpec extends Specification {
         ByteToObjectResult result = messageConverter.convert(input)
 
         then:
-        result.getResult() instanceof TypeConvertingMap
-        result.getResult() == ["foo": "bar"] as TypeConvertingMap
+        result.getResult() == ["foo": "bar"]
     }
 
-    def 'Validate conversion from a TypeConvertingMap to a byte array'() {
+    def 'Validate conversion from a map to a byte array'() {
         setup:
         ObjectToByteInput input = new ObjectToByteInput(["foo": "bar"])
 
@@ -58,5 +56,29 @@ class TypeConvertingMapMessageConverterSpec extends Specification {
 
         then:
         result.getResult() == [123, 34, 102, 111, 111, 34, 58, 34, 98, 97, 114, 34, 125] as byte[]
+        result.getMimeType().toString() == 'application/json;charset=UTF-8'
+    }
+
+    def 'Validate conversion from a byte array to a list'() {
+        setup:
+        ByteToObjectInput input = new ByteToObjectInput([91, 34, 102, 111, 111, 34, 44, 34, 98, 97, 114, 34, 93] as byte[])
+
+        when:
+        ByteToObjectResult result = messageConverter.convert(input)
+
+        then:
+        result.getResult() == ["foo", "bar"]
+    }
+
+    def 'Validate conversion from a list to a byte array'() {
+        setup:
+        ObjectToByteInput input = new ObjectToByteInput(["foo", "bar"])
+
+        when:
+        ObjectToByteResult result = messageConverter.convert(input)
+
+        then:
+        result.getResult() == [91, 34, 102, 111, 111, 34, 44, 34, 98, 97, 114, 34, 93] as byte[]
+        result.getMimeType().toString() == 'application/json;charset=UTF-8'
     }
 }

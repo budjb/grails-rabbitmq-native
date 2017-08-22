@@ -16,13 +16,14 @@
 package com.budjb.rabbitmq.converter
 
 import groovy.transform.CompileStatic
+import org.springframework.util.ClassUtils
 import org.springframework.util.MimeType
 
 /**
- * A converter that supports conversion to and from a {@link String}.
+ * A converter that supports the conversion of a long via its string representation.
  */
 @CompileStatic
-class StringMessageConverter implements ByteToObjectConverter, ObjectToByteConverter {
+class LongMessageConverter implements ByteToObjectConverter, ObjectToByteConverter {
     /**
      * Mime type.
      */
@@ -33,7 +34,7 @@ class StringMessageConverter implements ByteToObjectConverter, ObjectToByteConve
      */
     @Override
     boolean supports(Class<?> type) {
-        return String.isAssignableFrom(type)
+        return ClassUtils.isAssignable(long, type)
     }
 
     /**
@@ -49,7 +50,12 @@ class StringMessageConverter implements ByteToObjectConverter, ObjectToByteConve
      */
     @Override
     ByteToObjectResult convert(ByteToObjectInput input) {
-        return new ByteToObjectResult(new String(input.getBytes(), input.getCharset()))
+        try {
+            return new ByteToObjectResult(new String(input.getBytes(), input.getCharset()).toLong())
+        }
+        catch (NumberFormatException ignored) {
+            return null
+        }
     }
 
     /**
@@ -57,9 +63,6 @@ class StringMessageConverter implements ByteToObjectConverter, ObjectToByteConve
      */
     @Override
     ObjectToByteResult convert(ObjectToByteInput input) {
-        return new ObjectToByteResult(
-            ((String) input.getObject()).getBytes(input.getCharset()),
-            new MimeType(mimeType, input.getCharset())
-        )
+        return new ObjectToByteResult(input.getObject().toString().getBytes(input.getCharset()), new MimeType(mimeType, input.getCharset()))
     }
 }

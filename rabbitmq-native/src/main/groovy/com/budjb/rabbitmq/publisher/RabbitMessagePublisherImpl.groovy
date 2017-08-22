@@ -17,13 +17,16 @@ package com.budjb.rabbitmq.publisher
 
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.MessageContext
+import com.budjb.rabbitmq.converter.ByteToObjectInput
 import com.budjb.rabbitmq.converter.MessageConverterManager
-import com.budjb.rabbitmq.exception.MessageConvertException
+import com.budjb.rabbitmq.converter.ObjectToByteInput
+import com.budjb.rabbitmq.converter.ObjectToByteResult
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
 import com.rabbitmq.client.ShutdownSignalException
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -32,6 +35,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
 @Slf4j
+@CompileStatic
 class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
     /**
      * Connection manager.
@@ -52,31 +56,24 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @throws IllegalArgumentException
      */
     void send(RabbitMessageProperties properties) throws IllegalArgumentException {
-        // Make sure an exchange or a routing key were provided
         if (!properties.exchange && !properties.routingKey) {
             throw new IllegalArgumentException("exchange and/or routing key required")
         }
 
-        // Build properties
+        byte[] body = convert(properties)
+
         BasicProperties basicProperties = properties.toBasicProperties()
 
-        // Convert the object and create the message
-        byte[] body = convertMessageToBytes(properties.body)
-
-        // Whether the channel should be closed
         boolean closeChannel = false
 
-        // If we weren't passed a channel, create a temporary one
         Channel channel = properties.channel
         if (!channel) {
             channel = connectionManager.createChannel(properties.connection)
             closeChannel = true
         }
 
-        // Send the message
         channel.basicPublish(properties.exchange, properties.routingKey, basicProperties, body)
 
-        // Close the channel
         if (closeChannel) {
             channel.close()
         }
@@ -123,31 +120,6 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
     }
 
     /**
-     * Attempts to convert an object to a byte array using any available message converters.
-     *
-     * @param Source object that needs conversion.
-     * @return
-     */
-    protected byte[] convertMessageToBytes(Object source) {
-        return messageConverterManager.convertToBytes(source)
-    }
-
-    /**
-     * Attempts to convert the given byte array to another type via the message converters.
-     *
-     * @param input Byte array to convert.
-     * @return An object converted from a byte array, or the byte array if no conversion could be done.
-     */
-    protected Object convertMessageFromBytes(byte[] input) {
-        try {
-            messageConverterManager.convertFromBytes(input)
-        }
-        catch (MessageConvertException ignore) {
-            return input
-        }
-    }
-
-    /**
      * Sends a message to the bus and waits for a reply, up to the "timeout" property.
      *
      * This method returns a Message object if autoConvert is set to false, or some
@@ -162,60 +134,48 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
      * @return
      */
     Object rpc(RabbitMessageProperties properties) throws TimeoutException, ShutdownSignalException, IOException, IllegalArgumentException {
-        // Make sure an exchange or a routing key were provided
         if (!properties.exchange && !properties.routingKey) {
             throw new IllegalArgumentException("exchange and/or routing key required")
         }
 
-        // Convert the object and create the message
-        byte[] body = convertMessageToBytes(properties.body)
+        byte[] body = convert(properties)
 
-        // Track whether channel should be closed
         boolean closeChannel = false
 
-        // Track whether we've started consuming
         boolean consuming = false
 
-        // Track the temporary queue name
         String temporaryQueue
 
-        // If a channel wasn't given, create one
         Channel channel = properties.channel
         if (!channel) {
             channel = connectionManager.createChannel(properties.connection)
             closeChannel = true
         }
 
-        // Generate a consumer tag
         String consumerTag = UUID.randomUUID().toString()
 
         try {
-            // Create a temporary queue
             temporaryQueue = channel.queueDeclare().queue
 
-            // Set the reply queue
             properties.replyTo = temporaryQueue
 
-            // Build properties
             BasicProperties basicProperties = properties.toBasicProperties()
 
-            // Create the sync object
-            SynchronousQueue<MessageContext> replyHandoff = createResponseQueue()
+            SynchronousQueue<MessageContext> replyHandOff = createResponseQueue()
 
-            // Define the response consumer handler
             DefaultConsumer consumer = new DefaultConsumer(channel) {
                 @Override
                 void handleDelivery(String replyConsumerTag, Envelope replyEnvelope, BasicProperties replyProperties, byte[] replyBody)
                     throws IOException {
                     MessageContext context = new MessageContext(
-                        channel: null,
+                        channel: (Channel) null,
                         consumerTag: replyConsumerTag,
                         envelope: replyEnvelope,
                         properties: replyProperties,
                         body: replyBody
                     )
                     try {
-                        replyHandoff.put(context)
+                        replyHandOff.put(context)
                     }
                     catch (InterruptedException ignore) {
                         Thread.currentThread().interrupt()
@@ -223,29 +183,24 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
                 }
             }
 
-            // Start the consumer and mark it
             channel.basicConsume(temporaryQueue, false, consumerTag, true, true, null, consumer)
             consuming = true
 
-            // Send the message
             channel.basicPublish(properties.exchange, properties.routingKey, basicProperties, body)
 
-            // Wait for the reply
-            MessageContext reply = (properties.timeout < 0) ? replyHandoff.take() : replyHandoff.poll(properties.timeout, TimeUnit.MILLISECONDS)
+            MessageContext reply = (properties.timeout < 0) ? replyHandOff.take() : replyHandOff.poll(properties.timeout, TimeUnit.MILLISECONDS)
 
-            // If the reply is null, assume the timeout was reached
             if (reply == null) {
                 throw new TimeoutException(
                     "timeout of ${properties.timeout} milliseconds reached while waiting for a response in an RPC message to exchange " +
                         "'${properties.exchange}' and routingKey '${properties.routingKey}'")
             }
 
-            // If auto convert is disabled, return the MessageContext
             if (!properties.autoConvert) {
                 return reply
             }
 
-            return convertMessageFromBytes(reply.body)
+            return convert(reply)
         }
         finally {
             // If we've started consuming, stop consumption.
@@ -256,7 +211,6 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
                 channel.basicCancel(consumerTag)
             }
 
-            // Close the channel if a temporary one was opened
             if (closeChannel) {
                 channel.close()
             }
@@ -591,5 +545,41 @@ class RabbitMessagePublisherImpl implements RabbitMessagePublisher {
                 channel.close()
             }
         }
+    }
+
+    /**
+     * Converts the body contained in the message properties. This will set the content type of
+     * the message if one has not already been set.
+     *
+     * @param properties
+     * @return
+     */
+    protected byte[] convert(RabbitMessageProperties properties) {
+        if (properties.getBody() instanceof byte[]) {
+            return (byte[]) properties.getBody()
+        }
+
+        ObjectToByteResult result = messageConverterManager.convert(new ObjectToByteInput(properties.getBody(), properties.getContentType()))
+
+        if (!result) {
+            return null
+        }
+
+        if (!properties.getContentType()) {
+            properties.setContentType(result.getMimeType().toString())
+        }
+
+        return result.getResult()
+    }
+
+    /**
+     * Converts the body contained in the message context. Will attempt to respect the content type
+     * and/or the character set of the message if possible.
+     *
+     * @param messageContext
+     * @return
+     */
+    protected Object convert(MessageContext messageContext) {
+        return messageConverterManager.convert(new ByteToObjectInput(messageContext.getBody(), messageContext.getProperties().getContentType()))?.getResult()
     }
 }

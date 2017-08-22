@@ -38,6 +38,6 @@ class MessageContextSpec extends MessageConsumerIntegrationTest {
         sleep 5000
 
         then:
-        messageContextConsumer.received == true
+        messageContextConsumer.received
     }
 }

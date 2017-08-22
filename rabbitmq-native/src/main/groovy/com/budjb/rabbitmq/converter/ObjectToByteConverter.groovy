@@ -15,25 +15,16 @@
  */
 package com.budjb.rabbitmq.converter
 
-import org.springframework.util.MimeType
-
 /**
- * Describes a class that can convert message bodies.
+ * Describes a {@link MessageConverter} that supports converting from some object to a byte array.
  */
-interface MessageConverter {
+interface ObjectToByteConverter extends MessageConverter {
     /**
-     * Determines whether the converter supports conversion to/from the given class type.
+     * Converts the object contained in the given message properties. This method may also
+     * set the {@link org.springframework.util.MimeType} of the message properties.
      *
-     * @param type Class type to check.
-     * @return Whether the converter supports the given class type.
+     * @param rabbitMessageProperties Message properties.
+     * @return
      */
-    boolean supports(Class<?> type)
-
-    /**
-     * Determines whether the converter supports the given mime type.
-     *
-     * @param mimeType Mime type to check.
-     * @return Whether the converter supports the given mime type.
-     */
-    boolean supports(MimeType mimeType)
+    ObjectToByteResult convert(ObjectToByteInput input)
 }

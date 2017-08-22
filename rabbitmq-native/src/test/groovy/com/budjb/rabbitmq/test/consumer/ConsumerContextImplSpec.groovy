@@ -41,10 +41,8 @@ class ConsumerContextImplSpec extends Specification {
         rabbitMessagePublisher = Mock(RabbitMessagePublisher)
 
         messageConverterManager = new MessageConverterManagerImpl()
-        messageConverterManager.register(new IntegerMessageConverter())
-        messageConverterManager.register(new MapMessageConverter())
-        messageConverterManager.register(new ListMessageConverter())
-        messageConverterManager.register(new GStringMessageConverter())
+        messageConverterManager.register(new JsonMessageConverter())
+        messageConverterManager.register(new LongMessageConverter())
         messageConverterManager.register(new StringMessageConverter())
     }
 

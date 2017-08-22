@@ -15,25 +15,28 @@
  */
 package com.budjb.rabbitmq.converter
 
+import groovy.json.JsonException
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import org.springframework.util.MimeType
 
 /**
- * A converter that supports conversion to and from a {@link String}.
+ * A converter that supports the conversion of a {@link Map} or a {@link List} to and from JSON.
  */
 @CompileStatic
-class StringMessageConverter implements ByteToObjectConverter, ObjectToByteConverter {
+class JsonMessageConverter implements ByteToObjectConverter, ObjectToByteConverter {
     /**
      * Mime type.
      */
-    private static final MimeType mimeType = MimeType.valueOf('text/plain')
+    private static MimeType mimeType = MimeType.valueOf('application/json')
 
     /**
      * {@inheritDoc}
      */
     @Override
     boolean supports(Class<?> type) {
-        return String.isAssignableFrom(type)
+        return List.isAssignableFrom(type) || Map.isAssignableFrom(type)
     }
 
     /**
@@ -49,7 +52,12 @@ class StringMessageConverter implements ByteToObjectConverter, ObjectToByteConve
      */
     @Override
     ByteToObjectResult convert(ByteToObjectInput input) {
-        return new ByteToObjectResult(new String(input.getBytes(), input.getCharset()))
+        try {
+            return new ByteToObjectResult(new JsonSlurper().parse(input.getBytes(), input.getCharset().toString()))
+        }
+        catch (JsonException ignored) {
+            return null
+        }
     }
 
     /**
@@ -57,9 +65,6 @@ class StringMessageConverter implements ByteToObjectConverter, ObjectToByteConve
      */
     @Override
     ObjectToByteResult convert(ObjectToByteInput input) {
-        return new ObjectToByteResult(
-            ((String) input.getObject()).getBytes(input.getCharset()),
-            new MimeType(mimeType, input.getCharset())
-        )
+        return new ObjectToByteResult(JsonOutput.toJson(input.getObject()).getBytes(input.getCharset()), new MimeType(mimeType, input.getCharset()))
     }
 }

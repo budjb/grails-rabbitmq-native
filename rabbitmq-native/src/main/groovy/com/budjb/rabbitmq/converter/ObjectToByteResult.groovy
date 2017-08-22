@@ -15,29 +15,32 @@
  */
 package com.budjb.rabbitmq.converter
 
-class GStringMessageConverter extends MessageConverter<GString> {
-    @Override
-    boolean canConvertFrom() {
-        return true
-    }
+import groovy.transform.CompileStatic
+import org.springframework.util.MimeType
 
-    @Override
-    boolean canConvertTo() {
-        return false
-    }
+/**
+ * Contains the result of a conversion from some object to a byte array.
+ */
+@CompileStatic
+class ObjectToByteResult {
+    /**
+     * Result of the conversion.
+     */
+    final byte[] result
 
-    @Override
-    GString convertTo(byte[] input) {
-        throw new IllegalStateException("can not convert to a GString")
-    }
+    /**
+     * Mime type of the converted object.
+     */
+    final MimeType mimeType
 
-    @Override
-    byte[] convertFrom(GString input) {
-        return input.toString().getBytes()
-    }
-
-    @Override
-    String getContentType() {
-        return null
+    /**
+     * Constructor.
+     *
+     * @param result
+     * @param mimeType
+     */
+    ObjectToByteResult(byte[] result, MimeType mimeType) {
+        this.result = result
+        this.mimeType = mimeType
     }
 }

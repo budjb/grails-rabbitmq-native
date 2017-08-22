@@ -19,21 +19,21 @@ import groovy.transform.CompileStatic
 import org.springframework.util.MimeType
 
 /**
- * A converter that supports conversion to and from a {@link String}.
+ * A message converter that supports conversion of Java serializable objects.
  */
 @CompileStatic
-class StringMessageConverter implements ByteToObjectConverter, ObjectToByteConverter {
+class SerializableMessageConverter implements ByteToObjectConverter, ObjectToByteConverter {
     /**
      * Mime type.
      */
-    private static final MimeType mimeType = MimeType.valueOf('text/plain')
+    final static MimeType mimeType = MimeType.valueOf('application/java-serialized-object')
 
     /**
      * {@inheritDoc}
      */
     @Override
     boolean supports(Class<?> type) {
-        return String.isAssignableFrom(type)
+        return Serializable.isAssignableFrom(type)
     }
 
     /**
@@ -49,7 +49,14 @@ class StringMessageConverter implements ByteToObjectConverter, ObjectToByteConve
      */
     @Override
     ByteToObjectResult convert(ByteToObjectInput input) {
-        return new ByteToObjectResult(new String(input.getBytes(), input.getCharset()))
+        try {
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(input.getBytes())
+            ObjectInputStream ois = new ObjectInputStream(byteArrayInputStream)
+            return new ByteToObjectResult(ois.readObject())
+        }
+        catch (Exception ignored) {
+            return null
+        }
     }
 
     /**
@@ -57,9 +64,15 @@ class StringMessageConverter implements ByteToObjectConverter, ObjectToByteConve
      */
     @Override
     ObjectToByteResult convert(ObjectToByteInput input) {
-        return new ObjectToByteResult(
-            ((String) input.getObject()).getBytes(input.getCharset()),
-            new MimeType(mimeType, input.getCharset())
-        )
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)
+            objectOutputStream.writeObject((Serializable) input.getObject())
+
+            return new ObjectToByteResult(byteArrayOutputStream.toByteArray(), mimeType)
+        }
+        catch (Exception ignored) {
+            return null
+        }
     }
 }

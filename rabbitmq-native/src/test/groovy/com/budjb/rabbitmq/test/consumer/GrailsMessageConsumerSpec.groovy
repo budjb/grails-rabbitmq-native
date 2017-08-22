@@ -37,8 +37,8 @@ class GrailsMessageConsumerSpec extends Specification {
 
     def setup() {
         messageConverterManager = new MessageConverterManagerImpl()
-        messageConverterManager.register(new MapMessageConverter())
-        messageConverterManager.register(new IntegerMessageConverter())
+        messageConverterManager.register(new JsonMessageConverter())
+        messageConverterManager.register(new LongMessageConverter())
         messageConverterManager.register(new StringMessageConverter())
 
         grailsApplication = Mock(GrailsApplication)
