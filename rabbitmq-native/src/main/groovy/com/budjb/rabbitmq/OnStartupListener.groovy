@@ -42,7 +42,7 @@ class OnStartupListener extends GrailsApplicationLifeCycleAdapter implements Gra
         if (isEnabled()) {
             RabbitContext rabbitContext = getRabbitContextBean()
             rabbitContext.load()
-            rabbitContext.start()
+            rabbitContext.start(!isAutoStart())
         }
     }
 
@@ -62,6 +62,21 @@ class OnStartupListener extends GrailsApplicationLifeCycleAdapter implements Gra
      */
     boolean isEnabled() {
         def val = grailsApplication.config.rabbitmq.enabled
+
+        if (!(val instanceof Boolean)) {
+            return true
+        }
+
+        return val
+    }
+
+    /**
+     * Returns whether the plugin is set to auto-start Consumers.
+     *
+     * @return
+     */
+    boolean isAutoStart() {
+        def val = grailsApplication.config.rabbitmq.autoStart
 
         if (!(val instanceof Boolean)) {
             return true
