@@ -69,8 +69,10 @@ class ConsumerContextImpl implements ConsumerContext {
     /**
      * Constructor.
      *
-     * @param clazz
-     * @param grailsApplication
+     * @param consumer
+     * @param connectionManager
+     * @param persistenceInterceptor
+     * @param rabbitMessagePublisher
      */
     ConsumerContextImpl(
         MessageConsumer consumer,
