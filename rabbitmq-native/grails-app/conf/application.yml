@@ -2,7 +2,7 @@ grails:
     profile: plugin
     doc:
         title: RabbitMQ Native Plugin
-        authors: Bud Byrd
+        authors: Bud Byrd, Aaron Brown, Ollie Freeman
     codegen:
         defaultPackage: plugin
     spring:

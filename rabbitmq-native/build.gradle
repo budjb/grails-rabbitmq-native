@@ -8,10 +8,10 @@ buildscript {
     }
 }
 
-apply plugin:"eclipse"
-apply plugin:"idea"
-apply plugin:"org.grails.grails-plugin"
-apply plugin:"org.grails.grails-plugin-publish"
+apply plugin: "eclipse"
+apply plugin: "idea"
+apply plugin: "org.grails.grails-plugin"
+apply plugin: "org.grails.grails-plugin-publish"
 apply plugin: "org.grails.grails-doc"
 
 repositories {
@@ -31,7 +31,7 @@ dependencies {
 
     compile 'commons-lang:commons-lang:2.6'
     compile 'org.codehaus.groovy:groovy-json:2.4.11'
-    compile 'com.rabbitmq:amqp-client:3.6.6'
+    compile 'com.rabbitmq:amqp-client:4.2.0'
 }
 
 bootRun {
@@ -47,7 +47,7 @@ grailsPublish {
         name = 'Apache-2.0'
     }
     title = "RabbitMQ Native Plugin"
-    developers = [budjb: "Bud Byrd", olliefreeman:'Oliver Freeman']
+    developers = [budjb: "Bud Byrd", olliefreeman: "Oliver Freeman", "aaron-brown": "Aaron Brown"]
     repo = "grails-plugins"
 
     user = System.getenv('BINTRAY_USER')
