@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Bud Byrd
+ * Copyright 2013-2017 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,61 +15,58 @@
  */
 package com.budjb.rabbitmq.converter
 
-import com.budjb.rabbitmq.exception.MessageConvertException
 import grails.core.GrailsClass
 
+/**
+ * Describes a class that manages message converters and acts as the entry point for conversion.
+ */
 interface MessageConverterManager {
     /**
-     * Attempt to marshall a byte array to some other object type as long
-     * as that object type has been provided in the given list of classes.
+     * Converts from an <pre>Object</pre> to a <pre>byte[]</pre>.
      *
-     * @param source
-     * @param availableClasses
+     * @param input
      * @return
      */
-    Object convertFromBytes(byte[] source, List<Class<?>> availableClasses)
+    ObjectToByteResult convert(ObjectToByteInput input)
 
     /**
-     * Attempt to marshall a byte array to some other object type.
+     * Converts from a <pre>byte[]</pre> to an <pre>Object</pre>.
      *
-     * @param source
+     * If the input specifies a class filter, the conversions will be limited to only those classes.
+     * In the absence of a class filter, any conversion will be considered valid.
+     *
+     * @param input
      * @return
      */
-    Object convertFromBytes(byte[] source)
+    ByteToObjectResult convert(ByteToObjectInput input)
 
     /**
-     * Attempt to marshall a byte array to some other object type with a content type hint.
+     * Retrieves a list of all registered message converters.
      *
-     * @param source
-     * @param availableClasses
-     * @param contentType
      * @return
-     * @throws MessageConvertException when conversion can not be completed.
      */
-    Object convertFromBytes(byte[] source, List<Class<?>> availableClasses, String contentType) throws MessageConvertException
+    List<MessageConverter> getMessageConverters()
 
     /**
-     * Attempt to marshall an object to a byte array.
+     * Retrieves a list of registered byte-to-object converters.
      *
-     * @param source
      * @return
-     * @throws MessageConvertException when conversion can not be completed.
      */
-    byte[] convertToBytes(Object source) throws MessageConvertException
+    List<ByteToObjectConverter> getByteToObjectConverters()
 
     /**
-     * Retrieves the list of registered message converters.
+     * Retrieves a list of registered object-to-byte converters.
      *
      * @return
      */
-    List<MessageConverter<?>> getMessageConverters()
+    List<ObjectToByteConverter> getObjectToByteConverters()
 
     /**
      * Registers a new message converter.
      *
      * @param messageConverter
      */
-    void register(MessageConverter<?> messageConverter)
+    void register(MessageConverter messageConverter)
 
     /**
      * Registers a new message converter from its Grails artefact.
@@ -79,7 +76,7 @@ interface MessageConverterManager {
     void register(GrailsClass artefact)
 
     /**
-     * Load any message converter artefacts.
+     * Load any registered Grails artefacts and instantiates and adds built-in message converters.
      */
     void load()
 

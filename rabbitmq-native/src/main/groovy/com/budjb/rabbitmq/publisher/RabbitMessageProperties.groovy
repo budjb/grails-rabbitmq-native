@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Bud Byrd
+ * Copyright 2013-2017 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@ package com.budjb.rabbitmq.publisher
 
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.Channel
+import groovy.transform.CompileStatic
 
 import java.time.OffsetDateTime
 
+@CompileStatic
 class RabbitMessageProperties {
     /**
      * Default timeout for RPC calls (5 seconds).
@@ -112,7 +114,7 @@ class RabbitMessageProperties {
     String appId
 
     /**
-     * Whether to auto-convert the reply payload.
+     * Whether to auto-convertToBytes the reply payload.
      */
     Boolean autoConvert = true
 
@@ -162,7 +164,7 @@ class RabbitMessageProperties {
 
         // Content type
         if (contentType) {
-            builder.contentType(contentType)
+            builder.contentType(contentType.toString())
         }
 
         // Content encoding

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 Bud Byrd
+ * Copyright 2013-2017 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,52 +15,25 @@
  */
 package com.budjb.rabbitmq.converter
 
-import java.lang.reflect.ParameterizedType
+import org.springframework.util.MimeType
 
-abstract class MessageConverter<T> {
+/**
+ * Describes a class that can convert message bodies.
+ */
+interface MessageConverter {
     /**
-     * Returns the class type this converter is responsible for converting.
+     * Determines whether the converter supports conversion to/from the given class type.
      *
-     * @return
+     * @param type Class type to check.
+     * @return Whether the converter supports the given class type.
      */
-    Class getType() {
-        // TODO: may need to do this better...
-        return ((ParameterizedType) getClass().getGenericSuperclass()).actualTypeArguments[0]
-    }
+    boolean supports(Class<?> type)
 
     /**
-     * Returns the content type this handler can convert.
+     * Determines whether the converter supports the given mime type.
      *
-     * @return Content-type, or null if a content-type does not exist.
+     * @param mimeType Mime type to check.
+     * @return Whether the converter supports the given mime type.
      */
-    abstract String getContentType()
-
-    /**
-     * Returns whether the converter can convert the object from its source type to a byte array.
-     *
-     * @return
-     */
-    abstract boolean canConvertFrom()
-
-    /**
-     * Returns whether the converter can convert the object from a byte array to its proper type.
-     * @return
-     */
-    abstract boolean canConvertTo()
-
-    /**
-     * Converts a byte array to the object type this converter is responsible for.
-     *
-     * @param input
-     * @return
-     */
-    abstract T convertTo(byte[] input)
-
-    /**
-     * Converts an object to a byte array.
-     *
-     * @param input
-     * @return
-     */
-    abstract byte[] convertFrom(T input)
+    boolean supports(MimeType mimeType)
 }

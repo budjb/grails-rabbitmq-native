@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 Bud Byrd
+ * Copyright 2013-2017 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,34 +15,54 @@
  */
 package com.budjb.rabbitmq.converter
 
-class IntegerMessageConverter extends MessageConverter<Integer> {
+import groovy.transform.CompileStatic
+import org.springframework.util.ClassUtils
+import org.springframework.util.MimeType
+
+/**
+ * A converter that supports the conversion of an integer via its string representation.
+ */
+@CompileStatic
+class IntegerMessageConverter implements ByteToObjectConverter, ObjectToByteConverter {
+    /**
+     * Mime type.
+     */
+    private static final MimeType mimeType = MimeType.valueOf('text/plain')
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    boolean canConvertFrom() {
-        return true
+    boolean supports(Class<?> type) {
+        return ClassUtils.isAssignable(int, type)
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    boolean canConvertTo() {
-        return true
+    boolean supports(MimeType mimeType) {
+        return mimeType.isCompatibleWith(this.mimeType)
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    Integer convertTo(byte[] input) {
-        String string = new String(input)
-        if (!string.isInteger()) {
+    ByteToObjectResult convert(ByteToObjectInput input) {
+        try {
+            return new ByteToObjectResult(new String(input.getBytes(), input.getCharset()).toInteger())
+        }
+        catch (NumberFormatException ignored) {
             return null
         }
-        return string.toInteger()
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    byte[] convertFrom(Integer input) {
-        return input.toString().getBytes()
+    ObjectToByteResult convert(ObjectToByteInput input) {
+        return new ObjectToByteResult(input.getObject().toString().getBytes(input.getCharset()), new MimeType(mimeType, input.getCharset()))
     }
-
-    @Override
-    String getContentType() {
-        return null
-    }
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 Bud Byrd
+ * Copyright 2013-2017 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,51 @@
  */
 package com.budjb.rabbitmq.converter
 
-class StringMessageConverter extends MessageConverter<String> {
+import groovy.transform.CompileStatic
+import org.springframework.util.MimeType
+
+/**
+ * A converter that supports conversion to and from a {@link String}.
+ */
+@CompileStatic
+class StringMessageConverter implements ByteToObjectConverter, ObjectToByteConverter {
+    /**
+     * Mime type.
+     */
+    private static final MimeType mimeType = MimeType.valueOf('text/plain')
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    boolean canConvertFrom() {
-        return true
+    boolean supports(Class<?> type) {
+        return String.isAssignableFrom(type)
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    boolean canConvertTo() {
-        return true
+    boolean supports(MimeType mimeType) {
+        return mimeType.isCompatibleWith(this.mimeType)
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    String convertTo(byte[] input) {
-        return new String(input)
+    ByteToObjectResult convert(ByteToObjectInput input) {
+        return new ByteToObjectResult(new String(input.getBytes(), input.getCharset()))
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    byte[] convertFrom(String input) {
-        return input.getBytes()
-    }
-
-    @Override
-    String getContentType() {
-        return 'text/plain'
+    ObjectToByteResult convert(ObjectToByteInput input) {
+        return new ObjectToByteResult(
+            ((String) input.getObject()).getBytes(input.getCharset()),
+            new MimeType(mimeType, input.getCharset())
+        )
     }
 }

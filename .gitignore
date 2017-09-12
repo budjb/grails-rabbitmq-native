@@ -60,3 +60,5 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
+# OSX
+.DS_Store

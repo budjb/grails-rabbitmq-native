@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Bud Byrd
+ * Copyright 2013-2017 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,13 @@ import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.MessageContext
 import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.exception.ContextNotFoundException
-import com.budjb.rabbitmq.exception.MessageConvertException
+import com.budjb.rabbitmq.exception.NoConverterFoundException
 import com.budjb.rabbitmq.publisher.RabbitMessageProperties
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisherImpl
+import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.util.concurrent.SynchronousQueue
@@ -58,7 +60,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
             channel: null,
             consumerTag: null,
             envelope: null,
-            properties: null,
+            properties: new AMQP.BasicProperties(),
             body: response
         )
 
@@ -68,6 +70,14 @@ class RabbitMessagePublisherImplSpec extends Specification {
 
     }
 
+    @Ignore
+    byte[] serialize(Serializable serializable) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream()
+        ObjectOutputStream oos = new ObjectOutputStream(baos)
+        oos.writeObject(serializable)
+        return baos.toByteArray()
+    }
+
     def setup() {
         channel = Mock(Channel)
 
@@ -75,10 +85,8 @@ class RabbitMessagePublisherImplSpec extends Specification {
         connectionManager.createChannel(null) >> channel
 
         messageConverterManager = new MessageConverterManagerImpl()
-        messageConverterManager.register(new IntegerMessageConverter())
-        messageConverterManager.register(new MapMessageConverter())
-        messageConverterManager.register(new ListMessageConverter())
-        messageConverterManager.register(new GStringMessageConverter())
+        messageConverterManager.register(new LongMessageConverter())
+        messageConverterManager.register(new JsonMessageConverter())
         messageConverterManager.register(new StringMessageConverter())
 
         rabbitMessagePublisher = new RabbitMessagePublisherImpl()
@@ -113,7 +121,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
         rabbitMessagePublisher.send(BASIC_PUBLISH_ROUTING_KEY, BASIC_PUBLISH_MESSAGE)
 
         then:
-        1 * channel.basicPublish('', BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
+        1 * channel.basicPublish('', BASIC_PUBLISH_ROUTING_KEY, _, serialize(BASIC_PUBLISH_MESSAGE))
     }
 
     def 'Basic send() with an exchange and routing key'() {
@@ -121,7 +129,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
         rabbitMessagePublisher.send(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, BASIC_PUBLISH_MESSAGE)
 
         then:
-        1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
+        1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, serialize(BASIC_PUBLISH_MESSAGE))
     }
 
     def 'Basic send() with a provided RabbitMessageProperties object'() {
@@ -133,7 +141,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
         })
 
         then:
-        1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
+        1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, serialize(BASIC_PUBLISH_MESSAGE))
     }
 
     def 'Basic send() configured by a closure'() {
@@ -145,7 +153,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
         }
 
         then:
-        1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
+        1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, serialize(BASIC_PUBLISH_MESSAGE))
     }
 
     def 'Send with no parameters provided (routing key and/or exchange are required)'() {
@@ -188,7 +196,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
         rabbitMessagePublisher.send(BASIC_PUBLISH_ROUTING_KEY, new Expando())
 
         then:
-        thrown MessageConvertException
+        thrown NoConverterFoundException
     }
 
     def 'RPC with only a routing key'() {
@@ -200,7 +208,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
 
         then:
         response == BASIC_RESPONSE_MESSAGE
-        1 * channel.basicPublish('', BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
+        1 * channel.basicPublish('', BASIC_PUBLISH_ROUTING_KEY, _, serialize(BASIC_PUBLISH_MESSAGE))
     }
 
     def 'RPC with an exchange and routing key'() {
@@ -212,7 +220,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
 
         then:
         response == BASIC_RESPONSE_MESSAGE
-        1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
+        1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, serialize(BASIC_PUBLISH_MESSAGE))
     }
 
     def 'RPC call with a RabbitMessageProperties object'() {
@@ -228,7 +236,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
 
         then:
         response == BASIC_RESPONSE_MESSAGE
-        1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
+        1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, serialize(BASIC_PUBLISH_MESSAGE))
     }
 
     def 'RPC call configured by a closure'() {
@@ -244,7 +252,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
 
         then:
         response == BASIC_RESPONSE_MESSAGE
-        1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, BASIC_PUBLISH_MESSAGE.getBytes())
+        1 * channel.basicPublish(BASIC_PUBLISH_EXCHANGE, BASIC_PUBLISH_ROUTING_KEY, _, serialize(BASIC_PUBLISH_MESSAGE))
     }
 
     def 'Ensure that an RPC timeout throws an exception'() {
@@ -328,7 +336,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
         }
 
         then:
-        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        5 * channel.basicPublish('', 'test-queue', _, serialize('hi'))
     }
 
     def 'If batching messages with withChannel(String, Closure), only one channel from the default connection should be used'() {
@@ -350,7 +358,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
         }
 
         then:
-        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        5 * channel.basicPublish('', 'test-queue', _, serialize('hi'))
     }
 
     def 'Validate interactions for withConfirms(Closure)'() {
@@ -371,7 +379,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
         }
 
         then:
-        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        5 * channel.basicPublish('', 'test-queue', _, serialize('hi'))
         1 * channel.confirmSelect()
         1 * channel.waitForConfirms()
     }
@@ -395,7 +403,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
         }
 
         then:
-        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        5 * channel.basicPublish('', 'test-queue', _, serialize('hi'))
         1 * channel.confirmSelect()
         1 * channel.waitForConfirms()
     }
@@ -418,7 +426,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
         }
 
         then:
-        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        5 * channel.basicPublish('', 'test-queue', _, serialize('hi'))
         1 * channel.confirmSelect()
         1 * channel.waitForConfirms(5000)
     }
@@ -442,7 +450,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
         }
 
         then:
-        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        5 * channel.basicPublish('', 'test-queue', _, serialize('hi'))
         1 * channel.confirmSelect()
         1 * channel.waitForConfirms(5000)
     }
@@ -465,7 +473,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
         }
 
         then:
-        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        5 * channel.basicPublish('', 'test-queue', _, serialize('hi'))
         1 * channel.confirmSelect()
         1 * channel.waitForConfirmsOrDie()
     }
@@ -489,7 +497,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
         }
 
         then:
-        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        5 * channel.basicPublish('', 'test-queue', _, serialize('hi'))
         1 * channel.confirmSelect()
         1 * channel.waitForConfirmsOrDie()
     }
@@ -512,7 +520,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
         }
 
         then:
-        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        5 * channel.basicPublish('', 'test-queue', _, serialize('hi'))
         1 * channel.confirmSelect()
         1 * channel.waitForConfirmsOrDie(5000)
     }
@@ -536,7 +544,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
         }
 
         then:
-        5 * channel.basicPublish('', 'test-queue', _, 'hi'.getBytes())
+        5 * channel.basicPublish('', 'test-queue', _, serialize('hi'))
         1 * channel.confirmSelect()
         1 * channel.waitForConfirmsOrDie(5000)
     }

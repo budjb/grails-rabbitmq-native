@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Bud Byrd
+ * Copyright 2013-2017 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class MessageMarshallSpec extends MessageConsumerIntegrationTest {
     @Autowired
     ReportingConsumer reportingConsumer
+
     @Autowired
     StringConsumer stringConsumer
 
@@ -36,7 +37,7 @@ class MessageMarshallSpec extends MessageConsumerIntegrationTest {
             routingKey = 'reporting'
             body = "foobar"
         }
-        Map received = waitUntilMessageReceived(30000) { reportingConsumer.lastMessage }
+        Map received = (Map) waitUntilMessageReceived(30000) { reportingConsumer.lastMessage }
 
         then:
         received != null
@@ -51,7 +52,7 @@ class MessageMarshallSpec extends MessageConsumerIntegrationTest {
             routingKey = 'reporting'
             body = 1234
         }
-        Map received = waitUntilMessageReceived(30000) { reportingConsumer.lastMessage }
+        Map received = (Map) waitUntilMessageReceived(30000) { reportingConsumer.lastMessage }
 
         then:
         received != null
@@ -66,7 +67,7 @@ class MessageMarshallSpec extends MessageConsumerIntegrationTest {
             routingKey = 'reporting'
             body = ["foo", "bar"]
         }
-        Map received = waitUntilMessageReceived(30000) { reportingConsumer.lastMessage }
+        Map received = (Map) waitUntilMessageReceived(30000) { reportingConsumer.lastMessage }
 
         then:
         received != null
@@ -81,7 +82,7 @@ class MessageMarshallSpec extends MessageConsumerIntegrationTest {
             routingKey = 'reporting'
             body = ["foo": "bar"]
         }
-        Map received = waitUntilMessageReceived(30000) { reportingConsumer.lastMessage }
+        Map received = (Map) waitUntilMessageReceived(30000) { reportingConsumer.lastMessage }
 
         then:
         received != null
@@ -103,7 +104,7 @@ class MessageMarshallSpec extends MessageConsumerIntegrationTest {
 
     def 'Ensure RPC calls marshall Integers correctly'() {
         when:
-        Integer response = rabbitMessagePublisher.rpc {
+        Integer response = (Integer) rabbitMessagePublisher.rpc {
             routingKey = 'reporting'
             body = 1234
         }
@@ -114,7 +115,7 @@ class MessageMarshallSpec extends MessageConsumerIntegrationTest {
 
     def 'Ensure RPC calls marshall Lists correctly'() {
         when:
-        List response = rabbitMessagePublisher.rpc {
+        List response = (List) rabbitMessagePublisher.rpc {
             routingKey = 'reporting'
             body = ["foo", "bar"]
         }
@@ -125,7 +126,7 @@ class MessageMarshallSpec extends MessageConsumerIntegrationTest {
 
     def 'Ensure RPC calls marshall Maps correctly'() {
         when:
-        Map response = rabbitMessagePublisher.rpc {
+        Map response = (Map) rabbitMessagePublisher.rpc {
             routingKey = 'reporting'
             body = ["foo": "bar"]
         }
@@ -140,7 +141,7 @@ class MessageMarshallSpec extends MessageConsumerIntegrationTest {
             routingKey = 'string-test'
             body = '{"hi":"there"}'
         }
-        Map received = waitUntilMessageReceived(30000) { stringConsumer.lastMessage }
+        Map received = (Map) waitUntilMessageReceived(30000) { stringConsumer.lastMessage }
 
         then:
         received

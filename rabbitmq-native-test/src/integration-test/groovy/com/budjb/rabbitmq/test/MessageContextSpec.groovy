@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Bud Byrd
+ * Copyright 2013-2017 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,6 @@ class MessageContextSpec extends MessageConsumerIntegrationTest {
         sleep 5000
 
         then:
-        messageContextConsumer.received == true
+        messageContextConsumer.received
     }
 }

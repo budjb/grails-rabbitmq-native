@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Bud Byrd
+ * Copyright 2013-2017 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package com.budjb.rabbitmq.consumer
 
+import com.budjb.rabbitmq.converter.ByteToObjectInput
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.DuplicateHandlerException
-import com.budjb.rabbitmq.exception.MessageConvertException
+import com.budjb.rabbitmq.exception.NoConverterFoundException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
 import com.budjb.rabbitmq.exception.NoMessageHandlersDefinedException
 import grails.core.GrailsApplication
@@ -70,24 +71,41 @@ class GrailsMessageConsumer extends AbstractMessageConsumer implements Initializ
      * {@inheritDoc}
      */
     Object process(MessageContext messageContext) {
-        Object body
-        try {
-            body = convertMessage(messageContext)
-        }
-        catch (Throwable e) {
-            log.error("unexpected exception ${e.getClass()} encountered converting incoming request with handler ${getId()}", e)
-            return null
+        MetaMethod handler = null
+        Object body = null
+
+        if (messageContext.getBody() != null) {
+            try {
+                body = messageConverterManager.convert(new ByteToObjectInput(
+                    messageContext.getBody(),
+                    (String) messageContext.getProperties().getContentType(),
+                    getConfiguration().getConvert(),
+                    handlers.keySet().toList())
+                ).getResult()
+            }
+            catch (NoConverterFoundException ignored) {
+                // There was no message converter that could convert the body.
+                // This is OK. The consumer may have a byte[] or MessageContext handler.
+            }
+            catch (Throwable e) {
+                throw new RuntimeException("unexpected exception ${e.getClass()} encountered converting incoming request with handler ${getId()}", e)
+            }
         }
 
-        MetaMethod handler = findHandler(body)
-        if (!handler) {
-            handler = findHandler(messageContext.body)
+        if (body != null) {
+            handler = findHandler(body)
         }
+
+        if (!handler && messageContext.getBody() != null) {
+            handler = findHandler(messageContext.getBody())
+        }
+
         if (!handler) {
             handler = findHandler(messageContext)
         }
+
         if (!handler) {
-            throw new IllegalArgumentException("could not find a handler method for class type ${body.getClass()}")
+            throw new IllegalArgumentException("could not find a message converter and message handler combination to process an incoming message")
         }
 
         if (handler.nativeParameterTypes.size() == 1) {
@@ -118,46 +136,6 @@ class GrailsMessageConsumer extends AbstractMessageConsumer implements Initializ
     @Override
     void afterPropertiesSet() throws Exception {
         init()
-    }
-
-    /**
-     * Attempts to convert the body of the incoming message from a byte array.
-     * The output of this method is dependent on the consumer's configuration,
-     * the content-type of the message, and the existence of an appropriately
-     * defined handler for the converted type.
-     *
-     * @param context
-     * @return
-     */
-    protected Object convertMessage(MessageContext context) {
-        ConsumerConfiguration configuration = getConfiguration()
-        List<Class<?>> supportedTypes = handlers.keySet().toList()
-
-        if (configuration.getConvert() == MessageConvertMethod.DISABLED) {
-            return context.getBody()
-        }
-
-        if (context.getProperties().getContentType()) {
-            try {
-                return messageConverterManager.convertFromBytes(context.getBody(), supportedTypes, context.getProperties().getContentType())
-            }
-            catch (MessageConvertException ignore) {
-                // Continue
-            }
-        }
-
-        if (configuration.getConvert() == MessageConvertMethod.HEADER) {
-            return context.getBody()
-        }
-
-        try {
-            return messageConverterManager.convertFromBytes(context.getBody(), supportedTypes.toList())
-        }
-        catch (MessageConvertException ignore) {
-            // Continue
-        }
-
-        return context.getBody()
     }
 
     /**

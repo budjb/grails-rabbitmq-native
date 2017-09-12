@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Bud Byrd
+ * Copyright 2013-2017 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,44 @@
  */
 package com.budjb.rabbitmq.converter
 
-import com.budjb.rabbitmq.exception.MessageConvertException
+import com.budjb.rabbitmq.consumer.MessageConvertMethod
+import com.budjb.rabbitmq.exception.NoConverterFoundException
 import grails.core.GrailsApplication
 import grails.core.GrailsClass
+import groovy.transform.CompileStatic
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.util.ClassUtils
+import org.springframework.util.MimeType
 
+/**
+ * A class that manages message converters and acts as the entry point for conversion.
+ */
+@CompileStatic
 class MessageConverterManagerImpl implements MessageConverterManager, ApplicationContextAware {
+    /**
+     * Binary data mime type.
+     */
+    final static MimeType APPLICATION_OCTET_STREAM = MimeType.valueOf('application/octet-stream')
+
     /**
      * Logger.
      */
     Logger log = LoggerFactory.getLogger(MessageConverterManager)
 
     /**
+     * Serializable message converter. This is kept separate because it needs to be called before
+     * any other message converters.
+     */
+    SerializableMessageConverter serializableMessageConverter = new SerializableMessageConverter()
+
+    /**
      * Registered message converters.
      */
-    List<MessageConverter<?>> messageConverters = []
+    List<MessageConverter> messageConverters = []
 
     /**
      * Grails application bean.
@@ -48,20 +66,172 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
     ApplicationContext applicationContext
 
     /**
-     * Registers a new message converter.
-     *
-     * @param messageConverter
+     * {@inheritDoc}
      */
     @Override
-    void register(MessageConverter<?> messageConverter) {
+    List<ByteToObjectConverter> getByteToObjectConverters() {
+        List<ByteToObjectConverter> converters = []
+
+        for (MessageConverter messageConverter : getMessageConverters()) {
+            if (ByteToObjectConverter.isInstance(messageConverter)) {
+                converters.add((ByteToObjectConverter) messageConverter)
+            }
+        }
+
+        return converters
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    List<ObjectToByteConverter> getObjectToByteConverters() {
+        List<ObjectToByteConverter> converters = []
+
+        for (MessageConverter messageConverter : getMessageConverters()) {
+            if (ObjectToByteConverter.isInstance(messageConverter)) {
+                converters.add((ObjectToByteConverter) messageConverter)
+            }
+        }
+
+        return converters
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ObjectToByteResult convert(ObjectToByteInput input) throws NoConverterFoundException {
+        Object body = input.getObject()
+
+        if (body == null) {
+            return null
+        }
+
+        if (body instanceof byte[]) {
+            return new ObjectToByteResult((byte[]) body, APPLICATION_OCTET_STREAM)
+        }
+
+        if (body instanceof Serializable) {
+            ObjectToByteResult converted = attemptConversion(serializableMessageConverter, input)
+
+            if (converted != null) {
+                return converted
+            }
+        }
+
+        Class<?> type = body.getClass()
+
+        for (ObjectToByteConverter messageConverter : getObjectToByteConverters()) {
+            if (messageConverter.supports(type)) {
+                ObjectToByteResult converted = attemptConversion(messageConverter, input)
+
+                if (converted != null) {
+                    return converted
+                }
+            }
+        }
+
+        throw new NoConverterFoundException('no message converter found to convert to a byte array')
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ByteToObjectResult convert(ByteToObjectInput input) throws NoConverterFoundException {
+        if (input.getBytes() == null) {
+            return null
+        }
+
+        if (input.getMessageConvertMethod() == MessageConvertMethod.DISABLED) {
+            return null
+        }
+
+        if (input.getMimeType() != null) {
+            if (serializableMessageConverter.supports(input.getMimeType())) {
+                try {
+                    ByteToObjectResult result = attemptConversion(serializableMessageConverter, input)
+
+                    if (result != null) {
+                        if (!input.getClassFilter() || input.getClassFilter().any() {
+                            ClassUtils.isAssignableValue(it, result.getResult())
+                        }) {
+                            return result
+                        }
+                    }
+                }
+                catch (Exception ignored) {
+                    // noop
+                }
+            }
+
+
+            for (ByteToObjectConverter converter : getByteToObjectConverters()) {
+                if (!converter.supports(input.getMimeType())) {
+                    continue
+                }
+
+                if (!isInputAndConverterCompatible(input, converter)) {
+                    continue
+                }
+
+                ByteToObjectResult result = attemptConversion(converter, input)
+
+                if (result != null) {
+                    return result
+                }
+            }
+        }
+
+        if (input.getMessageConvertMethod() != MessageConvertMethod.HEADER) {
+            try {
+                ByteToObjectResult result = attemptConversion(serializableMessageConverter, input)
+
+                if (result != null) {
+                    if (!input.getClassFilter() || input.getClassFilter().any() {
+                        ClassUtils.isAssignableValue(it, result.getResult())
+                    }) {
+                        return result
+                    }
+                }
+            }
+            catch (Exception ignored) {
+                // noop
+            }
+
+            for (ByteToObjectConverter converter : getByteToObjectConverters()) {
+                if (!isInputAndConverterCompatible(input, converter)) {
+                    continue
+                }
+
+                ByteToObjectResult result = attemptConversion(converter, input)
+
+                if (result != null) {
+                    return result
+                }
+            }
+        }
+
+        if (input.getClassFilter().contains(byte[])) {
+            return new ByteToObjectResult(input.getBytes())
+        }
+
+        throw new NoConverterFoundException('no message converter found to convert a message body from a byte array')
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void register(MessageConverter messageConverter) {
         log.debug("Registering message consumer: ${messageConverter.getClass().getSimpleName()}")
         messageConverters << messageConverter
     }
 
     /**
-     * Registers a new message converter from its Grails artefact.
-     *
-     * @param artefact
+     * {@inheritDoc}
      */
     @Override
     void register(GrailsClass artefact) {
@@ -69,99 +239,7 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
     }
 
     /**
-     * Attempt to marshall a byte array to some other object type.
-     *
-     * @param source
-     * @return
-     */
-    @Override
-    Object convertFromBytes(byte[] source) {
-        return convertFromBytes(source, [Object])
-    }
-
-    /**
-     * Converts a byte array to some other type based on the given content type.
-     *
-     * @param source Byte array to convert.
-     * @param contentType
-     * @return
-     * @throws MessageConvertException if there is no converter for the source.
-     */
-    @Override
-    Object convertFromBytes(byte[] source, List<Class<?>> availableClasses, String contentType = null) throws MessageConvertException {
-        List<MessageConverter> converters = messageConverters
-
-        if (contentType != null) {
-            converters = converters.findAll { it.contentType == contentType }
-        }
-
-        for (MessageConverter converter in converters) {
-            if (!converter.canConvertTo()) {
-                continue
-            }
-
-            if (!availableClasses.any { ClassUtils.isAssignable(it, converter.getType()) }) {
-                continue
-            }
-
-            try {
-                Object converted = converter.convertTo(source)
-
-                if (converted != null) {
-                    return converted
-                }
-            }
-            catch (Exception e) {
-                log.error("unhandled exception caught from message converter ${converter.class.simpleName}", e)
-            }
-        }
-
-        throw new MessageConvertException('no message converter found to convert from a byte array')
-    }
-
-    /**
-     * Converts a given object to a byte array using the message converters.
-     *
-     * @param source
-     * @return
-     * @throws MessageConvertException
-     */
-    @Override
-    byte[] convertToBytes(Object source) throws MessageConvertException {
-        if (source == null) {
-            return null
-        }
-
-        if (source instanceof byte[]) {
-            return source
-        }
-
-        for (MessageConverter converter in messageConverters) {
-            if (!converter.canConvertFrom()) {
-                continue
-            }
-
-            if (!converter.getType().isInstance(source)) {
-                continue
-            }
-
-            try {
-                byte[] converted = converter.convertFrom(source)
-
-                if (converted != null) {
-                    return converted
-                }
-            }
-            catch (Exception e) {
-                log.error("unhandled exception caught from message converter ${converter.class.simpleName}", e)
-            }
-        }
-
-        throw new MessageConvertException("no message converter found to convert class ${source.getClass().name} to a byte array")
-    }
-
-    /**
-     * Resets the message converter manager.
+     * {@inheritDoc}
      */
     @Override
     void reset() {
@@ -169,17 +247,64 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
     }
 
     /**
-     * Loads message converters.
+     * {@inheritDoc}
      */
     @Override
     void load() {
-        grailsApplication.getArtefacts('MessageConverter').each { register(it) }
-
-        // Note: the order matters, we want string to be the last one
+        grailsApplication.getArtefacts('MessageConverter').each { register((GrailsClass) it) }
+        register(new JsonMessageConverter())
+        register(new TypeConvertingMapMessageConverter())
+        register(new LongMessageConverter())
         register(new IntegerMessageConverter())
-        register(new MapMessageConverter())
-        register(new ListMessageConverter())
-        register(new GStringMessageConverter())
         register(new StringMessageConverter())
+    }
+
+    /**
+     * Attempts to convert some object to a <pre>byte[]</pre> with the given {@link ObjectToByteConverter}.
+     *
+     * @param messageConverter
+     * @param rabbitMessageProperties
+     * @return
+     */
+    protected ObjectToByteResult attemptConversion(ObjectToByteConverter messageConverter, ObjectToByteInput input) {
+        try {
+            return messageConverter.convert(input)
+        }
+        catch (Throwable e) {
+            log.error("unhandled exception caught from message converter ${messageConverter.class.simpleName}", e)
+            return null
+        }
+    }
+
+    /**
+     * Attempts to convert a <pre>byte[]</pre> to some object with the given {@link ByteToObjectConverter}.
+     *
+     * @param messageConverter
+     * @param bytes
+     * @return
+     */
+    protected ByteToObjectResult attemptConversion(ByteToObjectConverter messageConverter, ByteToObjectInput input) {
+        try {
+            return messageConverter.convert(input)
+        }
+        catch (Throwable e) {
+            log.error("unhandled exception caught from message converter ${messageConverter.class.simpleName}", e)
+            return null
+        }
+    }
+
+    /**
+     * Determines whether the given converter supports the given byte-to-object input.
+     *
+     * @param input
+     * @param converter
+     * @return
+     */
+    protected boolean isInputAndConverterCompatible(ByteToObjectInput input, ByteToObjectConverter converter) {
+        if (!input.getClassFilter()) {
+            return true
+        }
+
+        return input.getClassFilter().any { converter.supports(it) }
     }
 }

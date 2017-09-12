@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Bud Byrd
+ * Copyright 2013-2017 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
  */
 package com.budjb.rabbitmq.test.converter
 
-import com.budjb.rabbitmq.converter.TypeConvertingMapMessageConverter
+import com.budjb.rabbitmq.converter.*
 import grails.util.TypeConvertingMap
+import org.springframework.util.MimeType
 import spock.lang.Specification
 
 class TypeConvertingMapMessageConverterSpec extends Specification {
@@ -26,37 +27,36 @@ class TypeConvertingMapMessageConverterSpec extends Specification {
         messageConverter = new TypeConvertingMapMessageConverter()
     }
 
-    def 'Ensure the converter reports that it can convert from a map'() {
-        messageConverter.canConvertFrom() == true
-    }
-
-    def 'Ensure the converter reports that it can convert to a map'() {
-        messageConverter.canConvertTo() == true
-    }
-
-    def 'Validate conversion from a byte array'() {
-        setup:
-        byte[] source = [123, 34, 102, 111, 111, 34, 58, 34, 98, 97, 114, 34, 125] as byte[]
-
-        when:
-        TypeConvertingMap converted = messageConverter.convertTo(source)
-
-        then:
-        converted == ["foo": "bar"] as TypeConvertingMap
-    }
-
-    def 'Validate conversion to a byte array'() {
-        setup:
-        TypeConvertingMap list = ["foo": "bar"]
-
-        when:
-        byte[] converted = messageConverter.convertFrom(list)
-
-        then:
-        converted == [123, 34, 102, 111, 111, 34, 58, 34, 98, 97, 114, 34, 125] as byte[]
+    def 'Validate that TypeConvertingMap is supported'() {
+        expect:
+        messageConverter.supports(TypeConvertingMap)
     }
 
     def 'Ensure the converter has the correct content type'() {
-        messageConverter.getContentType() == 'application/json'
+        expect:
+        messageConverter.supports(MimeType.valueOf('application/json'))
+    }
+
+    def 'Validate conversion from a byte array to a TypeConvertingMap'() {
+        setup:
+        ByteToObjectInput input = new ByteToObjectInput([123, 34, 102, 111, 111, 34, 58, 34, 98, 97, 114, 34, 125] as byte[])
+
+        when:
+        ByteToObjectResult result = messageConverter.convert(input)
+
+        then:
+        result.getResult() instanceof TypeConvertingMap
+        result.getResult() == ["foo": "bar"] as TypeConvertingMap
+    }
+
+    def 'Validate conversion from a TypeConvertingMap to a byte array'() {
+        setup:
+        ObjectToByteInput input = new ObjectToByteInput(["foo": "bar"])
+
+        when:
+        ObjectToByteResult result = messageConverter.convert(input)
+
+        then:
+        result.getResult() == [123, 34, 102, 111, 111, 34, 58, 34, 98, 97, 114, 34, 125] as byte[]
     }
 }

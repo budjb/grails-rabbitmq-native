@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 Bud Byrd
+ * Copyright 2013-2017 Bud Byrd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,54 +16,39 @@
 package com.budjb.rabbitmq.converter
 
 import grails.util.TypeConvertingMap
-import groovy.json.JsonBuilder
 import groovy.json.JsonException
 import groovy.json.JsonSlurper
-import groovy.util.logging.Slf4j
+import groovy.transform.CompileStatic
 
-@Slf4j
-class TypeConvertingMapMessageConverter extends MessageConverter<TypeConvertingMap> {
+/**
+ * A converter that supports the conversion of a {@link TypeConvertingMap} to and from JSON.
+ */
+@CompileStatic
+class TypeConvertingMapMessageConverter extends JsonMessageConverter {
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    boolean canConvertFrom() {
-        return true
+    boolean supports(Class<?> type) {
+        return TypeConvertingMap.isAssignableFrom(type)
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    boolean canConvertTo() {
-        return true
-    }
-
-    @Override
-    TypeConvertingMap convertTo(byte[] input) {
+    ByteToObjectResult convert(ByteToObjectInput input) {
         try {
-            def parsed = new JsonSlurper().parseText(new String(input))
+            def parsed = new JsonSlurper().parse(input.getBytes(), input.getCharset().toString())
 
             if (parsed instanceof Map) {
-                return new TypeConvertingMap(parsed)
+                return new ByteToObjectResult(new TypeConvertingMap(parsed))
             }
+        }
+        catch (JsonException ignored) {
+            // noop
+        }
 
-            return null
-        }
-        catch (Exception e) {
-            log.trace("error parsing JSON", e)
-            return null
-        }
+        return null
     }
-
-    @Override
-    byte[] convertFrom(TypeConvertingMap input) {
-        try {
-            return new JsonBuilder(input).toString().getBytes()
-        }
-        catch (JsonException e) {
-            log.trace("error creating JSON", e)
-            return null
-        }
-    }
-
-    @Override
-    String getContentType() {
-        return 'application/json'
-    }
-
 }
