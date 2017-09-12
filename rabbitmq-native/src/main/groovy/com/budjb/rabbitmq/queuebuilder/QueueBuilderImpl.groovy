@@ -72,7 +72,6 @@ class QueueBuilderImpl implements QueueBuilder, ConfigPropertyResolver {
             throw new InvalidConfigurationException("queue/exchanges configuration is invalid")
         }
 
-
         queues*.validate()
         exchanges*.validate()
 
@@ -100,14 +99,14 @@ class QueueBuilderImpl implements QueueBuilder, ConfigPropertyResolver {
      * @param configuration
      */
     void parse(Map configuration) {
-        if (configuration.containsKey('queues')) {
+        if (configuration?.containsKey('queues')) {
             if (!(configuration.queues instanceof Collection)) {
                 throw new IllegalArgumentException("Queue configuration must be a list of maps")
             }
             parseQueues(configuration.queues as Collection)
         }
 
-        if (configuration.containsKey('exchanges')) {
+        if (configuration?.containsKey('exchanges')) {
             if (!(configuration.exchanges instanceof Collection)) {
                 throw new IllegalArgumentException("Exchange configuration must be a list of maps")
             }
