@@ -1,25 +1,9 @@
-/*
- * Copyright 2013-2017 Bud Byrd
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package com.budjb.rabbitmq.test
+package com.budjb.rabbitmq.test.queuebuilder
 
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
-import com.budjb.rabbitmq.queuebuilder.QueueBuilder
 import com.budjb.rabbitmq.queuebuilder.QueueBuilderImpl
 import com.rabbitmq.client.Channel
 import grails.config.Config
@@ -27,20 +11,122 @@ import grails.core.GrailsApplication
 import org.grails.config.CodeGenConfig
 import org.grails.config.PropertySourcesConfig
 import spock.lang.Specification
+import spock.lang.Unroll
 
-class QueueBuilderSpec extends Specification {
-    QueueBuilder queueBuilder
-    GrailsApplication grailsApplication
+/**
+ * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
+ */
+class QueueBuilderImplSpec extends Specification {
+    QueueBuilderImpl queueBuilder
+
     ConnectionManager connectionManager
+    GrailsApplication grailsApplication
 
     def setup() {
+        connectionManager = Mock(ConnectionManager)
         grailsApplication = Mock(GrailsApplication)
 
-        connectionManager = Mock(ConnectionManager)
-
         queueBuilder = new QueueBuilderImpl()
-        queueBuilder.grailsApplication = grailsApplication
         queueBuilder.connectionManager = connectionManager
+        queueBuilder.grailsApplication = grailsApplication
+    }
+
+    @Unroll
+    void 'Validate parse(#configuration) does not throw Exception'() {
+        setup:
+        queueBuilder = new QueueBuilderImpl() {
+            @Override
+            void parseQueues(Collection queues) {
+
+            }
+
+            @Override
+            void parseExchanges(Collection exchanges) {
+
+            }
+        }
+
+        queueBuilder.connectionManager = connectionManager
+        queueBuilder.grailsApplication = grailsApplication
+
+        when:
+        queueBuilder.parse(configuration)
+
+        then:
+        notThrown Exception
+
+        where:
+        configuration << [
+            null,
+            [:],
+            [queues: []],
+            [queues: [], exchanges: []],
+        ]
+    }
+
+    @Unroll
+    void 'Validate parse(#configuration) throws IllegalArgumentException'() {
+        setup:
+        queueBuilder = new QueueBuilderImpl() {
+            @Override
+            void parseQueues(Collection queues) {
+
+            }
+
+            @Override
+            void parseExchanges(Collection exchanges) {
+
+            }
+        }
+
+        queueBuilder.connectionManager = connectionManager
+        queueBuilder.grailsApplication = grailsApplication
+
+        when:
+        queueBuilder.parse(configuration)
+
+        then:
+        thrown IllegalArgumentException
+
+        where:
+        configuration << [
+            [queues: null],
+            [queues: true],
+            [queues: [], exchanges: null],
+            [queues: [], exchanges: true],
+        ]
+    }
+
+    @Unroll
+    void 'Validate parseQueues(#queues) throws IllegalArgumentException'() {
+        when:
+        queueBuilder.parseQueues(queues)
+
+        then:
+        thrown IllegalArgumentException
+
+        where:
+        queues << [
+            [null],
+            [true],
+            [[]],
+        ]
+    }
+
+    @Unroll
+    void 'Validate parseExchanges(#excchanges) throws IllegalArgumentException'() {
+        when:
+        queueBuilder.parseExchanges(excchanges)
+
+        then:
+        thrown IllegalArgumentException
+
+        where:
+        excchanges << [
+            [null],
+            [true],
+            [[]],
+        ]
     }
 
     def 'If a queue is missing a name, an exception is thrown'() {
