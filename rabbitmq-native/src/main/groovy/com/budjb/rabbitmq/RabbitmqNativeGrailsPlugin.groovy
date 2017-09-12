@@ -80,6 +80,14 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
     def loadAfter = ['controllers', 'services', 'domains', 'hibernate', 'spring-security-core']
 
     /**
+     * Additional developers.
+     */
+    def developers = [
+        [name: "Aaron Brown", email: "brown.aaron.lloyd@gmail.com"],
+        [name: "Ollie Freeman", email: "ollie.freeman@gmail.com"]
+    ]
+
+    /**
      * Spring actions.
      *
      * @return
