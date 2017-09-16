@@ -47,9 +47,31 @@ class RabbitLifecycleListenerSpec extends Specification {
         '0'     || true
     }
 
-    void 'Validate doWithApplicationContext() (enabled: true)'() {
+    @Unroll
+    void 'Validate isAutoStart() == #expect (autoStart: #autoStart)'() {
+        setup:
+        config.getProperty('rabbitmq.autoStart', Boolean, true) >> autoStart
+
+        expect:
+        rabbitLifecycleListener.isAutoStart() == expect
+
+        where:
+        autoStart || expect
+        true      || true
+        false     || false
+
+        'true'    || true
+        'false'   || true
+        1         || true
+        0         || false
+        '1'       || true
+        '0'       || true
+    }
+
+    void 'Validate doWithApplicationContext() (enabled: true, autoStart: true)'() {
         setup:
         config.getProperty('rabbitmq.enabled', Boolean, true) >> true
+        config.getProperty('rabbitmq.autoStart', Boolean, true) >> true
 
         when:
         rabbitLifecycleListener.doWithApplicationContext()
@@ -59,9 +81,23 @@ class RabbitLifecycleListenerSpec extends Specification {
         0 * rabbitContext.start()
     }
 
-    void 'Validate doWithApplicationContext() (enabled: false)'() {
+    void 'Validate doWithApplicationContext() (enabled: true, autoStart: false)'() {
+        setup:
+        config.getProperty('rabbitmq.enabled', Boolean, true) >> true
+        config.getProperty('rabbitmq.autoStart', Boolean, true) >> false
+
+        when:
+        rabbitLifecycleListener.doWithApplicationContext()
+
+        then:
+        1 * rabbitContext.load()
+        0 * rabbitContext.start()
+    }
+
+    void 'Validate doWithApplicationContext() (enabled: false, autoStart: false)'() {
         setup:
         config.getProperty('rabbitmq.enabled', Boolean, true) >> false
+        config.getProperty('rabbitmq.autoStart', Boolean, true) >> false
 
         when:
         rabbitLifecycleListener.doWithApplicationContext()
@@ -71,9 +107,10 @@ class RabbitLifecycleListenerSpec extends Specification {
         0 * rabbitContext.start()
     }
 
-    void 'Validate onStartup() (enabled: true)'() {
+    void 'Validate onStartup() (enabled: true, autoStart: true)'() {
         setup:
         config.getProperty('rabbitmq.enabled', Boolean, true) >> true
+        config.getProperty('rabbitmq.autoStart', Boolean, true) >> true
 
         when:
         rabbitLifecycleListener.onStartup([:])
@@ -86,6 +123,19 @@ class RabbitLifecycleListenerSpec extends Specification {
     void 'Validate onStartup() (enabled: false)'() {
         setup:
         config.getProperty('rabbitmq.enabled', Boolean, true) >> false
+
+        when:
+        rabbitLifecycleListener.onStartup([:])
+
+        then:
+        0 * rabbitContext.load()
+        0 * rabbitContext.start()
+    }
+
+    void 'Validate onStartup() (enabled: true, autoStart: false)'() {
+        setup:
+        config.getProperty('rabbitmq.enabled', Boolean, true) >> true
+        config.getProperty('rabbitmq.autoStart', Boolean, true) >> false
 
         when:
         rabbitLifecycleListener.onStartup([:])
