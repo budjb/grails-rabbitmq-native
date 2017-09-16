@@ -5,11 +5,5 @@ Below is the list of general configuration properties.
 
 {table}
 *Configuration Property* | *Required* | *Description* | *Type* | *Default*
-@autoStart@ | | If true, will start any consumers during the bootstrap phase of the application startup. | @Boolean@ | @true@
 @enabled@ | | If false, will register the plugin's beans, but prevent the plugin connecting to the RabbitMQ broker(s) and consuming messages. | @String@ | @true@
 {table}
-
-{note}
-If @autoStart@ is set to false, all of the connections to the broker will be initiated, but the message consumers will not
-automatically start consuming messages.  To start consuming, use the @rabbitContext@ bean and call @rabbitContext.startConsumers()@.
-{note}

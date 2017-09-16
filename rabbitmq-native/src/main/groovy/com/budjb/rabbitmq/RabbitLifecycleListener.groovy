@@ -47,7 +47,7 @@ class RabbitLifecycleListener extends GrailsApplicationLifeCycleAdapter implemen
      */
     @Override
     void onStartup(Map<String, Object> event) {
-        if (isEnabled() && isAutoStart()) {
+        if (isEnabled()) {
             rabbitContext.start()
         }
     }
@@ -79,14 +79,5 @@ class RabbitLifecycleListener extends GrailsApplicationLifeCycleAdapter implemen
      */
     boolean isEnabled() {
         return configuration.getProperty('rabbitmq.enabled', Boolean, true)
-    }
-
-    /**
-     * Returns whether the plugin is set to auto-start Consumers.
-     *
-     * @return
-     */
-    boolean isAutoStart() {
-        return configuration.getProperty('rabbitmq.autoStart', Boolean, true)
     }
 }
