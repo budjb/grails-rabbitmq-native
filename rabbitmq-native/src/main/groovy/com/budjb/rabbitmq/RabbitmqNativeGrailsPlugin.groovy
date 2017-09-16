@@ -112,8 +112,6 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
                 }
             }
 
-            'onStartupListener'(OnStartupListener)
-
             "connectionManager"(ConnectionManagerImpl)
 
             "connectionBuilder"(ConnectionBuilderImpl)
@@ -137,6 +135,20 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
                     bean.autowire = "byName"
                 }
             }
+        }
+    }
+
+    /**
+     * Application context actions.
+     *
+     * @param event
+     */
+    @Override
+    void onStartup(Map<String, Object> event) {
+        if (isEnabled()) {
+            RabbitContext rabbitContext = getRabbitContextBean()
+            rabbitContext.load()
+            rabbitContext.start(!isAutoStart())
         }
     }
 
@@ -203,6 +215,21 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
      */
     boolean isRabbitEnabled() {
         def val = grailsApplication.config.rabbitmq.enabled
+
+        if (!(val instanceof Boolean)) {
+            return true
+        }
+
+        return val
+    }
+
+    /**
+     * Returns whether the plugin is set to auto-start Consumers.
+     *
+     * @return
+     */
+    boolean isAutoStart() {
+        def val = grailsApplication.config.rabbitmq.autoStart
 
         if (!(val instanceof Boolean)) {
             return true
