@@ -112,7 +112,7 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
                 }
             }
 
-            'onStartupListener'(OnStartupListener)
+            'rabbitLifecycleListener'(RabbitLifecycleListener)
 
             "connectionManager"(ConnectionManagerImpl)
 
@@ -159,41 +159,8 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
             grailsApplication.isArtefactOfType(MessageConsumerArtefactHandler.TYPE, event.source as Class<?>)
         ) {
             // TODO: change the reload to just re-register the resource
-            getRabbitContextBean().reload()
+            applicationContext.getBean('rabbitContext', RabbitContext).reload()
         }
-    }
-
-    /**
-     * Handle configuration changes.
-     *
-     * @param event
-     */
-    @Override
-    void onConfigChange(Map<String, Object> event) {
-        if (isRabbitEnabled()) {
-            getRabbitContextBean().reload()
-        }
-    }
-
-    /**
-     * Attempt to cleanly shut down the application.
-     *
-     * @param event
-     */
-    @Override
-    void onShutdown(Map<String, Object> event) {
-        if (isRabbitEnabled()) {
-            getRabbitContextBean().stop()
-        }
-    }
-
-    /**
-     * Return the RabbitContext bean.
-     *
-     * @return
-     */
-    RabbitContext getRabbitContextBean() {
-        return applicationContext.getBean('rabbitContext', RabbitContext)
     }
 
     /**
@@ -202,12 +169,6 @@ class RabbitmqNativeGrailsPlugin extends Plugin {
      * @return
      */
     boolean isRabbitEnabled() {
-        def val = grailsApplication.config.rabbitmq.enabled
-
-        if (!(val instanceof Boolean)) {
-            return true
-        }
-
-        return val
+        return config.getProperty('rabbitmq.enabled', Boolean, true)
     }
 }
