@@ -1,5 +1,7 @@
-package com.budjb.rabbitmq
+package com.budjb.rabbitmq.test
 
+import com.budjb.rabbitmq.RabbitContext
+import com.budjb.rabbitmq.RabbitLifecycleListener
 import grails.config.Config
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin

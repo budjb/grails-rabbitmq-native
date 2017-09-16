@@ -170,14 +170,6 @@ class RabbitContextProxySpec extends Specification {
         1 * targetRabbitContext.start()
     }
 
-    def 'Ensure start(boolean) is proxied'() {
-        when:
-        rabbitContext.start(false)
-
-        then:
-        1 * targetRabbitContext.start(false)
-    }
-
     def 'Ensure startConsumers() is proxied'() {
         when:
         rabbitContext.startConsumers()

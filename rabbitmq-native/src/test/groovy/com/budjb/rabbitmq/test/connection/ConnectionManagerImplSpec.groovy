@@ -18,6 +18,8 @@ package com.budjb.rabbitmq.test.connection
 import com.budjb.rabbitmq.connection.ConnectionBuilder
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManagerImpl
+import com.budjb.rabbitmq.event.ConnectionManagerStartedEvent
+import com.budjb.rabbitmq.event.ConnectionManagerStartingEvent
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
@@ -25,20 +27,24 @@ import grails.config.Config
 import grails.core.GrailsApplication
 import org.grails.config.PropertySourcesConfig
 import org.slf4j.Logger
+import org.springframework.context.ApplicationEventPublisher
 import spock.lang.Specification
 
 class ConnectionManagerImplSpec extends Specification {
     GrailsApplication grailsApplication
     ConnectionBuilder connectionBuilder
     ConnectionManagerImpl connectionManager
+    ApplicationEventPublisher applicationEventPublisher
 
     def setup() {
         grailsApplication = Mock(GrailsApplication)
         connectionBuilder = Mock(ConnectionBuilder)
+        applicationEventPublisher = Mock(ApplicationEventPublisher)
 
         connectionManager = new ConnectionManagerImpl()
         connectionManager.grailsApplication = grailsApplication
         connectionManager.connectionBuilder = connectionBuilder
+        connectionManager.applicationEventPublisher = applicationEventPublisher
     }
 
     def 'If no connection configuration is missing, a MissingConfigurationException should be thrown'() {
@@ -120,7 +126,7 @@ class ConnectionManagerImplSpec extends Specification {
         connectionManager.load()
 
         then:
-        1 * connectionBuilder.loadConnectionContexts(_)
+        1 * connectionBuilder.loadConnectionContexts((Closure) _)
     }
 
     def 'If a connection is registered as a default connection while another default connection is already registered, an InvalidConfigurationException is thrown'() {
@@ -160,7 +166,7 @@ class ConnectionManagerImplSpec extends Specification {
         ConnectionContext context = Mock(ConnectionContext)
         context.getIsDefault() >> false
 
-        connectionManager.connections = [context]
+        connectionManager.register(context)
 
         when:
         connectionManager.start()
@@ -177,7 +183,7 @@ class ConnectionManagerImplSpec extends Specification {
         ConnectionContext context2 = Mock(ConnectionContext)
         context2.getId() >> "test-connection"
 
-        connectionManager.connections = [context1]
+        connectionManager.register(context1)
 
         when:
         connectionManager.register(context2)
@@ -196,7 +202,9 @@ class ConnectionManagerImplSpec extends Specification {
         context2.getId() >> "connection2"
         context3.getId() >> "connection3"
 
-        connectionManager.connections = [context1, context2, context3]
+        connectionManager.register(context1)
+        connectionManager.register(context2)
+        connectionManager.register(context3)
 
         when:
         connectionManager.start("connection2")
@@ -217,7 +225,9 @@ class ConnectionManagerImplSpec extends Specification {
         context2.getId() >> "connection2"
         context3.getId() >> "connection3"
 
-        connectionManager.connections = [context1, context2, context3]
+        connectionManager.register(context1)
+        connectionManager.register(context2)
+        connectionManager.register(context3)
 
         when:
         connectionManager.start()
@@ -238,7 +248,9 @@ class ConnectionManagerImplSpec extends Specification {
         context2.getId() >> "connection2"
         context3.getId() >> "connection3"
 
-        connectionManager.connections = [context1, context2, context3]
+        connectionManager.register(context1)
+        connectionManager.register(context2)
+        connectionManager.register(context3)
 
         when:
         connectionManager.stop("connection2")
@@ -259,7 +271,9 @@ class ConnectionManagerImplSpec extends Specification {
         context2.getId() >> "connection2"
         context3.getId() >> "connection3"
 
-        connectionManager.connections = [context1, context2, context3]
+        connectionManager.register(context1)
+        connectionManager.register(context2)
+        connectionManager.register(context3)
 
         when:
         connectionManager.stop()
@@ -280,7 +294,9 @@ class ConnectionManagerImplSpec extends Specification {
         context2.getId() >> "connection2"
         context3.getId() >> "connection3"
 
-        connectionManager.connections = [context1, context2, context3]
+        connectionManager.register(context1)
+        connectionManager.register(context2)
+        connectionManager.register(context3)
 
         when:
         connectionManager.reset()
@@ -297,7 +313,7 @@ class ConnectionManagerImplSpec extends Specification {
         setup:
         ConnectionContext context = Mock(ConnectionContext)
 
-        connectionManager.connections = [context]
+        connectionManager.register(context)
 
         when:
         connectionManager.unregister(context)
@@ -315,7 +331,8 @@ class ConnectionManagerImplSpec extends Specification {
         context1.getIsDefault() >> false
         context2.getIsDefault() >> true
 
-        connectionManager.connections = [context1, context2]
+        connectionManager.register(context1)
+        connectionManager.register(context2)
 
         when:
         ConnectionContext connection = connectionManager.getContext(null)
@@ -331,7 +348,7 @@ class ConnectionManagerImplSpec extends Specification {
         context.getIsDefault() >> true
         context.getId() >> "test-connection"
 
-        connectionManager.connections = [context]
+        connectionManager.register(context)
 
         when:
         connectionManager.createChannel()
@@ -349,7 +366,7 @@ class ConnectionManagerImplSpec extends Specification {
     def 'If no default connection is registered, getContext() should throw a ContextNotFoundException'() {
         setup:
         ConnectionContext context = Mock(ConnectionContext)
-        connectionManager.connections = [context]
+        connectionManager.register(context)
 
         when:
         connectionManager.getContext()
@@ -361,7 +378,7 @@ class ConnectionManagerImplSpec extends Specification {
     def 'If a connection is requested by name but it is not registered, a ContextNotFoundException should be thrown'() {
         setup:
         ConnectionContext context = Mock(ConnectionContext)
-        connectionManager.connections = [context]
+        connectionManager.register(context)
 
         when:
         connectionManager.getContext("test-connection")
@@ -375,7 +392,8 @@ class ConnectionManagerImplSpec extends Specification {
         ConnectionContext connection1 = Mock(ConnectionContext)
         ConnectionContext connection2 = Mock(ConnectionContext)
 
-        connectionManager.connections = [connection1, connection2]
+        connectionManager.register(connection1)
+        connectionManager.register(connection2)
 
         when:
         connectionManager.start(connection1)
@@ -412,5 +430,28 @@ class ConnectionManagerImplSpec extends Specification {
         then:
         connectionManager.getContexts().size() == 2
         1 * context2.stop()
+    }
+
+    def 'Ensure that connection manager start events are published in the correct order'() {
+        setup:
+        ConnectionContext context = Mock(ConnectionContext)
+        context.getIsDefault() >> false
+
+        connectionManager.register(context)
+
+        when:
+        connectionManager.start()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConnectionManagerStartingEvent })
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConnectionManagerStartedEvent })
+        0 * context.start()
+
+        then:
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConnectionManagerStartedEvent })
+        1 * context.start()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConnectionManagerStartedEvent })
     }
 }

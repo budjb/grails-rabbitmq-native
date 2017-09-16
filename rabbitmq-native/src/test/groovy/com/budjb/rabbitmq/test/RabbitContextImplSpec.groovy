@@ -15,18 +15,20 @@
  */
 package com.budjb.rabbitmq.test
 
-import com.budjb.rabbitmq.RunningState
-import com.budjb.rabbitmq.queuebuilder.QueueBuilder
 import com.budjb.rabbitmq.RabbitContextImpl
+import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerContext
 import com.budjb.rabbitmq.consumer.ConsumerManager
-
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
+import com.budjb.rabbitmq.event.RabbitContextStartedEvent
+import com.budjb.rabbitmq.event.RabbitContextStartingEvent
+import com.budjb.rabbitmq.queuebuilder.QueueBuilder
 import grails.core.GrailsApplication
+import org.springframework.context.ApplicationEventPublisher
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -37,6 +39,7 @@ class RabbitContextImplSpec extends Specification {
     ConsumerManager consumerManager
     RabbitContextImpl rabbitContext
     QueueBuilder queueBuilder
+    ApplicationEventPublisher applicationEventPublisher
 
     def setup() {
         grailsApplication = Mock(GrailsApplication)
@@ -44,12 +47,14 @@ class RabbitContextImplSpec extends Specification {
         connectionManager = Mock(ConnectionManager)
         consumerManager = Mock(ConsumerManager)
         queueBuilder = Mock(QueueBuilder)
+        applicationEventPublisher = Mock(ApplicationEventPublisher)
 
         rabbitContext = new RabbitContextImpl()
         rabbitContext.setMessageConverterManager(messageConverterManager)
         rabbitContext.setConnectionManager(connectionManager)
         rabbitContext.setConsumerManager(consumerManager)
         rabbitContext.setQueueBuilder(queueBuilder)
+        rabbitContext.applicationEventPublisher = applicationEventPublisher
     }
 
     def 'Ensure createChannel() is proxied through to the connectionManager'() {
@@ -110,7 +115,7 @@ class RabbitContextImplSpec extends Specification {
 
     def 'Ensure registerMessageConverter(MessageConverter) is proxied to the rabbit consumer manager'() {
         setup:
-        MessageConverter<?> converter = Mock(MessageConverter)
+        MessageConverter converter = Mock(MessageConverter)
 
         when:
         rabbitContext.registerMessageConverter(converter)
@@ -136,16 +141,6 @@ class RabbitContextImplSpec extends Specification {
         1 * connectionManager.start()
         1 * queueBuilder.configure()
         1 * consumerManager.start()
-    }
-
-    def 'When start(true) is called, connections should be opened, queues should be configured, and consumers should not be started'() {
-        when:
-        rabbitContext.start(true)
-
-        then:
-        1 * connectionManager.start()
-        1 * queueBuilder.configure()
-        0 * consumerManager.start()
     }
 
     def 'Ensure the proper interactions for reload (stop/load/start)'() {
@@ -313,12 +308,31 @@ class RabbitContextImplSpec extends Specification {
         (consumersStopped) * consumerManager.stop()
 
         where:
-        consumer                    | connection            | consumersStopped  | result
-        RunningState.RUNNING        | RunningState.RUNNING  | 0                 | RunningState.RUNNING
-        RunningState.STOPPED        | RunningState.RUNNING  | 0                 | RunningState.RUNNING
-        RunningState.SHUTTING_DOWN  | RunningState.RUNNING  | 0                 | RunningState.SHUTTING_DOWN
-        RunningState.RUNNING        | RunningState.STOPPED  | 1                 | RunningState.STOPPED
-        RunningState.STOPPED        | RunningState.STOPPED  | 0                 | RunningState.STOPPED
-        RunningState.SHUTTING_DOWN  | RunningState.STOPPED  | 1                 | RunningState.STOPPED
+        consumer                   | connection           | consumersStopped | result
+        RunningState.RUNNING       | RunningState.RUNNING | 0                | RunningState.RUNNING
+        RunningState.STOPPED       | RunningState.RUNNING | 0                | RunningState.RUNNING
+        RunningState.SHUTTING_DOWN | RunningState.RUNNING | 0                | RunningState.SHUTTING_DOWN
+        RunningState.RUNNING       | RunningState.STOPPED | 1                | RunningState.STOPPED
+        RunningState.STOPPED       | RunningState.STOPPED | 0                | RunningState.STOPPED
+        RunningState.SHUTTING_DOWN | RunningState.STOPPED | 1                | RunningState.STOPPED
+    }
+
+    def 'Ensure that rabbit context start events are published in the correct order'() {
+        when:
+        rabbitContext.start()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof RabbitContextStartingEvent })
+        0 * applicationEventPublisher.publishEvent({ it instanceof RabbitContextStartedEvent })
+        0 * connectionManager.start()
+        0 * consumerManager.start()
+
+        then:
+        0 * applicationEventPublisher.publishEvent({ it instanceof RabbitContextStartedEvent })
+        1 * connectionManager.start()
+        1 * consumerManager.start()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof RabbitContextStartedEvent })
     }
 }
