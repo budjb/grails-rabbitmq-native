@@ -82,6 +82,8 @@ class ConnectionConfigurationImplSpec extends Specification {
         connectionConfiguration.getSsl() == false
         connectionConfiguration.getThreads() == 0
         connectionConfiguration.getVirtualHost() == ConnectionFactory.DEFAULT_VHOST
+        connectionConfiguration.getClientProperties() == null
+        connectionConfiguration.getMetricsEnabled() == false
     }
 
     def 'Missing required properties should throw an exception'() {
@@ -116,7 +118,8 @@ class ConnectionConfigurationImplSpec extends Specification {
             'ssl': true,
             'threads': 10,
             'virtualHost': 'test-virtual-host',
-            'clientProperties' : ['applicationName': 'TestApp', 'appVersion': '0.0.1']
+            'clientProperties' : ['applicationName': 'TestApp', 'appVersion': '0.0.1'],
+            'enableMetrics': true
         ]
 
         when:
@@ -135,6 +138,7 @@ class ConnectionConfigurationImplSpec extends Specification {
         connectionConfiguration.getThreads() == 10
         connectionConfiguration.getVirtualHost() == 'test-virtual-host'
         connectionConfiguration.getClientProperties() == ['applicationName': 'TestApp', 'appVersion': '0.0.1']
+        connectionConfiguration.getMetricsEnabled() == true
     }
 
     def 'Test that setters work correctly'() {
@@ -154,6 +158,7 @@ class ConnectionConfigurationImplSpec extends Specification {
         configuration.setThreads(10)
         configuration.setVirtualHost('test-virtual-host')
         configuration.setClientProperties(['applicationName': 'TestApp', 'appVersion': '0.0.2'])
+        configuration.setMetricsEnabled(true)
 
         then:
         configuration.getHost() == 'test-host'
@@ -168,5 +173,6 @@ class ConnectionConfigurationImplSpec extends Specification {
         configuration.getThreads() == 10
         configuration.getVirtualHost() == 'test-virtual-host'
         configuration.getClientProperties() == ['applicationName': 'TestApp', 'appVersion': '0.0.2']
+        configuration.getMetricsEnabled() == true
     }
 }

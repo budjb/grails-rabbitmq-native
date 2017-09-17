@@ -89,6 +89,11 @@ class ConnectionConfigurationImpl implements ConnectionConfiguration, ConfigReso
     Map<String, Object> clientProperties
 
     /**
+     * Metrics enabled / disabled.
+     */
+    boolean metricsEnabled = false
+
+    /**
      * Basic constructor.
      */
     ConnectionConfigurationImpl() {}
@@ -111,6 +116,7 @@ class ConnectionConfigurationImpl implements ConnectionConfiguration, ConfigReso
         setUsername(parseConfigOption(String, configuration['username'], username))
         setVirtualHost(parseConfigOption(String, configuration['virtualHost'], virtualHost))
         setClientProperties(parseConfigOption(Map, configuration['clientProperties'], clientProperties))
+        setMetricsEnabled(parseConfigOption(Boolean, configuration['enableMetrics'], metricsEnabled))
     }
 
     /**
