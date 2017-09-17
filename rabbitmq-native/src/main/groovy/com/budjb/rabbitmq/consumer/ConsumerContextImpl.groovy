@@ -18,6 +18,10 @@ package com.budjb.rabbitmq.consumer
 import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
+import com.budjb.rabbitmq.event.ConsumerContextStartedEvent
+import com.budjb.rabbitmq.event.ConsumerContextStartingEvent
+import com.budjb.rabbitmq.event.ConsumerContextStoppedEvent
+import com.budjb.rabbitmq.event.ConsumerContextStoppingEvent
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.publisher.RabbitMessageProperties
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
@@ -27,7 +31,7 @@ import grails.persistence.support.PersistenceContextInterceptor
 import groovyx.gpars.GParsPool
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationEventPublisher
 
 /**
  * Implementation of a container for a consumer and all of its consuming threads.
@@ -46,20 +50,22 @@ class ConsumerContextImpl implements ConsumerContext {
     /**
      * Connection manager.
      */
-    @Autowired
     ConnectionManager connectionManager
 
     /**
      * Persistence interceptor for Hibernate session handling.
      */
-    @Autowired
     PersistenceContextInterceptor persistenceInterceptor
 
     /**
      * Rabbit message publisher.
      */
-    @Autowired
     RabbitMessagePublisher rabbitMessagePublisher
+
+    /**
+     * Spring application event publisher.
+     */
+    ApplicationEventPublisher applicationEventPublisher
 
     /**
      * List of active rabbit consumers.
@@ -78,12 +84,14 @@ class ConsumerContextImpl implements ConsumerContext {
         MessageConsumer consumer,
         ConnectionManager connectionManager,
         PersistenceContextInterceptor persistenceInterceptor,
-        RabbitMessagePublisher rabbitMessagePublisher) {
+        RabbitMessagePublisher rabbitMessagePublisher,
+        ApplicationEventPublisher applicationEventPublisher) {
 
         this.consumer = consumer
         this.connectionManager = connectionManager
         this.persistenceInterceptor = persistenceInterceptor
         this.rabbitMessagePublisher = rabbitMessagePublisher
+        this.applicationEventPublisher = applicationEventPublisher
     }
 
     /**
@@ -141,6 +149,8 @@ class ConsumerContextImpl implements ConsumerContext {
             throw new IllegalStateException("attempted to start consumer '${getId()}' but its connection is not started")
         }
 
+        applicationEventPublisher.publishEvent(new ConsumerContextStartingEvent(this))
+
         if (configuration.queue) {
             log.debug("starting consumer '${getId()}' on connection '${connectionContext.id}' with ${configuration.consumers} consumer(s)")
 
@@ -187,6 +197,8 @@ class ConsumerContextImpl implements ConsumerContext {
 
             consumers << consumer
         }
+
+        applicationEventPublisher.publishEvent(new ConsumerContextStartedEvent(this))
     }
 
     /**
@@ -198,6 +210,8 @@ class ConsumerContextImpl implements ConsumerContext {
             return
         }
 
+        applicationEventPublisher.publishEvent(new ConsumerContextStoppingEvent(this))
+
         consumers.each {
             it.stop()
         }
@@ -205,6 +219,7 @@ class ConsumerContextImpl implements ConsumerContext {
         consumers.clear()
 
         log.debug("stopped consumer '${getId()}' on connection '${getConnectionName()}'")
+        applicationEventPublisher.publishEvent(new ConsumerContextStoppedEvent(this))
     }
 
     /**

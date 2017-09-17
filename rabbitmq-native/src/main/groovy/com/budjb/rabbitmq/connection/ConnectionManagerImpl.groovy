@@ -18,6 +18,8 @@ package com.budjb.rabbitmq.connection
 import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.event.ConnectionManagerStartedEvent
 import com.budjb.rabbitmq.event.ConnectionManagerStartingEvent
+import com.budjb.rabbitmq.event.ConnectionManagerStoppedEvent
+import com.budjb.rabbitmq.event.ConnectionManagerStoppingEvent
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
@@ -244,7 +246,11 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
      */
     @Override
     void stop() {
+        applicationEventPublisher.publishEvent(new ConnectionManagerStoppingEvent(this))
+
         connections.each { stop(it) }
+
+        applicationEventPublisher.publishEvent(new ConnectionManagerStoppedEvent(this))
     }
 
     /**
@@ -327,7 +333,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
      */
     @Override
     ConnectionContext createContext(ConnectionConfiguration configuration) {
-        return new ConnectionContextImpl(configuration)
+        return new ConnectionContextImpl(configuration, applicationEventPublisher)
     }
 
     /**

@@ -27,6 +27,7 @@ import com.rabbitmq.client.Envelope
 import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk
 import grails.persistence.support.PersistenceContextInterceptor
 import org.slf4j.Logger
+import org.springframework.context.ApplicationEventPublisher
 import spock.lang.Specification
 
 class ConsumerContextImplSpec extends Specification {
@@ -34,11 +35,13 @@ class ConsumerContextImplSpec extends Specification {
     PersistenceContextInterceptor persistenceInterceptor
     ConnectionManager connectionManager
     RabbitMessagePublisher rabbitMessagePublisher
+    ApplicationEventPublisher applicationEventPublisher
 
     def setup() {
         persistenceInterceptor = Mock(PersistenceContextInterceptor)
         connectionManager = Mock(ConnectionManager)
         rabbitMessagePublisher = Mock(RabbitMessagePublisher)
+        applicationEventPublisher = Mock(ApplicationEventPublisher)
 
         messageConverterManager = new MessageConverterManagerImpl()
         messageConverterManager.register(new JsonMessageConverter())
@@ -52,7 +55,7 @@ class ConsumerContextImplSpec extends Specification {
         consumer.getId() >> 'com.budjb.rabbitmq.test.support.UnitTestConsumer'
 
         when:
-        ConsumerContextImpl context = new ConsumerContextImpl(consumer, null, null, null)
+        ConsumerContextImpl context = new ConsumerContextImpl(consumer, null, null, null, null)
 
         then:
         context.getId() == 'com.budjb.rabbitmq.test.support.UnitTestConsumer'
@@ -64,7 +67,7 @@ class ConsumerContextImplSpec extends Specification {
         consumer.getConfiguration() >> new ConsumerConfigurationImpl(connection: 'foobar')
 
         when:
-        ConsumerContext context = new ConsumerContextImpl(consumer, null, null, null)
+        ConsumerContext context = new ConsumerContextImpl(consumer, null, null, null, null)
 
         then:
         context.getConnectionName() == 'foobar'
@@ -82,7 +85,8 @@ class ConsumerContextImplSpec extends Specification {
             consumer,
             connectionManager,
             persistenceInterceptor,
-            rabbitMessagePublisher
+            rabbitMessagePublisher,
+            applicationEventPublisher
         )
 
         MessageContext messageContext = new MessageContext(
@@ -101,7 +105,7 @@ class ConsumerContextImplSpec extends Specification {
         1 * consumer.onReceive(messageContext)
         1 * consumer.onSuccess(messageContext)
         1 * consumer.onComplete(messageContext)
-        0 * consumer.onFailure(_)
+        0 * consumer.onFailure((MessageContext) _, (Throwable) _)
     }
 
     def 'Verify that the proper consumer callbacks are invoked for an unsuccessful message'() {
@@ -111,13 +115,14 @@ class ConsumerContextImplSpec extends Specification {
 
         MessageConsumer consumer = Mock(MessageConsumer)
         consumer.getConfiguration() >> configuration
-        consumer.process(_) >> { throw new RuntimeException() }
+        consumer.process((MessageContext) _) >> { throw new RuntimeException() }
 
         ConsumerContextImpl consumerContext = new ConsumerContextImpl(
             consumer,
             connectionManager,
             persistenceInterceptor,
-            rabbitMessagePublisher
+            rabbitMessagePublisher,
+            applicationEventPublisher
         )
 
         MessageContext messageContext = new MessageContext(
@@ -134,9 +139,9 @@ class ConsumerContextImplSpec extends Specification {
 
         then:
         1 * consumer.onReceive(messageContext)
-        0 * consumer.onSuccess(_)
+        0 * consumer.onSuccess((MessageContext) _)
         1 * consumer.onComplete(messageContext)
-        1 * consumer.onFailure(messageContext, _)
+        1 * consumer.onFailure((MessageContext) messageContext, (Throwable) _)
     }
 
     def 'Start a basic consumer'() {
@@ -160,7 +165,8 @@ class ConsumerContextImplSpec extends Specification {
             consumer,
             connectionManager,
             persistenceInterceptor,
-            rabbitMessagePublisher
+            rabbitMessagePublisher,
+            applicationEventPublisher
         )
 
         when:
@@ -186,7 +192,8 @@ class ConsumerContextImplSpec extends Specification {
             consumer,
             connectionManager,
             persistenceInterceptor,
-            rabbitMessagePublisher
+            rabbitMessagePublisher,
+            applicationEventPublisher
         )
 
         context.start()
@@ -221,7 +228,8 @@ class ConsumerContextImplSpec extends Specification {
             consumer,
             connectionManager,
             persistenceInterceptor,
-            rabbitMessagePublisher
+            rabbitMessagePublisher,
+            applicationEventPublisher
         )
 
         when:
@@ -244,7 +252,8 @@ class ConsumerContextImplSpec extends Specification {
             consumer,
             connectionManager,
             persistenceInterceptor,
-            rabbitMessagePublisher
+            rabbitMessagePublisher,
+            applicationEventPublisher
         )
 
         MessageContext messageContext = new MessageContext(
@@ -293,7 +302,8 @@ class ConsumerContextImplSpec extends Specification {
             consumer,
             connectionManager,
             persistenceInterceptor,
-            rabbitMessagePublisher
+            rabbitMessagePublisher,
+            applicationEventPublisher
         )
 
         rabbitMessagePublisher.send(*_) >> { throw new StackOverflowError() }

@@ -19,9 +19,10 @@ import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
-import com.budjb.rabbitmq.event.ConnectionManagerStartedEvent
 import com.budjb.rabbitmq.event.ConsumerManagerStartedEvent
 import com.budjb.rabbitmq.event.ConsumerManagerStartingEvent
+import com.budjb.rabbitmq.event.ConsumerManagerStoppedEvent
+import com.budjb.rabbitmq.event.ConsumerManagerStoppingEvent
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
@@ -153,9 +154,13 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      */
     @Override
     void stop() {
+        applicationEventPublisher.publishEvent(new ConsumerManagerStoppingEvent(this))
+
         consumers.each {
             stop(it)
         }
+
+        applicationEventPublisher.publishEvent(new ConsumerManagerStoppedEvent(this))
     }
 
     /**
@@ -249,7 +254,8 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
             (MessageConsumer) consumer,
             connectionManager,
             persistenceInterceptor,
-            rabbitMessagePublisher
+            rabbitMessagePublisher,
+            applicationEventPublisher
         )
     }
 
