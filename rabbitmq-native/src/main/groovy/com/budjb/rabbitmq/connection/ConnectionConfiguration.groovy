@@ -141,4 +141,14 @@ interface ConnectionConfiguration extends RabbitManagedContextConfiguration {
      * Returns the client properties
      */
     Map<String, Object> getClientProperties()
+
+    /**
+     * Whether or not metrics are enabled.
+     */
+    boolean getMetricsEnabled()
+
+    /**
+     * Enable / disable metrics.
+     */
+    void setMetricsEnabled(boolean metricsEnabled)
 }
