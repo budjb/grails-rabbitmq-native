@@ -17,9 +17,12 @@ package com.budjb.rabbitmq.connection
 
 import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.report.ConnectionReport
+import com.codahale.metrics.JmxReporter
+import com.codahale.metrics.MetricRegistry
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
+import com.rabbitmq.client.impl.StandardMetricsCollector
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -43,6 +46,11 @@ class ConnectionContextImpl implements ConnectionContext {
      * This is here for injection during testing.
      */
     ConnectionFactory connectionFactory
+
+    /**
+     * {@link MetricRegistry}.
+     */
+    MetricRegistry metricRegistry
 
     /**
      * Logger.
@@ -95,6 +103,12 @@ class ConnectionContextImpl implements ConnectionContext {
 
         if (configuration.getSsl()) {
             factory.useSslProtocol()
+        }
+
+        if (configuration.getMetricsEnabled() ) {
+            metricRegistry = new MetricRegistry()
+            StandardMetricsCollector metrics = new StandardMetricsCollector(metricRegistry)
+            connectionFactory.setMetricsCollector(metrics)
         }
 
         ExecutorService executorService
