@@ -19,6 +19,9 @@ import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.MessageConverterManager
+import com.budjb.rabbitmq.event.ConnectionManagerStartedEvent
+import com.budjb.rabbitmq.event.ConsumerManagerStartedEvent
+import com.budjb.rabbitmq.event.ConsumerManagerStartingEvent
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
@@ -31,6 +34,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
+import org.springframework.context.ApplicationEventPublisher
 
 class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
     /**
@@ -38,6 +42,12 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      */
     @Autowired
     GrailsApplication grailsApplication
+
+    /**
+     * Spring application event publisher.
+     */
+    @Autowired
+    ApplicationEventPublisher applicationEventPublisher
 
     /**
      * Hibernate object used to bind a session to the current thread.
@@ -106,9 +116,13 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
             throw new IllegalStateException('can not start consumers when they are in the process of shutting down')
         }
 
+        applicationEventPublisher.publishEvent(new ConsumerManagerStartingEvent(this))
+
         consumers.each {
             start(it)
         }
+
+        applicationEventPublisher.publishEvent(new ConsumerManagerStartedEvent(this))
     }
 
     /**

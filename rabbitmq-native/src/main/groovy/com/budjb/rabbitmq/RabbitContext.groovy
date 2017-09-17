@@ -37,17 +37,6 @@ interface RabbitContext {
     void start()
 
     /**
-     * Starts all connections and creates exchanges and queues.  Optionally starts
-     * consumers.
-     *
-     * This method is useful in situation where the system needs to be started up
-     * but other work needs to be done before messages can start consuming.
-     *
-     * @param deferConsumers
-     */
-    void start(boolean deferConsumers)
-
-    /**
      * Stops all consumers and connections.
      */
     void stop()

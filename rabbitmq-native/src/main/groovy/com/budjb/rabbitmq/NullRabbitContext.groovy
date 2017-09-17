@@ -162,11 +162,6 @@ class NullRabbitContext implements RabbitContext {
     }
 
     @Override
-    void start(boolean deferConsumers) {
-
-    }
-
-    @Override
     void createExchangesAndQueues() {
 
     }

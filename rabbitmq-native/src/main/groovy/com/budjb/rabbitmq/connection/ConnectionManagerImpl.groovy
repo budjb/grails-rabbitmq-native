@@ -16,6 +16,8 @@
 package com.budjb.rabbitmq.connection
 
 import com.budjb.rabbitmq.RunningState
+import com.budjb.rabbitmq.event.ConnectionManagerStartedEvent
+import com.budjb.rabbitmq.event.ConnectionManagerStartingEvent
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
@@ -26,6 +28,7 @@ import grails.core.GrailsApplication
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationEventPublisher
 
 class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver {
     /**
@@ -38,6 +41,12 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
      */
     @Autowired
     GrailsApplication grailsApplication
+
+    /**
+     * Spring application event publisher.
+     */
+    @Autowired
+    ApplicationEventPublisher applicationEventPublisher
 
     /**
      * Connection builder bean.
@@ -195,6 +204,8 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
             connections[0].isDefault = true
         }
 
+        applicationEventPublisher.publishEvent(new ConnectionManagerStartingEvent(this))
+
         connections.each {
             try {
                 start(it)
@@ -203,6 +214,8 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
                 log.trace("error starting a connection; this is probably not a problem", e)
             }
         }
+
+        applicationEventPublisher.publishEvent(new ConnectionManagerStartedEvent(this))
     }
 
     /**

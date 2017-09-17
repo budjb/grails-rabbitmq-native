@@ -23,12 +23,15 @@ import com.budjb.rabbitmq.consumer.ConsumerContextImpl
 import com.budjb.rabbitmq.consumer.ConsumerManagerImpl
 import com.budjb.rabbitmq.consumer.MessageConsumer
 import com.budjb.rabbitmq.converter.MessageConverterManager
+import com.budjb.rabbitmq.event.ConsumerManagerStartedEvent
+import com.budjb.rabbitmq.event.ConsumerManagerStartingEvent
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import grails.core.GrailsApplication
 import grails.core.GrailsClass
 import org.grails.config.PropertySourcesConfig
 import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationEventPublisher
 import spock.lang.Specification
 
 class ConsumerManagerImplSpec extends Specification {
@@ -39,6 +42,7 @@ class ConsumerManagerImplSpec extends Specification {
     ConnectionManager connectionManager
     ConsumerManagerImpl consumerManager
     ApplicationContext applicationContext
+    ApplicationEventPublisher applicationEventPublisher
 
     def setup() {
         grailsApplication = Mock(GrailsApplication)
@@ -48,6 +52,7 @@ class ConsumerManagerImplSpec extends Specification {
         messageConverterManager = Mock(MessageConverterManager)
         rabbitMessagePublisher = Mock(RabbitMessagePublisher)
         applicationContext = Mock(ApplicationContext)
+        applicationEventPublisher = Mock(ApplicationEventPublisher)
 
         consumerManager = new ConsumerManagerImpl()
         consumerManager.grailsApplication = grailsApplication
@@ -56,6 +61,7 @@ class ConsumerManagerImplSpec extends Specification {
         consumerManager.rabbitMessagePublisher = rabbitMessagePublisher
         consumerManager.connectionManager = connectionManager
         consumerManager.applicationContext = applicationContext
+        consumerManager.applicationEventPublisher = applicationEventPublisher
     }
 
     def 'Ensure proper objects are injected into new contexts'() {
@@ -370,6 +376,30 @@ class ConsumerManagerImplSpec extends Specification {
         then:
         0 * consumer1.start()
         0 * consumer2.start()
+    }
+
+    def 'Ensure that consumer manager start events are published in the correct order'() {
+        setup:
+        ConsumerContext consumerContext = Mock(ConsumerContext)
+        consumerContext.getId() >> "Consumer1"
+        consumerContext.getRunningState() >> RunningState.STOPPED
+
+        consumerManager.register(consumerContext)
+
+        when:
+        consumerManager.start()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStartingEvent})
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStartedEvent})
+        0 * consumerContext.start()
+
+        then:
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStartedEvent})
+        1 * consumerContext.start()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStartedEvent})
     }
 
     class Consumer1 {

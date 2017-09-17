@@ -186,11 +186,6 @@ class RabbitContextProxy implements RabbitContext, InitializingBean {
     }
 
     @Override
-    void start(boolean deferConsumers) {
-        target.start(deferConsumers)
-    }
-
-    @Override
     void createExchangesAndQueues() {
         target.createExchangesAndQueues()
     }

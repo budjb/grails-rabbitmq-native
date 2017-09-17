@@ -15,11 +15,25 @@
  */
 package com.budjb.rabbitmq.test
 
+import com.budjb.rabbitmq.consumer.ConsumerManager
 import grails.boot.GrailsApp
 import grails.boot.config.GrailsAutoConfiguration
+import org.springframework.context.annotation.Bean
 
 class Application extends GrailsAutoConfiguration {
     static void main(String[] args) {
         GrailsApp.run(Application, args)
+    }
+
+    @Bean
+    ConsumerManagerCheckListener consumerManagerCheckListener(ConsumerManager consumerManager) {
+        ConsumerManagerCheckListener consumerManagerCheckListener = new ConsumerManagerCheckListener()
+        consumerManagerCheckListener.consumerManager = consumerManager
+        return consumerManagerCheckListener
+    }
+
+    @Bean
+    RabbitEventListener rabbitEventListener(ConsumerManager consumerManager) {
+        return new RabbitEventListener()
     }
 }

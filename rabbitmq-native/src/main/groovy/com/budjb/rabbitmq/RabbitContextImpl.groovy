@@ -20,13 +20,22 @@ import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerManager
 import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
+import com.budjb.rabbitmq.event.RabbitContextStartedEvent
+import com.budjb.rabbitmq.event.RabbitContextStartingEvent
 import com.budjb.rabbitmq.queuebuilder.QueueBuilder
 import com.budjb.rabbitmq.report.ConnectionReport
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationEventPublisher
 
 class RabbitContextImpl implements RabbitContext {
+    /**
+     * Spring application event publisher.
+     */
+    @Autowired
+    ApplicationEventPublisher applicationEventPublisher
+
     /**
      * Message converter manager.
      */
@@ -66,27 +75,13 @@ class RabbitContextImpl implements RabbitContext {
      */
     @Override
     void start() {
+        applicationEventPublisher.publishEvent(new RabbitContextStartingEvent(this))
+
         startConnections()
         createExchangesAndQueues()
         startConsumers()
-    }
 
-    /**
-     * Starts all connections and creates exchanges and queues.  Optionally starts
-     * consumers.
-     *
-     * This method is useful in situation where the system needs to be started up
-     * but other work needs to be done before messages can start consuming.
-     *
-     * @param deferConsumers
-     */
-    @Override
-    void start(boolean deferConsumers) {
-        startConnections()
-        createExchangesAndQueues()
-        if (!deferConsumers) {
-            startConsumers()
-        }
+        applicationEventPublisher.publishEvent(new RabbitContextStartedEvent(this))
     }
 
     /**
