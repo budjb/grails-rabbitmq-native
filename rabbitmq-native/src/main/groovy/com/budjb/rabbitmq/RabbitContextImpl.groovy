@@ -22,6 +22,8 @@ import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.event.RabbitContextStartedEvent
 import com.budjb.rabbitmq.event.RabbitContextStartingEvent
+import com.budjb.rabbitmq.event.RabbitContextStoppedEvent
+import com.budjb.rabbitmq.event.RabbitContextStoppingEvent
 import com.budjb.rabbitmq.queuebuilder.QueueBuilder
 import com.budjb.rabbitmq.report.ConnectionReport
 import com.rabbitmq.client.Channel
@@ -89,7 +91,11 @@ class RabbitContextImpl implements RabbitContext {
      */
     @Override
     void stop() {
-        stopConnections() // this will also stop consumers
+        applicationEventPublisher.publishEvent(new RabbitContextStoppingEvent(this))
+
+        stopConnections()
+
+        applicationEventPublisher.publishEvent(new RabbitContextStoppedEvent(this))
     }
 
     /**

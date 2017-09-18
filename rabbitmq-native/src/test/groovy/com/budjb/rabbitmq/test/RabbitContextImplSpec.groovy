@@ -26,6 +26,8 @@ import com.budjb.rabbitmq.converter.MessageConverter
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.event.RabbitContextStartedEvent
 import com.budjb.rabbitmq.event.RabbitContextStartingEvent
+import com.budjb.rabbitmq.event.RabbitContextStoppedEvent
+import com.budjb.rabbitmq.event.RabbitContextStoppingEvent
 import com.budjb.rabbitmq.queuebuilder.QueueBuilder
 import grails.core.GrailsApplication
 import org.springframework.context.ApplicationEventPublisher
@@ -334,5 +336,24 @@ class RabbitContextImplSpec extends Specification {
 
         then:
         1 * applicationEventPublisher.publishEvent({ it instanceof RabbitContextStartedEvent })
+    }
+
+    def 'Ensure that rabbit context stop events are published in the correct order'() {
+        when:
+        rabbitContext.stop()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof RabbitContextStoppingEvent })
+        0 * applicationEventPublisher.publishEvent({ it instanceof RabbitContextStoppedEvent })
+        0 * connectionManager.start()
+        0 * consumerManager.start()
+
+        then:
+        0 * applicationEventPublisher.publishEvent({ it instanceof RabbitContextStoppedEvent })
+        1 * connectionManager.stop()
+        1 * consumerManager.stop()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof RabbitContextStoppedEvent })
     }
 }
