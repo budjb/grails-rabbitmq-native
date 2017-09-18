@@ -1,0 +1,31 @@
+==== Short-Form Usage
+
+In addition to the 2-parameter handler method signature, there are 2 shortcut versions available for use. One form only takes the converted message body, and the other only
+takes the `MessageContext` object. The order of preference when multiple valid handlers are defined is:
+
+* Long form (body, context)
+* Short form (body)
+* `MessageContext` form
+
+The short-form handlers are shown below:
+
+[source,groovy]
+-----
+package com.example
+
+import com.budjb.rabbitmq.consumer.MessageContext
+
+class ExampleConsumer {
+    // ...
+
+    def handleMessage(String message) {
+        // Do work
+    }
+
+    def handleMessage(MessageContext context) {
+        // Do work
+    }
+}
+-----
+
+NOTE: The `MessageContext`-only handler will only be called if there is no other handler defined that can possibly handle any conversion of the message body.

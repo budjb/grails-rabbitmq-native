@@ -1,0 +1,179 @@
+=== Binding Queues To Exchanges
+
+Queues can be bound to an exchange by setting the `exchange` and `binding` properties in the queue's configuration. The
+value of the binding depends on the type of exchange the queue is being bound to. Each exchange type is explained below.
+
+This basic example will create a *topic* exchange named *example.exchange*, as well as create a queue named
+*example.queue*. The queue will be bound to the exchange with the topic, or routing key, of `sample.binding.#`.
+
+.application.groovy
+[source,groovy]
+rabbitmq {
+    queues = [
+        [
+            name: "example.queue",
+            exchange: "example.exchange",
+            binding: "sample.binding.#"
+        ]
+    ]
+    exchanges = [
+        [
+            name: "example.exchange",
+            type: "topic"
+        ]
+    ]
+}
+
+.application.yml
+[source,yaml]
+rabbitmq:
+    queues:
+      - name: example.queue
+        exchange: example.exchange
+        binding: 'sample.binding.#'
+    exchanges:
+      - name: example.exchange
+        type: topic
+
+WARNING: The `#` character is used frequently with RabbitMQ bindings. The `#` character is also special in YAML, so it is
+important that strings using the `#` character are quoted so that the YAML engine will treat it as plain text.
+
+Queues need to have their binding defined specifically for the type of exchange they are bound to.
+
+==== Fanout Exchanges
+Fanout exchanges are the easiest to configure bindings for, since they require none. Fanout exchanges simply send every
+message it receives to every queue bound to it.
+
+.application.groovy
+[source,groovy]
+rabbitmq {
+    queues = [
+        [
+            name: "example.queue",
+            exchange: "example.exchange"
+        ]
+    ]
+    exchanges = [
+        [
+            name: "example.exchange",
+            type: "fanout"
+        ]
+    ]
+}
+
+.application.yml
+[source,yaml]
+rabbitmq:
+    queues:
+      - name: example.queue
+        exchange: example.exchange
+    exchanges:
+      - name: example.exchange
+        type: fanout
+
+==== Topic Exchanges
+Topic exchanges require queues to define a topic. Topics can be an exact match, but their strength is in their partial
+matching ability. See the http://www.rabbitmq.com/documentation.html[RabbitMQ documentation] for details about this
+kind of exchange.
+
+.application.groovy
+[source,groovy]
+rabbitmq {
+    queues = [
+        [
+            name: "example.queue",
+            exchange: "example.exchange",
+            binding: "example.binding.#"
+        ]
+    ]
+    exchanges = [
+        [
+            name: "example.exchange",
+            type: "topic"
+        ]
+    ]
+}
+
+.application.yml
+[source,yaml]
+rabbitmq:
+    queues:
+      - name: example.queue
+        exchange: example.exchange
+        binding: 'example.binding.#'
+    exchanges:
+      - name: example.exchange
+        type: topic
+
+==== Direct Exchanges
+Direct exchanges are similar to topic exchanges, except that their "topics" only function with direct name matching.
+The appropriate name for the binding in this case is "routing key". Queues must define a routing key when binding to
+this type of exchange.
+
+.application.groovy
+[source,groovy]
+rabbitmq {
+    queues = [
+        [
+            name: "example.queue",
+            exchange: "example.exchange",
+            binding: "exampleRoutingKey"
+        ]
+    ]
+    exchanges = [
+        [
+            name: "example.exchange",
+            type: "direct"
+        ]
+    ]
+}
+
+.application.yml
+[source,yaml]
+rabbitmq:
+    queues:
+      - name: example.queue
+        exchange: example.exchange
+        binding: exampleRoutingKey
+    exchanges:
+      - name: example.exchange
+        type: direct
+
+==== Header Exchanges
+Header exchanges are like topic exchanges, but with the ability to define multiple match keywords. The binding for
+queues allows the queue to match on all or one of multiple header values. The queue must also set the `match` property
+for this exchange type, and the value must be one of "any" or "all".
+
+.application.groovy
+[source,groovy]
+rabbitmq {
+    queues = [
+        [
+            name: "example.queue",
+            match: "any",
+            binding: [
+                "header1": "header-value-1",
+                "header2": "header-value-2"
+            ]
+        ]
+    ]
+    exchanges = [
+        [
+            name: "example.exchange",
+            type: "headers"
+        ]
+    ]
+}
+
+.application.yml
+[source,yaml]
+rabbitmq:
+    queues:
+      - name: example.queue
+        match: any
+        binding:
+            header1: header-value-1
+            header2: header-value-2
+    exchanges:
+      - name: example.exchange
+        type: headers

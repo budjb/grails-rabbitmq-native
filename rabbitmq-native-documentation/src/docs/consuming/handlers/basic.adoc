@@ -1,0 +1,22 @@
+==== Basic Usage
+
+In its most basic form, a message handler method takes in the body of the received message, and a @MessageContext@
+object that contains the message parameters received from the RabbitMQ server, along with the consumer's channel
+that the handler should publish messages through.
+
+This is the most generic form of a message handler:
+
+[source,groovy]
+-----
+package com.example
+
+import com.budjb.rabbitmq.consumer.MessageContext
+
+class ExampleConsumer {
+    // ...
+
+    def handleMessage(def body, MessageContext context) {
+        // Do work
+    }
+}
+-----

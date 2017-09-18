@@ -1,0 +1,35 @@
+=== Defining Exchanges
+
+Defining exchanges is very similar to defining queues. The following code illustrates how to define an exchange:
+
+.application.groovy
+[source,groovy]
+rabbitmq {
+    exchanges = [
+        [
+            name: "example.exchange",
+            type: "topic"
+        ]
+    ]
+}
+
+.application.yml
+[source,yaml]
+rabbitmq:
+    exchanges:
+      - name: example.exchange
+        type: topic
+
+The above example will create an exchange with the name *example.exchange* and of the type *topic*. Below is a list of
+all the options available when creating exchanges:
+
+[grid="rows"]
+|===
+| Property | Required | Description | Type | Default
+| `name` | image:check.svg[36,36] | Name of the exchange. | `String` | _none_
+| `arguments` | | Extra arguments used to create the exchange. See the http://www.rabbitmq.com/documentation.html[RabbitMQ documentation] for more information. | `Map` | _none_
+| `autoDelete` | | Whether to automatically delete the exchange once there are no longer any queues bound to it. | `boolean` | `false`
+| `durable` | | Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts. | `boolean` | `false`
+| `type` | image:check.svg[36,36] | One of "fanout", "topic", "direct", or "headers". | `String`| _none_
+| `connection` | | Name of the connection to create the exchange with.  Uses the default connection if omitted. | `String` | _none_
+|===

@@ -12,7 +12,6 @@ apply plugin: "eclipse"
 apply plugin: "idea"
 apply plugin: "org.grails.grails-plugin"
 apply plugin: "org.grails.grails-plugin-publish"
-apply plugin: "org.grails.grails-doc"
 
 repositories {
     mavenLocal()

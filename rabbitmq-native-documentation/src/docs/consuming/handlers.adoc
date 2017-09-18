@@ -1,0 +1,14 @@
+=== Message Handlers
+
+One of the requirements for a consumer to be registered to the RabbitMQ server is that a message handler be declared
+in the consumer class. The message handler is the mechanism by which messages are consumed.
+
+include::handlers/basic.adoc[]
+
+include::handlers/typed.adoc[]
+
+include::handlers/short.adoc[]
+
+include::handlers/messagecontext.adoc[]
+
+include::handlers/rpc.adoc[]

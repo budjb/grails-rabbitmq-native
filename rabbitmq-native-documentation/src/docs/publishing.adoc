@@ -1,0 +1,16 @@
+== Publishing Messages
+
+Publishing messages through the plugin is achieved by using the `rabbitMessagePublisher` bean. This Spring bean utilizes a closure-based configuration method to
+both send messages without waiting for a response, and sending rpc-style messages. There are many options available to the `rabbitMessagePublisher` which are
+documented in the reference, but this guide will only demonstrate basic usage.
+
+NOTE: In a multi-server setup, it is important to consider what server to send a message to. Like configuration and consumers, the `connection` property
+is used to route the message to the proper server connection.
+
+include::publishing/send.adoc[]
+
+include::publishing/rpcsend.adoc[]
+
+include::publishing/bulk.adoc[]
+
+include::publishing/confirms.adoc[]

@@ -1,0 +1,9 @@
+=== Transactions
+
+The plugin provides a bit of automation around channel transactions. When a consumer is defined with the `transacted` property set to `true`, a transaction is automatically started on
+the channel passed to the message handler. When the message handler completes successfully, the transaction is automatically committed. If an unhandled exception is thrown from the message
+handler, the transaction is automatically rolled back.
+
+It is *especially important* that any messages published from a message handler use the `Channel` instance passed in the `MessageContext` for this functionality to work.
+
+Since the `Channel` is passed in the `MessageContext`, the author has full control over committing and rolling back transactions.

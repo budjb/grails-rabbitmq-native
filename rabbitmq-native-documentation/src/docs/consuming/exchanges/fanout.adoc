@@ -1,0 +1,19 @@
+==== Fanout Exchanges
+
+A fanout exchange will forward a received message to every queue bound to it. There is no binding criteria for this kind of exchange.
+This is the simplest type of exchange, and is also the easiest to configure.
+
+[source,groovy]
+-----
+package com.example
+
+class ExampleConsumer {
+    static rabbitConfig = [
+        "exchange": "fanout.exchange"
+    ]
+
+    def handleMessage(def body, MessageContext context) {
+        // Process message
+    }
+}
+-----
