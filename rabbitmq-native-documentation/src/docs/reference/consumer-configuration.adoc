@@ -1,0 +1,23 @@
+=== Consumer Configuration
+
+include::consumer-configuration/autoAck.adoc[]
+
+include::consumer-configuration/binding.adoc[]
+
+include::consumer-configuration/connection.adoc[]
+
+include::consumer-configuration/consumers.adoc[]
+
+include::consumer-configuration/convert.adoc[]
+
+include::consumer-configuration/exchange.adoc[]
+
+include::consumer-configuration/match.adoc[]
+
+include::consumer-configuration/prefetchCount.adoc[]
+
+include::consumer-configuration/queue.adoc[]
+
+include::consumer-configuration/retry.adoc[]
+
+include::consumer-configuration/transacted.adoc[]

@@ -19,4 +19,6 @@ include::advanced.adoc[]
 
 include::upgrading.adoc[]
 
+include::reference.adoc[]
+
 include::changelog.adoc[]

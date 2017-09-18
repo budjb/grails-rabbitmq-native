@@ -4,7 +4,6 @@ buildscript {
     }
     dependencies {
         classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
-        classpath 'org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16'
     }
 }
 
@@ -17,7 +16,7 @@ asciidoctor {
     sources {
         include 'index.adoc'
     }
-    backends 'html5', 'pdf'
+    backends 'html5'
     attributes 'copyright': 'Apache License, Version 2.0',
         'toc': 'left',
         'toclevels': 2,

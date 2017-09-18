@@ -1,0 +1,14 @@
+==== connection
+
+Sets which connection should be used to send the message to.
+
+[source,groovy]
+rabbitMessagePublisher.send {
+    exchange = "example.exchange"
+    routingKey = "example.topic"
+    body = "message"
+    connection = "server1"
+}
+
+The connection property is used to specify which server to send a message with in a multi-server configuration.
+If the connection is omitted, the default connection will be used.

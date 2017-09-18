@@ -1,0 +1,15 @@
+==== headers
+
+Attached headers to send with the message.
+
+[source,groovy]
+rabbitMessagePublisher.send {
+    routingKey = "example.queue"
+    headers = [
+        "header1": "foo",
+        "header2": "bar"
+    }
+    body = "test message"
+}
+
+The headers property is simply a map with key/value pairs for the header names and their values.

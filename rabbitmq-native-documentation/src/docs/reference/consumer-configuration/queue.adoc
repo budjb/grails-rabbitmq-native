@@ -1,0 +1,11 @@
+==== queue
+
+Set the queue to consume from.
+
+[source,groovy]
+static rabbitConfig = [
+    queue: "example.queue"
+]
+
+Tells the plugin that the consumer should consume a specific queue. The queue must already exist for the consumer to beging listening to it. Queues can be created externally from the application, or via the
+application's RabbitMQ configuration.

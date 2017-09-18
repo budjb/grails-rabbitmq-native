@@ -1,0 +1,12 @@
+==== consumers
+
+Set the number of concurrent consumers the message consumer should start.
+
+[source,groovy]
+static rabbitConfig = [
+    queue: "example.queue",
+    consumers: 10
+]
+
+By default, a message consumer class will only start one consumer. This means the consumer can only handle one message at a time. Authors can increase the number of concurrent consumers are running by
+increasing the value of this property.

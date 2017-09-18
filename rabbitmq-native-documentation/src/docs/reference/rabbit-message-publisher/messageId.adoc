@@ -1,0 +1,10 @@
+==== messageId
+
+Sets the messageId property of the message.
+
+[source,groovy]
+rabbitMessagePublisher.send {
+    routingKey = "example.queue"
+    messageId = "1234"
+    body = "test message"
+}

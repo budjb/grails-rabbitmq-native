@@ -1,0 +1,19 @@
+==== autoAck
+
+Sets whether incoming messages should be automatically acknowledged.
+
+[source,groovy]
+static rabbitConfig = [
+    queue: "example.queue",
+    autoAck: AutoAck.POST
+]
+
+
+There are 3 auto-acknowledgement modes:
+
+|===
+| Enum Value | Effect
+| AutoAck.MANUAL | The message is never automatically acknowledged. The message handler is responsible for acknowledging the message.
+| AutoAck.ALWAYS | The message will be automatically acknowledged *before* the message is delivered the message handler.
+| AutoAck.POST | The message will be automatically acknowledged *after* the message handler successfully completes. If an unhandled exception escapes the handler, the message is rejected. This is the default mode.
+|===

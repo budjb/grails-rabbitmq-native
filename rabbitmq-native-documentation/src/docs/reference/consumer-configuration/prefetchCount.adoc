@@ -1,0 +1,11 @@
+==== prefetchCount
+
+Sets number of messages the consumer will prefetch.
+
+[source,groovy]
+static rabbitConfig = [
+    queue: "example.queue",
+    prefetchCount: 1
+]
+
+Sets the QOS prefetch count property of the consumer's channel. By default, the consumer will fetch one message at a time. Increasing this value will increase the number of messages the consumer will queue up before it processes them.

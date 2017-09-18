@@ -1,9 +1,0 @@
-Subscribing to a exchanges is different from subscribing to queues, as there are different types of exchanges with different behavior.
-RabbitMQ's libraries do not provide a direct way to subscribe to an exchange, however the plugin provides a way to subscribe to exchanges directly by creating
-a temporary queue that is bound to an exchange. The binding requirements differ between the different types of exchanges.
-
-{warning}
-Using the functionality to subscribe to an exchange works by creating a temporary queue at runtime that is bound to the exchange and consumed from by
-the message consumer.  It is important to note that these queues are randomly named and are exclusive and auto delete, so this feature is not
-suitable if messages that are left on this queue should persist if the application shuts down.
-{warning}

@@ -1,0 +1,12 @@
+==== priority
+
+Sets the priority of the message.
+
+[source,groovy]
+rabbitMessagePublisher.send {
+    routingKey = "example.queue"
+    priority = 5
+    body = "test message"
+}
+
+Message priority is an integer with values from `0` to `9`.
