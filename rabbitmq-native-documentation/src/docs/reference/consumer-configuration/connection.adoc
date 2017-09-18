@@ -1,0 +1,12 @@
+==== connection
+
+Sets which connection should be used to consume messages from.
+
+[source,groovy]
+static rabbitConfig = [
+    queue: "foobar",
+    connection: "server1"
+]
+
+The connection property should be used in multi-server configurations to specify which connection should be used to consume messages from.
+If the connection property is omitted, the default connection will be used.

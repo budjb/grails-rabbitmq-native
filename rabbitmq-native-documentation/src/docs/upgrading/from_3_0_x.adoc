@@ -1,0 +1,30 @@
+=== From 3.0.X
+
+The upgrade from 3.0.X to 3.1.X includes a refactor of how the consumer and connection managers work.
+The storage of consumer handlers was moved from the connection classes into the consumer manager in order
+to support the new start/stop functionality, and it made sense for consumer handlers to reside with
+the appropriately named manager.
+
+Both of the managers also now have underlying interfaces that define how a manager should behave. In addition,
+the objects being managed are now called *Contexts*, which also have interfaces that define their general
+behavior.  It is the intention that with these changes the plugin becomes more stable with less backwards-
+compatibility breaking changes being introduced moving forward.
+
+Here are the items authors may need to address when upgrading to this version of the plugin.
+
+* The `rabbitContext.getConnection()` methods now return the RabbitMQ `Connection` object instead of
+  the `ConnectionContext` instance.  This was done to make the methods more consistent with the
+  `createChannel` methods and to encapsulate the `ConnectionContext` objects inside the manager.
+  The `ConnectionContext` objects can now be retrieved from the `consumerManager` bean.
+* Many of the methods inside of the `ConsumerManager` and `ConnectionManager` have been renamed to adhere
+  to a common interface.  This should only affect projects that use these beans directly.
+* Some of the methods inside of the `RabbitContext` have been renamed to match the interface used by
+  the various managers.
+
+Overall, users of the plugin should see no impact if the `rabbitContext` or any of the other beans are
+not used in their projects.
+
+If the use of the plugin's beans is limited to the `rabbitContext`, the impact should be minimal,
+with some minor changes need to method names and some refactored code if retrieving a `ConnectionContext`.
+Users that use the other manager beans will need to account for the changed interface implemented by
+those beans.

@@ -1,0 +1,13 @@
+==== retry
+
+Sets whether a rejected message should be redelivered.
+
+[source,groovy]
+static rabbitConfig = [
+    queue: "example.queue",
+    retry: false
+]
+
+If a message is rejected, this property is used to determine whether the message should be marked for redelivery.
+
+WARNING: If a message is rejected because of an unhandled exception, for example, that will repeat every time the message is consumed, the message will be retried indefinitely if enabled. Be careful when using this feature.

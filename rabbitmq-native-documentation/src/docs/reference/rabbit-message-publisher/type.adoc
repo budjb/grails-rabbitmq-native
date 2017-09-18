@@ -1,0 +1,10 @@
+==== type
+
+Sets the type property of the message.
+
+[source,groovy]
+rabbitMessagePublisher.send {
+    routingKey = "example.queue"
+    type = "type"
+    body = "test message"
+}

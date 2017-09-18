@@ -1,0 +1,117 @@
+== Quickstart
+
+This is a quick and dirty how-to detailing how to quickly begin using the plugin. While the plugin is very configurable,
+this is a very basic demonstration of its usage.
+
+=== Create The Application
+Create a project named *RabbitExample*. You can do this by entering:
+
+[source,bash,subs="attributes"]
+grails create-app RabbitExample
+
+=== Add The Plugin
+In the application's `build.gradle` file, under the `dependencies` section, add:
+
+.build.gradle
+[source,groovy,subs="attributes"]
+-----
+    dependencies {
+        // ...
+
+        compile "org.grails.plugins:rabbitmq-native:{version}"
+
+        // ...
+    }
+-----
+
+=== Configuring
+In `grails-app/conf/application.yml`, add to the bottom:
+
+.grails-app/conf/application.yml
+[source,yaml,subs="attributes"]
+rabbitmq:
+    connections:
+      - name: main
+        host: changeme
+        username: changeme
+        password: changeme
+    queues:
+      - name: testqueue
+
+NOTE: Be sure to replace the appropriate values for your RabbitMQ server and user credentials.
+
+=== Consumer
+Create the a consumer by using the following command:
+
+[source,bash]
+grails create-consumer com.example.Test
+
+Update the consumer to reflect the following:
+
+.grails-app/rabbit-consumers/com/example/TestConsumer.groovy
+[source,groovy]
+-----
+package com.example
+
+import com.budjb.rabbitmq.consumer.MessageContext
+
+class TestConsumer {
+    /**
+     * Consumer configuration.
+     */
+    static rabbitConfig = [
+        queue: "testqueue"
+    ]
+
+    /**
+     * Handle an incoming RabbitMQ message.
+     *
+     * @param body    The converted body of the incoming message.
+     * @param context Properties of the incoming message.
+     * @return
+     */
+    def handleMessage(def body, MessageContext context) {
+        println body
+        return "Hello to you, too!"
+    }
+}
+-----
+
+=== Controller
+Create a controller by using the following command:
+
+[source,bash]
+grails create-controller com.example.Test
+
+Update the controller to reflect the following:
+
+.grails-app/controllers/com/example/TestController.groovy
+[source,groovy]
+-----
+package com.example
+
+import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
+
+class TestController {
+    RabbitMessagePublisher rabbitMessagePublisher
+
+    def index() {
+        render rabbitMessagePublisher.rpc {
+            routingKey = "testqueue"
+            body = "Hello!"
+        }
+    }
+}
+-----
+
+=== Run it!
+Run the grails application.
+
+[source,bash]
+-----
+./gradlew bootRun
+-----
+
+You can see the application in action by hitting the test controller. If you're running this on your localhost, your URL
+may be similar to `http://localhost:8080/test/index`. You should see the message "Hello!" printed the
+application's output console, and your web browser should display the message "Hello to you, too!".

@@ -1,0 +1,17 @@
+==== create-consumer
+
+The `create-consumer` command creates a new consumer or consumers.
+
+[source,bash]
+grails create-consumer com.example.Test
+
+This command is useful to quickly create new consumers, in much the same way as Grails' built-in commands to create new controllers, domains, etc. The generated file is a template that is ready to be configured and used,
+and includes a generic message handler.
+
+A powerful feature of this script is the ability to create as many consumers as are entered on the command line. For example:
+
+[source,bash]
+grails create-consumer com.example.First com.example.Second
+
+
+The above will create two consumers: `FirstConsumer` and `SecondConsumer`.

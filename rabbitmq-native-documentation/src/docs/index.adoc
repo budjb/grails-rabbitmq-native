@@ -1,0 +1,24 @@
+= RabbitMQ Native Grails Plugin Documentation
+Bud Byrd
+2017-09-17
+:imagesdir: images/
+
+include::introduction.adoc[]
+
+include::quickstart.adoc[]
+
+include::configuration.adoc[]
+
+include::consuming.adoc[]
+
+include::publishing.adoc[]
+
+include::converters.adoc[]
+
+include::advanced.adoc[]
+
+include::upgrading.adoc[]
+
+include::reference.adoc[]
+
+include::changelog.adoc[]

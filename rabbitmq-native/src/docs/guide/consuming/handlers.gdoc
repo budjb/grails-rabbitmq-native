@@ -1,2 +1,0 @@
-One of the requirements for a consumer to be registered to the RabbitMQ server is that a message handler be declared
-in the consumer class. The message handler is the mechanism by which messages are consumed.

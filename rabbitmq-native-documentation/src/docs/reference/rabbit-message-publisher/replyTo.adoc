@@ -1,0 +1,14 @@
+==== replyTo
+
+Sets the replyTo queue name.
+
+[source,groovy]
+rabbitMessagePublisher.send {
+    routingKey = "example.queue"
+    replyTo = "reply.queue"
+    body = "test message"
+}
+
+Setting the `replyTo` property of the message lets the consumer know that the publisher expects a response to the message. The value of this property should be an existent queue the client is consuming on.
+
+NOTE: This property is automatically set when the `RabbitMessagePublisher.rpc()` method is used, and the consumer has access to this property to reply to the message.

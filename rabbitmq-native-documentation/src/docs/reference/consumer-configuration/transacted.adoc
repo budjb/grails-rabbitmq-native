@@ -1,0 +1,11 @@
+==== transacted
+
+Sets whether automatic transactions should be enabled on the consumer.
+
+[source,groovy]
+static rabbitConfig = [
+    queue: "example.queue",
+    transacted: true
+]
+
+See the <<Transactions>> documentation for more information.

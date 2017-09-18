@@ -1,0 +1,13 @@
+==== MessageContext Object
+
+The message context is just an object that encapsulates the data relevant to the received message.  Below
+is a list of properties of the class.
+
+|===
+| Property | Description
+| `body` | Incoming message in its raw `byte[]` format.
+| `channel` | The RabbitMQ channel the message handler should use to publish messages. This is especially important when using transactions.
+| `consumerTag` | Consumer tag
+| `envelope` | Properties of the message's delivery (see RabbitMQ's http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.1.5/rabbitmq-java-client-javadoc-3.1.5/com/rabbitmq/client/Envelope.html[documentation])
+| `properties` | Properties of the message (see RabbitMQ's http://www.rabbitmq.com/releases/rabbitmq-java-client/v3.1.5/rabbitmq-java-client-javadoc-3.1.5/com/rabbitmq/client/BasicProperties.html[documentation])
+|===

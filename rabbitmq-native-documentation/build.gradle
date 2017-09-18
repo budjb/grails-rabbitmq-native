@@ -1,0 +1,29 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
+    }
+}
+
+apply plugin: 'org.asciidoctor.convert'
+
+version version
+
+asciidoctor {
+    sourceDir new File("$projectDir/src/docs")
+    sources {
+        include 'index.adoc'
+    }
+    backends 'html5'
+    attributes 'copyright': 'Apache License, Version 2.0',
+        'toc': 'left',
+        'toclevels': 2,
+        'numbered': 'true',
+        'icons': 'font',
+        'version': project.version,
+        'revnumber': project.version,
+        'source-highlighter': 'prettify'
+
+}

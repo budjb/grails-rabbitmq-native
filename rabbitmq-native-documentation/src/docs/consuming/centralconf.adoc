@@ -1,0 +1,27 @@
+=== Central Configuration
+
+It is also possible to define the consumer's configuration outside of the consumer in the application's configuration
+file.  All of the configuration options described above are valid for this type of configuration. This functionality is
+valuable when a consumer's configuration needs to be determined at runtime, instead of being hardcoded in the consumer
+class itself.
+
+To configuration a consumer in the Grails application's configuration file, an entry matching the consumer's class name
+should be present under the `rabbitmq.consumers` key, as follows:
+
+.application.groovy
+[source,groovy]
+rabbitmq {
+    consumers {
+        ExampleConsumer {
+            queue = "test.queue"
+        }
+    }
+}
+
+
+.application.yml
+[source,yaml]
+rabbitmq:
+    consumers:
+        ExampleConsumer:
+            queue: test.queue

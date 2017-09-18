@@ -1,0 +1,10 @@
+==== contentEncoding
+
+Sets the content encoding property of the message.
+
+[source,groovy]
+rabbitMessagePublisher.send {
+    routingKey = "example.queue"
+    contentEncoding = "base64"
+    body = "test message"
+}

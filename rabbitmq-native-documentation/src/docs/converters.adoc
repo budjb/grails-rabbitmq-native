@@ -1,0 +1,13 @@
+== Message Converters
+
+Message converters are classes that are responsible for converting objects to and from byte arrays. The plugin provides 4 built-in converters that cover basic types:
+
+* `Integer`
+* `Map`
+* `List`
+* `GString`
+* `String`
+
+These converters allow message handlers to consume and return data without having to convert that data themselves. They are also used with the `RabbitMessagePublisher` class.
+
+include::converters/custom.adoc[]

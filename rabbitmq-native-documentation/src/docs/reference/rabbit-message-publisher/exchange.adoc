@@ -1,0 +1,14 @@
+==== exchange
+
+Define the exchange to publish a message to.
+
+[source,groovy]
+rabbitMessagePublisher.send {
+    exchange = "example.exchange"
+    body = "message"
+}
+
+Setting this property lets the `rabbitMessagePublisher` know to publish the message to an exchange. Depending on the type of exchange, the use of the <<routingKey>>
+property may be necessary. See the RabbitMQ documentation for more information on exchanges.
+
+NOTE: A publish operation with the `rabbitMessagePublisher` may only be done with either an exchange or a queue, but not both.  Attempting to use both will result in an error.

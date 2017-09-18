@@ -1,0 +1,25 @@
+==== Headers Exchanges
+
+Header exchanges work similarly to topic exchanges. A headers exchange will forward messages to queues based on header values contained
+in messages. Additionally, a queue can be bound on multiple header values, along with an option to require one or all of the headers
+to match.
+
+[source,groovy]
+-----
+package com.example
+
+class ExampleConsumer {
+    static rabbitConfig = [
+        "exchange": "headers.exchange",
+        "binding": [
+            "foo": "bar",
+            "hi": "there"
+        ],
+        "match": "any"
+    ]
+
+    def handleMessage(def body, MessageContext context) {
+        // Process message
+    }
+}
+-----

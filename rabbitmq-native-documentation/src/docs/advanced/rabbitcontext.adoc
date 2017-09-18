@@ -1,0 +1,24 @@
+=== Rabbit Context
+
+Besides the `rabbitMessagePublisher`, the `rabbitContext` is the bean users will most likely interact with.
+While you may never need to use this bean, it can be useful.  As with any Spring bean, the `rabbitContext` can be
+injected into any Spring managed bean, such as services, controllers, and rabbit consumers.
+
+The `rabbitContext` is intended to be used as a front-end to all of the other beans defined by the plugin to hide
+some of the complexity of interacting with the system. As such, in most cases the `rabbitContext` proxies requests
+to the appropriate manager bean to accomplish the requested task.
+
+WARNING: In some cases, interactions with multiple managers are necessary to safely carry out the action. Therefore, unless
+the `rabbitContext` does not provide the required functionality, it should be considered best-practice to use
+the `rabbitContext` instead of the other beans directly.  If you find that you are frequently resorting to using
+one of the other beans, I encourage you to post an issue on the GitHub project.
+
+The follow subsections describe some of the more useful functionality the `rabbitContext` provides.
+
+include::rabbitcontext/native.adoc[]
+
+include::rabbitcontext/connection_lifecycle.adoc[]
+
+include::rabbitcontext/consumer_lifecycle.adoc[]
+
+include::rabbitcontext/report.adoc[]

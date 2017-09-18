@@ -1,0 +1,78 @@
+=== Defining Queues
+
+The plugin allows authors to define the exchanges and queues programatically inside the configuration. This allows the
+application to configure its own queues without someone having to manually create the exchanges and queues prior to
+running the application.
+
+Queue configuration is also done in the rabbitmq block, much as the server connection is configured. Usage is best
+illustrated with an example:
+
+.application.groovy
+[source,groovy]
+rabbitmq {
+    connections = [
+        // ...
+    ]
+    queues = [
+        [
+            name: "example.queue",
+            durable: true,
+            exchange: "example.exchange"
+        ]
+    ]
+}
+
+
+.application.yml
+[source,yaml]
+rabbitmq:
+    connections:
+        # ...
+    queues:
+      - name: example.queue
+        durable: true
+        exchange: example.exchange
+
+
+The above code will define a queue named *example.queue*, and its durable flag will be set.
+
+If using the multi-server feature of the plugin, it is important to consider what server the queue should be defined in.
+The `connection` property specifies which server to create the queue in, illustrated below:
+
+.application.groovy
+[source,groovy]
+rabbitmq {
+    queues = [
+        // Assume there is a connection with the name "server1"...
+        [
+            name: "example.queue",
+            connection: "server1",
+            durable: true
+        ]
+    ]
+}
+
+
+.application.yml
+[source,yaml]
+rabbitmq:
+    queues:
+        # Assume there is a connection with the name "server1"...
+      - name: example.queue
+        connection: server1
+        durable: true
+
+
+Below is a table of all of the options available when defining queues:
+[grid="rows"]
+|===
+| Property | Required | Description | Type | Default
+| `name` | image:check.svg[36,36] | Name of the queue. | `String` | _none_
+| `arguments` | | Extra arguments used to create the queue. See the http://www.rabbitmq.com/documentation.html[RabbitMQ documentation] for more information. | `Map` | _none_
+| `autoDelete` | | Whether to automatically delete the queue once there are no more consumers listening to it. | `boolean` | `false`
+| `binding` | | Used in conjunction with exchanges. See the section below for more information. | _Mixed_ | _none_
+| `durable` | | Whether messages should be persisted to the disk on the RabbitMQ server to survive server restarts. | `boolean` | `false`
+| `exchange` | | Binds a queue to an exchange in conjunction with the `binding` property. Ignored if used inside an exchange declaration. | `String` | _none_
+| `match` | | Required when binding to a headers exchange. Either "any" or "all". | `String` | _none_
+| `connection` | | Name of the connection to create the queue with.  Uses the default connection if omitted. | `String` | _none_
+|===

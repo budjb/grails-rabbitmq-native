@@ -1,3 +1,4 @@
 include 'rabbitmq-native'
 include 'rabbitmq-native-test'
 include 'rabbitmq-native-test-plugin'
+include 'rabbitmq-native-documentation'
