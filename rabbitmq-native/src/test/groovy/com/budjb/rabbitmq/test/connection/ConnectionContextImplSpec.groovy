@@ -19,6 +19,10 @@ import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.connection.ConnectionConfigurationImpl
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionContextImpl
+import com.budjb.rabbitmq.event.ConnectionContextStartedEvent
+import com.budjb.rabbitmq.event.ConnectionContextStartingEvent
+import com.budjb.rabbitmq.event.ConnectionContextStoppedEvent
+import com.budjb.rabbitmq.event.ConnectionContextStoppingEvent
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
 import org.slf4j.Logger
@@ -146,5 +150,57 @@ class ConnectionContextImplSpec extends Specification {
 
         then:
         thrown IllegalStateException
+    }
+
+    def 'Ensure that connection context start events are published in the correct order'() {
+        setup:
+        ConnectionConfiguration configuration = Mock(ConnectionConfiguration)
+        configuration.isValid() >> true
+
+        ConnectionFactory connectionFactory = Mock(ConnectionFactory)
+
+        ConnectionContext connectionContext = new ConnectionContextImpl(configuration, applicationEventPublisher)
+        connectionContext.setConnectionFactory(connectionFactory)
+
+        when:
+        connectionContext.start()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConnectionContextStartingEvent })
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConnectionContextStartedEvent })
+        0 * connectionFactory.newConnection((ExecutorService) _)
+
+        then:
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConnectionContextStartedEvent })
+        1 * connectionFactory.newConnection((ExecutorService) _)
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConnectionContextStartedEvent })
+    }
+
+    def 'Ensure that connection context stop events are published in the correct order'() {
+        setup:
+        ConnectionConfiguration configuration = Mock(ConnectionConfiguration)
+
+        Connection connection = Mock(Connection)
+        connection.isOpen() >> true
+
+        ConnectionContext connectionContext = new ConnectionContextImpl(configuration, applicationEventPublisher)
+        connectionContext.setConnection(connection)
+
+        when:
+        connectionContext.stop()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConnectionContextStoppingEvent })
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConnectionContextStoppedEvent })
+        0 * connection.close()
+
+        then:
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConnectionContextStoppedEvent })
+        1 * connection.close()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConnectionContextStoppedEvent })
     }
 }

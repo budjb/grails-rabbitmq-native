@@ -20,6 +20,10 @@ import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.*
 import com.budjb.rabbitmq.converter.*
+import com.budjb.rabbitmq.event.ConsumerContextStartedEvent
+import com.budjb.rabbitmq.event.ConsumerContextStartingEvent
+import com.budjb.rabbitmq.event.ConsumerContextStoppedEvent
+import com.budjb.rabbitmq.event.ConsumerContextStoppingEvent
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
@@ -316,5 +320,85 @@ class ConsumerContextImplSpec extends Specification {
         then:
         notThrown StackOverflowError
         1 * log.error('unexpected exception class java.lang.StackOverflowError encountered while responding from an RPC call with handler com.budjb.rabbitmq.test.support.UnitTestConsumer', _)
+    }
+
+    def 'Ensure that consumer context start events are published in the correct order'() {
+        setup:
+        Channel channel = Mock(Channel)
+
+        ConnectionContext connectionContext = Mock(ConnectionContext)
+        connectionContext.getRunningState() >> RunningState.RUNNING
+        connectionContext.createChannel(*_) >> channel
+
+        connectionManager.getContext(_) >> connectionContext
+
+        ConsumerConfiguration configuration = Mock(ConsumerConfiguration)
+        configuration.isValid() >> true
+        configuration.getQueue() >> 'foobar'
+        configuration.getConsumers() >> 1
+
+        MessageConsumer consumer = Mock(MessageConsumer)
+        consumer.getConfiguration() >> configuration
+
+        ConsumerContextImpl consumerContext = new ConsumerContextImpl(
+            consumer,
+            connectionManager,
+            persistenceInterceptor,
+            rabbitMessagePublisher,
+            applicationEventPublisher
+        )
+
+        when:
+        consumerContext.start()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerContextStartingEvent })
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConsumerContextStartedEvent })
+        0 * channel.basicConsume(_, _, _)
+
+        then:
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConsumerContextStartedEvent })
+        1 * channel.basicConsume(_, _, _)
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerContextStartedEvent })
+    }
+
+    def 'Ensure that consumer context stop events are published in the correct order'() {
+        setup:
+        RabbitMessageHandler rabbitMessageHandler = Mock(RabbitMessageHandler)
+        rabbitMessageHandler.getRunningState() >> RunningState.RUNNING
+
+        ConsumerConfiguration configuration = Mock(ConsumerConfiguration)
+        configuration.isValid() >> true
+        configuration.getQueue() >> 'foobar'
+        configuration.getConsumers() >> 1
+
+        MessageConsumer consumer = Mock(MessageConsumer)
+        consumer.getConfiguration() >> configuration
+
+        ConsumerContextImpl consumerContext = new ConsumerContextImpl(
+            consumer,
+            connectionManager,
+            persistenceInterceptor,
+            rabbitMessagePublisher,
+            applicationEventPublisher
+        )
+        consumerContext.consumers = [rabbitMessageHandler]
+
+        when:
+        consumerContext.stop()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerContextStoppingEvent })
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConsumerContextStoppedEvent })
+        0 * rabbitMessageHandler.stop()
+
+        then:
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConsumerContextStoppedEvent })
+        1 * rabbitMessageHandler.stop()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerContextStoppedEvent })
     }
 }
