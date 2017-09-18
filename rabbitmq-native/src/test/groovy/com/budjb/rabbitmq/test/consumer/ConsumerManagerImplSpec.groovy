@@ -25,6 +25,8 @@ import com.budjb.rabbitmq.consumer.MessageConsumer
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.event.ConsumerManagerStartedEvent
 import com.budjb.rabbitmq.event.ConsumerManagerStartingEvent
+import com.budjb.rabbitmq.event.ConsumerManagerStoppedEvent
+import com.budjb.rabbitmq.event.ConsumerManagerStoppingEvent
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import grails.core.GrailsApplication
@@ -400,6 +402,30 @@ class ConsumerManagerImplSpec extends Specification {
 
         then:
         1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStartedEvent})
+    }
+
+    def 'Ensure that consumer manager stop events are published in the correct order'() {
+        setup:
+        ConsumerContext consumerContext = Mock(ConsumerContext)
+        consumerContext.getId() >> "Consumer1"
+        consumerContext.getRunningState() >> RunningState.RUNNING
+
+        consumerManager.register(consumerContext)
+
+        when:
+        consumerManager.stop()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStoppingEvent})
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStoppedEvent})
+        0 * consumerContext.stop()
+
+        then:
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStoppedEvent})
+        1 * consumerContext.stop()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStoppedEvent})
     }
 
     class Consumer1 {

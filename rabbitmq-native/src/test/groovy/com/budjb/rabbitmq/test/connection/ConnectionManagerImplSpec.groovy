@@ -20,6 +20,8 @@ import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManagerImpl
 import com.budjb.rabbitmq.event.ConnectionManagerStartedEvent
 import com.budjb.rabbitmq.event.ConnectionManagerStartingEvent
+import com.budjb.rabbitmq.event.ConnectionManagerStoppedEvent
+import com.budjb.rabbitmq.event.ConnectionManagerStoppingEvent
 import com.budjb.rabbitmq.exception.ContextNotFoundException
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.exception.MissingConfigurationException
@@ -453,5 +455,28 @@ class ConnectionManagerImplSpec extends Specification {
 
         then:
         1 * applicationEventPublisher.publishEvent({ it instanceof ConnectionManagerStartedEvent })
+    }
+
+    def 'Ensure that connection manager stop events are published in the correct order'() {
+        setup:
+        ConnectionContext context = Mock(ConnectionContext)
+        context.getIsDefault() >> false
+
+        connectionManager.register(context)
+
+        when:
+        connectionManager.stop()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConnectionManagerStoppingEvent })
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConnectionManagerStoppedEvent })
+        0 * context.stop()
+
+        then:
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConnectionManagerStoppedEvent })
+        1 * context.stop()
+
+        then:
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConnectionManagerStoppedEvent })
     }
 }

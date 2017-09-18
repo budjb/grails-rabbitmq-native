@@ -13,18 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.budjb.rabbitmq.artefact;
+package com.budjb.rabbitmq.event
 
-import org.grails.core.AbstractInjectableGrailsClass;
+import groovy.transform.InheritConstructors
 
-public class DefaultGrailsMessageConverterClass extends AbstractInjectableGrailsClass implements GrailsMessageConverterClass {
-    public static final String MESSAGECONVERTER = "MessageConverter";
-
-    public DefaultGrailsMessageConverterClass(Class clazz) {
-        super(clazz, MESSAGECONVERTER);
-    }
-
-    public DefaultGrailsMessageConverterClass(Class clazz, String trailingName) {
-        super(clazz, trailingName);
-    }
+@InheritConstructors
+class ConnectionContextStoppedEvent extends RabbitEvent {
 }

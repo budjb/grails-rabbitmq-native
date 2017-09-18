@@ -16,8 +16,11 @@
 package com.budjb.rabbitmq.connection
 
 import com.budjb.rabbitmq.RunningState
+import com.budjb.rabbitmq.event.ConnectionContextStartedEvent
+import com.budjb.rabbitmq.event.ConnectionContextStartingEvent
+import com.budjb.rabbitmq.event.ConnectionContextStoppedEvent
+import com.budjb.rabbitmq.event.ConnectionContextStoppingEvent
 import com.budjb.rabbitmq.report.ConnectionReport
-import com.codahale.metrics.JmxReporter
 import com.codahale.metrics.MetricRegistry
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
@@ -25,6 +28,7 @@ import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.impl.StandardMetricsCollector
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -53,6 +57,11 @@ class ConnectionContextImpl implements ConnectionContext {
     MetricRegistry metricRegistry
 
     /**
+     * Spring application event publisher.
+     */
+    ApplicationEventPublisher applicationEventPublisher
+
+    /**
      * Logger.
      */
     Logger log = LoggerFactory.getLogger(ConnectionContextImpl)
@@ -62,11 +71,12 @@ class ConnectionContextImpl implements ConnectionContext {
      *
      * @param parameters
      */
-    ConnectionContextImpl(ConnectionConfiguration configuration) {
+    ConnectionContextImpl(ConnectionConfiguration configuration, ApplicationEventPublisher applicationEventPublisher) {
         if (configuration == null) {
             throw new NullPointerException("connection configuration can not be null")
         }
         this.configuration = configuration
+        this.applicationEventPublisher = applicationEventPublisher
     }
 
     /**
@@ -85,10 +95,10 @@ class ConnectionContextImpl implements ConnectionContext {
             return
         }
 
-        log.info("connecting to RabbitMQ server '${getId()}' at '${configuration.getHost()}:${configuration.getPort()}' on virtual host '${configuration.getVirtualHost()}'")
+        log.debug("connecting to RabbitMQ server '${getId()}' at '${configuration.getHost()}:${configuration.getPort()}' on virtual host '${configuration.getVirtualHost()}'")
+        applicationEventPublisher.publishEvent(new ConnectionContextStartingEvent(this))
 
         ConnectionFactory factory = getConnectionFactory()
-
         factory.setUsername(configuration.getUsername())
         factory.setPassword(configuration.getPassword())
         factory.setPort(configuration.getPort())
@@ -105,7 +115,7 @@ class ConnectionContextImpl implements ConnectionContext {
             factory.useSslProtocol()
         }
 
-        if (configuration.getMetricsEnabled() ) {
+        if (configuration.getMetricsEnabled()) {
             metricRegistry = new MetricRegistry()
             StandardMetricsCollector metrics = new StandardMetricsCollector(metricRegistry)
             connectionFactory.setMetricsCollector(metrics)
@@ -120,6 +130,8 @@ class ConnectionContextImpl implements ConnectionContext {
         }
 
         this.connection = factory.newConnection(executorService)
+
+        applicationEventPublisher.publishEvent(new ConnectionContextStartedEvent(this))
     }
 
     /**
@@ -131,10 +143,13 @@ class ConnectionContextImpl implements ConnectionContext {
             return
         }
 
+        applicationEventPublisher.publishEvent(new ConnectionContextStoppingEvent(this))
+
         connection.close()
         connection = null
 
         log.debug("closed connection to the RabbitMQ server with name '${getId()}'")
+        applicationEventPublisher.publishEvent(new ConnectionContextStoppedEvent(this))
     }
 
     /**
