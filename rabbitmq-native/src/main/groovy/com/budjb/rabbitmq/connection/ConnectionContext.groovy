@@ -17,19 +17,26 @@ package com.budjb.rabbitmq.connection
 
 import com.budjb.rabbitmq.RabbitManagedContext
 import com.budjb.rabbitmq.report.ConnectionReport
+import com.codahale.metrics.MetricRegistry
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
+import com.rabbitmq.client.ConnectionFactory
 
 interface ConnectionContext extends RabbitManagedContext {
     /**
-     * Returns the RabbitMQ connection.
+     * Returns the RabbitMQ {@link Connection}.
      *
      * @return
      */
     Connection getConnection() throws IllegalStateException
 
     /**
-     * Returns the context's configuration.
+     * Returns the RabbitMQ {@link MetricRegistry}
+     */
+    MetricRegistry metricRegistry
+
+    /**
+     * Returns the context's {@link ConnectionConfiguration configuration}.
      *
      * @return
      */
@@ -50,7 +57,7 @@ interface ConnectionContext extends RabbitManagedContext {
     void setIsDefault(boolean isDefault)
 
     /**
-     * Creates a channel.
+     * Creates a {@link Channel}.
      *
      * @return
      */

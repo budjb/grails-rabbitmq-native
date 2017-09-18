@@ -32,6 +32,7 @@ dependencies {
     compile 'commons-lang:commons-lang:2.6'
     compile 'org.codehaus.groovy:groovy-json:2.4.11'
     compile 'com.rabbitmq:amqp-client:4.2.0'
+    compile 'io.dropwizard.metrics:metrics-core:3.2.3'
 }
 
 bootRun {
