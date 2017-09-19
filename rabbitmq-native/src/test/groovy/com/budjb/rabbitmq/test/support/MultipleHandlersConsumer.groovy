@@ -15,15 +15,11 @@
  */
 package com.budjb.rabbitmq.test.support
 
-import com.budjb.rabbitmq.consumer.ConsumerConfiguration
-import com.budjb.rabbitmq.consumer.ConsumerConfigurationImpl
-import com.budjb.rabbitmq.consumer.GrailsMessageConsumer
-
-class MultipleHandlersConsumer extends GrailsMessageConsumer {
-    final ConsumerConfiguration configuration = new ConsumerConfigurationImpl(
-        queue: 'foobar',
+class MultipleHandlersConsumer {
+    static rabbitConfig = [
+        queue    : 'foobar',
         consumers: 10
-    )
+    ]
 
     enum Handler {
         INTEGER,

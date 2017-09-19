@@ -15,31 +15,15 @@
  */
 package com.budjb.rabbitmq.test.support
 
-import com.budjb.rabbitmq.consumer.GrailsMessageConsumer
+import com.budjb.rabbitmq.consumer.MessageConsumerEventHandler
 
-class UnitTestConsumer extends GrailsMessageConsumer {
+class UnitTestConsumer implements MessageConsumerEventHandler {
     static rabbitConfig = [
-        queue: 'test-queue',
+        queue    : 'test-queue',
         consumers: 5
     ]
 
     def handleMessage(def body, def context) {
         return body
-    }
-
-    void onReceive(def context) {
-
-    }
-
-    def onSuccess(def context) {
-
-    }
-
-    def onComplete(def context) {
-
-    }
-
-    def onFailure(def context) {
-
     }
 }

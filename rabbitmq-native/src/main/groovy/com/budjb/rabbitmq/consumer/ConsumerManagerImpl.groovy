@@ -247,7 +247,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
     @Override
     ConsumerContext createContext(Object consumer) {
         if (!MessageConsumer.isInstance(consumer)) {
-            consumer = new GrailsMessageConsumerWrapper(consumer, grailsApplication, messageConverterManager)
+            consumer = new LegacyMessageConsumer(consumer, grailsApplication.getConfig(), messageConverterManager)
         }
 
         return new ConsumerContextImpl(
@@ -260,7 +260,7 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
     }
 
     /**
-     * Create a consumer context withe consumer represented by the given Grails artefact.
+     * Create a consumer context with the consumer represented by the given Grails artefact.
      *
      * @param artefact
      * @return

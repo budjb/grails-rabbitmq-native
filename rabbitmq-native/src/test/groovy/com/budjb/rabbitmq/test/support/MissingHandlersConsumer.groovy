@@ -15,9 +15,7 @@
  */
 package com.budjb.rabbitmq.test.support
 
-import com.budjb.rabbitmq.consumer.GrailsMessageConsumer
-
-class MissingHandlersConsumer extends GrailsMessageConsumer {
+class MissingHandlersConsumer {
     static rabbitConfig = [
         queue: 'foobar'
     ]

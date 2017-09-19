@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 package com.budjb.rabbitmq.exception
-
-import com.budjb.rabbitmq.consumer.MessageConsumer
-
 /**
- * Exception thrown when a {@link com.budjb.rabbitmq.consumer.GrailsMessageConsumer} implementation
+ * Exception thrown when a {@link com.budjb.rabbitmq.consumer.LegacyMessageConsumer} implementation
  * does not have any message handlers defined.
  */
 class NoMessageHandlersDefinedException extends RuntimeException {
     /**
      * The offending message handler class.
      */
-    Class<MessageConsumer> messageConsumerClass
+    Class<?> messageConsumerClass
 
     /**
      * Constructor.
      *
      * @param messageConsumerClass
      */
-    NoMessageHandlersDefinedException(Class<MessageConsumer> messageConsumerClass) {
+    NoMessageHandlersDefinedException(Class<?> messageConsumerClass) {
         super("message consumer ${messageConsumerClass.getName()} does not have any message handler methods defined")
         this.messageConsumerClass = messageConsumerClass
     }

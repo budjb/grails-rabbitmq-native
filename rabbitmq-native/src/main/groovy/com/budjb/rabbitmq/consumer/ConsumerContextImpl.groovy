@@ -296,7 +296,10 @@ class ConsumerContextImpl implements ConsumerContext {
         ConsumerConfiguration configuration = consumer.getConfiguration()
 
         openSession()
-        consumer.onReceive(context)
+
+        if (consumer instanceof MessageConsumerEventHandler) {
+            ((MessageConsumerEventHandler) consumer).onReceive(context)
+        }
 
         try {
             if (configuration.getTransacted()) {
@@ -313,7 +316,9 @@ class ConsumerContextImpl implements ConsumerContext {
                 context.getChannel().txCommit()
             }
 
-            consumer.onSuccess(context)
+            if (consumer instanceof MessageConsumerEventHandler) {
+                ((MessageConsumerEventHandler) consumer).onSuccess(context)
+            }
         }
         catch (Throwable e) {
             if (configuration.getTransacted()) {
@@ -331,12 +336,16 @@ class ConsumerContextImpl implements ConsumerContext {
                 log.error("unhandled exception ${e.getClass().name} caught in RabbitMQ message handler for consumer ${getId()}", e)
             }
 
-            consumer.onFailure(context, e)
+            if (consumer instanceof MessageConsumerEventHandler) {
+                ((MessageConsumerEventHandler) consumer).onFailure(context, e)
+            }
 
             return
         }
         finally {
-            consumer.onComplete(context)
+            if (consumer instanceof MessageConsumerEventHandler) {
+                ((MessageConsumerEventHandler) consumer).onComplete(context)
+            }
 
             closeSession()
         }

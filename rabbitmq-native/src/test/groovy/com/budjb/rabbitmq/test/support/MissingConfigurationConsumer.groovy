@@ -15,26 +15,10 @@
  */
 package com.budjb.rabbitmq.test.support
 
-import com.budjb.rabbitmq.consumer.GrailsMessageConsumer
+import com.budjb.rabbitmq.consumer.MessageConsumerEventHandler
 
-class MissingConfigurationConsumer extends GrailsMessageConsumer {
+class MissingConfigurationConsumer implements MessageConsumerEventHandler {
     def handleMessage(def body, def context) {
-
-    }
-
-    void onReceive(def context) {
-
-    }
-
-    def onSuccess(def context) {
-
-    }
-
-    def onComplete(def context) {
-
-    }
-
-    def onFailure(def context) {
 
     }
 }

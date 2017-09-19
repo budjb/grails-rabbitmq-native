@@ -15,12 +15,10 @@
  */
 package com.budjb.rabbitmq.test.support
 
-import com.budjb.rabbitmq.consumer.ConsumerConfiguration
-import com.budjb.rabbitmq.consumer.ConsumerConfigurationImpl
-import com.budjb.rabbitmq.consumer.GrailsMessageConsumer
-
-class IntegerMessageConsumer extends GrailsMessageConsumer {
-    final ConsumerConfiguration configuration = new ConsumerConfigurationImpl(queue: 'foobar')
+class IntegerMessageConsumer {
+    static rabbitConfig = [
+        queue: 'foobar'
+    ]
 
     void handleMessage(int message) {
 

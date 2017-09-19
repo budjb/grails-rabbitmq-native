@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq.test.consumer
 
-import com.budjb.rabbitmq.consumer.MessageConsumer
+import com.budjb.rabbitmq.consumer.LegacyMessageConsumer
 import com.budjb.rabbitmq.consumer.MessageContext
 import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.exception.MissingConfigurationException
@@ -25,29 +25,24 @@ import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope
 import grails.config.Config
-import grails.core.GrailsApplication
 import groovy.json.JsonOutput
 import org.grails.config.PropertySourcesConfig
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class GrailsMessageConsumerSpec extends Specification {
+class LegacyMessageConsumerSpec extends Specification {
     MessageConverterManager messageConverterManager
-    GrailsApplication grailsApplication
 
     def setup() {
         messageConverterManager = new MessageConverterManagerImpl()
         messageConverterManager.register(new JsonMessageConverter())
         messageConverterManager.register(new LongMessageConverter())
         messageConverterManager.register(new StringMessageConverter())
-
-        grailsApplication = Mock(GrailsApplication)
     }
 
     def 'If a consumer has a configuration defined in the application config, it is loaded correctly'() {
         setup:
-        Config config = new PropertySourcesConfig()
-        config.putAll([
+        Config config = new PropertySourcesConfig([
             rabbitmq: [
                 consumers: [
                     'UnitTestConsumer': [
@@ -58,11 +53,7 @@ class GrailsMessageConsumerSpec extends Specification {
             ]
         ])
 
-        grailsApplication.getConfig() >> config
-
-        UnitTestConsumer consumer = new UnitTestConsumer()
-        consumer.grailsApplication = grailsApplication
-        consumer.init()
+        LegacyMessageConsumer consumer = new LegacyMessageConsumer(new UnitTestConsumer(), config, messageConverterManager)
 
         expect:
         consumer.id == 'com.budjb.rabbitmq.test.support.UnitTestConsumer'
@@ -72,11 +63,7 @@ class GrailsMessageConsumerSpec extends Specification {
 
     def 'If a consumer has a configuration defined within the object, it is loaded correctly'() {
         setup:
-        grailsApplication.getConfig() >> new PropertySourcesConfig()
-
-        UnitTestConsumer consumer = new UnitTestConsumer()
-        consumer.grailsApplication = grailsApplication
-        consumer.init()
+        LegacyMessageConsumer consumer = new LegacyMessageConsumer(new UnitTestConsumer(), new PropertySourcesConfig(), messageConverterManager)
 
         expect:
         consumer.id == 'com.budjb.rabbitmq.test.support.UnitTestConsumer'
@@ -85,28 +72,16 @@ class GrailsMessageConsumerSpec extends Specification {
     }
 
     def 'If a consumer has no configuration defined, a MissingConfigurationException is thrown'() {
-        setup:
-        grailsApplication.getConfig() >> new PropertySourcesConfig()
-
-        MissingConfigurationConsumer consumer = new MissingConfigurationConsumer()
-        consumer.grailsApplication = grailsApplication
-
         when:
-        consumer.init()
+        new LegacyMessageConsumer(new MissingConfigurationConsumer(), new PropertySourcesConfig(), messageConverterManager)
 
         then:
         thrown MissingConfigurationException
     }
 
     def 'If a consumer has no message handlers defined, a NoMessageHandlersDefinedException is thrown'() {
-        setup:
-        grailsApplication.getConfig() >> new PropertySourcesConfig()
-
-        MessageConsumer messageConsumer = new MissingHandlersConsumer()
-        messageConsumer.grailsApplication = grailsApplication
-
         when:
-        messageConsumer.init()
+        new LegacyMessageConsumer(new MissingHandlersConsumer(), new PropertySourcesConfig(), messageConverterManager)
 
         then:
         thrown NoMessageHandlersDefinedException
@@ -115,12 +90,9 @@ class GrailsMessageConsumerSpec extends Specification {
     @Unroll
     def 'When a #type type is given to the MultipleMessageConsumer, the proper handler is called'() {
         setup:
-        grailsApplication.getConfig() >> new PropertySourcesConfig()
+        MultipleHandlersConsumer wrapped = new MultipleHandlersConsumer()
 
-        MultipleHandlersConsumer consumer = new MultipleHandlersConsumer()
-        consumer.grailsApplication = grailsApplication
-        consumer.messageConverterManager = messageConverterManager
-        consumer.init()
+        LegacyMessageConsumer consumer = new LegacyMessageConsumer(wrapped, new PropertySourcesConfig(), messageConverterManager)
 
         MessageContext messageContext = new MessageContext()
         messageContext.body = body
@@ -133,7 +105,7 @@ class GrailsMessageConsumerSpec extends Specification {
         consumer.process(messageContext)
 
         then:
-        consumer.handler == handler
+        wrapped.handler == handler
 
         where:
         type      | body                                  | handler
@@ -144,9 +116,7 @@ class GrailsMessageConsumerSpec extends Specification {
 
     def 'When a handler does not exist for a given body type, an IllegalArgumentException is thrown'() {
         setup:
-        MessageConsumer messageConsumer = new IntegerMessageConsumer()
-        messageConsumer.messageConverterManager = messageConverterManager
-        messageConsumer.init()
+        LegacyMessageConsumer messageConsumer = new LegacyMessageConsumer(new IntegerMessageConsumer(), new PropertySourcesConfig(), messageConverterManager)
 
         MessageContext messageContext = new MessageContext()
         messageContext.body = 'foobar'.bytes
@@ -160,5 +130,40 @@ class GrailsMessageConsumerSpec extends Specification {
 
         then:
         thrown IllegalArgumentException
+    }
+
+    def 'Validate that the handlers of wrapped consumers are called'() {
+        setup:
+        MessageConverterManager messageConverterManager = Mock(MessageConverterManager)
+        messageConverterManager.convertFromBytes(_, _) >> 'foobar'
+
+        WrappedMessageConsumer wrappedMessageConsumer = new WrappedMessageConsumer()
+
+        LegacyMessageConsumer messageConsumer = new LegacyMessageConsumer(wrappedMessageConsumer, new PropertySourcesConfig(), messageConverterManager)
+        MessageContext messageContext = Mock(MessageContext)
+
+        when: 'the wrapper\'s onReceive is called'
+        messageConsumer.onReceive(messageContext)
+
+        then: 'the wrapped consumer\'s onReceive is called'
+        wrappedMessageConsumer.callback == WrappedMessageConsumer.Callback.ON_RECEIVE
+
+        when: 'the wrapper\'s onSuccess is called'
+        messageConsumer.onSuccess(messageContext)
+
+        then: 'the wrapped consumer\'s onSuccess is called'
+        wrappedMessageConsumer.callback == WrappedMessageConsumer.Callback.ON_SUCCESS
+
+        when: 'the wrapper\'s onFailure is called'
+        messageConsumer.onFailure(messageContext, new Exception())
+
+        then: 'the wrapped consumer\'s onFailure is called'
+        wrappedMessageConsumer.callback == WrappedMessageConsumer.Callback.ON_FAILURE
+
+        when: 'the wrapper\'s onComplete is called'
+        messageConsumer.onComplete(messageContext)
+
+        then: 'the wrapped consumer\'s onComplete is called'
+        wrappedMessageConsumer.callback == WrappedMessageConsumer.Callback.ON_COMPLETE
     }
 }

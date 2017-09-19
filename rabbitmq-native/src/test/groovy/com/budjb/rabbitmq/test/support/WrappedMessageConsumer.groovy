@@ -15,7 +15,10 @@
  */
 package com.budjb.rabbitmq.test.support
 
-class WrappedMessageConsumer {
+import com.budjb.rabbitmq.consumer.MessageConsumerEventHandler
+import com.budjb.rabbitmq.consumer.MessageContext
+
+class WrappedMessageConsumer implements MessageConsumerEventHandler{
     static rabbitConfig = [queue: 'foobar']
 
     enum Callback {
@@ -31,19 +34,19 @@ class WrappedMessageConsumer {
 
     }
 
-    def onReceive(def context) {
+    void onReceive(MessageContext context) {
         callback = Callback.ON_RECEIVE
     }
 
-    def onSuccess(def context) {
+    void onSuccess(MessageContext context) {
         callback = Callback.ON_SUCCESS
     }
 
-    def onFailure(def context, def throwable) {
+    void onFailure(MessageContext context, Throwable throwable) {
         callback = Callback.ON_FAILURE
     }
 
-    def onComplete(def context) {
+    void onComplete(MessageContext context) {
         callback = Callback.ON_COMPLETE
     }
 }
