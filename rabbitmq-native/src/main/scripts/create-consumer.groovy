@@ -4,6 +4,6 @@ description "Creates a new Rabbit-native Consumer class.", {
 }
 
 model = model(args[0])
-render template: 'Consumer.groovy',
+render template: 'Consumer.groovy.template',
        destination: file("grails-app/rabbit-consumers/$model.packagePath/${model.simpleName}Consumer.groovy"),
        model: model
