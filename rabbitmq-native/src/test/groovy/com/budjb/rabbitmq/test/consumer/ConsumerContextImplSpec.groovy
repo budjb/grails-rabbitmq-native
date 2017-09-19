@@ -25,6 +25,7 @@ import com.budjb.rabbitmq.event.ConsumerContextStartingEvent
 import com.budjb.rabbitmq.event.ConsumerContextStoppedEvent
 import com.budjb.rabbitmq.event.ConsumerContextStoppingEvent
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
+import com.budjb.rabbitmq.test.support.CompositeMessageConsumer
 import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope
@@ -82,7 +83,7 @@ class ConsumerContextImplSpec extends Specification {
         ConsumerConfiguration configuration = new ConsumerConfigurationImpl()
         configuration.queue = 'test-queue'
 
-        MessageConsumer consumer = Mock(MessageConsumer)
+        MessageConsumer consumer = Mock(CompositeMessageConsumer)
         consumer.getConfiguration() >> configuration
 
         ConsumerContextImpl consumerContext = new ConsumerContextImpl(
@@ -117,7 +118,7 @@ class ConsumerContextImplSpec extends Specification {
         ConsumerConfiguration configuration = new ConsumerConfigurationImpl()
         configuration.queue = 'test-queue'
 
-        MessageConsumer consumer = Mock(MessageConsumer)
+        MessageConsumer consumer = Mock(CompositeMessageConsumer)
         consumer.getConfiguration() >> configuration
         consumer.process((MessageContext) _) >> { throw new RuntimeException() }
 
