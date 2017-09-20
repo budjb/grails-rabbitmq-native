@@ -2,8 +2,8 @@
 
 The logic surrounding the message consumer classes will by default attempt to intelligently convert the body of
 the received message from a byte array to a converted type, such as a String. Before routing the message to the
-consumer and handler, the plugin will run through a list of [converters|guide:converters] that will attempt to convert the message,
-and if the conversion was successful, determine if an appropriate handler has been defined.
+consumer and handler, the plugin will run through a list of <<Message Converters>>, limited by the class types
+of the handlers defined in the message consumer, and attempt to find a conversion that works.
 
 For example, consider this JSON blob:
 
@@ -11,10 +11,9 @@ For example, consider this JSON blob:
 {"foo":"bar","hi":"there"}
 
 If the above message is received, the converter for the Map class type will convert the byte array to a Map
-of the JSON data. If a valid handler for the Map type is defined, the handler will receive the converted JSON
-so that the handler does not need to handle the conversion.
+of the JSON data. If a valid handler for the Map type is defined, the handler will receive the converted JSON.
 
-The following handlers would accept the converted Map:
+The following handlers would accept the converted map:
 
 [source,groovy]
 -----
@@ -35,15 +34,8 @@ class ExampleConsumer {
 }
 -----
 
-NOTE: If a converter was successfully able to convert the message body, but no handler was defined to handle the
-class type, other converters will get a chance to convert the message body. In the above example, if only
-a handler for the String type was defined, the handler will receive the JSON blob as a String.
-
 If no converter is able to convert the message body, the plugin will fall back to passing the handler the raw
 byte array received from the RabbitMQ server.
 
-WARNING: If no handler is defined that can handle the received message (including the raw byte array), an error will
-be logged and the message will be rejected.
-
-The plugin has built-in <<Message Converters>> for `Integer`, `Map`, `List`, `GString`, and `String` types. The plugin allows users
-to define their own converters to convert other object types, which will be discussed later in this guide.
+NOTE: More information about message converters can be found in the <<Message Converters>> section, including a list
+of built-in message converters and details of how to create custom converters.

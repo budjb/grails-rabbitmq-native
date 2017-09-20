@@ -15,3 +15,5 @@ include::consuming/exchanges.adoc[]
 include::consuming/consmulti.adoc[]
 
 include::consuming/centralconf.adoc[]
+
+include::consuming/event-handlers.adoc[]

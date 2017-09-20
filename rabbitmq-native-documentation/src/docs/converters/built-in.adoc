@@ -1,0 +1,23 @@
+==== Built-in Message Converters
+
+The plugin provides converters for the following types:
+
+.Built-in Message Converters
+[grid="rows"]
+|===
+| Type              | Incoming               | Outgoing
+| `Serializable`    | image:check.svg[36,36] | image:check.svg[36,36]
+| `Integer`         | image:check.svg[36,36] | image:check.svg[36,36]
+| `Long`            | image:check.svg[36,36] | image:check.svg[36,36]
+| `Map` (JSON)      | image:check.svg[36,36] | image:check.svg[36,36]
+| `List` (JSON)     | image:check.svg[36,36] | image:check.svg[36,36]
+| `String`          | image:check.svg[36,36] | image:check.svg[36,36]
+| `GString`         |                        | image:check.svg[36,36]
+|===
+
+
+
+These converters allow message handlers to consume and return data without having to convert that data themselves. They
+are also used when publishing messages with the `RabbitMessagePublisher`.
+
+INFO: The message converter for `Serializable` classes will always be attempted first.
