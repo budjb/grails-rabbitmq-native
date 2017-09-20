@@ -23,6 +23,7 @@ import com.budjb.rabbitmq.event.ConsumerContextStartingEvent
 import com.budjb.rabbitmq.event.ConsumerContextStoppedEvent
 import com.budjb.rabbitmq.event.ConsumerContextStoppingEvent
 import com.budjb.rabbitmq.exception.ContextNotFoundException
+import com.budjb.rabbitmq.exception.UnsupportedMessageException
 import com.budjb.rabbitmq.publisher.RabbitMessageProperties
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import com.budjb.rabbitmq.report.ConsumerReport
@@ -306,7 +307,14 @@ class ConsumerContextImpl implements ConsumerContext {
                 context.getChannel().txSelect()
             }
 
-            response = consumer.process(context)
+            try {
+                response = consumer.process(context)
+            }
+            catch (UnsupportedMessageException ignored) {
+                if (consumer instanceof UnsupportedMessageHandler) {
+                    ((UnsupportedMessageHandler) consumer).handleUnsupportedMessage(context)
+                }
+            }
 
             if (configuration.getAutoAck() == AutoAck.POST) {
                 context.getChannel().basicAck(context.getEnvelope().deliveryTag, false)

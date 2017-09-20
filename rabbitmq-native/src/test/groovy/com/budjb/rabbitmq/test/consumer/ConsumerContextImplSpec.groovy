@@ -26,11 +26,13 @@ import com.budjb.rabbitmq.event.ConsumerContextStoppedEvent
 import com.budjb.rabbitmq.event.ConsumerContextStoppingEvent
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import com.budjb.rabbitmq.test.support.CompositeMessageConsumer
+import com.budjb.rabbitmq.test.support.TestUnsupportedMessageConsumer
 import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope
 import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk
 import grails.persistence.support.PersistenceContextInterceptor
+import org.grails.config.PropertySourcesConfig
 import org.slf4j.Logger
 import org.springframework.context.ApplicationEventPublisher
 import spock.lang.Specification
@@ -401,5 +403,39 @@ class ConsumerContextImplSpec extends Specification {
 
         then:
         1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerContextStoppedEvent })
+    }
+
+    def 'When a no message handler and message converter combination are available to handle an incoming message, and \
+            the consumer implements UnsupportedMessageHandler, handleUnsupportedMessage is called'() {
+        setup:
+        TestUnsupportedMessageConsumer testUnsupportedMessageConsumer = new TestUnsupportedMessageConsumer()
+        LegacyMessageConsumer consumer = new LegacyMessageConsumer(testUnsupportedMessageConsumer, new PropertySourcesConfig(), messageConverterManager)
+
+        BasicProperties basicProperties = Mock(BasicProperties)
+        Envelope envelope = Mock(Envelope)
+        Channel channel = Mock(Channel)
+
+        MessageContext messageContext = Mock(MessageContext)
+        messageContext.getBody() >> 'foobar'.bytes
+        messageContext.getProperties() >> basicProperties
+        messageContext.getEnvelope() >> envelope
+        messageContext.getChannel() >> channel
+
+        ConsumerContextImpl context = new ConsumerContextImpl(
+            consumer,
+            connectionManager,
+            persistenceInterceptor,
+            rabbitMessagePublisher,
+            applicationEventPublisher
+        )
+
+        expect:
+        !testUnsupportedMessageConsumer.unsupportedCalled
+
+        when:
+        context.deliverMessage(messageContext)
+
+        then:
+        testUnsupportedMessageConsumer.unsupportedCalled
     }
 }
