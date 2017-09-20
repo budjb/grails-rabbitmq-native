@@ -17,10 +17,7 @@ package com.budjb.rabbitmq.consumer
 
 import com.budjb.rabbitmq.converter.ByteToObjectInput
 import com.budjb.rabbitmq.converter.MessageConverterManager
-import com.budjb.rabbitmq.exception.DuplicateHandlerException
-import com.budjb.rabbitmq.exception.MissingConfigurationException
-import com.budjb.rabbitmq.exception.NoConverterFoundException
-import com.budjb.rabbitmq.exception.NoMessageHandlersDefinedException
+import com.budjb.rabbitmq.exception.*
 import grails.config.Config
 import grails.util.GrailsClassUtils
 import org.slf4j.Logger
@@ -30,7 +27,7 @@ import org.springframework.util.ClassUtils
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
-class LegacyMessageConsumer implements MessageConsumer, MessageConsumerEventHandler {
+class LegacyMessageConsumer implements MessageConsumer, MessageConsumerEventHandler, UnsupportedMessageHandler {
     /**
      * Name of the method that should handle incoming messages.
      */
@@ -198,6 +195,19 @@ class LegacyMessageConsumer implements MessageConsumer, MessageConsumerEventHand
     /**
      * {@inheritDoc}
      */
+    @Override
+    Object handleUnsupportedMessage(MessageContext messageContext) {
+        if (UnsupportedMessageHandler.isInstance(consumer)) {
+            return ((UnsupportedMessageHandler) consumer).handleUnsupportedMessage(messageContext)
+        }
+
+        throw new UnsupportedMessageException("could not find a message converter and message handler combination to process an incoming message")
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     Object process(MessageContext messageContext) {
         Method handler = null
         Object body = null
@@ -233,7 +243,7 @@ class LegacyMessageConsumer implements MessageConsumer, MessageConsumerEventHand
         }
 
         if (!handler) {
-            throw new IllegalArgumentException("could not find a message converter and message handler combination to process an incoming message")
+            throw new UnsupportedMessageException()
         }
 
         if (handler.getParameterCount() == 1) {

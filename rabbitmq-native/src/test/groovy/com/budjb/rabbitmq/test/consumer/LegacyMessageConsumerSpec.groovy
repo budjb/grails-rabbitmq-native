@@ -20,6 +20,7 @@ import com.budjb.rabbitmq.consumer.MessageContext
 import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.exception.MissingConfigurationException
 import com.budjb.rabbitmq.exception.NoMessageHandlersDefinedException
+import com.budjb.rabbitmq.exception.UnsupportedMessageException
 import com.budjb.rabbitmq.test.support.*
 import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
@@ -114,7 +115,7 @@ class LegacyMessageConsumerSpec extends Specification {
         'b[]'     | [1, 2, 3] as byte[]                   | MultipleHandlersConsumer.Handler.BYTE
     }
 
-    def 'When a handler does not exist for a given body type, an IllegalArgumentException is thrown'() {
+    def 'When a handler does not exist for a given body type, an UnsupportedMessageException is thrown'() {
         setup:
         LegacyMessageConsumer messageConsumer = new LegacyMessageConsumer(new IntegerMessageConsumer(), new PropertySourcesConfig(), messageConverterManager)
 
@@ -129,14 +130,40 @@ class LegacyMessageConsumerSpec extends Specification {
         messageConsumer.process(messageContext)
 
         then:
-        thrown IllegalArgumentException
+        thrown UnsupportedMessageException
+    }
+
+    def 'When no message handler is available to handle an incoming message, and the consumer implements UnsupportedMessageHandler, the handler is called'() {
+        setup:
+        TestUnsupportedMessageConsumer testUnsupportedMessageConsumer = new TestUnsupportedMessageConsumer()
+        LegacyMessageConsumer consumer = new LegacyMessageConsumer(testUnsupportedMessageConsumer, new PropertySourcesConfig(), messageConverterManager)
+        MessageContext messageContext = Mock(MessageContext)
+
+        expect:
+        !testUnsupportedMessageConsumer.unsupportedCalled
+
+        when:
+        consumer.handleUnsupportedMessage(messageContext)
+
+        then:
+        testUnsupportedMessageConsumer.unsupportedCalled
+    }
+
+    def 'When no message handler is available to handle an incoming message, and the consumer does NOT implement UnsupportedMessageHandler, an UnsupportedMessageException is thrown'() {
+        setup:
+        IntegerMessageConsumer integerMessageConsumer = new IntegerMessageConsumer()
+        LegacyMessageConsumer consumer = new LegacyMessageConsumer(integerMessageConsumer, new PropertySourcesConfig(), messageConverterManager)
+        MessageContext messageContext = Mock(MessageContext)
+
+        when:
+        consumer.handleUnsupportedMessage(messageContext)
+
+        then:
+        thrown UnsupportedMessageException
     }
 
     def 'Validate that the handlers of wrapped consumers are called'() {
         setup:
-        MessageConverterManager messageConverterManager = Mock(MessageConverterManager)
-        messageConverterManager.convertFromBytes(_, _) >> 'foobar'
-
         WrappedMessageConsumer wrappedMessageConsumer = new WrappedMessageConsumer()
 
         LegacyMessageConsumer messageConsumer = new LegacyMessageConsumer(wrappedMessageConsumer, new PropertySourcesConfig(), messageConverterManager)
