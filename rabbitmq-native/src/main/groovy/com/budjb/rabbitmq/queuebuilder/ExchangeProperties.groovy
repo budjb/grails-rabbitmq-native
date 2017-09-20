@@ -16,6 +16,8 @@
 package com.budjb.rabbitmq.queuebuilder
 
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
+import grails.config.Config
+import org.grails.config.PropertySourcesConfig
 
 class ExchangeProperties implements ConfigurationProperties {
     /**
@@ -56,16 +58,25 @@ class ExchangeProperties implements ConfigurationProperties {
     /**
      * Constructor.
      *
-     * @param name
      * @param configuration
      */
     ExchangeProperties(Map configuration) {
-        name = parseConfigOption(String, configuration.name)
-        arguments = parseConfigOption(Map, configuration.arguments, arguments)
-        autoDelete = parseConfigOption(Boolean, configuration.autoDelete, autoDelete)
-        durable = parseConfigOption(Boolean, configuration.durable, durable)
-        type = ExchangeType.lookup(parseConfigOption(String, configuration['type']))
-        connection = parseConfigOption(String, configuration.connection, connection)
+        this(new PropertySourcesConfig(configuration))
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param name
+     * @param configuration
+     */
+    ExchangeProperties(Config configuration) {
+        name = configuration.getProperty('name', String)
+        arguments = configuration.getProperty('arguments', Map, arguments)
+        autoDelete = configuration.getProperty('autoDelete', Boolean, autoDelete)
+        durable = configuration.getProperty('durable', Boolean, durable)
+        type = ExchangeType.lookup(configuration.getProperty('type', String))
+        connection = configuration.getProperty('connection', String, connection)
 
         /*
         Handle exchange binding to another exchange
@@ -85,10 +96,12 @@ class ExchangeProperties implements ConfigurationProperties {
                 if (!(bindingMap instanceof Map)) {
                     throw new IllegalArgumentException("Exchange binding configuration must be a list of maps")
                 }
-                String exc = parseConfigOption(String, bindingMap.exchange)
-                String binding = parseConfigOption(String, bindingMap.binding)
+                bindingMap = new PropertySourcesConfig(bindingMap)
 
-                switch (parseConfigOption(String, bindingMap.as)) {
+                String exc = bindingMap.getProperty('exchange', String)
+                String binding = bindingMap.getProperty('binding', String)
+
+                switch (bindingMap.getProperty('as', String)) {
                     case 'source':
                         exchangeBindings += new ExchangeBinding(name, exc, binding)
                         break

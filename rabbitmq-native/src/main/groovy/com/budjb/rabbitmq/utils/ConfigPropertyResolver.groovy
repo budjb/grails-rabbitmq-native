@@ -15,7 +15,8 @@
  */
 package com.budjb.rabbitmq.utils
 
-import grails.core.GrailsApplication
+import grails.config.Config
+import org.grails.config.PropertySourcesConfig
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -24,8 +25,12 @@ import java.util.regex.Pattern
  * @since 02/12/2016
  */
 trait ConfigPropertyResolver {
-
-    abstract GrailsApplication getGrailsApplication()
+    /**
+     * Returns the Grails configuration.
+     *
+     * @return The Grails configuration.
+     */
+    abstract Config getGrailsConfiguration()
 
     /**
      * Temporary fix to handle property resolution from YAML processed lists of maps.
@@ -37,17 +42,16 @@ trait ConfigPropertyResolver {
      * @param config Grails Application config
      * @return a map with all values remapped where necessary
      */
-    Map fixPropertyResolution(Map map) {
-        map.collectEntries { k, v ->
+    Config fixPropertyResolution(Map map) {
+        return new PropertySourcesConfig((Map) map.collectEntries { k, v ->
             def val = v
             if (val instanceof String) {
                 Matcher m = Pattern.compile(/\$\{(.+?)}/).matcher(val)
                 if (m.matches()) {
-                    val = grailsApplication.config.get(m.group(1))
+                    val = grailsConfiguration.get(m.group(1))
                 }
             }
-            [k, val]
-        }
+            return [k, val]
+        })
     }
-
 }

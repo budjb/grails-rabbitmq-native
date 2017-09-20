@@ -26,6 +26,7 @@ import com.budjb.rabbitmq.exception.MissingConfigurationException
 import com.budjb.rabbitmq.utils.ConfigPropertyResolver
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
+import grails.config.Config
 import grails.core.GrailsApplication
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -62,10 +63,15 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     private List<ConnectionContext> connections = []
 
     /**
-     * Returns the default connection context.
-     *
-     * @return
-     * @throws ContextNotFoundException
+     * {@inheritDoc}
+     */
+    @Override
+    Config getGrailsConfiguration() {
+        return grailsApplication.getConfig()
+    }
+
+    /**
+     * {@inheritDoc}
      */
     @Override
     ConnectionContext getContext() throws ContextNotFoundException {
@@ -79,11 +85,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Returns the connection context with the requested name.
-     *
-     * @param name
-     * @return
-     * @throws ContextNotFoundException
+     * {@inheritDoc}
      */
     @Override
     ConnectionContext getContext(String name) throws ContextNotFoundException {
@@ -101,10 +103,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Creates a new channel with the default connection.
-     *
-     * @return
-     * @throws ContextNotFoundException
+     * {@inheritDoc}
      */
     @Override
     Channel createChannel() throws ContextNotFoundException, IllegalStateException {
@@ -112,11 +111,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Creates a new channel with the connection identified by the given connection name.
-     *
-     * @param connectionName
-     * @return
-     * @throws ContextNotFoundException
+     * {@inheritDoc}
      */
     @Override
     Channel createChannel(String connectionName) throws ContextNotFoundException, IllegalStateException {
@@ -124,10 +119,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Returns the RabbitMQ connection associated with the default connection context.
-     *
-     * @return
-     * @throws ContextNotFoundException
+     * {@inheritDoc}
      */
     @Override
     Connection getConnection() throws ContextNotFoundException, IllegalStateException {
@@ -135,12 +127,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Returns the RabbitMQ connection associated with the connection context identified
-     * by the given connection name.
-     *
-     * @param connectionName
-     * @return
-     * @throws ContextNotFoundException
+     * {@inheritDoc}
      */
     @Override
     Connection getConnection(String connectionName) throws ContextNotFoundException, IllegalStateException {
@@ -148,52 +135,31 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Loads any configured connections from the grails application configuration.
+     * {@inheritDoc}
      */
     @Override
     void load() {
-        if (grailsApplication.config.rabbitmq?.connections) {
-            // Grail 3 format suitable for YAML configuration. Groovy ConfigSlurper-style
-            // configurations will also follow this format going forward.
-            def configurations = grailsApplication.config.rabbitmq.connections
-
-            if (!(configurations instanceof Collection)) {
-                throw new InvalidConfigurationException("RabbitMQ configuration is invalid; expected a List but got ${configurations.getClass().getSimpleName()} instead")
-            }
-
-            configurations.each { item ->
-                if (!(item instanceof Map)) {
-                    throw new InvalidConfigurationException("RabbitMQ configuration is invalid; expected a Map but got ${configurations.getClass().getSimpleName()} instead")
-                }
-
-                register(createContext(fixPropertyResolution(item)))
-            }
-        }
-        else if (grailsApplication.config.rabbitmq?.connection) {
-            // Legacy configuration format that supports closures. This functionality
-            // is deprecated and will be removed at some point in the future.
-            log.warn("Configuration via rabbitmq.connection is deprecated and will be removed in the future.")
-
-            def configuration = grailsApplication.config.rabbitmq?.connection
-
-            if (!(configuration instanceof Map || configuration instanceof Closure)) {
-                throw new InvalidConfigurationException('RabbitMQ connection configuration is not a Map or a Closure')
-            }
-
-            if (configuration instanceof Map) {
-                register(createContext(configuration))
-            }
-            else {
-                connectionBuilder.loadConnectionContexts(configuration as Closure).each { register(it) }
-            }
-        }
-        else {
+        if (!grailsApplication.getConfig().containsProperty('rabbitmq.connections')) {
             throw new MissingConfigurationException("unable to start application because the RabbitMQ connection configuration was not found")
+        }
+
+        List connections = grailsApplication.getConfig().getProperty('rabbitmq.connections', List)
+
+        if (!connections) {
+            throw new InvalidConfigurationException("RabbitMQ connection configuration is either invalid or missing")
+        }
+
+        connections.each { item ->
+            if (!Map.isInstance(item)) {
+                throw new InvalidConfigurationException("RabbitMQ connection configuration is expected to be a map but got ${item.getClass().getName()} instead")
+            }
+
+            register(createContext(fixPropertyResolution((Map) item)))
         }
     }
 
     /**
-     * Starts all connection contexts.
+     * {@inheritDoc}
      */
     @Override
     void start() {
@@ -221,9 +187,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Start a specific connection context.
-     *
-     * @param context
+     * {@inheritDoc}
      */
     @Override
     void start(ConnectionContext context) {
@@ -231,10 +195,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Starts a specific connection context identified by the given connection name.
-     *
-     * @param name
-     * @throws ContextNotFoundException
+     * {@inheritDoc}
      */
     @Override
     void start(String name) throws ContextNotFoundException {
@@ -242,7 +203,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Stops all connection contexts.
+     * {@inheritDoc}
      */
     @Override
     void stop() {
@@ -254,9 +215,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Stops a specific connection context.
-     *
-     * @param context
+     * {@inheritDoc}
      */
     @Override
     void stop(ConnectionContext context) {
@@ -264,10 +223,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Stops a specific connection context identified by the given connection name.
-     *
-     * @param name
-     * @throws ContextNotFoundException
+     * {@inheritDoc}
      */
     @Override
     void stop(String name) throws ContextNotFoundException {
@@ -275,7 +231,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Removes all connection contexts.
+     * {@inheritDoc}
      */
     @Override
     void reset() {
@@ -284,10 +240,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Registers a new connection context.  If a context already exists with the same name,
-     * the old context will be stopped and removed first.
-     *
-     * @param context
+     * {@inheritDoc}
      */
     @Override
     void register(ConnectionContext context) {
@@ -315,9 +268,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Un-registers a connection context.
-     *
-     * @param context
+     * {@inheritDoc}
      */
     @Override
     void unregister(ConnectionContext context) {
@@ -326,10 +277,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Creates a new managed context.
-     *
-     * @param configuration
-     * @return
+     * {@inheritDoc}
      */
     @Override
     ConnectionContext createContext(ConnectionConfiguration configuration) {
@@ -337,10 +285,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Creates a new connection context based on a map of configuration values.
-     *
-     * @param configuration
-     * @return
+     * {@inheritDoc}
      */
     @Override
     ConnectionContext createContext(Map configuration) {
@@ -348,9 +293,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Returns a list of all registered contexts.
-     *
-     * @return
+     * {@inheritDoc}
      */
     @Override
     List<ConnectionContext> getContexts() {
@@ -358,9 +301,7 @@ class ConnectionManagerImpl implements ConnectionManager, ConfigPropertyResolver
     }
 
     /**
-     * Returns the state of the contexts the manager.
-     *
-     * @return
+     * {@inheritDoc}
      */
     @Override
     RunningState getRunningState() {

@@ -20,6 +20,7 @@ import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.utils.ConfigPropertyResolver
 import com.rabbitmq.client.Channel
+import grails.config.Config
 import grails.core.GrailsApplication
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -52,8 +53,17 @@ class QueueBuilderImpl implements QueueBuilder, ConfigPropertyResolver {
     List<ExchangeProperties> exchanges = []
 
     /**
-     * Configure any defined exchanges and queues.
+     * {@inheritDoc}
      */
+    @Override
+    Config getGrailsConfiguration() {
+        return grailsApplication.getConfig()
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     void configure() {
         queues.clear()
         exchanges.clear()
@@ -115,9 +125,7 @@ class QueueBuilderImpl implements QueueBuilder, ConfigPropertyResolver {
     }
 
     /**
-     * Parses the queue configuration.
-     *
-     * @param queues
+     * {@inheritDoc}
      */
     void parseQueues(Collection queues) {
         queues.each { item ->
