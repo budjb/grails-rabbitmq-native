@@ -16,6 +16,8 @@
 package com.budjb.rabbitmq.queuebuilder
 
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
+import grails.config.Config
+import org.grails.config.PropertySourcesConfig
 
 class QueueProperties implements ConfigurationProperties {
     /**
@@ -68,19 +70,27 @@ class QueueProperties implements ConfigurationProperties {
     /**
      * Constructor.
      *
-     * @param name
-     * @param properties
+     * @param configuration
      */
-    QueueProperties(Map<String, Object> properties) {
-        name = parseConfigOption(String, properties.name)
-        arguments = parseConfigOption(Map, properties.arguments, arguments)
-        autoDelete = parseConfigOption(Boolean, properties.autoDelete, autoDelete)
-        binding = parseConfigOption(Object, properties.binding, binding)
-        durable = parseConfigOption(Boolean, properties.durable, durable)
-        exchange = parseConfigOption(String, properties.exchange, exchange)
-        exclusive = parseConfigOption(Boolean, properties.exclusive, exclusive)
-        match = MatchType.lookup(parseConfigOption(String, properties.match))
-        connection = parseConfigOption(String, properties.connection, connection)
+    QueueProperties(Map configuration) {
+        this(new PropertySourcesConfig(configuration))
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param configuration
+     */
+    QueueProperties(Config configuration) {
+        name = configuration.getProperty('name', String)
+        arguments = configuration.getProperty('arguments', Map, arguments)
+        autoDelete = configuration.getProperty('autoDelete', Boolean, autoDelete)
+        binding = configuration.getProperty('binding', Object, binding)
+        durable = configuration.getProperty('durable', Boolean, durable)
+        exchange = configuration.getProperty('exchange', String, exchange)
+        exclusive = configuration.getProperty('exclusive', Boolean, exclusive)
+        match = MatchType.lookup(configuration.getProperty('match', String))
+        connection = configuration.getProperty('connection', String, connection)
     }
 
     /**

@@ -15,12 +15,13 @@
  */
 package com.budjb.rabbitmq.connection
 
-import com.budjb.rabbitmq.utils.ConfigResolver
 import com.rabbitmq.client.ConnectionFactory
+import grails.config.Config
+import org.grails.config.PropertySourcesConfig
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class ConnectionConfigurationImpl implements ConnectionConfiguration, ConfigResolver {
+class ConnectionConfigurationImpl implements ConnectionConfiguration {
     /**
      * Logger.
      */
@@ -103,20 +104,29 @@ class ConnectionConfigurationImpl implements ConnectionConfiguration, ConfigReso
      *
      * @param configuration
      */
-    ConnectionConfigurationImpl(Map<String, Object> configuration) {
-        setAutomaticReconnect(parseConfigOption(Boolean, configuration['automaticReconnect'], automaticReconnect))
-        setHost(parseConfigOption(String, configuration['host'], host))
-        setIsDefault(parseConfigOption(Boolean, configuration['isDefault'], isDefault))
-        setName(parseConfigOption(String, configuration['name'], name))
-        setPassword(parseConfigOption(String, configuration['password'], password))
-        setPort(parseConfigOption(Integer, configuration['port'], port))
-        setRequestedHeartbeat(parseConfigOption(Integer, configuration['requestedHeartbeat'], requestedHeartbeat))
-        setSsl(parseConfigOption(Boolean, configuration['ssl'], ssl))
-        setThreads(parseConfigOption(Integer, configuration['threads'], threads))
-        setUsername(parseConfigOption(String, configuration['username'], username))
-        setVirtualHost(parseConfigOption(String, configuration['virtualHost'], virtualHost))
-        setClientProperties(parseConfigOption(Map, configuration['clientProperties'], clientProperties))
-        setMetricsEnabled(parseConfigOption(Boolean, configuration['enableMetrics'], metricsEnabled))
+    ConnectionConfigurationImpl(Map configuration) {
+        this(new PropertySourcesConfig(configuration))
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param configuration
+     */
+    ConnectionConfigurationImpl(Config configuration) {
+        setAutomaticReconnect(configuration.getProperty('automaticReconnect', Boolean, automaticReconnect))
+        setHost(configuration.getProperty('host', String, host))
+        setIsDefault(configuration.getProperty('isDefault', Boolean, isDefault))
+        setName(configuration.getProperty('name', String, name))
+        setPassword(configuration.getProperty('password', String, password))
+        setPort(configuration.getProperty('port', Integer, port))
+        setRequestedHeartbeat(configuration.getProperty('requestedHeartbeat', Integer, requestedHeartbeat))
+        setSsl(configuration.getProperty('ssl', Boolean, ssl))
+        setThreads(configuration.getProperty('threads', Integer, threads))
+        setUsername(configuration.getProperty('username', String, username))
+        setVirtualHost(configuration.getProperty('virtualHost', String, virtualHost))
+        setClientProperties(configuration.getProperty('clientProperties', Map, clientProperties))
+        setMetricsEnabled(configuration.getProperty('enableMetrics', Boolean, metricsEnabled))
     }
 
     /**

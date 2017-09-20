@@ -60,33 +60,16 @@ class ConnectionManagerImplSpec extends Specification {
         thrown MissingConfigurationException
     }
 
-    def 'If the connection stanza is not a map or closure, an InvalidConfigurationException should be thrown'() {
+    def 'If the configuration is valid, contexts are created correctly'() {
         setup:
-        Config config = new PropertySourcesConfig()
-        config.putAll([
+        Config config = new PropertySourcesConfig([
             'rabbitmq': [
-                'connection': 'foobar'
-            ]
-        ])
-        grailsApplication.getConfig() >> config
-
-        when:
-        connectionManager.load()
-
-        then:
-        thrown InvalidConfigurationException
-    }
-
-    def 'Legacy map configuration test'() {
-        setup:
-        Config config = new PropertySourcesConfig()
-        config.putAll([
-            'rabbitmq': [
-                'connection': [
-                    'name'    : 'myConnection',
-                    'host'    : 'test.budjb.com',
-                    'username': 'test-user',
-                    'password': 'test-password'
+                'connections': [
+                    [
+                        'host'    : 'localhost',
+                        'username': 'guest',
+                        'password': 'guest'
+                    ]
                 ]
             ]
         ])
@@ -97,29 +80,13 @@ class ConnectionManagerImplSpec extends Specification {
 
         then:
         connectionManager.getContexts().size() == 1
-        connectionManager.getContext('myConnection') != null
     }
 
-    def 'Legacy closure configuration test'() {
+    def 'If the connection stanza is not a map or closure, an InvalidConfigurationException should be thrown'() {
         setup:
-        Config config = new PropertySourcesConfig()
-        config.putAll([
+        Config config = new PropertySourcesConfig([
             'rabbitmq': [
-                'connection': {
-                    connection(
-                        'name': 'primaryConnection',
-                        'isDefault': true,
-                        'host': 'test.budjb.com',
-                        'username': 'test-user',
-                        'password': 'test-password'
-                    )
-                    connection(
-                        'name': 'secondaryConnection',
-                        'host': 'foo.budjb.com',
-                        'username': 'test-user',
-                        'password': 'test-password'
-                    )
-                }
+                'connections': 'foobar'
             ]
         ])
         grailsApplication.getConfig() >> config
@@ -128,7 +95,7 @@ class ConnectionManagerImplSpec extends Specification {
         connectionManager.load()
 
         then:
-        1 * connectionBuilder.loadConnectionContexts((Closure) _)
+        thrown InvalidConfigurationException
     }
 
     def 'If a connection is registered as a default connection while another default connection is already registered, an InvalidConfigurationException is thrown'() {
