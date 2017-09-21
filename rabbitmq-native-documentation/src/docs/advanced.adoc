@@ -4,6 +4,8 @@ While the plugin effectively wraps the functionality of the RabbitMQ library, th
 
 include::advanced/beans.adoc[]
 
+include::advanced/spring-application-events.adoc[]
+
 include::advanced/rabbitcontext.adoc[]
 
 include::advanced/transactions.adoc[]

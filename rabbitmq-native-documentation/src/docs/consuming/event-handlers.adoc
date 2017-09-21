@@ -1,0 +1,23 @@
+=== Consumer Event Handlers
+
+It may be useful to execute some logic at certain times during the message delivery lifecycle. To enable this, the
+`MessageConsumerEventHandler` trait exists that provides several hooks or event handlers, which are called at various
+times during the message delivery.
+
+The trait provides empty bodies for all of its methods and so implementations of the trait need only override the
+specific event handlers that are required.
+
+.Event Handlers
+[grid="rows"]
+|===
+| Method | Description
+| `onReceive(MessageContext)`               | Called when a message is initially received by the underlying RabbitMQ
+                                              system and before handed to the message consumer class.
+| `onSuccess(MessageContext)`               | Called when a message has been successfully delivered and processed by the message consumer class.
+| `onFailure(MessageContext, Throwable)`    | Called when some unhandled exception occurred during the process of
+                                              delivering or processing the message. This event handler differs from the
+                                              rest in that the unhandled exception is provided.
+| `onComplete(MessageContext)`              | Called when the delivery process is complete, whether it was successful or
+                                              failed. This event handler will be called even when `onSuccess` or
+                                              `onFailure` are called.
+|===

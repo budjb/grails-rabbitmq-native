@@ -12,3 +12,5 @@ include::handlers/short.adoc[]
 include::handlers/messagecontext.adoc[]
 
 include::handlers/rpc.adoc[]
+
+include::handlers/unsupported.adoc[]

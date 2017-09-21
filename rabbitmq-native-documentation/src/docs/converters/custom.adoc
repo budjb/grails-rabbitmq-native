@@ -1,73 +1,71 @@
 === Custom Message Converters
 
-The plugin provides a way for authors to create their own message converters. A custom message converter must be placed in the `grails-app/rabbit-converters` path, and must end with `Converter.groovy`.
+The plugin provides a way for authors to create their own message converters. A custom message converter must be placed
+in the `grails-app/rabbit-converters` path, and must end with `Converter.groovy`.
 
-Message converters should extend the `MessageConverter` abstract class. `MessageConverter` is a generic class, meaning when extending it, you need to pass it the object class type the message
-converter will be responsible for converting.
+A message converter must implement the appropriate interface for the type of conversion it supports. The
+`ByteToObjectConverter` interface is used when a converter supports incoming messages from RabbitMQ, while the
+`ObjectToByteConverter` interface is used when a converter supports outgoing messages to RabbitMQ. Classes that support
+both should implement both interfaces.
 
-A message converter can notify the plugin just what abilities it has. Specifically, there are methods that return whether it can convert an object to or from a byte array. A message converter need
-not provide two-way conversion.
-
-Message converters may also provide the plugin with a MIME-type that is typically indicative of the object type it is responsible for. It does not make sense for all object types to have a MIME-type
-associated with it, but this is useful to give the plugin hints if the conversion mode is set to attempt conversion only based on the content-type property a message contains.
+Message converters advertise what objects and MIME types it supports. The conversion system will typically attempt to
+first match an incoming message with a converter matching its MIME type, if it was provided. Message converters that are
+aware of the MIME types it supports provides the conversion system with a more accurate type detection ability.
+Additionally, converters may apply a MIME type to outgoing messages if one has not already been defined.
 
 Below is an example converter for the String object type. Custom converters should follow the same format.
 
+.StringMessageConverter
 [source,groovy]
 -----
-import com.budjb.rabbitmq.converter.MessageConverter
+package com.budjb.rabbitmq.converter
 
-class StringMessageConverter extends MessageConverter<String> {
+import groovy.transform.CompileStatic
+import org.springframework.util.MimeType
+
+/**
+ * A converter that supports conversion to and from a {@link String}.
+ */
+@CompileStatic
+class StringMessageConverter implements ByteToObjectConverter, ObjectToByteConverter {
     /**
-     * Returns whether the message converter can convert a value from a String to a byte array.
-     *
-     * @return boolean
+     * Mime type.
+     */
+    private static final MimeType mimeType = MimeType.valueOf('text/plain')
+
+    /**
+     * {@inheritDoc}
      */
     @Override
-    public boolean canConvertFrom() {
-        return true
+    boolean supports(Class<?> type) {
+        return String.isAssignableFrom(type)
     }
 
     /**
-     * Returns whether the message converter can convert a value from a byte array to a String.
-     *
-     * @return boolean
+     * {@inheritDoc}
      */
     @Override
-    public boolean canConvertTo() {
-        return true
+    boolean supports(MimeType mimeType) {
+        return mimeType.isCompatibleWith(this.mimeType)
     }
 
     /**
-     * Converts a value from a byte array to a String.
-     *
-     * @param input Value to convert.
-     * @return Value converted to a String, or null if the conversion failed.
+     * {@inheritDoc}
      */
     @Override
-    public String convertTo(byte[] input) {
-        return new String(input)
+    ByteToObjectResult convert(ByteToObjectInput input) {
+        return new ByteToObjectResult(new String(input.getBytes(), input.getCharset()))
     }
 
     /**
-     * Converts a value from a String to a byte array.
-     *
-     * @param input Value to convert.
-     * @return Value converted to a byte array, or null if the conversion failed..
+     * {@inheritDoc}
      */
     @Override
-    public byte[] convertFrom(String input) {
-        return input.getBytes()
-    }
-
-    /**
-     * The MIME-type typically associated with the object type, if one exists.
-     *
-     * @return MIME-type typically associated with this object type, or null if one does not exist.
-     */
-    @Override
-    public String getContentType() {
-        return 'text/plain'
+    ObjectToByteResult convert(ObjectToByteInput input) {
+        return new ObjectToByteResult(
+            ((String) input.getObject()).getBytes(input.getCharset()),
+            new MimeType(mimeType, input.getCharset())
+        )
     }
 }
 -----

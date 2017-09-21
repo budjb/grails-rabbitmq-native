@@ -1,0 +1,10 @@
+==== Handling Unsupported Messages
+
+As long as there is a converter that can convert an incoming message and a handler defined that accepts the converted
+object, messages can be delivered. In the case where an incoming message can not be converted and there is no possible
+way to provide the message to a handler, an error is logged by default and the message is rejected.
+
+Message consumers that need to conduct some logic when this occurs may implement the `UnsupportedMessageHandler`
+interface, which requires the `handleUnsupportedMessage` method. When no handler and converter exist for a message,
+this method is called and the `MessageContext` is passed in, giving the consumer some way to gracefully handle input
+failures. Objects may even be returned, much like regular handlers, as a response to an RPC call.

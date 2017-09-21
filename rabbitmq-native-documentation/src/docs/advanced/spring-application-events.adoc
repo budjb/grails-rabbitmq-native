@@ -1,0 +1,77 @@
+=== Spring Application Events
+
+The plugin provides several https://docs.spring.io/spring-integration/reference/html/applicationevent.html[application events]
+that applications using the plugin may be interested in. They are particularly useful when some logic needs to execute
+during the startup and shutdown lifecycle of the plugin.
+
+.Application Events
+[grid="rows"]
+|===
+| Event Type                        | Description
+| `RabbitContextStartingEvent`      | Published before the `RabbitContext` is started. This is useful when
+                                      code needs to execute before connections and consumers start.
+| `RabbitContextStartedEvent`       | Published after the `RabbitContext` is started. This is useful when
+                                      code needs to execute after connections and consumers are started.
+| `RabbitContextStoppingEvent`      | Published before the `RabbitContext` is stopped. This is useful when
+                                      code needs to execute before connections and consumers are stopped.
+| `RabbitContextStoppedEvent`       | Published after the `RabbitContext` is stopped. This is useful when
+                                      code needs to execute after connections and consumers are stopped.
+| `ConsumerManagerStartingEvent`    | Published before all consumers are started.
+| `ConsumerManagerStartedEvent`     | Published after all consumers are started.
+| `ConsumerManagerStoppingEvent`    | Published before all consumers are stopped.
+| `ConsumerManagerStoppedEvent`     | Published after all consumers are stopped.
+| `ConsumerContextStartingEvent`    | Published before a specific consumer is started.
+| `ConsumerContextStartedEvent`     | Published after a specific consumer is started.
+| `ConsumerContextStoppingEvent`    | Published before a specific consumer is stopped.
+| `ConsumerContextStoppedEvent`     | Published before a specific consumer is stopped.
+| `ConnectionManagerStartingEvent`  | Published before all connections are started.
+| `ConnectionManagerStartedEvent`   | Published after all connections are started.
+| `ConnectionManagerStoppingEvent`  | Published before all connections are stopped.
+| `ConnectionManagerStoppedEvent`   | Published after all connections are stopped.
+| `ConnectionContextStartingEvent`  | Published before a specific connection is started.
+| `ConnectionContextStartedEvent`   | Published after a specific connection is started.
+| `ConnectionContextStoppingEvent`  | Published before a specific connection is stopped.
+| `ConnectionContextStoppedEvent`   | Published after a specific connection is stopped.
+|===
+
+Events can be consumed by registering a bean that implements the `ApplicationListener` interface. The interface is
+generic and takes the type of event it wants to listen for. Below is an example of a listener that's interested in
+the `RabbitContextStartingEvent` event.
+
+.grails-app/init/Application.groovy
+[source,groovy]
+-----
+package com.example
+
+import com.example.MyRabbitContextStartingEventListener
+import grails.boot.GrailsApp
+import grails.boot.config.GrailsAutoConfiguration
+import org.springframework.context.annotation.Bean
+
+class Application extends GrailsAutoConfiguration {
+    static void main(String[] args) {
+        GrailsApp.run(Application, args)
+    }
+
+    @Bean
+    MyRabbitContextStartingEventListener myRabbitContextStartingEventListener() {
+        return new MyRabbitContextStartingEventListener()
+    }
+}
+-----
+
+.src/main/groovy/com/example/MyRabbitContextStartingListener.groovy
+[source,groovy]
+-----
+package com.example
+
+import com.budjb.rabbitmq.event.RabbitContextStartingEvent
+import org.springframework.context.ApplicationListener
+
+class MyRabbitContextStartingListener implements ApplicationListener<RabbitContextStartingEvent> {
+    @Override
+    void onApplicationEvent(RabbitContextStartingEvent event) {
+        println "received a RabbitContextStartingEvent event"
+    }
+}
+-----

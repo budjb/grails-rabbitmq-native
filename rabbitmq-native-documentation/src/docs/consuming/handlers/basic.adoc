@@ -1,6 +1,6 @@
 ==== Basic Usage
 
-In its most basic form, a message handler method takes in the body of the received message, and a @MessageContext@
+In its most basic form, a message handler method takes in the body of the received message, and a `MessageContext`
 object that contains the message parameters received from the RabbitMQ server, along with the consumer's channel
 that the handler should publish messages through.
 
