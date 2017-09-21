@@ -1,5 +1,17 @@
 == Changelog
 
+=== 3.4.x
+
+==== Version 3.4.0
+* Remove support for legacy connection configuration (`rabbitmq.connection`).
+* Update RabbitMQ Client library to 4.2.0.
+* Add support for exporting RabbitMQ metrics.
+* Major refactor of the message converter system. These changes are not backwards compatible.
+* Major refactor of the message consumer backend system. Existing consumers are compatible.
+* Migrate documentation to AsciiDoc.
+* Introduce new interfaces for message consumers (`UnsupportedMessageHandler` and `MessageConsumerEventHandler`).
+* Added Spring application events for RabbitMQ plugin system start and stop events.
+
 === 3.3.x
 
 ==== Version 3.3.3
