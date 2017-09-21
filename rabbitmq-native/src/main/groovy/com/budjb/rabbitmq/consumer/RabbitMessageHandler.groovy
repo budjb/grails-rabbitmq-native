@@ -64,7 +64,7 @@ class RabbitMessageHandler extends DefaultConsumer {
      * @param channel
      * @param context
      */
-    RabbitMessageHandler(Channel channel, String queue, ConsumerContextImpl context, ConnectionContext connectionContext) {
+    RabbitMessageHandler(Channel channel, String queue, AbstractConsumerContext context, ConnectionContext connectionContext) {
         super(channel)
 
         this.consumerContext = context

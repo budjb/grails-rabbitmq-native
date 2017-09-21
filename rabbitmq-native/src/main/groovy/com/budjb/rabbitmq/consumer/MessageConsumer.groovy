@@ -22,24 +22,4 @@ interface MessageConsumer {
      * @return The configuration of the consumer.
      */
     ConsumerConfiguration getConfiguration()
-
-    /**
-     * Returns the consumer's ID.
-     *
-     * @return
-     */
-    String getId()
-
-    /**
-     * Returns the consumer's name.
-     */
-    String getName()
-
-    /**
-     * Processes incoming messages.
-     *
-     * @param messageContext Contains the various bits of data associated with the incoming message.
-     * @return If not null and the message contained a reply-to property, the returned object will be published to the reply-to queue.
-     */
-    Object process(MessageContext messageContext)
 }

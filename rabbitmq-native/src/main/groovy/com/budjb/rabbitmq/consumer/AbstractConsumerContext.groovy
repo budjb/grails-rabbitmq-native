@@ -37,16 +37,11 @@ import org.springframework.context.ApplicationEventPublisher
 /**
  * Implementation of a container for a consumer and all of its consuming threads.
  */
-class ConsumerContextImpl implements ConsumerContext {
+abstract class AbstractConsumerContext implements ConsumerContext, MessageConsumerEventHandler {
     /**
      * Logger.
      */
-    protected Logger log = LoggerFactory.getLogger(ConsumerContextImpl)
-
-    /**
-     * Consumer bean.
-     */
-    MessageConsumer consumer
+    protected Logger log = LoggerFactory.getLogger(AbstractConsumerContext)
 
     /**
      * Connection manager.
@@ -76,19 +71,16 @@ class ConsumerContextImpl implements ConsumerContext {
     /**
      * Constructor.
      *
-     * @param consumer
      * @param connectionManager
      * @param persistenceInterceptor
      * @param rabbitMessagePublisher
      */
-    ConsumerContextImpl(
-        MessageConsumer consumer,
+    AbstractConsumerContext(
         ConnectionManager connectionManager,
         PersistenceContextInterceptor persistenceInterceptor,
         RabbitMessagePublisher rabbitMessagePublisher,
         ApplicationEventPublisher applicationEventPublisher) {
 
-        this.consumer = consumer
         this.connectionManager = connectionManager
         this.persistenceInterceptor = persistenceInterceptor
         this.rabbitMessagePublisher = rabbitMessagePublisher
@@ -96,11 +88,33 @@ class ConsumerContextImpl implements ConsumerContext {
     }
 
     /**
+     * Implementation-specific message hand-off and processing.
+     *
+     * @param messageContext
+     * @return
+     */
+    abstract protected Object process(MessageContext messageContext)
+
+    /**
+     * Returns the consumer's configuration.
+     *
+     * @return
+     */
+    abstract protected ConsumerConfiguration getConsumerConfiguration()
+
+    /**
+     * Returns the actual consumer object.
+     *
+     * @return
+     */
+    abstract protected Object getConsumer()
+
+    /**
      * {@inheritDoc}
      */
     @Override
     String getConnectionName() {
-        return consumer.getConfiguration().getConnection()
+        return getConsumerConfiguration().getConnection()
     }
 
     /**
@@ -108,7 +122,7 @@ class ConsumerContextImpl implements ConsumerContext {
      */
     @Override
     String getId() {
-        return consumer.getId()
+        return getConsumer().getClass().getName()
     }
 
     /**
@@ -116,7 +130,7 @@ class ConsumerContextImpl implements ConsumerContext {
      */
     @Override
     String getName() {
-        return consumer.getName()
+        return getConsumer().getClass().getSimpleName()
     }
 
     /**
@@ -128,12 +142,12 @@ class ConsumerContextImpl implements ConsumerContext {
             throw new IllegalStateException("attempted to start consumer '${getId()}' but it is already started")
         }
 
-        if (!consumer.getConfiguration()?.isValid()) {
+        if (!getConsumerConfiguration()?.isValid()) {
             log.warn("not starting consumer '${getId()}' because it is not valid")
             return
         }
 
-        ConsumerConfiguration configuration = consumer.getConfiguration()
+        ConsumerConfiguration configuration = getConsumerConfiguration()
 
         String connectionName = configuration.getConnection()
 
@@ -226,6 +240,7 @@ class ConsumerContextImpl implements ConsumerContext {
     /**
      * {@inheritDoc}
      */
+    @Override
     RunningState getRunningState() {
         if (consumers.size() == 0) {
             return RunningState.STOPPED
@@ -256,7 +271,7 @@ class ConsumerContextImpl implements ConsumerContext {
         log.debug("shutting down consumer '${getId()}' on connection '${getConnectionName()}'")
 
         GParsPool.withPool {
-            consumers.eachParallel { it.shutdown() }
+            consumers.eachParallel { ((RabbitMessageHandler) it).shutdown() }
         }
 
         consumers.clear()
@@ -271,9 +286,9 @@ class ConsumerContextImpl implements ConsumerContext {
     ConsumerReport getStatusReport() {
         ConsumerReport report = new ConsumerReport()
 
-        ConsumerConfiguration configuration = consumer.getConfiguration()
+        ConsumerConfiguration configuration = getConsumerConfiguration()
 
-        report.name = consumer.getName()
+        report.name = getName()
         report.fullName = getId()
 
         report.runningState = getRunningState()
@@ -294,25 +309,27 @@ class ConsumerContextImpl implements ConsumerContext {
     @Override
     void deliverMessage(MessageContext context) {
         Object response
-        ConsumerConfiguration configuration = consumer.getConfiguration()
+        ConsumerConfiguration configuration = getConsumerConfiguration()
 
         openSession()
 
-        if (consumer instanceof MessageConsumerEventHandler) {
-            ((MessageConsumerEventHandler) consumer).onReceive(context)
-        }
+        onReceive(context)
 
         try {
+
             if (configuration.getTransacted()) {
                 context.getChannel().txSelect()
             }
 
             try {
-                response = consumer.process(context)
+                response = process(context)
             }
-            catch (UnsupportedMessageException ignored) {
-                if (consumer instanceof UnsupportedMessageHandler) {
-                    ((UnsupportedMessageHandler) consumer).handleUnsupportedMessage(context)
+            catch (UnsupportedMessageException e) {
+                if (UnsupportedMessageHandler.isInstance(getConsumer())) {
+                    response = ((UnsupportedMessageHandler) getConsumer()).handleUnsupportedMessage(context)
+                }
+                else {
+                    throw e
                 }
             }
 
@@ -324,9 +341,7 @@ class ConsumerContextImpl implements ConsumerContext {
                 context.getChannel().txCommit()
             }
 
-            if (consumer instanceof MessageConsumerEventHandler) {
-                ((MessageConsumerEventHandler) consumer).onSuccess(context)
-            }
+            onSuccess(context)
         }
         catch (Throwable e) {
             if (configuration.getTransacted()) {
@@ -344,16 +359,12 @@ class ConsumerContextImpl implements ConsumerContext {
                 log.error("unhandled exception ${e.getClass().name} caught in RabbitMQ message handler for consumer ${getId()}", e)
             }
 
-            if (consumer instanceof MessageConsumerEventHandler) {
-                ((MessageConsumerEventHandler) consumer).onFailure(context, e)
-            }
+            onFailure(context, e)
 
             return
         }
         finally {
-            if (consumer instanceof MessageConsumerEventHandler) {
-                ((MessageConsumerEventHandler) consumer).onComplete(context)
-            }
+            onComplete(context)
 
             closeSession()
         }
@@ -396,5 +407,45 @@ class ConsumerContextImpl implements ConsumerContext {
 
         persistenceInterceptor.flush()
         persistenceInterceptor.destroy()
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void onReceive(MessageContext messageContext) {
+        if (MessageConsumerEventHandler.isInstance(getConsumer())) {
+            ((MessageConsumerEventHandler) getConsumer()).onReceive(messageContext)
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void onSuccess(MessageContext messageContext) {
+        if (MessageConsumerEventHandler.isInstance(getConsumer())) {
+            ((MessageConsumerEventHandler) getConsumer()).onSuccess(messageContext)
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void onFailure(MessageContext messageContext, Throwable throwable) {
+        if (MessageConsumerEventHandler.isInstance(getConsumer())) {
+            ((MessageConsumerEventHandler) getConsumer()).onFailure(messageContext, throwable)
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void onComplete(MessageContext messageContext) {
+        if (MessageConsumerEventHandler.isInstance(getConsumer())) {
+            ((MessageConsumerEventHandler) getConsumer()).onComplete(messageContext)
+        }
     }
 }

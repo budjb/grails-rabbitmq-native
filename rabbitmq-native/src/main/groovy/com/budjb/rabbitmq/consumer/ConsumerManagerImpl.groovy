@@ -246,17 +246,22 @@ class ConsumerManagerImpl implements ConsumerManager, ApplicationContextAware {
      */
     @Override
     ConsumerContext createContext(Object consumer) {
-        if (!MessageConsumer.isInstance(consumer)) {
-            consumer = new LegacyMessageConsumer(consumer, grailsApplication.getConfig(), messageConverterManager)
+        /*
+        if (false && MessageConsumer.isInstance(consumer)) {
+            // TODO: annotation-based consumer
         }
-
-        return new ConsumerContextImpl(
-            (MessageConsumer) consumer,
-            connectionManager,
-            persistenceInterceptor,
-            rabbitMessagePublisher,
-            applicationEventPublisher
-        )
+        else {
+        */
+            return new LegacyConsumerContext(
+                consumer,
+                grailsApplication.getConfig(),
+                connectionManager,
+                persistenceInterceptor,
+                rabbitMessagePublisher,
+                applicationEventPublisher,
+                messageConverterManager
+            )
+        //}
     }
 
     /**
