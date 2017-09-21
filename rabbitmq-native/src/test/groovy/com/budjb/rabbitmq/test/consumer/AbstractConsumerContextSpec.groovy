@@ -24,20 +24,21 @@ import com.budjb.rabbitmq.event.ConsumerContextStartedEvent
 import com.budjb.rabbitmq.event.ConsumerContextStartingEvent
 import com.budjb.rabbitmq.event.ConsumerContextStoppedEvent
 import com.budjb.rabbitmq.event.ConsumerContextStoppingEvent
+import com.budjb.rabbitmq.exception.UnsupportedMessageException
+import com.budjb.rabbitmq.publisher.RabbitMessageProperties
 import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
-import com.budjb.rabbitmq.test.support.CompositeMessageConsumer
-import com.budjb.rabbitmq.test.support.TestUnsupportedMessageConsumer
 import com.rabbitmq.client.BasicProperties
 import com.rabbitmq.client.Channel
+import com.rabbitmq.client.Consumer
 import com.rabbitmq.client.Envelope
 import com.rabbitmq.client.impl.AMQImpl.Queue.DeclareOk
 import grails.persistence.support.PersistenceContextInterceptor
-import org.grails.config.PropertySourcesConfig
+import groovy.transform.InheritConstructors
 import org.slf4j.Logger
 import org.springframework.context.ApplicationEventPublisher
 import spock.lang.Specification
 
-class ConsumerContextImplSpec extends Specification {
+class AbstractConsumerContextSpec extends Specification {
     MessageConverterManager messageConverterManager
     PersistenceContextInterceptor persistenceInterceptor
     ConnectionManager connectionManager
@@ -56,25 +57,33 @@ class ConsumerContextImplSpec extends Specification {
         messageConverterManager.register(new StringMessageConverter())
     }
 
-    def 'Validate retrieving the context ID'() {
-        setup:
-        MessageConsumer consumer = Mock(MessageConsumer)
-        consumer.getId() >> 'com.budjb.rabbitmq.test.support.UnitTestConsumer'
+    AbstractConsumerContext createConsumerContext(Object consumer, ConsumerConfiguration consumerConfiguration, Object result) {
+        return new MockConsumerContext(
+            consumer,
+            consumerConfiguration,
+            result,
+            connectionManager,
+            persistenceInterceptor,
+            rabbitMessagePublisher,
+            applicationEventPublisher
+        )
+    }
 
+    def 'Validate retrieving the context ID'() {
         when:
-        ConsumerContextImpl context = new ConsumerContextImpl(consumer, null, null, null, null)
+        ConsumerContext context = createConsumerContext(new Object(), null, null)
 
         then:
-        context.getId() == 'com.budjb.rabbitmq.test.support.UnitTestConsumer'
+        context.getId() == Object.class.getName()
     }
 
     def 'Validate retrieving the connection name'() {
         setup:
-        MessageConsumer consumer = Mock(MessageConsumer)
-        consumer.getConfiguration() >> new ConsumerConfigurationImpl(connection: 'foobar')
+        ConsumerConfiguration consumerConfiguration = new ConsumerConfigurationImpl()
+        consumerConfiguration.connection = 'foobar'
 
         when:
-        ConsumerContext context = new ConsumerContextImpl(consumer, null, null, null, null)
+        ConsumerContext context = createConsumerContext(new Object(), consumerConfiguration, null)
 
         then:
         context.getConnectionName() == 'foobar'
@@ -82,19 +91,12 @@ class ConsumerContextImplSpec extends Specification {
 
     def 'Verify that the proper consumer callbacks are invoked for a successful message'() {
         setup:
-        ConsumerConfiguration configuration = new ConsumerConfigurationImpl()
-        configuration.queue = 'test-queue'
+        ConsumerConfiguration consumerConfiguration = new ConsumerConfigurationImpl()
+        consumerConfiguration.queue = 'test-queue'
 
-        MessageConsumer consumer = Mock(CompositeMessageConsumer)
-        consumer.getConfiguration() >> configuration
+        MessageConsumerEventHandler consumer = Mock(MessageConsumerEventHandler)
 
-        ConsumerContextImpl consumerContext = new ConsumerContextImpl(
-            consumer,
-            connectionManager,
-            persistenceInterceptor,
-            rabbitMessagePublisher,
-            applicationEventPublisher
-        )
+        ConsumerContext consumerContext = createConsumerContext(consumer, consumerConfiguration, null)
 
         MessageContext messageContext = new MessageContext(
             channel: Mock(Channel),
@@ -117,20 +119,12 @@ class ConsumerContextImplSpec extends Specification {
 
     def 'Verify that the proper consumer callbacks are invoked for an unsuccessful message'() {
         setup:
-        ConsumerConfiguration configuration = new ConsumerConfigurationImpl()
-        configuration.queue = 'test-queue'
+        ConsumerConfiguration consumerConfiguration = new ConsumerConfigurationImpl()
+        consumerConfiguration.queue = 'test-queue'
 
-        MessageConsumer consumer = Mock(CompositeMessageConsumer)
-        consumer.getConfiguration() >> configuration
-        consumer.process((MessageContext) _) >> { throw new RuntimeException() }
+        MessageConsumerEventHandler consumer = Mock(MessageConsumerEventHandler)
 
-        ConsumerContextImpl consumerContext = new ConsumerContextImpl(
-            consumer,
-            connectionManager,
-            persistenceInterceptor,
-            rabbitMessagePublisher,
-            applicationEventPublisher
-        )
+        ConsumerContext consumerContext = createConsumerContext(consumer, consumerConfiguration, new RuntimeException())
 
         MessageContext messageContext = new MessageContext(
             channel: Mock(Channel),
@@ -155,26 +149,17 @@ class ConsumerContextImplSpec extends Specification {
         setup:
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.getRunningState() >> RunningState.RUNNING
-        connectionContext.createChannel(*_) >> {
+        connectionContext.createChannel() >> {
             return Mock(Channel)
         }
 
-        connectionManager.getContext(*_) >> connectionContext
+        connectionManager.getContext(_) >> connectionContext
 
         ConsumerConfiguration configuration = new ConsumerConfigurationImpl()
         configuration.queue = 'test-queue'
         configuration.consumers = 5
 
-        MessageConsumer consumer = Mock(MessageConsumer)
-        consumer.getConfiguration() >> configuration
-
-        ConsumerContextImpl context = new ConsumerContextImpl(
-            consumer,
-            connectionManager,
-            persistenceInterceptor,
-            rabbitMessagePublisher,
-            applicationEventPublisher
-        )
+        ConsumerContext context = createConsumerContext(new Object(), configuration, null)
 
         when:
         context.start()
@@ -186,22 +171,15 @@ class ConsumerContextImplSpec extends Specification {
     def 'If the consumer has already been started and tried to start again, throw an IllegalStateException'() {
         setup:
         ConnectionContext connectionContext = Mock(ConnectionContext)
-        connectionContext.createChannel(*_) >> {
+        connectionContext.createChannel() >> {
             return Mock(Channel)
         }
         connectionContext.getRunningState() >> RunningState.RUNNING
-        connectionManager.getContext(*_) >> connectionContext
+        connectionManager.getContext(_) >> connectionContext
 
-        MessageConsumer consumer = Mock(MessageConsumer)
-        consumer.getConfiguration() >> new ConsumerConfigurationImpl(queue: 'foobar')
+        ConsumerConfiguration consumerConfiguration = new ConsumerConfigurationImpl(queue: 'foobar')
 
-        ConsumerContextImpl context = new ConsumerContextImpl(
-            consumer,
-            connectionManager,
-            persistenceInterceptor,
-            rabbitMessagePublisher,
-            applicationEventPublisher
-        )
+        AbstractConsumerContext context = createConsumerContext(new Object(), consumerConfiguration, null)
 
         context.start()
         context.consumers*.runningState = RunningState.RUNNING
@@ -220,31 +198,22 @@ class ConsumerContextImplSpec extends Specification {
         configuration.binding = '#'
 
         Channel channel = Mock(Channel)
-        channel.queueDeclare(*_) >> { new DeclareOk('test-queue', 0, 0) }
+        channel.queueDeclare() >> { new DeclareOk('test-queue', 0, 0) }
 
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.getRunningState() >> RunningState.RUNNING
-        connectionContext.createChannel(*_) >> channel
+        connectionContext.createChannel() >> channel
 
-        connectionManager.getContext(*_) >> connectionContext
+        connectionManager.getContext(_) >> connectionContext
 
-        MessageConsumer consumer = Mock(MessageConsumer)
-        consumer.getConfiguration() >> configuration
-
-        ConsumerContextImpl context = new ConsumerContextImpl(
-            consumer,
-            connectionManager,
-            persistenceInterceptor,
-            rabbitMessagePublisher,
-            applicationEventPublisher
-        )
+        ConsumerContext context = createConsumerContext(new Object(), configuration, null)
 
         when:
         context.start()
 
         then:
         context.getStatusReport().numConfigured == 1
-        1 * channel.basicConsume('test-queue', _, _)
+        1 * channel.basicConsume('test-queue', (Boolean) _, (Consumer) _)
     }
 
     def 'If the persistence interceptor is present, validate its interactions'() {
@@ -252,16 +221,7 @@ class ConsumerContextImplSpec extends Specification {
         ConsumerConfiguration configuration = new ConsumerConfigurationImpl()
         configuration.queue = 'test-queue'
 
-        MessageConsumer consumer = Mock(MessageConsumer)
-        consumer.getConfiguration() >> configuration
-
-        ConsumerContextImpl consumerContext = new ConsumerContextImpl(
-            consumer,
-            connectionManager,
-            persistenceInterceptor,
-            rabbitMessagePublisher,
-            applicationEventPublisher
-        )
+        ConsumerContext consumerContext = createConsumerContext(new Object(), configuration, null)
 
         MessageContext messageContext = new MessageContext(
             channel: Mock(Channel),
@@ -289,11 +249,6 @@ class ConsumerContextImplSpec extends Specification {
 
         Logger log = Mock(Logger)
 
-        MessageConsumer consumer = Mock(MessageConsumer)
-        consumer.getConfiguration() >> configuration
-        consumer.process(_) >> 'foobar'
-        consumer.getId() >> 'com.budjb.rabbitmq.test.support.UnitTestConsumer'
-
         BasicProperties properties = Mock(BasicProperties)
         properties.getReplyTo() >> 'test-queue'
         properties.getContentType() >> ''
@@ -305,15 +260,9 @@ class ConsumerContextImplSpec extends Specification {
             body: 'asdf'.getBytes()
         )
 
-        ConsumerContextImpl consumerContext = new ConsumerContextImpl(
-            consumer,
-            connectionManager,
-            persistenceInterceptor,
-            rabbitMessagePublisher,
-            applicationEventPublisher
-        )
+        ConsumerContext consumerContext = createConsumerContext(new Object(), configuration, 'foobar')
 
-        rabbitMessagePublisher.send(*_) >> { throw new StackOverflowError() }
+        rabbitMessagePublisher.send((RabbitMessageProperties) _) >> { throw new StackOverflowError() }
 
         consumerContext.log = log
 
@@ -322,7 +271,7 @@ class ConsumerContextImplSpec extends Specification {
 
         then:
         notThrown StackOverflowError
-        1 * log.error('unexpected exception class java.lang.StackOverflowError encountered while responding from an RPC call with handler com.budjb.rabbitmq.test.support.UnitTestConsumer', _)
+        1 * log.error('unexpected exception class java.lang.StackOverflowError encountered while responding from an RPC call with handler java.lang.Object', _)
     }
 
     def 'Ensure that consumer context start events are published in the correct order'() {
@@ -331,7 +280,7 @@ class ConsumerContextImplSpec extends Specification {
 
         ConnectionContext connectionContext = Mock(ConnectionContext)
         connectionContext.getRunningState() >> RunningState.RUNNING
-        connectionContext.createChannel(*_) >> channel
+        connectionContext.createChannel() >> channel
 
         connectionManager.getContext(_) >> connectionContext
 
@@ -340,16 +289,7 @@ class ConsumerContextImplSpec extends Specification {
         configuration.getQueue() >> 'foobar'
         configuration.getConsumers() >> 1
 
-        MessageConsumer consumer = Mock(MessageConsumer)
-        consumer.getConfiguration() >> configuration
-
-        ConsumerContextImpl consumerContext = new ConsumerContextImpl(
-            consumer,
-            connectionManager,
-            persistenceInterceptor,
-            rabbitMessagePublisher,
-            applicationEventPublisher
-        )
+        AbstractConsumerContext consumerContext = createConsumerContext(new Object(), configuration, null)
 
         when:
         consumerContext.start()
@@ -377,16 +317,8 @@ class ConsumerContextImplSpec extends Specification {
         configuration.getQueue() >> 'foobar'
         configuration.getConsumers() >> 1
 
-        MessageConsumer consumer = Mock(MessageConsumer)
-        consumer.getConfiguration() >> configuration
+        AbstractConsumerContext consumerContext = createConsumerContext(new Object(), configuration, null)
 
-        ConsumerContextImpl consumerContext = new ConsumerContextImpl(
-            consumer,
-            connectionManager,
-            persistenceInterceptor,
-            rabbitMessagePublisher,
-            applicationEventPublisher
-        )
         consumerContext.consumers = [rabbitMessageHandler]
 
         when:
@@ -408,8 +340,7 @@ class ConsumerContextImplSpec extends Specification {
     def 'When a no message handler and message converter combination are available to handle an incoming message, and \
             the consumer implements UnsupportedMessageHandler, handleUnsupportedMessage is called'() {
         setup:
-        TestUnsupportedMessageConsumer testUnsupportedMessageConsumer = new TestUnsupportedMessageConsumer()
-        LegacyMessageConsumer consumer = new LegacyMessageConsumer(testUnsupportedMessageConsumer, new PropertySourcesConfig(), messageConverterManager)
+        UnsupportedMessageHandler unsupportedMessageHandler = Mock(UnsupportedMessageHandler)
 
         BasicProperties basicProperties = Mock(BasicProperties)
         Envelope envelope = Mock(Envelope)
@@ -421,21 +352,42 @@ class ConsumerContextImplSpec extends Specification {
         messageContext.getEnvelope() >> envelope
         messageContext.getChannel() >> channel
 
-        ConsumerContextImpl context = new ConsumerContextImpl(
-            consumer,
-            connectionManager,
-            persistenceInterceptor,
-            rabbitMessagePublisher,
-            applicationEventPublisher
-        )
-
-        expect:
-        !testUnsupportedMessageConsumer.unsupportedCalled
+        AbstractConsumerContext context = createConsumerContext(unsupportedMessageHandler, new ConsumerConfigurationImpl(queue: 'foobar'), new UnsupportedMessageException())
 
         when:
         context.deliverMessage(messageContext)
 
         then:
-        testUnsupportedMessageConsumer.unsupportedCalled
+        1 * unsupportedMessageHandler.handleUnsupportedMessage(_)
+    }
+}
+
+@InheritConstructors
+class MockConsumerContext extends AbstractConsumerContext {
+    final Object consumer
+    final ConsumerConfiguration consumerConfiguration
+    final Object result
+
+    /**
+     * Constructor.
+     *
+     * @param connectionManager
+     * @param persistenceInterceptor
+     * @param rabbitMessagePublisher @param applicationEventPublisher
+     */
+    MockConsumerContext(Object consumer, ConsumerConfiguration consumerConfiguration, Object result, ConnectionManager connectionManager, PersistenceContextInterceptor persistenceInterceptor, RabbitMessagePublisher rabbitMessagePublisher, ApplicationEventPublisher applicationEventPublisher) {
+        super(connectionManager, persistenceInterceptor, rabbitMessagePublisher, applicationEventPublisher)
+
+        this.consumer = consumer
+        this.consumerConfiguration = consumerConfiguration
+        this.result = result
+    }
+
+    @Override
+    protected Object process(MessageContext messageContext) {
+        if (result instanceof Throwable) {
+            throw result
+        }
+        return result
     }
 }

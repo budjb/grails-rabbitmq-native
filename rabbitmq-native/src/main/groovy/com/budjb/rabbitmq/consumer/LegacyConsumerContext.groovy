@@ -15,19 +15,25 @@
  */
 package com.budjb.rabbitmq.consumer
 
+import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.converter.ByteToObjectInput
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.exception.*
+import com.budjb.rabbitmq.publisher.RabbitMessagePublisher
 import grails.config.Config
+import grails.persistence.support.PersistenceContextInterceptor
 import grails.util.GrailsClassUtils
+import groovy.transform.CompileStatic
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.util.ClassUtils
 
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
-class LegacyMessageConsumer implements MessageConsumer, MessageConsumerEventHandler, UnsupportedMessageHandler {
+@CompileStatic
+class LegacyConsumerContext extends AbstractConsumerContext {
     /**
      * Name of the method that should handle incoming messages.
      */
@@ -41,7 +47,7 @@ class LegacyMessageConsumer implements MessageConsumer, MessageConsumerEventHand
     /**
      * {@inheritDoc}
      */
-    ConsumerConfiguration configuration
+    ConsumerConfiguration consumerConfiguration
 
     /**
      * List of classes the handlers of this consumer supports.
@@ -75,7 +81,17 @@ class LegacyMessageConsumer implements MessageConsumer, MessageConsumerEventHand
      * @param grailsConfig Grails configuration.
      * @param messageConverterManager Message converter manager instance.
      */
-    LegacyMessageConsumer(Object consumer, Config grailsConfig, MessageConverterManager messageConverterManager) {
+    LegacyConsumerContext(
+        Object consumer,
+        Config grailsConfig,
+        ConnectionManager connectionManager,
+        PersistenceContextInterceptor persistenceContextInterceptor,
+        RabbitMessagePublisher rabbitMessagePublisher,
+        ApplicationEventPublisher applicationEventPublisher,
+        MessageConverterManager messageConverterManager
+    ) {
+        super(connectionManager, persistenceContextInterceptor, rabbitMessagePublisher, applicationEventPublisher)
+
         this.consumer = consumer
         this.grailsConfig = grailsConfig
         this.messageConverterManager = messageConverterManager
@@ -88,16 +104,16 @@ class LegacyMessageConsumer implements MessageConsumer, MessageConsumerEventHand
      * {@inheritDoc}
      */
     @Override
-    String getId() {
-        return consumer.getClass().getName()
+    protected ConsumerConfiguration getConsumerConfiguration() {
+        return consumerConfiguration
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    String getName() {
-        return consumer.getClass().getSimpleName()
+    protected Object getConsumer() {
+        return consumer
     }
 
     /**
@@ -196,18 +212,6 @@ class LegacyMessageConsumer implements MessageConsumer, MessageConsumerEventHand
      * {@inheritDoc}
      */
     @Override
-    Object handleUnsupportedMessage(MessageContext messageContext) {
-        if (UnsupportedMessageHandler.isInstance(consumer)) {
-            return ((UnsupportedMessageHandler) consumer).handleUnsupportedMessage(messageContext)
-        }
-
-        throw new UnsupportedMessageException("could not find a message converter and message handler combination to process an incoming message")
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     Object process(MessageContext messageContext) {
         Method handler = null
         Object body = null
@@ -217,7 +221,7 @@ class LegacyMessageConsumer implements MessageConsumer, MessageConsumerEventHand
                 body = messageConverterManager.convert(new ByteToObjectInput(
                     messageContext.getBody(),
                     (String) messageContext.getProperties().getContentType(),
-                    getConfiguration().getConvert(),
+                    this.getConsumerConfiguration().getConvert(),
                     handlers.keySet().toList())
                 ).getResult()
             }
@@ -263,21 +267,21 @@ class LegacyMessageConsumer implements MessageConsumer, MessageConsumerEventHand
      * Loads the consumer's configuration.
      */
     protected void loadConfiguration() {
-        if (getConfiguration() != null) {
+        if (this.getConsumerConfiguration() != null) {
             return
         }
 
         def configuration = grailsConfig.getProperty("rabbitmq.consumers.${getName()}", Map)
 
         if (configuration) {
-            this.configuration = new ConsumerConfigurationImpl((Map) configuration)
+            this.consumerConfiguration = new ConsumerConfigurationImpl((Map) configuration)
             return
         }
 
         configuration = GrailsClassUtils.getStaticPropertyValue(consumer.getClass(), RABBIT_CONFIG_NAME)
 
         if (configuration && Map.isInstance(configuration)) {
-            this.configuration = new ConsumerConfigurationImpl((Map) configuration)
+            this.consumerConfiguration = new ConsumerConfigurationImpl((Map) configuration)
             return
         }
 

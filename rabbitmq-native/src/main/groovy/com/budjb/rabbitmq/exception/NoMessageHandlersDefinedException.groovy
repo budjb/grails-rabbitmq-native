@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq.exception
 /**
- * Exception thrown when a {@link com.budjb.rabbitmq.consumer.LegacyMessageConsumer} implementation
+ * Exception thrown when a {@link com.budjb.rabbitmq.consumer.LegacyConsumerContext} implementation
  * does not have any message handlers defined.
  */
 class NoMessageHandlersDefinedException extends RuntimeException {

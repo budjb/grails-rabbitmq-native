@@ -19,9 +19,7 @@ import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.connection.ConnectionContext
 import com.budjb.rabbitmq.connection.ConnectionManager
 import com.budjb.rabbitmq.consumer.ConsumerContext
-import com.budjb.rabbitmq.consumer.ConsumerContextImpl
 import com.budjb.rabbitmq.consumer.ConsumerManagerImpl
-import com.budjb.rabbitmq.consumer.MessageConsumer
 import com.budjb.rabbitmq.converter.MessageConverterManager
 import com.budjb.rabbitmq.event.ConsumerManagerStartedEvent
 import com.budjb.rabbitmq.event.ConsumerManagerStartingEvent
@@ -64,20 +62,6 @@ class ConsumerManagerImplSpec extends Specification {
         consumerManager.connectionManager = connectionManager
         consumerManager.applicationContext = applicationContext
         consumerManager.applicationEventPublisher = applicationEventPublisher
-    }
-
-    def 'Ensure proper objects are injected into new contexts'() {
-        setup:
-        MessageConsumer consumer = Mock(MessageConsumer)
-
-        when:
-        ConsumerContextImpl context = (ConsumerContextImpl) consumerManager.createContext(consumer)
-
-        then:
-        context.consumer == consumer
-        context.persistenceInterceptor == persistenceInterceptor
-        context.rabbitMessagePublisher == rabbitMessagePublisher
-        context.connectionManager == connectionManager
     }
 
     def 'Test load/registering of consumer artefacts'() {
@@ -392,16 +376,16 @@ class ConsumerManagerImplSpec extends Specification {
         consumerManager.start()
 
         then:
-        1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStartingEvent})
-        0 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStartedEvent})
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStartingEvent })
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStartedEvent })
         0 * consumerContext.start()
 
         then:
-        0 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStartedEvent})
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStartedEvent })
         1 * consumerContext.start()
 
         then:
-        1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStartedEvent})
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStartedEvent })
     }
 
     def 'Ensure that consumer manager stop events are published in the correct order'() {
@@ -416,16 +400,16 @@ class ConsumerManagerImplSpec extends Specification {
         consumerManager.stop()
 
         then:
-        1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStoppingEvent})
-        0 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStoppedEvent})
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStoppingEvent })
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStoppedEvent })
         0 * consumerContext.stop()
 
         then:
-        0 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStoppedEvent})
+        0 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStoppedEvent })
         1 * consumerContext.stop()
 
         then:
-        1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStoppedEvent})
+        1 * applicationEventPublisher.publishEvent({ it instanceof ConsumerManagerStoppedEvent })
     }
 
     class Consumer1 {
