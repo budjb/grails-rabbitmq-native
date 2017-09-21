@@ -5,14 +5,15 @@ The plugin provides converters for the following types:
 .Built-in Message Converters
 [grid="rows"]
 |===
-| Type              | Incoming               | Outgoing
-| `Serializable`    | image:check.svg[36,36] | image:check.svg[36,36]
-| `Integer`         | image:check.svg[36,36] | image:check.svg[36,36]
-| `Long`            | image:check.svg[36,36] | image:check.svg[36,36]
-| `Map` (JSON)      | image:check.svg[36,36] | image:check.svg[36,36]
-| `List` (JSON)     | image:check.svg[36,36] | image:check.svg[36,36]
-| `String`          | image:check.svg[36,36] | image:check.svg[36,36]
-| `GString`         |                        | image:check.svg[36,36]
+| Type                       | Incoming               | Outgoing
+| `Serializable`             | image:check.svg[36,36] | image:check.svg[36,36]
+| `Integer`                  | image:check.svg[36,36] | image:check.svg[36,36]
+| `Long`                     | image:check.svg[36,36] | image:check.svg[36,36]
+| `Map` (JSON)               | image:check.svg[36,36] | image:check.svg[36,36]
+| `TypeConvertingMap` (JSON) | image:check.svg[36,36] | image:check.svg[36,36]
+| `List` (JSON)              | image:check.svg[36,36] | image:check.svg[36,36]
+| `String`                   | image:check.svg[36,36] | image:check.svg[36,36]
+| `GString`                  |                        | image:check.svg[36,36]
 |===
 
 

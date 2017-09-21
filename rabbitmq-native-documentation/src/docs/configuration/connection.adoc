@@ -25,7 +25,7 @@ rabbitmq:
         username: foo
         password: bar
 
-The `connections` section should contains a list of maps, where each entry in the list represents an individual
+The `connections` section should contain a list of maps, where each entry in the list represents an individual
 connection.
 
 Connections to many different RabbitMQ servers can be configured.  A multi-server configuration looks like:
@@ -81,5 +81,6 @@ The following table enumerates all the configuration options available to the co
 | `threads` | | Threadpool size, if greater than 0, determines how many concurrent messages can be processed at any given time. If set to 0, consumers can consume as many messages as it's configured to. | `String` | `0`
 | `automaticReconnect` | | If true, will cause the application to automatically reconnect to a server when its connection is dropped. | `boolean` | `true`
 |`requestedHeartbeat` | | Heartbeat interval, in seconds. A value of `0` disables heartbeats. | `Integer` | `0`
+|`enableMetrics` | | If true, will create a metric registry and associate it for the connection via DropWizard. | `Boolean` | `false`
 |===
 
