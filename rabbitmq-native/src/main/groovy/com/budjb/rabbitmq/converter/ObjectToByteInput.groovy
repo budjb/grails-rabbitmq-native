@@ -79,6 +79,6 @@ class ObjectToByteInput {
      * @param contentType
      */
     ObjectToByteInput(Object object, MimeType contentType) {
-        this(object, contentType?.getCharset() ?: UTF_8)
+        this(object, contentType?.getCharSet() ?: UTF_8)
     }
 }

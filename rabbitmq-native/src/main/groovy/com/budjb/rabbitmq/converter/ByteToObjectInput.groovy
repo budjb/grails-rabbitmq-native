@@ -113,6 +113,6 @@ class ByteToObjectInput {
      * @return
      */
     Charset getCharset() {
-        return mimeType?.getCharset() ?: UTF_8
+        return mimeType?.getCharSet() ?: UTF_8
     }
 }
