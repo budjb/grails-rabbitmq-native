@@ -2,6 +2,10 @@
 
 === 3.4.x
 
+==== Version 3.4.1
+* Change from using Spring's `MimeType.getCharset()` to `MimeType.getCharSet()`. The latter is deprecated but
+  using it allows Grails 3.1.x to function correctly.
+
 ==== Version 3.4.0
 * Remove support for legacy connection configuration (`rabbitmq.connection`).
 * Update RabbitMQ Client library to 4.2.0.
