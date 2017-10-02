@@ -16,6 +16,7 @@
 package com.budjb.rabbitmq.test.converter
 
 import com.budjb.rabbitmq.converter.*
+import com.budjb.rabbitmq.exception.NoConverterFoundException
 import grails.core.GrailsApplication
 import grails.core.GrailsClass
 import groovy.json.internal.LazyMap
@@ -36,6 +37,7 @@ class MessageConverterManagerImplSpec extends Specification {
         messageConverterManager = new MessageConverterManagerImpl()
         messageConverterManager.grailsApplication = grailsApplication
         messageConverterManager.applicationContext = applicationContext
+        messageConverterManager.enableSerializableConverter = true
     }
 
     def 'Ensure setGrailsApplication(GrailsApplication) sets the property correctly'() {
@@ -167,5 +169,30 @@ class MessageConverterManagerImplSpec extends Specification {
         ObjectToByteResult convert(ObjectToByteInput input) {
             return new ObjectToByteResult([102, 111, 111, 98, 97, 114, 98, 97, 122] as byte[], null)
         }
+    }
+
+    def 'If the serializable converter is disabled, it is not used'() {
+        setup:
+        SerializableMessageConverter serializableMessageConverter = Mock(SerializableMessageConverter)
+        serializableMessageConverter.supports((Class)_) >> true
+        serializableMessageConverter.supports((MimeType)_) >> true
+
+        ObjectToByteConverter converter = Mock(ObjectToByteConverter)
+        converter.supports((Class)_) >> true
+        converter.supports((MimeType)_) >> true
+
+        messageConverterManager.messageConverters = [converter]
+        messageConverterManager.serializableMessageConverter = serializableMessageConverter
+        messageConverterManager.enableSerializableConverter = false
+
+        ObjectToByteInput input = new ObjectToByteInput('foo')
+
+        when:
+        messageConverterManager.convert(input)
+
+        then:
+        thrown NoConverterFoundException
+        0 * serializableMessageConverter.convert(input)
+        1 * converter.convert(input)
     }
 }

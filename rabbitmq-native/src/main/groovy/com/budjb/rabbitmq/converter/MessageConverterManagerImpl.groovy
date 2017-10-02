@@ -17,8 +17,10 @@ package com.budjb.rabbitmq.converter
 
 import com.budjb.rabbitmq.consumer.MessageConvertMethod
 import com.budjb.rabbitmq.exception.NoConverterFoundException
+import grails.config.Config
 import grails.core.GrailsApplication
 import grails.core.GrailsClass
+import grails.core.support.GrailsConfigurationAware
 import groovy.transform.CompileStatic
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,7 +34,7 @@ import org.springframework.util.MimeType
  * A class that manages message converters and acts as the entry point for conversion.
  */
 @CompileStatic
-class MessageConverterManagerImpl implements MessageConverterManager, ApplicationContextAware {
+class MessageConverterManagerImpl implements MessageConverterManager, ApplicationContextAware, GrailsConfigurationAware {
     /**
      * Binary data mime type.
      */
@@ -64,6 +66,11 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
      * Application context.
      */
     ApplicationContext applicationContext
+
+    /**
+     * Whether to use the serializable converter.
+     */
+    boolean enableSerializableConverter = false
 
     /**
      * {@inheritDoc}
@@ -114,10 +121,12 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
         }
 
         if (body instanceof Serializable) {
-            ObjectToByteResult converted = attemptConversion(serializableMessageConverter, input)
+            if (enableSerializableConverter) {
+                ObjectToByteResult converted = attemptConversion(serializableMessageConverter, input)
 
-            if (converted != null) {
-                return converted
+                if (converted != null) {
+                    return converted
+                }
             }
         }
 
@@ -151,19 +160,21 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
 
         if (input.getMimeType() != null) {
             if (serializableMessageConverter.supports(input.getMimeType())) {
-                try {
-                    ByteToObjectResult result = attemptConversion(serializableMessageConverter, input)
+                if (enableSerializableConverter) {
+                    try {
+                        ByteToObjectResult result = attemptConversion(serializableMessageConverter, input)
 
-                    if (result != null) {
-                        if (!input.getClassFilter() || input.getClassFilter().any() {
-                            ClassUtils.isAssignableValue(it, result.getResult())
-                        }) {
-                            return result
+                        if (result != null) {
+                            if (!input.getClassFilter() || input.getClassFilter().any() {
+                                ClassUtils.isAssignableValue(it, result.getResult())
+                            }) {
+                                return result
+                            }
                         }
                     }
-                }
-                catch (Exception ignored) {
-                    // noop
+                    catch (Exception ignored) {
+                        // noop
+                    }
                 }
             }
 
@@ -186,19 +197,21 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
         }
 
         if (input.getMessageConvertMethod() != MessageConvertMethod.HEADER) {
-            try {
-                ByteToObjectResult result = attemptConversion(serializableMessageConverter, input)
+            if (enableSerializableConverter) {
+                try {
+                    ByteToObjectResult result = attemptConversion(serializableMessageConverter, input)
 
-                if (result != null) {
-                    if (!input.getClassFilter() || input.getClassFilter().any() {
-                        ClassUtils.isAssignableValue(it, result.getResult())
-                    }) {
-                        return result
+                    if (result != null) {
+                        if (!input.getClassFilter() || input.getClassFilter().any() {
+                            ClassUtils.isAssignableValue(it, result.getResult())
+                        }) {
+                            return result
+                        }
                     }
                 }
-            }
-            catch (Exception ignored) {
-                // noop
+                catch (Exception ignored) {
+                    // noop
+                }
             }
 
             for (ByteToObjectConverter converter : getByteToObjectConverters()) {
@@ -306,5 +319,13 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
         }
 
         return input.getClassFilter().any { converter.supports(it) }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void setConfiguration(Config co) {
+        enableSerializableConverter = co.getProperty('rabbitmq.enableSerializableConverter', Boolean, enableSerializableConverter)
     }
 }

@@ -8,7 +8,8 @@ Below is the list of general configuration properties.
 [grid="rows"]
 |===
 | Configuration Property | Required | Description | Type | Default
-| `enabled` | | If false, will register the plugin's beans, but prevent the plugin connecting to the RabbitMQ broker(s) and consuming messages. | `String` | `true`
+| `enabled`                     | | If false, will register the plugin's beans, but prevent the plugin connecting to the RabbitMQ broker(s) and consuming messages. | `String` | `true`
+| `enableSerializableConverter` | | If true, enables the use of a converter that handles Java serialization. | `Boolean` | `false`
 |===
 
 include::configuration/connection.adoc[]

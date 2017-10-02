@@ -2,6 +2,11 @@
 
 === 3.4.x
 
+==== Version 3.4.2
+* Add configuration option `rabbitmq.enableSerializableConverter`, which defaults to `false`. This breaks behavior
+  with the previous 3.4.x releases but brings it back inline with the behavior of previous versions. This was done
+  due to unexpected serialization issues with embedded lazy maps returned from the `JsonSlurper`.
+
 ==== Version 3.4.1
 * Change from using Spring's `MimeType.getCharset()` to `MimeType.getCharSet()`. The latter is deprecated but
   using it allows Grails 3.1.x to function correctly.
