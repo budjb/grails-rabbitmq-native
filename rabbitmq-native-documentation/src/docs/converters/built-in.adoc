@@ -1,4 +1,4 @@
-==== Built-in Message Converters
+=== Built-in Message Converters
 
 The plugin provides converters for the following types:
 
