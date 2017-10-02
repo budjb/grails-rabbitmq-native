@@ -88,6 +88,7 @@ class RabbitMessagePublisherImplSpec extends Specification {
         messageConverterManager.register(new LongMessageConverter())
         messageConverterManager.register(new JsonMessageConverter())
         messageConverterManager.register(new StringMessageConverter())
+        messageConverterManager.enableSerializableConverter = true
 
         rabbitMessagePublisher = new RabbitMessagePublisherImpl()
         rabbitMessagePublisher.connectionManager = connectionManager
