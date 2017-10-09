@@ -65,6 +65,6 @@ class JsonMessageConverter implements ByteToObjectConverter, ObjectToByteConvert
      */
     @Override
     ObjectToByteResult convert(ObjectToByteInput input) {
-        return new ObjectToByteResult(JsonOutput.toJson(input.getObject()).getBytes(input.getCharset()), new MimeType(mimeType, input.getCharset()))
+        return new ObjectToByteResult(JsonOutput.toJson(input.getObject()).getBytes(input.getCharset()), new MimeType(mimeType, ['charset': input.getCharset().name()]))
     }
 }

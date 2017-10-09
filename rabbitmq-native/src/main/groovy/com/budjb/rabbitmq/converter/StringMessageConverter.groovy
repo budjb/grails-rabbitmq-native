@@ -59,7 +59,7 @@ class StringMessageConverter implements ByteToObjectConverter, ObjectToByteConve
     ObjectToByteResult convert(ObjectToByteInput input) {
         return new ObjectToByteResult(
             ((String) input.getObject()).getBytes(input.getCharset()),
-            new MimeType(mimeType, input.getCharset())
+            new MimeType(mimeType, ['charset': input.getCharset().name()])
         )
     }
 }
