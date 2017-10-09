@@ -64,7 +64,7 @@ class RabbitMessageHandler extends DefaultConsumer {
      * @param channel
      * @param context
      */
-    RabbitMessageHandler(Channel channel, String queue, AbstractConsumerContext context, ConnectionContext connectionContext) {
+    RabbitMessageHandler(Channel channel, String queue, ConsumerContext context, ConnectionContext connectionContext) {
         super(channel)
 
         this.consumerContext = context
@@ -85,10 +85,8 @@ class RabbitMessageHandler extends DefaultConsumer {
         log.trace("starting handleDelivery for consumer ${consumerContext.getId()}")
 
         synchronized (processLock) {
-            // Mark that the consumer is processing
             processing = true
 
-            // Wrap up the parameters into a context
             MessageContext context = new MessageContext(
                 channel: channel,
                 consumerTag: consumerTag,
@@ -98,10 +96,13 @@ class RabbitMessageHandler extends DefaultConsumer {
                 connectionContext: connectionContext
             )
 
-            // Hand off the message to the context.
-            consumerContext.deliverMessage(context)
+            try {
+                consumerContext.deliverMessage(context)
+            }
+            catch (Throwable throwable) {
+                log.warn("unhandled throwable encountered while delivering message", throwable)
+            }
 
-            // Mark that the consumer is no longer processing
             processing = false
         }
 
