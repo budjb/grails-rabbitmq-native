@@ -63,6 +63,6 @@ class LongMessageConverter implements ByteToObjectConverter, ObjectToByteConvert
      */
     @Override
     ObjectToByteResult convert(ObjectToByteInput input) {
-        return new ObjectToByteResult(input.getObject().toString().getBytes(input.getCharset()), new MimeType(mimeType, input.getCharset()))
+        return new ObjectToByteResult(input.getObject().toString().getBytes(input.getCharset()), new MimeType(mimeType, ['charset': input.getCharset().name()]))
     }
 }
