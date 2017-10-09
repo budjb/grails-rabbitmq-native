@@ -2,6 +2,11 @@
 
 === 3.4.x
 
+==== Version 3.4.3
+* Add top-level exception handling for the internal message handler implementation. This fixes an issue
+  where Hibernate exceptions closed RabbitMQ channels.
+* Use a different `MimeType` constructor with built-in message converters to maintain Grails 3.1.x support.
+
 ==== Version 3.4.2
 * Add configuration option `rabbitmq.enableSerializableConverter`, which defaults to `false`. This breaks behavior
   with the previous 3.4.x releases but brings it back inline with the behavior of previous versions. This was done
