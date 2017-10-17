@@ -49,7 +49,7 @@ class ConfigurationSpec extends Specification {
         // For some reason the plugin.yml file is not properly being merged but overwritten
         // Therefore we test to make sure that the queue we expect is not present
         // Once the merge works this test will fail
-        rabbitmqConfig.queues.size() == 9
+        rabbitmqConfig.queues.size() == 10
         rabbitmqConfig.queues.every{it.name != 'topic-queue-sub-exchange-unused'}
 
         // The YAML processor creates org.springframework.beans.factory.config.YamlProcessor.StrictMapAppenderConstructor

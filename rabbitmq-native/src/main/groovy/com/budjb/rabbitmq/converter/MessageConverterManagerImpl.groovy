@@ -265,8 +265,8 @@ class MessageConverterManagerImpl implements MessageConverterManager, Applicatio
     @Override
     void load() {
         grailsApplication.getArtefacts('MessageConverter').each { register((GrailsClass) it) }
-        register(new JsonMessageConverter())
         register(new TypeConvertingMapMessageConverter())
+        register(new JsonMessageConverter())
         register(new LongMessageConverter())
         register(new IntegerMessageConverter())
         register(new StringMessageConverter())

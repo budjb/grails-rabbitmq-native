@@ -2,6 +2,9 @@
 
 === 3.4.x
 
+==== Version 3.4.4
+* Move the `TypeConvertertingMapConverter` to a higher converting priority than `JsonConverter`.
+
 ==== Version 3.4.3
 * Add top-level exception handling for the internal message handler implementation. This fixes an issue
   where Hibernate exceptions closed RabbitMQ channels.

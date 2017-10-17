@@ -16,6 +16,7 @@
 package com.budjb.rabbitmq.test
 
 import grails.test.mixin.integration.Integration
+import grails.util.TypeConvertingMap
 import org.springframework.beans.factory.annotation.Autowired
 
 @Integration
@@ -132,7 +133,7 @@ class MessageMarshallSpec extends MessageConsumerIntegrationTest {
         }
 
         then:
-        response == ["foo": "bar"]
+        response == ["foo": "bar"] as TypeConvertingMap
     }
 
     def 'If a Map is sent to a consumer but it only has a String handler, the proper conversion and handoff occurs'() {

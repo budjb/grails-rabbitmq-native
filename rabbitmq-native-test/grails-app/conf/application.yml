@@ -144,6 +144,10 @@ rabbitmq:
         autoDelete: true
         connection: connection1
 
+      - name: message-converter
+        autoDelete: true
+        connection: connection1
+
       - name: reporting
         autoDelete: true
         connection: connection1

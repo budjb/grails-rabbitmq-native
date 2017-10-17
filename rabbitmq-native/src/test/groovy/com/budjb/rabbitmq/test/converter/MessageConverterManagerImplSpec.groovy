@@ -19,6 +19,7 @@ import com.budjb.rabbitmq.converter.*
 import com.budjb.rabbitmq.exception.NoConverterFoundException
 import grails.core.GrailsApplication
 import grails.core.GrailsClass
+import grails.util.TypeConvertingMap
 import groovy.json.internal.LazyMap
 import org.springframework.context.ApplicationContext
 import org.springframework.util.MimeType
@@ -84,7 +85,7 @@ class MessageConverterManagerImplSpec extends Specification {
         [102, 111, 111, 98, 97, 114] as byte[]                               || "foobar"
         [49, 50, 51, 52] as byte[]                                           || 1234
         [91, 34, 102, 111, 111, 34, 44, 34, 98, 97, 114, 34, 93] as byte[]   || ["foo", "bar"]
-        [123, 34, 102, 111, 111, 34, 58, 34, 98, 97, 114, 34, 125] as byte[] || ["foo": "bar"]
+        [123, 34, 102, 111, 111, 34, 58, 34, 98, 97, 114, 34, 125] as byte[] || ["foo": "bar"] as TypeConvertingMap
     }
 
     @Unroll
