@@ -16,6 +16,7 @@
 package com.budjb.rabbitmq.utils
 
 import grails.config.Config
+import org.grails.config.PrefixedConfig
 import org.grails.config.PropertySourcesConfig
 
 import java.util.regex.Matcher
@@ -43,7 +44,7 @@ trait ConfigPropertyResolver {
      * @return a map with all values remapped where necessary
      */
     Config fixPropertyResolution(Map map) {
-        return new PropertySourcesConfig((Map) map.collectEntries { k, v ->
+        PropertySourcesConfig config =  new PropertySourcesConfig((Map) map.collectEntries { k, v ->
             def val = v
             if (val instanceof String) {
                 Matcher m = Pattern.compile(/\$\{(.+?)}/).matcher(val)
@@ -51,7 +52,9 @@ trait ConfigPropertyResolver {
                     val = grailsConfiguration.get(m.group(1))
                 }
             }
-            return [k, val]
+            return ['rabbitmq.' + k, val]
         })
+
+        new PrefixedConfig('rabbitmq', config)
     }
 }
