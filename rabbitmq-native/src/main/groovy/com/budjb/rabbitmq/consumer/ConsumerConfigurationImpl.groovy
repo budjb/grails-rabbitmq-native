@@ -178,7 +178,7 @@ class ConsumerConfigurationImpl implements ConsumerConfiguration {
             valid = false
         }
 
-        if (binding instanceof Map && !(match in ["any", "all"])) {
+        if (!queue && binding instanceof Map && !(match in ["any", "all"])) {
             log.warn("match must be either 'any' or 'all'")
             valid = false
         }
