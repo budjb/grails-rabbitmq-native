@@ -22,3 +22,5 @@ These converters allow message handlers to consume and return data without havin
 are also used when publishing messages with the `RabbitMessagePublisher`.
 
 INFO: The message converter for `Serializable` classes will always be attempted first.
+
+INFO: `Serializable` converter is off by default. set `rabbitmq.enableSerializableConverter`, to `true` to enable this feature. 
