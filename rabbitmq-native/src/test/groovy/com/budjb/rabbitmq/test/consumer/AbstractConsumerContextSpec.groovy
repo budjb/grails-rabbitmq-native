@@ -232,6 +232,8 @@ class AbstractConsumerContextSpec extends Specification {
             connectionContext: Mock(ConnectionContext)
         )
 
+        persistenceInterceptor.isOpen() >> true
+
         when:
         consumerContext.deliverMessage(messageContext)
 
