@@ -405,8 +405,21 @@ abstract class AbstractConsumerContext implements ConsumerContext, MessageConsum
             return
         }
 
-        persistenceInterceptor.flush()
-        persistenceInterceptor.destroy()
+        if (persistenceInterceptor.isOpen()) {
+            try {
+                persistenceInterceptor.flush()
+            }
+            catch (Exception e) {
+                log.error("an unhandled exception caught while flushing the persistence context interceptor; still attempting to destroy", e)
+            }
+
+            try {
+                persistenceInterceptor.destroy()
+            }
+            catch (Exception e) {
+                log.error("an unhandled exception caught while destroying the persistence context interceptor", e)
+            }
+        }
     }
 
     /**
