@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq.test
 
-import grails.test.mixin.integration.Integration
+import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 

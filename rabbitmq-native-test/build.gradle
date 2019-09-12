@@ -5,7 +5,7 @@ buildscript {
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsVersion"
-        classpath "com.bertramlabs.plugins:asset-pipeline-gradle:2.14.1"
+        classpath "com.bertramlabs.plugins:asset-pipeline-gradle:2.15.1"
         classpath "org.grails.plugins:hibernate5:${gormVersion-".RELEASE"}"
     }
 }
@@ -39,8 +39,12 @@ dependencies {
     profile "org.grails.profiles:web"
     runtime "com.bertramlabs.plugins:asset-pipeline-grails:2.14.1"
     runtime "com.h2database:h2"
-    testCompile "org.grails:grails-plugin-testing"
+    testCompile "org.grails:grails-gorm-testing-support"
     testCompile "org.grails.plugins:geb"
+    testCompile "org.grails:grails-web-testing-support"
+//    testCompile "org.spockframework:spock-core"
+//    testCompile "cglib:cglib-nodep:3.3.0"
+//    testCompile "org.objenesis:objenesis:1.4"
     testRuntime "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.1"
     testRuntime "net.sourceforge.htmlunit:htmlunit:2.18"
 }

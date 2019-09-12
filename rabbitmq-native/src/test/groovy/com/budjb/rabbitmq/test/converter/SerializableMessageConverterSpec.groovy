@@ -22,15 +22,9 @@ import com.budjb.rabbitmq.converter.ObjectToByteResult
 import com.budjb.rabbitmq.converter.SerializableMessageConverter
 import com.budjb.rabbitmq.test.converter.support.MyNotSerializable
 import com.budjb.rabbitmq.test.converter.support.MySerializable
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
 import org.springframework.util.MimeType
 import spock.lang.*
 
-/**
- * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
- */
-@TestMixin(GrailsUnitTestMixin)
 class SerializableMessageConverterSpec extends Specification {
     SerializableMessageConverter messageConverter
 
