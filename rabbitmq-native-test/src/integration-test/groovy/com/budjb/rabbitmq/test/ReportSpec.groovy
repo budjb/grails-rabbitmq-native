@@ -16,7 +16,7 @@
 package com.budjb.rabbitmq.test
 
 import com.budjb.rabbitmq.RabbitContext
-import grails.test.mixin.integration.Integration
+import grails.testing.mixin.integration.Integration
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import spock.lang.Specification

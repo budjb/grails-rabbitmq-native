@@ -19,11 +19,13 @@ import grails.util.TypeConvertingMap
 import groovy.json.JsonException
 import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
+import org.springframework.core.annotation.Order
 
 /**
  * A converter that supports the conversion of a {@link TypeConvertingMap} to and from JSON.
  */
 @CompileStatic
+@Order(-10)
 class TypeConvertingMapMessageConverter extends JsonMessageConverter {
     /**
      * {@inheritDoc}

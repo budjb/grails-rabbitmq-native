@@ -18,14 +18,8 @@ package com.budjb.rabbitmq.test.queuebuilder
 import com.budjb.rabbitmq.exception.InvalidConfigurationException
 import com.budjb.rabbitmq.queuebuilder.ExchangeProperties
 import com.budjb.rabbitmq.queuebuilder.ExchangeType
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.*
 
-/**
- * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
- */
-@TestMixin(GrailsUnitTestMixin)
 class ExchangePropertiesSpec extends Specification {
 
     ExchangeProperties exchangeProperties

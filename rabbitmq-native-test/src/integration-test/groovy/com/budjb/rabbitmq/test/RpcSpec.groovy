@@ -15,7 +15,7 @@
  */
 package com.budjb.rabbitmq.test
 
-import grails.test.mixin.integration.Integration
+import grails.testing.mixin.integration.Integration
 
 @Integration
 class RpcSpec extends MessageConsumerIntegrationTest {
