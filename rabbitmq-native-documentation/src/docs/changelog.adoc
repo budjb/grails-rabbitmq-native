@@ -2,6 +2,10 @@
 
 === 3.4.x
 
+==== Version 3.4.6
+* Add some error handling around flushing and destroying the persistence context interceptor. Was unable
+  to reproduce the error, but this is an attempt to fix a zombie Hibernate session bug.
+
 ==== Version 3.4.5
 * Added rabbitmq prefix, to avoid conflicts with environment variables. (http://github.com/budjb/grails-rabbitmq-native/issues/130[#130])
 
