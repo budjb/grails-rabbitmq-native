@@ -139,4 +139,30 @@ class ConsumerConfigurationImplSpec extends Specification {
         then:
         configuration.getAutoAck() == AutoAck.POST
     }
+
+    def 'Validate isValid'() {
+        when:
+            ConsumerConfigurationImpl configuration = new ConsumerConfigurationImpl()
+
+        then:
+            configuration.isValid() == false
+
+        when:
+            configuration = new ConsumerConfigurationImpl([queue: 'test-queue'])
+
+        then:
+            configuration.isValid() == true
+
+        when:
+            configuration = new ConsumerConfigurationImpl([queue: 'test-queue', exchange: 'test-exchange'])
+
+        then:
+            configuration.isValid() == false
+
+        when:
+            configuration = new ConsumerConfigurationImpl([queue: 'test-queue', binding: [:]])
+
+        then:
+            configuration.isValid() == true
+    }
 }
