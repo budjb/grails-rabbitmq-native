@@ -90,18 +90,17 @@ endpoints:
 
 ---
 hibernate:
-    cache:
-        queries: false
-        use_second_level_cache: true
-        use_query_cache: false
-        region.factory_class: org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory
+  cache:
+    queries: false
+    use_second_level_cache: false
+    use_query_cache: false
 
 dataSource:
     pooled: true
     jmxExport: true
     driverClassName: org.h2.Driver
     username: sa
-    password:
+    password: ''
 
 environments:
     test:
@@ -185,5 +184,11 @@ rabbitmq:
       - name: topic-queue-sub-exchange-set
         autoDelete: true
         binding: 'com.budjb.exchange.queue'
+        connection: connection1
+        exchange: sub-topic-exchange
+
+      - name: topic-queue-sub-exchange-unused
+        autoDelete: true
+        binding: 'com.budjb.exchange.unused'
         connection: connection1
         exchange: sub-topic-exchange

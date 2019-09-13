@@ -1,6 +1,5 @@
 buildscript {
     repositories {
-        mavenLocal()
         maven { url "https://repo.grails.org/grails/core" }
     }
     dependencies {
@@ -8,29 +7,36 @@ buildscript {
     }
 }
 
-apply plugin: "eclipse"
-apply plugin: "idea"
-apply plugin: "org.grails.grails-plugin"
-apply plugin: "org.grails.grails-plugin-publish"
+apply plugin:"eclipse"
+apply plugin:"idea"
+apply plugin:"org.grails.grails-plugin"
+apply plugin:"org.grails.grails-plugin-publish"
 
 repositories {
     mavenLocal()
     maven { url "https://repo.grails.org/grails/core" }
 }
 
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+}
+
 dependencies {
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
     compile "org.springframework.boot:spring-boot-starter-logging"
     compile "org.springframework.boot:spring-boot-autoconfigure"
     compile "org.grails:grails-core"
-    compile "org.codehaus.gpars:gpars:1.2.1"
-    compile "org.grails:grails-console"
+    compileOnly "io.micronaut:micronaut-inject-groovy"
+    console "org.grails:grails-console"
     profile "org.grails.profiles:plugin"
-    provided "org.grails:grails-plugin-services"
-    provided "org.grails:grails-plugin-domain-class"
-    testCompile "org.spockframework:spock-core"
-    testCompile "cglib:cglib-nodep:3.3.0"
-    testCompile "org.objenesis:objenesis:1.4"
+    testCompile "org.grails:grails-gorm-testing-support"
+    testCompile "org.mockito:mockito-core"
+
     compile 'org.codehaus.groovy:groovy-json'
+    compile "org.codehaus.gpars:gpars:1.2.1"
     compile 'com.rabbitmq:amqp-client:4.2.0'
     compile 'io.dropwizard.metrics:metrics-core:3.2.3'
 }
@@ -62,6 +68,7 @@ grailsPublish {
     vcsUrl = 'https://github.com/budjb/grails-rabbitmq-native.git'
 }
 
+/*
 publishing {
     publications {
         maven(MavenPublication) {
@@ -75,3 +82,4 @@ publishing {
         }
     }
 }
+*/

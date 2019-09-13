@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.budjb.rabbitmq.test.plugin
+package com.budjb.rabbitmq.test
 
 import com.budjb.rabbitmq.consumer.MessageContext
 
