@@ -1,0 +1,26 @@
+= Contributing
+
+== Testing
+
+For testing purposes, you will need to have a local instance of RabbitMQ Server running on your local machine, accesible
+via Port `5672`.
+
+It is recommended to use a Docker Container to serve as your RabbitMQ Server instance.
+
+The Server will also need to be accessible via the standard username and password for a default RabbitMQ Server.
+
+In addition, the following vHosts will need to be added to the server, accessible to the default user:
+
+* `test1.rabbitmq.budjb.com`
+* `test1.rabbitmq.budjb.com`
+
+== Pull Requests
+
+Pull Requests should be made to the appropriate `grails-#.x` Branch.
+
+Please also update any documentation that needs to be updated, as well as update the
+`rabbitmq-native-documentation/changelog.adoc` file with a clear, succinct change.
+
+Please do not change the version number. The version number will be modified appropriately by repository maintainers
+when a release candidate is ready. You may update the changelog without declaring a version number by adding a `Future`
+entry at the top.
