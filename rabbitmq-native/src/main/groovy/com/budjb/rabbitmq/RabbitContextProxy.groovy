@@ -24,7 +24,6 @@ import com.budjb.rabbitmq.queuebuilder.QueueBuilder
 import com.budjb.rabbitmq.report.ConnectionReport
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
-import org.apache.commons.lang.NullArgumentException
 import org.springframework.beans.factory.InitializingBean
 
 class RabbitContextProxy implements RabbitContext, InitializingBean {
@@ -40,7 +39,7 @@ class RabbitContextProxy implements RabbitContext, InitializingBean {
      */
     void setTarget(RabbitContext target) {
         if (target == null) {
-            throw new NullArgumentException("rabbit context target can not be null")
+            throw new NullPointerException("rabbit context target can not be null")
         }
         if (target instanceof RabbitContextProxy) {
             throw new IllegalArgumentException("rabbit context target can not be a RabbitContextProxy")
