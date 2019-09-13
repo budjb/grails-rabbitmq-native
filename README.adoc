@@ -1,0 +1,18 @@
+= Grails RabbitMQ Native
+// Settings:
+ifdef::env-github[]
+:badges:
+endif::[]
+
+// URIs:
+:uri-travis-builds: http://travis-ci.com/budjb/grails-rabbitmq-native
+:uri-apache-license: http://www.apache.org/licenses/LICENSE-2.0.html
+
+ifdef::badges[]
+image:https://travis-ci.com/budjb/grails-rabbitmq-native.svg?branch=grails-4.x[Build Status,link={uri-travis-builds}]
+image:http://img.shields.io/:license-apache-blue.svg[License,,link={uri-apache-license}]
+endif::[]
+
+RabbitMQ Native plugin for Grails
+
+http://budjb.github.io/grails-rabbitmq-native/4.x/latest[Documentation]
