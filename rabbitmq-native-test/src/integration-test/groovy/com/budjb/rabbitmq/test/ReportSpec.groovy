@@ -41,7 +41,7 @@ class ReportSpec extends Specification {
                         runningState : 'RUNNING'
                     ],
                     [
-                            fullName     : 'com.budjb.rabbitmq.test.plugin.ExchangeBindingTopicConsumer',
+                            fullName     : 'com.budjb.rabbitmq.test.ExchangeBindingTopicConsumer',
                             load         : 0,
                             name         : 'ExchangeBindingTopicConsumer',
                             numConfigured: 1,

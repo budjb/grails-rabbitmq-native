@@ -335,6 +335,10 @@ class LegacyConsumerContext extends AbstractConsumerContext {
     /**
      * Determines if the given method is a match for the given message body type.
      *
+     * TODO: this method should attempt to find the best match, meaning find the most
+     * specific, lowest level class match. An example is HashMap vs Map, where HashMap
+     * should be preferred.
+     *
      * @param method Method to check.
      * @param clazz Class of the converted message body type.
      * @return
