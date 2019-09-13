@@ -23,7 +23,7 @@ class MessageConverterIntegrationSpec extends MessageConsumerIntegrationTest {
             body = map
         }
 
-        Class<?> clazz = (Class<?>) waitUntilMessageReceived(50000) { messageConverterConsumer.handler }
+        Class<?> clazz = (Class<?>) waitUntilMessageReceived(5000) { messageConverterConsumer.handler }
 
         then:
         clazz == TypeConvertingMap
