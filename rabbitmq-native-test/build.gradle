@@ -68,6 +68,6 @@ assets {
 grails {
     exploded = true
     plugins {
-        compile project(':rabbitmq-native-test-plugin')
+        implementation project(':rabbitmq-native-test-plugin')
     }
 }
