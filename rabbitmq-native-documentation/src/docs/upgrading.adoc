@@ -3,6 +3,8 @@
 When an update to the plugin is made that has incompatibility considerations, this document will help identify the
 various impact considerations when upgrading to a new version.
 
+include::upgrading/from_3_5_x.adoc[]
+
 include::upgrading/from_3_0_x.adoc[]
 
 include::upgrading/from_2_0_x.adoc[]

@@ -1,0 +1,7 @@
+=== From 3.5.X
+
+The upgrade from 3.5.X to 4.0.X is essentially a drop-in replacement if migrating from a Grails 3.x Application to a
+Grails 4.x Application.
+
+On the chance that your application is looking for the *NullArgumentException* that occurred during startup if the
+*RabbitContext* was `null`, this will need to be changed to look for a *NullPointerException* instead.
