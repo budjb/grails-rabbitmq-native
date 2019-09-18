@@ -19,7 +19,6 @@ import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitContextProxy
 import com.budjb.rabbitmq.connection.ConnectionConfiguration
 import com.budjb.rabbitmq.converter.MessageConverter
-import org.apache.commons.lang.NullArgumentException
 import spock.lang.Specification
 
 class RabbitContextProxySpec extends Specification {
@@ -33,12 +32,12 @@ class RabbitContextProxySpec extends Specification {
         rabbitContext.setTarget(targetRabbitContext)
     }
 
-    def 'If a null rabbit context is set as the target, a NullArgumentException should be thrown'() {
+    def 'If a null rabbit context is set as the target, a NullPointerException should be thrown'() {
         when:
         rabbitContext.setTarget(null)
 
         then:
-        thrown NullArgumentException
+        thrown NullPointerException
     }
 
     def 'If a RabbitContextProxy is set as the target, an IllegalArgumentException should be thrown'() {
@@ -113,7 +112,7 @@ class RabbitContextProxySpec extends Specification {
 
     def 'Ensure registerMessageConverter(MessageConverter) is proxied'() {
         setup:
-        MessageConverter<?> messageConverter = Mock(MessageConverter)
+        MessageConverter messageConverter = Mock(MessageConverter)
 
         when:
         rabbitContext.registerMessageConverter(messageConverter)

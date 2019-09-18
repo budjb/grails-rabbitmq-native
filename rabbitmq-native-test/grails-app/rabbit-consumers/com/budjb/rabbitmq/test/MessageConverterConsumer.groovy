@@ -10,7 +10,12 @@ class MessageConverterConsumer {
     Class<?> handler = null
 
     void handleMessage(Map body) {
-        handler = Map
+        if (body instanceof TypeConvertingMap) {
+            handler = TypeConvertingMap
+        }
+        else {
+            handler = Map
+        }
     }
 
     void handleMessage(TypeConvertingMap body) {

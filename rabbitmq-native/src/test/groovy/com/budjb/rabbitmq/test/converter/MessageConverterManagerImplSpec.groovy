@@ -20,7 +20,7 @@ import com.budjb.rabbitmq.exception.NoConverterFoundException
 import grails.core.GrailsApplication
 import grails.core.GrailsClass
 import grails.util.TypeConvertingMap
-import groovy.json.internal.LazyMap
+import org.apache.groovy.json.internal.LazyMap
 import org.springframework.context.ApplicationContext
 import org.springframework.util.MimeType
 import spock.lang.Specification

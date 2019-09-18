@@ -15,7 +15,6 @@
  */
 package com.budjb.rabbitmq.test
 
-import com.budjb.rabbitmq.test.plugin.ExchangeBindingTopicConsumer
 import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 
