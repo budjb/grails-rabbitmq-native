@@ -16,7 +16,7 @@
 package com.budjb.rabbitmq.test
 
 import com.budjb.rabbitmq.test.plugin.ExchangeBindingTopicConsumer
-import grails.test.mixin.integration.Integration
+import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 
 import java.util.concurrent.TimeoutException

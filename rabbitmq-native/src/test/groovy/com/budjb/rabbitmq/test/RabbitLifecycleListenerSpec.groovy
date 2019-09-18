@@ -18,15 +18,9 @@ package com.budjb.rabbitmq.test
 import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RabbitLifecycleListener
 import grails.config.Config
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 import spock.lang.Unroll
 
-/**
- * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
- */
-@TestMixin(GrailsUnitTestMixin)
 class RabbitLifecycleListenerSpec extends Specification {
     RabbitLifecycleListener rabbitLifecycleListener
     RabbitContext rabbitContext

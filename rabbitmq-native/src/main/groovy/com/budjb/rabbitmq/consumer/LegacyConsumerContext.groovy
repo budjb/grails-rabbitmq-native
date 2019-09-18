@@ -271,7 +271,7 @@ class LegacyConsumerContext extends AbstractConsumerContext {
             return
         }
 
-        def configuration = grailsConfig.getProperty("rabbitmq.consumers.${getName()}", Map)
+        def configuration = grailsConfig.getProperty("rabbitmq.consumers.${getName()}".toString(), Map)
 
         if (configuration) {
             this.consumerConfiguration = new ConsumerConfigurationImpl((Map) configuration)

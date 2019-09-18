@@ -22,14 +22,18 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-logging"
     compile "org.springframework.boot:spring-boot-autoconfigure"
     compile "org.grails:grails-core"
+    compile "org.codehaus.gpars:gpars:1.2.1"
     console "org.grails:grails-console"
     profile "org.grails.profiles:plugin"
     provided "org.grails:grails-plugin-services"
     provided "org.grails:grails-plugin-domain-class"
     testCompile "org.grails:grails-plugin-testing"
+    testCompile "org.spockframework:spock-core"
+    testCompile "cglib:cglib-nodep:3.3.0"
+    testCompile "org.objenesis:objenesis:1.4"
 
     compile 'commons-lang:commons-lang:2.6'
-    compile 'org.codehaus.groovy:groovy-json:2.4.11'
+    compile 'org.codehaus.groovy:groovy-json'
     compile 'com.rabbitmq:amqp-client:4.2.0'
     compile 'io.dropwizard.metrics:metrics-core:3.2.3'
 }

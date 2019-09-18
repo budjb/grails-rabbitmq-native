@@ -18,7 +18,7 @@ package com.budjb.rabbitmq.test
 import com.budjb.rabbitmq.connection.ConnectionBuilder
 import com.budjb.rabbitmq.connection.ConnectionBuilderImpl
 import com.budjb.rabbitmq.connection.ConnectionContext
-import grails.test.mixin.integration.Integration
+import grails.testing.mixin.integration.Integration
 import grails.transaction.*
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.*

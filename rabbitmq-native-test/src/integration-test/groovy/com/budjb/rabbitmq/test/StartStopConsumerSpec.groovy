@@ -18,7 +18,7 @@ package com.budjb.rabbitmq.test
 import com.budjb.rabbitmq.RabbitContext
 import com.budjb.rabbitmq.RunningState
 import com.budjb.rabbitmq.test.support.ShutdownRunnable
-import grails.test.mixin.integration.Integration
+import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 
 import java.util.concurrent.TimeoutException

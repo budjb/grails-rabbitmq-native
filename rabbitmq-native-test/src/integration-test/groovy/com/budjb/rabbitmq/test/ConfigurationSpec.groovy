@@ -17,7 +17,7 @@ package com.budjb.rabbitmq.test
 
 import grails.config.Config
 import grails.core.GrailsApplication
-import grails.test.mixin.integration.Integration
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
 /**
