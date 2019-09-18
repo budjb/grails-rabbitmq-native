@@ -2,6 +2,10 @@
 
 === 3.5.x
 
+==== Version 3.5.1
+
+* Fix another instance of `getCharSet`.
+
 ==== Version 3.5.0
 * Update to work with Grails 3.3 (or better).
 * Add `Order` and `Ordered` support to message converters.
