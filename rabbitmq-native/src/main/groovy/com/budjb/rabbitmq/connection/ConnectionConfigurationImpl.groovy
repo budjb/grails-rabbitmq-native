@@ -184,4 +184,13 @@ class ConnectionConfigurationImpl implements ConnectionConfiguration {
         }
         this.name = name
     }
+
+    @Override
+    void setIsDefault(boolean val) {
+        this.isDefault = val
+    }
+
+    boolean getIsDefault() {
+        return this.isDefault
+    }
 }

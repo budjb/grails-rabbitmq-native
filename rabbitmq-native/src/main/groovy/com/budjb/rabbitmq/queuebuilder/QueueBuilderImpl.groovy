@@ -172,7 +172,7 @@ class QueueBuilderImpl implements QueueBuilder, ConfigPropertyResolver {
         try {
             channel.exchangeDeclare(
                 properties.name,
-                properties.type.toString().toLowerCase(),
+                properties.type.toString().toLowerCase(Locale.US),
                 properties.durable,
                 properties.autoDelete,
                 properties.arguments
