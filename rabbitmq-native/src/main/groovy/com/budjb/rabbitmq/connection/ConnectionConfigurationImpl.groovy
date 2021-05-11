@@ -184,5 +184,4 @@ class ConnectionConfigurationImpl implements ConnectionConfiguration {
         }
         this.name = name
     }
-
 }
