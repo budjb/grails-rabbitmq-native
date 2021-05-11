@@ -57,11 +57,12 @@ enum ExchangeType {
             return null
         }
         try {
-            return valueOf(val.toUpperCase())
+            return valueOf(val.toUpperCase(Locale.US))
         }
         catch (IllegalArgumentException e) {
             log.trace("no MatchType with name '${val}' found", e)
             return null
         }
     }
+
 }

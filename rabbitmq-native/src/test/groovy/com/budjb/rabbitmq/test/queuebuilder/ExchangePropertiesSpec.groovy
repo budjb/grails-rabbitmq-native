@@ -33,7 +33,7 @@ class ExchangePropertiesSpec extends Specification {
             ],
             autoDelete: true,
             durable: true,
-            type: ExchangeType.DIRECT.toString(),
+            type: ExchangeType.DIRECT.toString(Locale.US),
             connection: 'connection',
         ]
 
@@ -62,7 +62,7 @@ class ExchangePropertiesSpec extends Specification {
             ],
             autoDelete: true,
             durable: true,
-            type: ExchangeType.DIRECT.toString(),
+            type: ExchangeType.DIRECT.toString(Locale.US),
             connection: 'connection',
             exchangeBindings: [
                 [
@@ -98,7 +98,7 @@ class ExchangePropertiesSpec extends Specification {
             ],
             autoDelete: true,
             durable: true,
-            type: ExchangeType.DIRECT.toString(),
+            type: ExchangeType.DIRECT.toString(Locale.US),
             connection: 'connection',
         ]
 
@@ -133,7 +133,7 @@ class ExchangePropertiesSpec extends Specification {
         thrown InvalidConfigurationException
 
         when:
-        exchangeProperties = new ExchangeProperties([type: ExchangeType.DIRECT.toString()])
+        exchangeProperties = new ExchangeProperties([type: ExchangeType.DIRECT.toString(Locale.US)])
         exchangeProperties.validate()
 
         then:
