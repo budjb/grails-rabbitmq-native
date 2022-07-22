@@ -68,18 +68,15 @@ class QueueBuilderImpl implements QueueBuilder, ConfigPropertyResolver {
         queues.clear()
         exchanges.clear()
 
-        def topConfig = grailsApplication.config.rabbitmq
+        Map topConfig = grailsApplication.config.getProperty("rabbitmq", Map, [:])
         def queueConfig = topConfig.queues
 
         if (queueConfig instanceof Closure) {
             log.warn("closure-based configuration for queues and exchanges is deprecated")
             call(queueConfig, new ClosureDelegate())
         }
-        else if (topConfig instanceof Map) {
+        else  {
             parse(topConfig as Map)
-        }
-        else {
-            throw new InvalidConfigurationException("queue/exchanges configuration is invalid")
         }
 
         queues*.validate()
